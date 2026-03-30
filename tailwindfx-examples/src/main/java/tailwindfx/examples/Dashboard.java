@@ -5,22 +5,15 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import tailwindfx.TailwindFX;
 import tailwindfx.ComponentFactory;
 
 /**
- * Dashboard Example — Enhanced Design.
- *
- * Features demonstrated:
- * - Modern sidebar with gradient and icons
- * - Top bar with breadcrumbs and date
- * - Stats cards with colored icons
- * - Chart with simulated bars
- * - Data table with avatars
- * - Product cards with hover effects
- * - Chat/messages panel
- * - Dark mode support
+ * Dashboard Example — Using TailwindFX Utility Classes.
+ * 
+ * All styling uses TailwindFX CSS classes via:
+ * - node.getStyleClass().add("class-name")
+ * - TailwindFX.apply(node, "class1", "class2", ...)
  */
 public class Dashboard {
 
@@ -28,15 +21,15 @@ public class Dashboard {
 
     public static BorderPane create() {
         BorderPane mainLayout = new BorderPane();
-        mainLayout.setStyle("-fx-background-color: #f3f4f6;");
+        mainLayout.getStyleClass().add("bg-gray-100");
 
-        // Sidebar with modern design
+        // Sidebar
         VBox sidebar = createSidebar();
         mainLayout.setLeft(sidebar);
 
         // Main content
         VBox mainContent = new VBox(0);
-        mainContent.setStyle("-fx-background-color: #f9fafb;");
+        mainContent.getStyleClass().addAll("bg-gray-50");
 
         // Top bar
         HBox topBar = createTopBar();
@@ -45,7 +38,8 @@ public class Dashboard {
         // Scrollable content
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setFitToWidth(true);
-        scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+        scrollPane.getStyleClass().addAll("bg-transparent");
+        scrollPane.setStyle("-fx-background: transparent;");
         VBox content = createContent();
         scrollPane.setContent(content);
 
@@ -58,14 +52,15 @@ public class Dashboard {
     public static VBox createContent() {
         VBox content = new VBox(20);
         content.setPadding(new Insets(24));
+        content.getStyleClass().add("bg-gray-50");
 
         // Welcome banner
         content.getChildren().add(createWelcomeBanner());
 
-        // Stats row with gradient cards
+        // Stats row
         content.getChildren().add(createStatsRow());
 
-        // Main content: Chart + Activity + Chat
+        // Main content: Chart + Activity
         HBox middleRow = new HBox(20);
         middleRow.getChildren().addAll(
             createChartSection(),
@@ -86,19 +81,19 @@ public class Dashboard {
     }
 
     // =========================================================================
-    // Sidebar Navigation - Enhanced
+    // Sidebar Navigation
     // =========================================================================
 
     private static VBox createSidebar() {
         VBox sidebar = new VBox(0);
         sidebar.setPrefWidth(280);
-        sidebar.setStyle("-fx-background-color: linear-gradient(to bottom, #1e293b, #0f172a);");
-        sidebar.setPadding(new Insets(0));
+        sidebar.getStyleClass().addAll("bg-gray-900");
+        sidebar.setStyle("-fx-background-color: -color-gray-900;");
 
-        // Header with gradient
+        // Header
         VBox header = new VBox(16);
         header.setPadding(new Insets(24, 20, 24, 20));
-        header.setStyle("-fx-background-color: linear-gradient(to bottom, rgba(59,130,246,0.1), transparent);");
+        header.setStyle("-fx-background-color: -color-gray-800;");
 
         // Logo
         HBox brand = new HBox(14);
@@ -106,8 +101,7 @@ public class Dashboard {
 
         StackPane logo = new StackPane();
         logo.setPrefSize(44, 44);
-        logo.setStyle("-fx-background-color: linear-gradient(to bottom right, #3b82f6, #8b5cf6);");
-        TailwindFX.apply(logo, "rounded-xl", "shadow-lg");
+        logo.getStyleClass().addAll("bg-blue-500", "rounded-xl", "shadow-md");
 
         Label logoText = new Label("T");
         TailwindFX.apply(logoText, "text-2xl", "font-bold", "text-white");
@@ -122,8 +116,8 @@ public class Dashboard {
 
         brandText.getChildren().addAll(brandName, brandSubtitle);
         brand.getChildren().addAll(logo, brandText);
-
         header.getChildren().add(brand);
+
         sidebar.getChildren().add(header);
 
         // Navigation menu
@@ -145,7 +139,7 @@ public class Dashboard {
 
         sidebar.getChildren().add(menu);
 
-        // User profile at bottom with gradient
+        // User profile at bottom
         VBox userProfile = createUserProfile();
         sidebar.getChildren().add(new Region());
         VBox.setVgrow(new Region(), Priority.ALWAYS);
@@ -171,7 +165,8 @@ public class Dashboard {
         TailwindFX.apply(label, "text-sm", "font-medium");
 
         if (active) {
-            item.setStyle("-fx-background-color: rgba(59,130,246,0.2); -fx-background-radius: 8;");
+            item.setStyle("-fx-background-color: -color-blue-600;");
+            item.getStyleClass().addAll("rounded-lg");
             TailwindFX.apply(iconLabel, "text-white");
             TailwindFX.apply(label, "text-white");
         } else {
@@ -179,9 +174,10 @@ public class Dashboard {
             TailwindFX.apply(label, "text-gray-400");
             
             item.setOnMouseEntered(e -> {
-                item.setStyle("-fx-background-color: rgba(255,255,255,0.05); -fx-background-radius: 8;");
-                iconLabel.setStyle("-fx-text-fill: white;");
-                label.setStyle("-fx-text-fill: white;");
+                item.setStyle("-fx-background-color: -color-gray-800;");
+                item.getStyleClass().addAll("rounded-lg");
+                iconLabel.setStyle("-fx-text-fill: -color-white;");
+                label.setStyle("-fx-text-fill: -color-white;");
             });
             item.setOnMouseExited(e -> {
                 item.setStyle("");
@@ -193,7 +189,6 @@ public class Dashboard {
         HBox content = new HBox(12);
         content.setAlignment(Pos.CENTER_LEFT);
         content.getChildren().addAll(iconLabel, label);
-
         item.getChildren().add(content);
 
         if (badge > 0) {
@@ -203,8 +198,7 @@ public class Dashboard {
 
             StackPane badgePane = new StackPane();
             badgePane.setPrefSize(22, 22);
-            badgePane.setStyle("-fx-background-color: #ef4444;");
-            TailwindFX.apply(badgePane, "rounded-full");
+            badgePane.getStyleClass().addAll("bg-red-500", "rounded-full");
 
             Label badgeLabel = new Label(String.valueOf(badge));
             TailwindFX.apply(badgeLabel, "text-xs", "font-bold", "text-white");
@@ -219,7 +213,7 @@ public class Dashboard {
     private static Region createSeparator() {
         Region separator = new Region();
         separator.setPrefHeight(1);
-        separator.setStyle("-fx-background-color: rgba(255,255,255,0.1);");
+        separator.setStyle("-fx-background-color: -color-gray-800;");
         separator.setPadding(new Insets(12, 16, 12, 16));
         return separator;
     }
@@ -228,13 +222,13 @@ public class Dashboard {
         VBox profile = new VBox(12);
         profile.setAlignment(Pos.CENTER_LEFT);
         profile.setPadding(new Insets(20));
-        profile.setStyle("-fx-background-color: rgba(255,255,255,0.05);");
+        profile.setStyle("-fx-background-color: -color-gray-800;");
 
         HBox info = new HBox(12);
         info.setAlignment(Pos.CENTER_LEFT);
 
         StackPane avatar = ComponentFactory.avatar("JD", "blue", 44);
-        TailwindFX.apply(avatar, "rounded-full", "shadow-md");
+        TailwindFX.apply(avatar, "rounded-full");
 
         VBox text = new VBox(4);
         Label name = new Label("John Doe");
@@ -245,39 +239,20 @@ public class Dashboard {
 
         text.getChildren().addAll(name, email);
         info.getChildren().addAll(avatar, text);
-
         profile.getChildren().add(info);
-
-        // Settings icon
-        HBox actions = new HBox(8);
-        actions.setAlignment(Pos.CENTER_LEFT);
-
-        Button settingsBtn = new Button("⚙️");
-        settingsBtn.setStyle("-fx-background-color: transparent;");
-        TailwindFX.apply(settingsBtn, "text-sm");
-        settingsBtn.setCursor(javafx.scene.Cursor.HAND);
-
-        Button logoutBtn = new Button("🚪");
-        logoutBtn.setStyle("-fx-background-color: transparent;");
-        TailwindFX.apply(logoutBtn, "text-sm");
-        logoutBtn.setCursor(javafx.scene.Cursor.HAND);
-
-        actions.getChildren().addAll(settingsBtn, logoutBtn);
-        profile.getChildren().add(actions);
 
         return profile;
     }
 
     // =========================================================================
-    // Top Bar - Enhanced with breadcrumbs
+    // Top Bar
     // =========================================================================
 
     private static HBox createTopBar() {
         HBox topBar = new HBox(20);
         topBar.setAlignment(Pos.CENTER);
         topBar.setPadding(new Insets(20, 32, 20, 32));
-        topBar.setStyle("-fx-background-color: white;");
-        topBar.setStyle("-fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 15, 0, 0, 0);");
+        topBar.getStyleClass().addAll("bg-white", "shadow-md");
 
         // Breadcrumbs
         HBox breadcrumbs = new HBox(8);
@@ -311,7 +286,7 @@ public class Dashboard {
         Region lineSeparator = new Region();
         lineSeparator.setPrefWidth(1);
         lineSeparator.setPrefHeight(30);
-        lineSeparator.setStyle("-fx-background-color: #e5e7eb;");
+        lineSeparator.getStyleClass().addAll("bg-gray-200");
         lineSeparator.setPadding(new Insets(0, 16, 0, 16));
 
         // Theme toggle
@@ -324,7 +299,7 @@ public class Dashboard {
         HBox userMenu = new HBox(12);
         userMenu.setAlignment(Pos.CENTER);
         userMenu.setPadding(new Insets(8, 16, 8, 16));
-        userMenu.setStyle("-fx-background-color: #f9fafb; -fx-background-radius: 12;");
+        userMenu.getStyleClass().addAll("bg-gray-100", "rounded-xl");
         userMenu.setCursor(javafx.scene.Cursor.HAND);
 
         VBox userText = new VBox(2);
@@ -336,7 +311,7 @@ public class Dashboard {
         userText.getChildren().addAll(userName, userRole);
 
         StackPane userAvatar = ComponentFactory.avatar("JD", "blue", 40);
-        TailwindFX.apply(userAvatar, "rounded-full", "shadow-sm");
+        TailwindFX.apply(userAvatar, "rounded-full");
 
         userMenu.getChildren().addAll(userText, userAvatar);
 
@@ -352,11 +327,11 @@ public class Dashboard {
     private static Button createThemeToggle() {
         Button toggle = new Button(darkModeEnabled ? "🌙" : "☀️");
         toggle.setPrefSize(44, 44);
-        toggle.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 12;");
+        toggle.getStyleClass().addAll("bg-gray-100", "rounded-xl");
         toggle.setCursor(javafx.scene.Cursor.HAND);
         TailwindFX.apply(toggle, "text-xl");
-        toggle.setOnMouseEntered(e -> toggle.setStyle("-fx-background-color: #e5e7eb; -fx-background-radius: 12;"));
-        toggle.setOnMouseExited(e -> toggle.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 12;"));
+        toggle.setOnMouseEntered(e -> toggle.setStyle("-fx-background-color: -color-gray-200; -fx-background-radius: 12;"));
+        toggle.setOnMouseExited(e -> toggle.setStyle("-fx-background-color: -color-gray-100; -fx-background-radius: 12;"));
         toggle.setOnAction(e -> {
             darkModeEnabled = !darkModeEnabled;
             toggle.setText(darkModeEnabled ? "🌙" : "☀️");
@@ -375,23 +350,23 @@ public class Dashboard {
     private static StackPane createNotificationButton() {
         StackPane btnWrapper = new StackPane();
         btnWrapper.setPrefSize(44, 44);
-        btnWrapper.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 12;");
+        btnWrapper.getStyleClass().addAll("bg-gray-100", "rounded-xl");
         btnWrapper.setCursor(javafx.scene.Cursor.HAND);
 
         Label bell = new Label("🔔");
         TailwindFX.apply(bell, "text-xl");
         btnWrapper.getChildren().add(bell);
 
-        // Pulse animation effect (simulated with red dot)
+        // Notification dot
         StackPane badge = new StackPane();
         badge.setPrefSize(12, 12);
-        badge.setStyle("-fx-background-color: #ef4444; -fx-background-radius: 6;");
+        badge.getStyleClass().addAll("bg-red-500", "rounded-full");
 
         StackPane.setAlignment(badge, Pos.TOP_RIGHT);
         btnWrapper.getChildren().add(badge);
 
-        btnWrapper.setOnMouseEntered(e -> btnWrapper.setStyle("-fx-background-color: #e5e7eb; -fx-background-radius: 12;"));
-        btnWrapper.setOnMouseExited(e -> btnWrapper.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 12;"));
+        btnWrapper.setOnMouseEntered(e -> btnWrapper.setStyle("-fx-background-color: -color-gray-200; -fx-background-radius: 12;"));
+        btnWrapper.setOnMouseExited(e -> btnWrapper.setStyle("-fx-background-color: -color-gray-100; -fx-background-radius: 12;"));
 
         return btnWrapper;
     }
@@ -404,8 +379,8 @@ public class Dashboard {
         HBox banner = new HBox(24);
         banner.setAlignment(Pos.CENTER_LEFT);
         banner.setPadding(new Insets(24, 32, 24, 32));
-        banner.setStyle("-fx-background-color: linear-gradient(to right, #3b82f6, #8b5cf6); -fx-background-radius: 16;");
-        banner.setStyle("-fx-background-color: linear-gradient(to right, #3b82f6, #8b5cf6);");
+        banner.setStyle("-fx-background-color: linear-gradient(to right, -color-blue-500, -color-purple-500);");
+        banner.getStyleClass().addAll("rounded-xl", "shadow-lg");
 
         VBox text = new VBox(8);
         Label title = new Label("Welcome back, John! 👋");
@@ -419,39 +394,36 @@ public class Dashboard {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Button actionBtn = new Button("View Reports");
-        actionBtn.setStyle("-fx-background-color: white; -fx-background-radius: 10;");
+        Button actionBtn = new Button("📊 View Reports");
+        actionBtn.getStyleClass().addAll("bg-white", "rounded-lg");
         actionBtn.setPadding(new Insets(12, 24, 12, 24));
         actionBtn.setCursor(javafx.scene.Cursor.HAND);
-        Label btnLabel = new Label("📊 View Reports");
-        TailwindFX.apply(btnLabel, "text-sm", "font-semibold");
-        btnLabel.setStyle("-fx-text-fill: #3b82f6;");
-        actionBtn.setGraphic(btnLabel);
+        TailwindFX.apply(actionBtn, "text-sm", "font-semibold", "text-blue-600");
 
         banner.getChildren().addAll(text, spacer, actionBtn);
         return banner;
     }
 
     // =========================================================================
-    // Stats Row - Enhanced with gradient cards
+    // Stats Row
     // =========================================================================
 
     private static HBox createStatsRow() {
         HBox stats = new HBox(20);
 
         stats.getChildren().addAll(
-            createStatCard("💰", "Total Revenue", "$45,231", "+20.1%", "green", "linear-gradient(to bottom right, #10b981, #059669)"),
-            createStatCard("👥", "Active Users", "2,350", "+15.2%", "blue", "linear-gradient(to bottom right, #3b82f6, #2563eb)"),
-            createStatCard("📊", "Bounce Rate", "12.5%", "-3.2%", "purple", "linear-gradient(to bottom right, #8b5cf6, #7c3aed)"),
-            createStatCard("⏱️", "Avg. Session", "4m 32s", "+8.4%", "amber", "linear-gradient(to bottom right, #f59e0b, #d97706)")
+            createStatCard("💰", "Total Revenue", "$45,231", "+20.1%", "green"),
+            createStatCard("👥", "Active Users", "2,350", "+15.2%", "blue"),
+            createStatCard("📊", "Bounce Rate", "12.5%", "-3.2%", "purple"),
+            createStatCard("⏱️", "Avg. Session", "4m 32s", "+8.4%", "amber")
         );
 
         return stats;
     }
 
-    private static StackPane createStatCard(String icon, String title, String value, String change, String color, String gradient) {
+    private static StackPane createStatCard(String icon, String title, String value, String change, String color) {
         VBox card = new VBox(16);
-        card.setStyle("-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4);");
+        card.getStyleClass().addAll("card", "shadow-md");
         card.setPadding(new Insets(24));
         card.setCursor(javafx.scene.Cursor.HAND);
 
@@ -461,8 +433,7 @@ public class Dashboard {
 
         StackPane iconBox = new StackPane();
         iconBox.setPrefSize(48, 48);
-        iconBox.setStyle("-fx-background-color: " + gradient + ";");
-        iconBox.setStyle("-fx-background-color: linear-gradient(to bottom right, rgba(59,130,246,0.1), rgba(139,92,246,0.1)); -fx-background-radius: 12;");
+        iconBox.getStyleClass().addAll("bg-blue-50", "rounded-xl");
 
         Label iconLabel = new Label(icon);
         TailwindFX.apply(iconLabel, "text-2xl");
@@ -480,7 +451,7 @@ public class Dashboard {
         boolean isPositive = change.startsWith("+");
         StackPane changeBadge = new StackPane();
         changeBadge.setPadding(new Insets(6, 12, 6, 12));
-        changeBadge.setStyle("-fx-background-color: " + (isPositive ? "#d1fae5" : "#fee2e2") + "; -fx-background-radius: 20;");
+        changeBadge.getStyleClass().addAll(isPositive ? "bg-green-100" : "bg-red-100", "rounded-full");
         Label changeLabel = new Label(change);
         TailwindFX.apply(changeLabel, "text-xs", "font-bold", isPositive ? "text-green-700" : "text-red-700");
         changeBadge.getChildren().add(changeLabel);
@@ -498,12 +469,12 @@ public class Dashboard {
     }
 
     // =========================================================================
-    // Chart Section - Enhanced with simulated bars
+    // Chart Section
     // =========================================================================
 
     private static VBox createChartSection() {
         VBox section = new VBox(20);
-        section.setStyle("-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4);");
+        section.getStyleClass().addAll("card", "shadow-md");
         section.setPadding(new Insets(24));
 
         // Section header
@@ -521,11 +492,11 @@ public class Dashboard {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         HBox periodSelector = new HBox(2);
-        periodSelector.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 10;");
+        periodSelector.getStyleClass().addAll("bg-gray-100", "rounded-lg");
         String[] periods = {"7D", "30D", "90D"};
         for (int i = 0; i < periods.length; i++) {
             Button btn = new Button(periods[i]);
-            btn.setStyle(i == 0 ? "-fx-background-color: #3b82f6; -fx-background-radius: 8;" : "-fx-background-color: transparent;");
+            btn.getStyleClass().addAll(i == 0 ? "bg-blue-500" : "bg-transparent", "rounded-md");
             btn.setPadding(new Insets(8, 16, 8, 16));
             btn.setCursor(javafx.scene.Cursor.HAND);
             Label btnLabel = new Label(periods[i]);
@@ -561,12 +532,12 @@ public class Dashboard {
             StackPane bar = new StackPane();
             bar.setPrefWidth(36);
             bar.setPrefHeight(values[i] * 200);
-            bar.setStyle("-fx-background-color: linear-gradient(to top, #3b82f6, #8b5cf6); -fx-background-radius: 8 8 0 0;");
+            bar.getStyleClass().addAll("bg-blue-500", "rounded-t-lg");
+            bar.setStyle("-fx-background-color: -color-blue-500;");
             bar.setCursor(javafx.scene.Cursor.HAND);
 
-            // Hover effect
-            bar.setOnMouseEntered(e -> bar.setStyle("-fx-background-color: linear-gradient(to top, #2563eb, #7c3aed); -fx-background-radius: 8 8 0 0;"));
-            bar.setOnMouseExited(e -> bar.setStyle("-fx-background-color: linear-gradient(to top, #3b82f6, #8b5cf6); -fx-background-radius: 8 8 0 0;"));
+            bar.setOnMouseEntered(e -> bar.setStyle("-fx-background-color: -color-blue-600;"));
+            bar.setOnMouseExited(e -> bar.setStyle("-fx-background-color: -color-blue-500;"));
 
             // Month label
             Label monthLabel = new Label(months[i]);
@@ -587,10 +558,7 @@ public class Dashboard {
         VBox panel = new VBox(20);
         panel.setPrefWidth(380);
 
-        // Recent Activity
         panel.getChildren().add(createRecentActivity());
-
-        // Quick Chat
         panel.getChildren().add(createQuickChat());
 
         return panel;
@@ -598,7 +566,7 @@ public class Dashboard {
 
     private static VBox createRecentActivity() {
         VBox section = new VBox(16);
-        section.setStyle("-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4);");
+        section.getStyleClass().addAll("card", "shadow-md");
         section.setPadding(new Insets(20));
 
         // Header
@@ -611,12 +579,10 @@ public class Dashboard {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Button viewAll = new Button("View All");
-        viewAll.setStyle("-fx-background-color: transparent;");
+        Button viewAll = new Button("View All →");
+        viewAll.getStyleClass().addAll("bg-transparent");
         viewAll.setCursor(javafx.scene.Cursor.HAND);
-        Label viewAllLabel = new Label("→");
-        TailwindFX.apply(viewAllLabel, "text-sm", "font-medium", "text-blue-600");
-        viewAll.setGraphic(viewAllLabel);
+        TailwindFX.apply(viewAll, "text-sm", "font-medium", "text-blue-600");
 
         header.getChildren().addAll(title, viewAll);
 
@@ -624,18 +590,18 @@ public class Dashboard {
         VBox activities = new VBox(16);
 
         activities.getChildren().addAll(
-            createActivityItem("👤", "New user registered", "2 min ago", "#10b981"),
-            createActivityItem("💳", "Payment received", "15 min ago", "#3b82f6"),
-            createActivityItem("📄", "Report generated", "1 hour ago", "#8b5cf6"),
-            createActivityItem("🔄", "System update", "3 hours ago", "#f59e0b"),
-            createActivityItem("💾", "Backup completed", "5 hours ago", "#6b7280")
+            createActivityItem("👤", "New user registered", "2 min ago", "bg-green-100", "text-green-600"),
+            createActivityItem("💳", "Payment received", "15 min ago", "bg-blue-100", "text-blue-600"),
+            createActivityItem("📄", "Report generated", "1 hour ago", "bg-purple-100", "text-purple-600"),
+            createActivityItem("🔄", "System update", "3 hours ago", "bg-amber-100", "text-amber-600"),
+            createActivityItem("💾", "Backup completed", "5 hours ago", "bg-gray-100", "text-gray-600")
         );
 
         section.getChildren().addAll(header, activities);
         return section;
     }
 
-    private static HBox createActivityItem(String icon, String activity, String time, String color) {
+    private static HBox createActivityItem(String icon, String activity, String time, String bgClass, String textClass) {
         HBox item = new HBox(14);
         item.setAlignment(Pos.CENTER_LEFT);
         item.setPadding(new Insets(8, 0, 8, 0));
@@ -644,9 +610,9 @@ public class Dashboard {
         // Icon with background
         StackPane iconBox = new StackPane();
         iconBox.setPrefSize(40, 40);
-        iconBox.setStyle("-fx-background-color: " + color + "20; -fx-background-radius: 10;");
+        iconBox.getStyleClass().addAll(bgClass, "rounded-lg");
         Label iconLabel = new Label(icon);
-        TailwindFX.apply(iconLabel, "text-sm");
+        TailwindFX.apply(iconLabel, "text-sm", textClass);
         iconBox.getChildren().add(iconLabel);
 
         // Text
@@ -659,8 +625,8 @@ public class Dashboard {
 
         item.getChildren().addAll(iconBox, text);
 
-        item.setOnMouseEntered(e -> item.setStyle("-fx-background-color: #f9fafb; -fx-background-radius: 8;"));
-        item.setOnMouseExited(e -> item.setStyle(""));
+        item.setOnMouseEntered(e -> item.getStyleClass().addAll("bg-gray-50", "rounded-lg"));
+        item.setOnMouseExited(e -> item.getStyleClass().removeAll("bg-gray-50", "rounded-lg"));
 
         return item;
     }
@@ -671,7 +637,7 @@ public class Dashboard {
 
     private static VBox createQuickChat() {
         VBox section = new VBox(16);
-        section.setStyle("-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4);");
+        section.getStyleClass().addAll("card", "shadow-md");
         section.setPadding(new Insets(20));
 
         // Header
@@ -685,12 +651,8 @@ public class Dashboard {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         Button newMsg = new Button("+ New");
-        newMsg.setStyle("-fx-background-color: #3b82f6; -fx-background-radius: 8;");
-        newMsg.setPadding(new Insets(8, 16, 8, 16));
+        newMsg.getStyleClass().addAll("btn-primary", "btn-sm");
         newMsg.setCursor(javafx.scene.Cursor.HAND);
-        Label newMsgLabel = new Label("+ New");
-        TailwindFX.apply(newMsgLabel, "text-xs", "font-medium", "text-white");
-        newMsg.setGraphic(newMsgLabel);
 
         header.getChildren().addAll(title, newMsg);
 
@@ -712,7 +674,7 @@ public class Dashboard {
         HBox item = new HBox(12);
         item.setAlignment(Pos.CENTER_LEFT);
         item.setPadding(new Insets(12));
-        item.setStyle("-fx-background-color: #f9fafb; -fx-background-radius: 12;");
+        item.getStyleClass().addAll("bg-gray-50", "rounded-xl");
         item.setCursor(javafx.scene.Cursor.HAND);
 
         // Avatar
@@ -745,23 +707,23 @@ public class Dashboard {
         if (unread) {
             StackPane dot = new StackPane();
             dot.setPrefSize(10, 10);
-            dot.setStyle("-fx-background-color: #3b82f6; -fx-background-radius: 5;");
+            dot.getStyleClass().addAll("bg-blue-500", "rounded-full");
             item.getChildren().add(dot);
         }
 
-        item.setOnMouseEntered(e -> item.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 12;"));
-        item.setOnMouseExited(e -> item.setStyle("-fx-background-color: #f9fafb; -fx-background-radius: 12;"));
+        item.setOnMouseEntered(e -> item.setStyle("-fx-background-color: -color-gray-100;"));
+        item.setOnMouseExited(e -> item.setStyle("-fx-background-color: -color-gray-50;"));
 
         return item;
     }
 
     // =========================================================================
-    // Data Table Section - Enhanced
+    // Data Table Section
     // =========================================================================
 
     private static VBox createDataTableSection() {
         VBox section = new VBox(0);
-        section.setStyle("-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4);");
+        section.getStyleClass().addAll("card", "shadow-md");
 
         // Header
         HBox header = new HBox();
@@ -783,16 +745,12 @@ public class Dashboard {
         TextField search = new TextField();
         search.setPromptText("Search orders...");
         search.setPrefWidth(200);
-        search.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 8; -fx-padding: 8 12 8 12;");
-        TailwindFX.apply(search, "text-sm");
+        search.getStyleClass().addAll("input", "input-sm");
+        search.setStyle("-fx-background-color: -color-gray-100;");
 
         Button filterBtn = new Button("⚡ Filter");
-        filterBtn.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 8;");
-        filterBtn.setPadding(new Insets(10, 16, 10, 16));
+        filterBtn.getStyleClass().addAll("btn-outline", "btn-sm");
         filterBtn.setCursor(javafx.scene.Cursor.HAND);
-        Label filterLabel = new Label("⚡ Filter");
-        TailwindFX.apply(filterLabel, "text-sm", "font-medium", "text-gray-700");
-        filterBtn.setGraphic(filterLabel);
 
         actions.getChildren().addAll(search, filterBtn);
 
@@ -811,7 +769,7 @@ public class Dashboard {
         // Table header
         HBox headerRow = new HBox();
         headerRow.setPadding(new Insets(14, 24, 14, 24));
-        headerRow.setStyle("-fx-background-color: #f9fafb;");
+        headerRow.getStyleClass().addAll("bg-gray-50");
 
         String[] headers = {"Order ID", "Customer", "Product", "Amount", "Status", "Action"};
         int[] widths = {110, 180, 220, 100, 130, 80};
@@ -859,7 +817,7 @@ public class Dashboard {
     private static HBox createTableRow(OrderData data) {
         HBox row = new HBox();
         row.setPadding(new Insets(18, 24, 18, 24));
-        row.setStyle("-fx-background-color: white;");
+        row.getStyleClass().addAll("bg-white");
         row.setCursor(javafx.scene.Cursor.HAND);
 
         int[] widths = {110, 180, 220, 100, 130, 80};
@@ -900,14 +858,14 @@ public class Dashboard {
 
         // Action button
         Button moreBtn = new Button("⋮");
-        moreBtn.setStyle("-fx-background-color: transparent;");
+        moreBtn.getStyleClass().addAll("bg-transparent");
         moreBtn.setCursor(javafx.scene.Cursor.HAND);
         TailwindFX.apply(moreBtn, "text-lg", "text-gray-400");
         moreBtn.setPrefWidth(widths[5]);
         row.getChildren().add(moreBtn);
 
-        row.setOnMouseEntered(e -> row.setStyle("-fx-background-color: #f9fafb;"));
-        row.setOnMouseExited(e -> row.setStyle("-fx-background-color: white;"));
+        row.setOnMouseEntered(e -> row.setStyle("-fx-background-color: -color-gray-50;"));
+        row.setOnMouseExited(e -> row.setStyle("-fx-background-color: -color-white;"));
 
         return row;
     }
@@ -918,31 +876,30 @@ public class Dashboard {
 
         switch (status) {
             case "completed":
-                badge.setStyle("-fx-background-color: #d1fae5;");
+                badge.getStyleClass().addAll("bg-green-100", "rounded-full");
                 TailwindFX.apply(label, "text-xs", "font-bold", "text-green-700");
                 break;
             case "pending":
-                badge.setStyle("-fx-background-color: #fef3c7;");
+                badge.getStyleClass().addAll("bg-amber-100", "rounded-full");
                 TailwindFX.apply(label, "text-xs", "font-bold", "text-amber-700");
                 break;
             case "shipped":
-                badge.setStyle("-fx-background-color: #dbeafe;");
+                badge.getStyleClass().addAll("bg-blue-100", "rounded-full");
                 TailwindFX.apply(label, "text-xs", "font-bold", "text-blue-700");
                 break;
             case "processing":
-                badge.setStyle("-fx-background-color: #ede9fe;");
+                badge.getStyleClass().addAll("bg-purple-100", "rounded-full");
                 TailwindFX.apply(label, "text-xs", "font-bold", "text-purple-700");
                 break;
         }
 
         badge.setPadding(new Insets(6, 14, 6, 14));
-        TailwindFX.apply(badge, "rounded-full");
         badge.getChildren().add(label);
         return badge;
     }
 
     // =========================================================================
-    // Products Section - Enhanced
+    // Products Section
     // =========================================================================
 
     private static VBox createProductsSection() {
@@ -964,16 +921,14 @@ public class Dashboard {
 
         HBox actions = new HBox(12);
         Button prev = new Button("←");
-        prev.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 0);");
+        prev.getStyleClass().addAll("btn-outline", "rounded-lg");
         prev.setPrefSize(40, 40);
         prev.setCursor(javafx.scene.Cursor.HAND);
-        TailwindFX.apply(prev, "text-lg");
 
         Button next = new Button("→");
-        next.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 0);");
+        next.getStyleClass().addAll("btn-outline", "rounded-lg");
         next.setPrefSize(40, 40);
         next.setCursor(javafx.scene.Cursor.HAND);
-        TailwindFX.apply(next, "text-lg");
 
         actions.getChildren().addAll(prev, next);
 
@@ -995,13 +950,13 @@ public class Dashboard {
 
     private static VBox createProductCard(String title, String description, String price, String color, String rating, String reviews, boolean inStock) {
         VBox card = new VBox(0);
-        card.setStyle("-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4);");
+        card.getStyleClass().addAll("card", "shadow-md");
         card.setCursor(javafx.scene.Cursor.HAND);
 
-        // Image area with gradient
+        // Image area
         StackPane imageContainer = new StackPane();
         imageContainer.setPrefHeight(180);
-        imageContainer.setStyle("-fx-background-color: linear-gradient(to bottom right, #f3f4f6, #e5e7eb); -fx-background-radius: 16 16 0 0;");
+        imageContainer.getStyleClass().addAll("bg-gray-100", "rounded-t-xl");
 
         Label productIcon = new Label("📦");
         TailwindFX.apply(productIcon, "text-5xl");
@@ -1009,10 +964,9 @@ public class Dashboard {
 
         // Wishlist button
         Button wishlist = new Button("♡");
-        wishlist.setStyle("-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 0);");
+        wishlist.getStyleClass().addAll("bg-white", "rounded-full", "shadow-sm");
         wishlist.setPrefSize(36, 36);
         wishlist.setCursor(javafx.scene.Cursor.HAND);
-        TailwindFX.apply(wishlist, "text-lg");
         StackPane.setAlignment(wishlist, Pos.TOP_RIGHT);
         ((StackPane) imageContainer).getChildren().add(wishlist);
 
@@ -1022,7 +976,6 @@ public class Dashboard {
         VBox content = new VBox(12);
         content.setPadding(new Insets(20));
 
-        // Title and description
         Label titleLabel = new Label(title);
         TailwindFX.apply(titleLabel, "text-base", "font-bold", "text-gray-900");
 
@@ -1047,21 +1000,16 @@ public class Dashboard {
         TailwindFX.apply(priceLabel, "text-xl", "font-bold", "text-gray-900");
 
         Button addToCart = new Button("Add to Cart");
-        addToCart.setStyle("-fx-background-color: linear-gradient(to right, #3b82f6, #8b5cf6); -fx-background-radius: 10;");
-        addToCart.setPadding(new Insets(10, 20, 10, 20));
+        addToCart.getStyleClass().addAll("btn-primary", "btn-sm");
         addToCart.setCursor(javafx.scene.Cursor.HAND);
-        Label cartLabel = new Label("Add to Cart");
-        TailwindFX.apply(cartLabel, "text-sm", "font-semibold", "text-white");
-        addToCart.setGraphic(cartLabel);
 
         priceRow.getChildren().addAll(priceLabel, addToCart);
 
         content.getChildren().addAll(titleLabel, descLabel, ratingRow, priceRow);
         card.getChildren().add(content);
 
-        // Hover effect
-        card.setOnMouseEntered(e -> card.setStyle("-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 30, 0, 0, 8);"));
-        card.setOnMouseExited(e -> card.setStyle("-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 4);"));
+        card.setOnMouseEntered(e -> card.getStyleClass().addAll("shadow-lg"));
+        card.setOnMouseExited(e -> card.getStyleClass().removeAll("shadow-lg"));
 
         return card;
     }
