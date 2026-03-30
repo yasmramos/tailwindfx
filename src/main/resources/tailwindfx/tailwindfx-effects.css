@@ -1,0 +1,260 @@
+/*
+ * =============================================================================
+ * TAILWINDFX-EFFECTS - Sombras, Transforms y Efectos
+ * =============================================================================
+ * 
+ * Clases utilitarias para sombras, transformaciones y efectos visuales.
+ *
+ * DEPENDENCIA: Requiere tailwindfx-base.css cargado primero.
+ *
+ * USO:
+ *   scene.getStylesheets().add("tailwindfx/tailwindfx-base.css");
+ *   scene.getStylesheets().add("tailwindfx/tailwindfx-effects.css");
+ * =============================================================================
+ */
+
+/* =============================================================================
+ * SHADOWS - Sombras
+ * ============================================================================= */
+
+.shadow-xs { -fx-effect: -shadow-xs; }
+.shadow-sm { -fx-effect: -shadow-sm; }
+.shadow { -fx-effect: -shadow; }
+.shadow-md { -fx-effect: -shadow-md; }
+.shadow-lg { -fx-effect: -shadow-lg; }
+.shadow-xl { -fx-effect: -shadow-xl; }
+.shadow-2xl { -fx-effect: -shadow-2xl; }
+.shadow-inner { -fx-effect: -shadow-inner; }
+.shadow-none { -fx-effect: none; }
+
+/* Colored shadows */
+.shadow-blue { -fx-effect: dropshadow(gaussian, -color-blue-500, 10, 0.3, 0, 2); }
+.shadow-red { -fx-effect: dropshadow(gaussian, -color-red-500, 10, 0.3, 0, 2); }
+.shadow-green { -fx-effect: dropshadow(gaussian, -color-green-500, 10, 0.3, 0, 2); }
+.shadow-purple { -fx-effect: dropshadow(gaussian, -color-purple-500, 10, 0.3, 0, 2); }
+
+/* =============================================================================
+ * TRANSFORMS - Rotate
+ * ============================================================================= */
+
+.rotate-0 { -fx-rotate: 0; }
+.rotate-1 { -fx-rotate: 1; }
+.rotate-2 { -fx-rotate: 2; }
+.rotate-3 { -fx-rotate: 3; }
+.rotate-6 { -fx-rotate: 6; }
+.rotate-12 { -fx-rotate: 12; }
+.rotate-45 { -fx-rotate: 45; }
+.rotate-90 { -fx-rotate: 90; }
+.rotate-180 { -fx-rotate: 180; }
+
+.-rotate-1 { -fx-rotate: -1; }
+.-rotate-2 { -fx-rotate: -2; }
+.-rotate-3 { -fx-rotate: -3; }
+.-rotate-6 { -fx-rotate: -6; }
+.-rotate-12 { -fx-rotate: -12; }
+.-rotate-45 { -fx-rotate: -45; }
+.-rotate-90 { -fx-rotate: -90; }
+.-rotate-180 { -fx-rotate: -180; }
+
+/* =============================================================================
+ * TRANSFORMS - Scale
+ * ============================================================================= */
+
+.scale-0 { -fx-scale-x: 0; -fx-scale-y: 0; }
+.scale-50 { -fx-scale-x: 0.5; -fx-scale-y: 0.5; }
+.scale-75 { -fx-scale-x: 0.75; -fx-scale-y: 0.75; }
+.scale-90 { -fx-scale-x: 0.9; -fx-scale-y: 0.9; }
+.scale-95 { -fx-scale-x: 0.95; -fx-scale-y: 0.95; }
+.scale-100 { -fx-scale-x: 1; -fx-scale-y: 1; }
+.scale-105 { -fx-scale-x: 1.05; -fx-scale-y: 1.05; }
+.scale-110 { -fx-scale-x: 1.1; -fx-scale-y: 1.1; }
+.scale-125 { -fx-scale-x: 1.25; -fx-scale-y: 1.25; }
+.scale-150 { -fx-scale-x: 1.5; -fx-scale-y: 1.5; }
+
+/* Scale X */
+.scale-x-0 { -fx-scale-x: 0; }
+.scale-x-50 { -fx-scale-x: 0.5; }
+.scale-x-75 { -fx-scale-x: 0.75; }
+.scale-x-90 { -fx-scale-x: 0.9; }
+.scale-x-95 { -fx-scale-x: 0.95; }
+.scale-x-100 { -fx-scale-x: 1; }
+.scale-x-105 { -fx-scale-x: 1.05; }
+.scale-x-110 { -fx-scale-x: 1.1; }
+.scale-x-125 { -fx-scale-x: 1.25; }
+.scale-x-150 { -fx-scale-x: 1.5; }
+
+/* Scale Y */
+.scale-y-0 { -fx-scale-y: 0; }
+.scale-y-50 { -fx-scale-y: 0.5; }
+.scale-y-75 { -fx-scale-y: 0.75; }
+.scale-y-90 { -fx-scale-y: 0.9; }
+.scale-y-95 { -fx-scale-y: 0.95; }
+.scale-y-100 { -fx-scale-y: 1; }
+.scale-y-105 { -fx-scale-y: 1.05; }
+.scale-y-110 { -fx-scale-y: 1.1; }
+.scale-y-125 { -fx-scale-y: 1.25; }
+.scale-y-150 { -fx-scale-y: 1.5; }
+
+/* =============================================================================
+ * TRANSFORMS - Translate
+ * ============================================================================= */
+
+.translate-x-0 { -fx-translate-x: 0; }
+.translate-x-1 { -fx-translate-x: 2px; }
+.translate-x-2 { -fx-translate-x: 4px; }
+.translate-x-3 { -fx-translate-x: 6px; }
+.translate-x-4 { -fx-translate-x: 8px; }
+.translate-x-6 { -fx-translate-x: 12px; }
+.translate-x-8 { -fx-translate-x: 16px; }
+.translate-x-12 { -fx-translate-x: 24px; }
+
+.-translate-x-1 { -fx-translate-x: -2px; }
+.-translate-x-2 { -fx-translate-x: -4px; }
+.-translate-x-3 { -fx-translate-x: -6px; }
+.-translate-x-4 { -fx-translate-x: -8px; }
+.-translate-x-6 { -fx-translate-x: -12px; }
+.-translate-x-8 { -fx-translate-x: -16px; }
+.-translate-x-12 { -fx-translate-x: -24px; }
+
+/* Translate Y */
+.translate-y-0 { -fx-translate-y: 0; }
+.translate-y-1 { -fx-translate-y: 2px; }
+.translate-y-2 { -fx-translate-y: 4px; }
+.translate-y-3 { -fx-translate-y: 6px; }
+.translate-y-4 { -fx-translate-y: 8px; }
+.translate-y-6 { -fx-translate-y: 12px; }
+.translate-y-8 { -fx-translate-y: 16px; }
+.translate-y-12 { -fx-translate-y: 24px; }
+
+.-translate-y-1 { -fx-translate-y: -2px; }
+.-translate-y-2 { -fx-translate-y: -4px; }
+.-translate-y-3 { -fx-translate-y: -6px; }
+.-translate-y-4 { -fx-translate-y: -8px; }
+.-translate-y-6 { -fx-translate-y: -12px; }
+.-translate-y-8 { -fx-translate-y: -16px; }
+.-translate-y-12 { -fx-translate-y: -24px; }
+
+/* =============================================================================
+ * TRANSFORMS - Skew
+ * ============================================================================= */
+
+.skew-x-0 { -fx-she-x: 0; }
+.skew-x-1 { -fx-she-x: 0.0175; }
+.skew-x-2 { -fx-she-x: 0.0349; }
+.skew-x-3 { -fx-she-x: 0.0524; }
+.skew-x-6 { -fx-she-x: 0.1051; }
+.skew-x-12 { -fx-she-x: 0.2126; }
+
+.skew-y-0 { -fx-she-y: 0; }
+.skew-y-1 { -fx-she-y: 0.0175; }
+.skew-y-2 { -fx-she-y: 0.0349; }
+.skew-y-3 { -fx-she-y: 0.0524; }
+.skew-y-6 { -fx-she-y: 0.1051; }
+.skew-y-12 { -fx-she-y: 0.2126; }
+
+/* =============================================================================
+ * BLUR (simulado con shadow)
+ * ============================================================================= */
+
+.blur-none { /* No blur */ }
+.blur-sm { -fx-blur: 2px; }
+.blur { -fx-blur: 4px; }
+.blur-md { -fx-blur: 8px; }
+.blur-lg { -fx-blur: 12px; }
+.blur-xl { -fx-blur: 16px; }
+.blur-2xl { -fx-blur: 24px; }
+.blur-3xl { -fx-blur: 32px; }
+
+/* =============================================================================
+ * BRIGHTNESS
+ * ============================================================================= */
+
+.brightness-0 { -fx-brightness: 0%; }
+.brightness-50 { -fx-brightness: 50%; }
+.brightness-75 { -fx-brightness: 75%; }
+.brightness-90 { -fx-brightness: 90%; }
+.brightness-95 { -fx-brightness: 95%; }
+.brightness-100 { -fx-brightness: 100%; }
+.brightness-105 { -fx-brightness: 105%; }
+.brightness-110 { -fx-brightness: 110%; }
+.brightness-125 { -fx-brightness: 125%; }
+.brightness-150 { -fx-brightness: 150%; }
+.brightness-200 { -fx-brightness: 200%; }
+
+/* =============================================================================
+ * CONTRAST
+ * ============================================================================= */
+
+.contrast-0 { -fx-contrast: 0%; }
+.contrast-50 { -fx-contrast: 50%; }
+.contrast-75 { -fx-contrast: 75%; }
+.contrast-100 { -fx-contrast: 100%; }
+.contrast-125 { -fx-contrast: 125%; }
+.contrast-150 { -fx-contrast: 150%; }
+.contrast-200 { -fx-contrast: 200%; }
+
+/* =============================================================================
+ * GRAYSCALE
+ * ============================================================================= */
+
+.grayscale { -fx-saturation: 0%; }
+.grayscale-0 { -fx-saturation: 0%; }
+.grayscale-100 { -fx-saturation: 100%; }
+
+/* =============================================================================
+ * INVERT
+ * ============================================================================= */
+
+.invert { -fx-invert: 100%; }
+.invert-0 { -fx-invert: 0%; }
+
+/* =============================================================================
+ * SEPIA
+ * ============================================================================= */
+
+.sepia { -fx-sepia: 100%; }
+.sepia-0 { -fx-sepia: 0%; }
+
+/* =============================================================================
+ * BACKDROP FILTERS (JavaFX limitado - usar con Node.setEffect)
+ * ============================================================================= */
+
+/* Estas clases requieren aplicación manual vía Java API */
+.backdrop-blur { /* Usar blur() en Java */ }
+.backdrop-grayscale { /* Usar ColorAdjust en Java */ }
+.backdrop-invert { /* Usar ColorAdjust en Java */ }
+.backdrop-sepia { /* Usar ColorAdjust en Java */ }
+
+/* =============================================================================
+ * TRANSITIONS / ANIMATIONS (clases helper)
+ * ============================================================================= */
+
+.transition { /* Default transition */ }
+.transition-none { -fx-transition-duration: 0ms; }
+.transition-fast { -fx-transition-duration: 150ms; }
+.transition-normal { -fx-transition-duration: 300ms; }
+.transition-slow { -fx-transition-duration: 500ms; }
+
+/* Animation states - aplicar vía Java */
+.animate-pulse { /* Oscilar opacity */ }
+.animate-bounce { /* Saltar verticalmente */ }
+.animate-spin { /* Rotar 360° */ }
+.animate-ping { /* Expandir con fade */ }
+
+/* =============================================================================
+ * MIX BLEND MODE (JavaFX no soporta blend modes en CSS)
+ * ============================================================================= */
+
+/* Requieren aplicación vía Java API */
+.blend-normal { /* Default */ }
+.blend-multiply { /* Usar BlendMode.MULTIPLY */ }
+.blend-screen { /* Usar BlendMode.SCREEN */ }
+.blend-overlay { /* Usar BlendMode.OVERLAY */ }
+.blend-darken { /* Usar BlendMode.DARKEN */ }
+.blend-lighten { /* Usar BlendMode.LIGHTEN */ }
+.blend-color-dodge { /* Usar BlendMode.COLOR_DODGE */ }
+.blend-color-burn { /* Usar BlendMode.COLOR_BURN */ }
+.blend-hard-light { /* Usar BlendMode.HARD_LIGHT */ }
+.blend-soft-light { /* Usar BlendMode.SOFT_LIGHT */ }
+.blend-difference { /* Usar BlendMode.DIFFERENCE */ }
+.blend-exclusion { /* Usar BlendMode.EXCLUSION */ }

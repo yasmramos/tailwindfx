@@ -1,0 +1,561 @@
+/*
+ * =============================================================================
+ * TAILWINDFX-COMPONENTS - Componentes Base JavaFX
+ * =============================================================================
+ * 
+ * Estilos automáticos para controles JavaFX. Se aplican sin necesidad de
+ * agregar clases CSS manualmente.
+ *
+ * DEPENDENCIA: Requiere tailwindfx-base.css cargado primero.
+ *
+ * USO:
+ *   scene.getStylesheets().add("tailwindfx/tailwindfx-base.css");
+ *   scene.getStylesheets().add("tailwindfx/tailwindfx-components.css");
+ * =============================================================================
+ */
+
+/* Button - Estilo primario por defecto */
+Button {
+    -fx-background-color: -color-blue-500;
+    -fx-background-radius: 6px;
+    -fx-text-fill: -color-white;
+    -fx-font-weight: 500;
+    -fx-font-size: 14px;
+    -fx-padding: 8px 16px;
+    -fx-cursor: -cursor-hand;
+    -fx-background-insets: 0;
+    -fx-focus-traversable: true;
+    -fx-faint-focus-color: transparent;
+}
+
+Button:hover {
+    -fx-background-color: -color-blue-600;
+}
+
+Button:pressed {
+    -fx-background-color: -color-blue-700;
+}
+
+Button:focused {
+    -fx-border-color: -color-blue-300;
+    -fx-border-width: 2;
+    -fx-border-radius: 6px;
+}
+
+Button:disabled {
+    -fx-background-color: -color-gray-300;
+    -fx-text-fill: -color-gray-500;
+    -fx-cursor: -cursor-default;
+}
+
+/* TextField */
+TextField {
+    -fx-background-color: -color-white;
+    -fx-background-radius: 6px;
+    -fx-border-color: -color-gray-300;
+    -fx-border-width: 1;
+    -fx-border-radius: 6px;
+    -fx-text-fill: -color-gray-900;
+    -fx-padding: 8px 12px;
+    -fx-prompt-text-fill: -color-gray-400;
+    -fx-focus-traversable: true;
+    -fx-faint-focus-color: transparent;
+}
+
+TextField:focused {
+    -fx-border-color: -color-blue-500;
+    -fx-border-width: 2;
+}
+
+TextField:disabled {
+    -fx-background-color: -color-gray-100;
+    -fx-text-fill: -color-gray-400;
+}
+
+/* PasswordField */
+PasswordField {
+    -fx-background-color: -color-white;
+    -fx-background-radius: 6px;
+    -fx-border-color: -color-gray-300;
+    -fx-border-width: 1;
+    -fx-border-radius: 6px;
+    -fx-text-fill: -color-gray-900;
+    -fx-padding: 8px 12px;
+    -fx-prompt-text-fill: -color-gray-400;
+    -fx-focus-traversable: true;
+    -fx-faint-focus-color: transparent;
+}
+
+PasswordField:focused {
+    -fx-border-color: -color-blue-500;
+    -fx-border-width: 2;
+}
+
+/* TextArea */
+TextArea {
+    -fx-background-color: -color-white;
+    -fx-background-radius: 6px;
+    -fx-border-color: -color-gray-300;
+    -fx-border-width: 1;
+    -fx-border-radius: 6px;
+    -fx-text-fill: -color-gray-900;
+    -fx-padding: 8px 12px;
+    -fx-prompt-text-fill: -color-gray-400;
+    -fx-focus-traversable: true;
+    -fx-faint-focus-color: transparent;
+}
+
+TextArea:focused {
+    -fx-border-color: -color-blue-500;
+    -fx-border-width: 2;
+}
+
+/* ComboBox */
+ComboBox {
+    -fx-background-color: -color-white;
+    -fx-background-radius: 6px;
+    -fx-border-color: -color-gray-300;
+    -fx-border-width: 1;
+    -fx-border-radius: 6px;
+    -fx-padding: 8px 12px;
+    -fx-focus-traversable: true;
+}
+
+ComboBox:focused {
+    -fx-border-color: -color-blue-500;
+    -fx-border-width: 2;
+}
+
+ComboBox .arrow-button {
+    -fx-background-color: transparent;
+}
+
+ComboBox .arrow {
+    -fx-background-color: -color-gray-500;
+}
+
+/* CheckBox */
+CheckBox {
+    -fx-text-fill: -color-gray-700;
+    -fx-font-size: 14px;
+    -fx-cursor: -cursor-hand;
+}
+
+CheckBox .box {
+    -fx-background-color: -color-white;
+    -fx-border-color: -color-gray-400;
+    -fx-border-width: 2;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-pref-width: 18px;
+    -fx-pref-height: 18px;
+}
+
+CheckBox:selected .box {
+    -fx-background-color: -color-blue-500;
+    -fx-border-color: -color-blue-500;
+}
+
+CheckBox:focused .box {
+    -fx-border-color: -color-blue-400;
+}
+
+/* RadioButton */
+RadioButton {
+    -fx-text-fill: -color-gray-700;
+    -fx-font-size: 14px;
+    -fx-cursor: -cursor-hand;
+}
+
+RadioButton .radio {
+    -fx-background-color: -color-white;
+    -fx-border-color: -color-gray-400;
+    -fx-border-width: 2;
+    -fx-pref-width: 18px;
+    -fx-pref-height: 18px;
+}
+
+RadioButton:selected .radio {
+    -fx-background-color: -color-white;
+    -fx-border-color: -color-blue-500;
+}
+
+RadioButton:selected .radio .dot {
+    -fx-background-color: -color-blue-500;
+    -fx-pref-width: 8px;
+    -fx-pref-height: 8px;
+}
+
+/* Hyperlink */
+Hyperlink {
+    -fx-text-fill: -color-blue-600;
+    -fx-cursor: -cursor-hand;
+    -fx-underline: false;
+}
+
+Hyperlink:hover {
+    -fx-text-fill: -color-blue-500;
+    -fx-underline: true;
+}
+
+Hyperlink:pressed {
+    -fx-text-fill: -color-blue-700;
+}
+
+/* Slider */
+Slider {
+    -fx-cursor: -cursor-hand;
+}
+
+Slider .track {
+    -fx-background-color: -color-gray-200;
+    -fx-pref-height: 4px;
+    -fx-background-radius: 2px;
+}
+
+Slider .thumb {
+    -fx-background-color: -color-white;
+    -fx-border-color: -color-blue-500;
+    -fx-border-width: 2;
+    -fx-background-radius: 10px;
+    -fx-pref-width: 20px;
+    -fx-pref-height: 20px;
+}
+
+Slider .thumb:hover {
+    -fx-background-color: -color-blue-50;
+}
+
+Slider .fill {
+    -fx-background-color: -color-blue-500;
+}
+
+/* ProgressBar */
+ProgressBar {
+    -fx-background-color: -color-gray-200;
+    -fx-background-radius: 9999px;
+    -fx-pref-height: 8px;
+}
+
+ProgressBar .bar {
+    -fx-background-color: -color-blue-500;
+    -fx-background-radius: 9999px;
+}
+
+/* ProgressIndicator */
+ProgressIndicator {
+    -fx-progress-color: -color-blue-500;
+    -fx-pref-width: 36px;
+    -fx-pref-height: 36px;
+}
+
+/* ScrollBar */
+ScrollBar {
+    -fx-background-color: transparent;
+    -fx-pref-width: 10px;
+    -fx-pref-height: 10px;
+}
+
+ScrollBar .track {
+    -fx-background-color: -color-gray-100;
+    -fx-background-radius: 5px;
+}
+
+ScrollBar .thumb {
+    -fx-background-color: -color-gray-300;
+    -fx-background-radius: 5px;
+}
+
+ScrollBar .thumb:hover {
+    -fx-background-color: -color-gray-400;
+}
+
+ScrollBar .thumb:pressed {
+    -fx-background-color: -color-gray-500;
+}
+
+/* ScrollPane */
+ScrollPane {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+ScrollPane .viewport {
+    -fx-background-color: transparent;
+}
+
+/* ListView */
+ListView {
+    -fx-background-color: -color-white;
+    -fx-background-radius: 6px;
+    -fx-border-color: -color-gray-200;
+    -fx-border-width: 1;
+    -fx-border-radius: 6px;
+    -fx-focus-traversable: false;
+}
+
+ListView .list-cell {
+    -fx-padding: 10px 12px;
+    -fx-text-fill: -color-gray-700;
+}
+
+ListView .list-cell:hover {
+    -fx-background-color: -color-gray-50;
+}
+
+ListView .list-cell:selected {
+    -fx-background-color: -color-blue-50;
+    -fx-text-fill: -color-blue-700;
+}
+
+/* TableView */
+TableView {
+    -fx-background-color: -color-white;
+    -fx-background-radius: 6px;
+    -fx-border-color: -color-gray-200;
+    -fx-border-width: 1;
+    -fx-border-radius: 6px;
+    -fx-focus-traversable: false;
+}
+
+TableView .column-header {
+    -fx-background-color: -color-gray-50;
+    -fx-font-weight: 600;
+    -fx-text-fill: -color-gray-700;
+    -fx-padding: 12px;
+}
+
+TableView .column-header .label {
+    -fx-font-weight: 600;
+}
+
+TableView .table-cell {
+    -fx-padding: 10px 12px;
+    -fx-text-fill: -color-gray-700;
+}
+
+TableView .table-row-cell:hover {
+    -fx-background-color: -color-gray-50;
+}
+
+TableView .table-row-cell:selected {
+    -fx-background-color: -color-blue-50;
+}
+
+/* TreeView */
+TreeView {
+    -fx-background-color: -color-white;
+    -fx-background-radius: 6px;
+    -fx-border-color: -color-gray-200;
+    -fx-border-width: 1;
+    -fx-border-radius: 6px;
+}
+
+TreeView .tree-cell {
+    -fx-padding: 6px 8px;
+    -fx-text-fill: -color-gray-700;
+}
+
+TreeView .tree-cell:hover {
+    -fx-background-color: -color-gray-50;
+}
+
+TreeView .tree-cell:selected {
+    -fx-background-color: -color-blue-50;
+    -fx-text-fill: -color-blue-700;
+}
+
+/* TabPane */
+TabPane {
+    -fx-background-color: -color-white;
+}
+
+TabPane .tab {
+    -fx-background-color: -color-gray-100;
+    -fx-padding: 10px 20px;
+    -fx-text-fill: -color-gray-600;
+    -fx-cursor: -cursor-hand;
+    -fx-background-radius: 4px 4px 0 0;
+}
+
+TabPane .tab:hover {
+    -fx-background-color: -color-gray-200;
+}
+
+TabPane .tab:selected {
+    -fx-background-color: -color-white;
+    -fx-text-fill: -color-blue-600;
+    -fx-font-weight: 500;
+    -fx-border-color: -color-gray-200;
+    -fx-border-width: 0 0 2 0;
+}
+
+TabPane .tab-header-area {
+    -fx-background-color: -color-gray-50;
+}
+
+/* MenuBar */
+MenuBar {
+    -fx-background-color: -color-white;
+    -fx-border-color: -color-gray-200;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 4px;
+}
+
+MenuBar .menu {
+    -fx-padding: 6px 10px;
+}
+
+MenuBar .menu:hover {
+    -fx-background-color: -color-gray-100;
+}
+
+/* ContextMenu */
+ContextMenu {
+    -fx-background-color: -color-white;
+    -fx-background-radius: 6px;
+    -fx-border-color: -color-gray-200;
+    -fx-border-width: 1;
+    -fx-effect: -shadow-lg;
+    -fx-padding: 4px;
+}
+
+/* Tooltip */
+Tooltip {
+    -fx-background-color: -color-gray-800;
+    -fx-text-fill: -color-white;
+    -fx-background-radius: 6px;
+    -fx-padding: 6px 10px;
+    -fx-font-size: 12.2px;
+    -fx-effect: -shadow-md;
+}
+
+/* Separator */
+Separator {
+    -fx-background-color: -color-gray-200;
+}
+
+Separator:horizontal {
+    -fx-pref-height: 1px;
+}
+
+Separator:vertical {
+    -fx-pref-width: 1px;
+}
+
+/* ToolBar */
+ToolBar {
+    -fx-background-color: -color-white;
+    -fx-border-color: -color-gray-200;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 8px;
+}
+
+/* ToggleButton */
+ToggleButton {
+    -fx-background-color: -color-white;
+    -fx-border-color: -color-gray-300;
+    -fx-border-width: 1;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-text-fill: -color-gray-700;
+    -fx-padding: 8px 16px;
+    -fx-cursor: -cursor-hand;
+}
+
+ToggleButton:selected {
+    -fx-background-color: -color-blue-500;
+    -fx-border-color: -color-blue-500;
+    -fx-text-fill: -color-white;
+}
+
+ToggleButton:hover {
+    -fx-background-color: -color-gray-50;
+}
+
+ToggleButton:selected:hover {
+    -fx-background-color: -color-blue-600;
+}
+
+/* ChoiceBox */
+ChoiceBox {
+    -fx-background-color: -color-white;
+    -fx-background-radius: 6px;
+    -fx-border-color: -color-gray-300;
+    -fx-border-width: 1;
+    -fx-border-radius: 6px;
+    -fx-padding: 8px 12px;
+    -fx-focus-traversable: true;
+}
+
+ChoiceBox:focused {
+    -fx-border-color: -color-blue-500;
+    -fx-border-width: 2;
+}
+
+/* DatePicker */
+DatePicker {
+    -fx-background-color: -color-white;
+    -fx-background-radius: 6px;
+    -fx-border-color: -color-gray-300;
+    -fx-border-width: 1;
+    -fx-border-radius: 6px;
+    -fx-padding: 4px 8px;
+}
+
+DatePicker:focused {
+    -fx-border-color: -color-blue-500;
+    -fx-border-width: 2;
+}
+
+/* ColorPicker */
+ColorPicker {
+    -fx-background-color: -color-white;
+    -fx-background-radius: 6px;
+    -fx-border-color: -color-gray-300;
+    -fx-border-width: 1;
+    -fx-border-radius: 6px;
+}
+
+/* Pagination */
+Pagination {
+    -fx-background-color: transparent;
+}
+
+/* TitledPane */
+TitledPane {
+    -fx-background-color: -color-white;
+    -fx-border-color: -color-gray-200;
+    -fx-border-width: 1;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+}
+
+TitledPane .title {
+    -fx-background-color: -color-gray-50;
+    -fx-padding: 12px 16px;
+    -fx-font-weight: 500;
+    -fx-background-radius: 6px 6px 0 0;
+}
+
+TitledPane:expanded .title {
+    -fx-background-color: -color-gray-100;
+}
+
+/* Accordion */
+Accordion {
+    -fx-background-color: -color-white;
+    -fx-border-color: -color-gray-200;
+    -fx-border-width: 1;
+    -fx-border-radius: 6px;
+}
+
+/* SplitPane */
+SplitPane {
+    -fx-background-color: -color-white;
+    -fx-border-color: transparent;
+}
+
+SplitPane .split-pane-divider {
+    -fx-background-color: -color-gray-200;
+}

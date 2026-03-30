@@ -1,0 +1,252 @@
+/*
+ * =============================================================================
+ * TAILWINDFX-COLORS - Clases de Color y Tipografía
+ * =============================================================================
+ * 
+ * Clases utilitarias para colores de fondo, texto, borde y tipografía.
+ *
+ * DEPENDENCIA: Requiere tailwindfx-base.css cargado primero.
+ *
+ * USO:
+ *   scene.getStylesheets().add("tailwindfx/tailwindfx-base.css");
+ *   scene.getStylesheets().add("tailwindfx/tailwindfx-colors.css");
+ * =============================================================================
+ */
+
+/* =============================================================================
+ * BACKGROUND COLORS - Gray
+ * ============================================================================= */
+
+.bg-gray-50 { -fx-background-color: -color-gray-50; }
+.bg-gray-100 { -fx-background-color: -color-gray-100; }
+.bg-gray-200 { -fx-background-color: -color-gray-200; }
+.bg-gray-300 { -fx-background-color: -color-gray-300; }
+.bg-gray-400 { -fx-background-color: -color-gray-400; }
+.bg-gray-500 { -fx-background-color: -color-gray-500; }
+.bg-gray-600 { -fx-background-color: -color-gray-600; }
+.bg-gray-700 { -fx-background-color: -color-gray-700; }
+.bg-gray-800 { -fx-background-color: -color-gray-800; }
+.bg-gray-900 { -fx-background-color: -color-gray-900; }
+
+/* Background - Blue */
+.bg-blue-50 { -fx-background-color: -color-blue-50; }
+.bg-blue-100 { -fx-background-color: -color-blue-100; }
+.bg-blue-200 { -fx-background-color: -color-blue-200; }
+.bg-blue-300 { -fx-background-color: -color-blue-300; }
+.bg-blue-400 { -fx-background-color: -color-blue-400; }
+.bg-blue-500 { -fx-background-color: -color-blue-500; }
+.bg-blue-600 { -fx-background-color: -color-blue-600; }
+.bg-blue-700 { -fx-background-color: -color-blue-700; }
+.bg-blue-800 { -fx-background-color: -color-blue-800; }
+.bg-blue-900 { -fx-background-color: -color-blue-900; }
+
+/* Background - Red */
+.bg-red-50 { -fx-background-color: -color-red-50; }
+.bg-red-100 { -fx-background-color: -color-red-100; }
+.bg-red-200 { -fx-background-color: -color-red-200; }
+.bg-red-300 { -fx-background-color: -color-red-300; }
+.bg-red-400 { -fx-background-color: -color-red-400; }
+.bg-red-500 { -fx-background-color: -color-red-500; }
+.bg-red-600 { -fx-background-color: -color-red-600; }
+.bg-red-700 { -fx-background-color: -color-red-700; }
+.bg-red-800 { -fx-background-color: -color-red-800; }
+.bg-red-900 { -fx-background-color: -color-red-900; }
+
+/* Background - Green */
+.bg-green-50 { -fx-background-color: -color-green-50; }
+.bg-green-100 { -fx-background-color: -color-green-100; }
+.bg-green-200 { -fx-background-color: -color-green-200; }
+.bg-green-300 { -fx-background-color: -color-green-300; }
+.bg-green-400 { -fx-background-color: -color-green-400; }
+.bg-green-500 { -fx-background-color: -color-green-500; }
+.bg-green-600 { -fx-background-color: -color-green-600; }
+.bg-green-700 { -fx-background-color: -color-green-700; }
+.bg-green-800 { -fx-background-color: -color-green-800; }
+.bg-green-900 { -fx-background-color: -color-green-900; }
+
+/* Background - White/Black/Transparent */
+.bg-white { -fx-background-color: -color-white; }
+.bg-black { -fx-background-color: -color-black; }
+.bg-transparent { -fx-background-color: transparent; }
+
+/* =============================================================================
+ * TEXT COLORS
+ * ============================================================================= */
+
+/* Text - Gray */
+.text-gray-50 { -fx-text-fill: -color-gray-50; }
+.text-gray-100 { -fx-text-fill: -color-gray-100; }
+.text-gray-200 { -fx-text-fill: -color-gray-200; }
+.text-gray-300 { -fx-text-fill: -color-gray-300; }
+.text-gray-400 { -fx-text-fill: -color-gray-400; }
+.text-gray-500 { -fx-text-fill: -color-gray-500; }
+.text-gray-600 { -fx-text-fill: -color-gray-600; }
+.text-gray-700 { -fx-text-fill: -color-gray-700; }
+.text-gray-800 { -fx-text-fill: -color-gray-800; }
+.text-gray-900 { -fx-text-fill: -color-gray-900; }
+
+/* Text - Blue */
+.text-blue-50 { -fx-text-fill: -color-blue-50; }
+.text-blue-100 { -fx-text-fill: -color-blue-100; }
+.text-blue-200 { -fx-text-fill: -color-blue-200; }
+.text-blue-300 { -fx-text-fill: -color-blue-300; }
+.text-blue-400 { -fx-text-fill: -color-blue-400; }
+.text-blue-500 { -fx-text-fill: -color-blue-500; }
+.text-blue-600 { -fx-text-fill: -color-blue-600; }
+.text-blue-700 { -fx-text-fill: -color-blue-700; }
+.text-blue-800 { -fx-text-fill: -color-blue-800; }
+.text-blue-900 { -fx-text-fill: -color-blue-900; }
+
+/* Text - Red */
+.text-red-50 { -fx-text-fill: -color-red-50; }
+.text-red-100 { -fx-text-fill: -color-red-100; }
+.text-red-200 { -fx-text-fill: -color-red-200; }
+.text-red-300 { -fx-text-fill: -color-red-300; }
+.text-red-400 { -fx-text-fill: -color-red-400; }
+.text-red-500 { -fx-text-fill: -color-red-500; }
+.text-red-600 { -fx-text-fill: -color-red-600; }
+.text-red-700 { -fx-text-fill: -color-red-700; }
+.text-red-800 { -fx-text-fill: -color-red-800; }
+.text-red-900 { -fx-text-fill: -color-red-900; }
+
+/* Text - Green */
+.text-green-50 { -fx-text-fill: -color-green-50; }
+.text-green-100 { -fx-text-fill: -color-green-100; }
+.text-green-200 { -fx-text-fill: -color-green-200; }
+.text-green-300 { -fx-text-fill: -color-green-300; }
+.text-green-400 { -fx-text-fill: -color-green-400; }
+.text-green-500 { -fx-text-fill: -color-green-500; }
+.text-green-600 { -fx-text-fill: -color-green-600; }
+.text-green-700 { -fx-text-fill: -color-green-700; }
+.text-green-800 { -fx-text-fill: -color-green-800; }
+.text-green-900 { -fx-text-fill: -color-green-900; }
+
+/* Text - White/Black */
+.text-white { -fx-text-fill: -color-white; }
+.text-black { -fx-text-fill: -color-black; }
+
+/* =============================================================================
+ * BORDER COLORS
+ * ============================================================================= */
+
+.border-gray-200 { -fx-border-color: -color-gray-200; }
+.border-gray-300 { -fx-border-color: -color-gray-300; }
+.border-gray-400 { -fx-border-color: -color-gray-400; }
+.border-gray-500 { -fx-border-color: -color-gray-500; }
+
+.border-blue-500 { -fx-border-color: -color-blue-500; }
+.border-blue-600 { -fx-border-color: -color-blue-600; }
+
+.border-red-500 { -fx-border-color: -color-red-500; }
+.border-green-500 { -fx-border-color: -color-green-500; }
+
+.border-transparent { -fx-border-color: transparent; }
+.border-white { -fx-border-color: -color-white; }
+
+/* =============================================================================
+ * BORDER WIDTH
+ * ============================================================================= */
+
+.border-0 { -fx-border-width: 0; }
+.border-1 { -fx-border-width: 1px; }
+.border-2 { -fx-border-width: 2px; }
+.border-3 { -fx-border-width: 3px; }
+.border-4 { -fx-border-width: 4px; }
+.border-8 { -fx-border-width: 8px; }
+
+/* =============================================================================
+ * BORDER RADIUS / ROUNDED
+ * ============================================================================= */
+
+.rounded-none { -fx-background-radius: 0; -fx-border-radius: 0; }
+.rounded-sm { -fx-background-radius: 2px; -fx-border-radius: 2px; }
+.rounded { -fx-background-radius: 4px; -fx-border-radius: 4px; }
+.rounded-md { -fx-background-radius: 6px; -fx-border-radius: 6px; }
+.rounded-lg { -fx-background-radius: 8px; -fx-border-radius: 8px; }
+.rounded-xl { -fx-background-radius: 12px; -fx-border-radius: 12px; }
+.rounded-2xl { -fx-background-radius: 16px; -fx-border-radius: 16px; }
+.rounded-3xl { -fx-background-radius: 24px; -fx-border-radius: 24px; }
+.rounded-full { -fx-background-radius: 9999px; -fx-border-radius: 9999px; }
+
+/* =============================================================================
+ * TYPOGRAPHY - Font Size
+ * ============================================================================= */
+
+.text-xs { -fx-font-size: -font-size-xs; }
+.text-sm { -fx-font-size: -font-size-sm; }
+.text-base { -fx-font-size: -font-size-base; }
+.text-lg { -fx-font-size: -font-size-lg; }
+.text-xl { -fx-font-size: -font-size-xl; }
+.text-2xl { -fx-font-size: -font-size-2xl; }
+.text-3xl { -fx-font-size: -font-size-3xl; }
+.text-4xl { -fx-font-size: -font-size-4xl; }
+.text-5xl { -fx-font-size: -font-size-5xl; }
+
+/* =============================================================================
+ * TYPOGRAPHY - Font Weight
+ * ============================================================================= */
+
+.font-thin { -fx-font-weight: -font-weight-thin; }
+.font-extralight { -fx-font-weight: -font-weight-extralight; }
+.font-light { -fx-font-weight: -font-weight-light; }
+.font-normal { -fx-font-weight: -font-weight-normal; }
+.font-medium { -fx-font-weight: -font-weight-medium; }
+.font-semibold { -fx-font-weight: -font-weight-semibold; }
+.font-bold { -fx-font-weight: -font-weight-bold; }
+.font-extrabold { -fx-font-weight: -font-weight-extrabold; }
+.font-black { -fx-font-weight: -font-weight-black; }
+
+/* =============================================================================
+ * TYPOGRAPHY - Font Family
+ * ============================================================================= */
+
+.font-sans { -fx-font-family: -font-family-sans; }
+.font-serif { -fx-font-family: -font-family-serif; }
+.font-mono { -fx-font-family: -font-family-mono; }
+
+/* =============================================================================
+ * TYPOGRAPHY - Text Alignment
+ * ============================================================================= */
+
+.text-left { -fx-alignment: center-left; }
+.text-center { -fx-alignment: center; }
+.text-right { -fx-alignment: center-right; }
+.text-justify { -fx-text-alignment: justify; }
+
+/* =============================================================================
+ * TYPOGRAPHY - Text Decoration
+ * ============================================================================= */
+
+.underline { -fx-underline: true; }
+.no-underline { -fx-underline: false; }
+.line-through { -fx-strikethrough: true; }
+
+/* =============================================================================
+ * TYPOGRAPHY - Leading (Line Height)
+ * ============================================================================= */
+
+.leading-none { -fx-line-spacing: 0; }
+.leading-tight { -fx-line-spacing: 1.25; }
+.leading-snug { -fx-line-spacing: 1.375; }
+.leading-normal { -fx-line-spacing: 1.5; }
+.leading-relaxed { -fx-line-spacing: 1.625; }
+.leading-loose { -fx-line-spacing: 2; }
+
+/* =============================================================================
+ * TYPOGRAPHY - Letter Spacing (tracking)
+ * ============================================================================= */
+
+.tracking-tighter { -fx-letter-spacing: -0.05em; }
+.tracking-tight { -fx-letter-spacing: -0.025em; }
+.tracking-normal { -fx-letter-spacing: 0; }
+.tracking-wide { -fx-letter-spacing: 0.025em; }
+.tracking-wider { -fx-letter-spacing: 0.05em; }
+.tracking-widest { -fx-letter-spacing: 0.1em; }
+
+/* =============================================================================
+ * TEXT TRANSFORM
+ * ============================================================================= */
+
+.uppercase { -fx-text-transform: uppercase; }
+.lowercase { -fx-text-transform: lowercase; }
+.capitalize { -fx-text-transform: capitalize; }

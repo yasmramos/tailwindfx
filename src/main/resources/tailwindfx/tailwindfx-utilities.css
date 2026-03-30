@@ -1,0 +1,271 @@
+/*
+ * =============================================================================
+ * TAILWINDFX-UTILITIES - Utilidades Layout y Spacing
+ * =============================================================================
+ * 
+ * Clases utilitarias para layout, spacing, sizing y visibilidad.
+ *
+ * DEPENDENCIA: Requiere tailwindfx-base.css cargado primero.
+ *
+ * USO:
+ *   scene.getStylesheets().add("tailwindfx/tailwindfx-base.css");
+ *   scene.getStylesheets().add("tailwindfx/tailwindfx-utilities.css");
+ * =============================================================================
+ */
+
+/* =============================================================================
+ * VISIBILIDAD
+ * ============================================================================= */
+
+.visible { -fx-visibility: visible; }
+.hidden { -fx-visibility: hidden; }
+.invisible { -fx-visibility: hidden; }
+.collapsed { -fx-collapsed: true; }
+
+/* Opacidad */
+.opacity-0 { -fx-opacity: 0; }
+.opacity-5 { -fx-opacity: 0.05; }
+.opacity-10 { -fx-opacity: 0.1; }
+.opacity-20 { -fx-opacity: 0.2; }
+.opacity-25 { -fx-opacity: 0.25; }
+.opacity-30 { -fx-opacity: 0.3; }
+.opacity-40 { -fx-opacity: 0.4; }
+.opacity-50 { -fx-opacity: 0.5; }
+.opacity-60 { -fx-opacity: 0.6; }
+.opacity-70 { -fx-opacity: 0.7; }
+.opacity-75 { -fx-opacity: 0.75; }
+.opacity-80 { -fx-opacity: 0.8; }
+.opacity-90 { -fx-opacity: 0.9; }
+.opacity-95 { -fx-opacity: 0.95; }
+.opacity-100 { -fx-opacity: 1; }
+
+/* =============================================================================
+ * LAYOUT DISPLAY
+ * ============================================================================= */
+
+/* Display type selectors - JavaFX no tiene display:none/block como CSS web */
+/* Usar .hidden o .visible para visibilidad */
+
+/* =============================================================================
+ * SPACING - Padding
+ * ============================================================================= */
+
+/* Padding general */
+.p-0 { -fx-padding: 0px; }
+.p-1 { -fx-padding: 2px; }
+.p-2 { -fx-padding: 4px; }
+.p-3 { -fx-padding: 6px; }
+.p-4 { -fx-padding: 8px; }
+.p-5 { -fx-padding: 10px; }
+.p-6 { -fx-padding: 12px; }
+.p-8 { -fx-padding: 16px; }
+.p-10 { -fx-padding: 20px; }
+.p-12 { -fx-padding: 24px; }
+.p-14 { -fx-padding: 28px; }
+.p-16 { -fx-padding: 32px; }
+.p-20 { -fx-padding: 40px; }
+.p-24 { -fx-padding: 48px; }
+
+/* Padding X (left/right) */
+.px-0 { -fx-padding: 0px 0px; }
+.px-1 { -fx-padding: 0px 2px; }
+.px-2 { -fx-padding: 0px 4px; }
+.px-3 { -fx-padding: 0px 6px; }
+.px-4 { -fx-padding: 0px 8px; }
+.px-5 { -fx-padding: 0px 10px; }
+.px-6 { -fx-padding: 0px 12px; }
+.px-8 { -fx-padding: 0px 16px; }
+.px-10 { -fx-padding: 0px 20px; }
+.px-12 { -fx-padding: 0px 24px; }
+
+/* Padding Y (top/bottom) */
+.py-0 { -fx-padding: 0px 0px; }
+.py-1 { -fx-padding: 2px 0px; }
+.py-2 { -fx-padding: 4px 0px; }
+.py-3 { -fx-padding: 6px 0px; }
+.py-4 { -fx-padding: 8px 0px; }
+.py-5 { -fx-padding: 10px 0px; }
+.py-6 { -fx-padding: 12px 0px; }
+.py-8 { -fx-padding: 16px 0px; }
+.py-10 { -fx-padding: 20px 0px; }
+.py-12 { -fx-padding: 24px 0px; }
+
+/* Padding individual */
+.pt-0 { -fx-padding: 0px 0px 0px 0px; }
+.pt-1 { -fx-padding: 2px 0px 0px 0px; }
+.pt-2 { -fx-padding: 4px 0px 0px 0px; }
+.pt-3 { -fx-padding: 6px 0px 0px 0px; }
+.pt-4 { -fx-padding: 8px 0px 0px 0px; }
+.pr-4 { -fx-padding: 0px 8px 0px 0px; }
+.pb-4 { -fx-padding: 0px 0px 8px 0px; }
+.pl-4 { -fx-padding: 0px 0px 0px 8px; }
+
+/* =============================================================================
+ * SPACING - Margin (usando -fx-padding negativo o translate)
+ * ============================================================================= */
+
+/* JavaFX no soporta márgenes negativos directamente en todos los controles */
+/* Usar -fx-padding negativo en el contenedor o -fx-translate-x/y */
+
+.m-0 { -fx-padding: 0px; }
+.m-1 { -fx-padding: 2px; }
+.m-2 { -fx-padding: 4px; }
+.m-3 { -fx-padding: 6px; }
+.m-4 { -fx-padding: 8px; }
+.m-8 { -fx-padding: 16px; }
+
+/* =============================================================================
+ * GAP (para VBox, HBox, FlowPane)
+ * ============================================================================= */
+
+.gap-0 { -fx-hgap: 0px; -fx-vgap: 0px; }
+.gap-1 { -fx-hgap: 2px; -fx-vgap: 2px; }
+.gap-2 { -fx-hgap: 4px; -fx-vgap: 4px; }
+.gap-3 { -fx-hgap: 6px; -fx-vgap: 6px; }
+.gap-4 { -fx-hgap: 8px; -fx-vgap: 8px; }
+.gap-5 { -fx-hgap: 10px; -fx-vgap: 10px; }
+.gap-6 { -fx-hgap: 12px; -fx-vgap: 12px; }
+.gap-8 { -fx-hgap: 16px; -fx-vgap: 16px; }
+.gap-10 { -fx-hgap: 20px; -fx-vgap: 20px; }
+.gap-12 { -fx-hgap: 24px; -fx-vgap: 24px; }
+
+/* Gap X */
+.gap-x-0 { -fx-hgap: 0px; }
+.gap-x-1 { -fx-hgap: 2px; }
+.gap-x-2 { -fx-hgap: 4px; }
+.gap-x-3 { -fx-hgap: 6px; }
+.gap-x-4 { -fx-hgap: 8px; }
+.gap-x-6 { -fx-hgap: 12px; }
+.gap-x-8 { -fx-hgap: 16px; }
+
+/* Gap Y */
+.gap-y-0 { -fx-vgap: 0px; }
+.gap-y-1 { -fx-vgap: 2px; }
+.gap-y-2 { -fx-vgap: 4px; }
+.gap-y-3 { -fx-vgap: 6px; }
+.gap-y-4 { -fx-vgap: 8px; }
+.gap-y-6 { -fx-vgap: 12px; }
+.gap-y-8 { -fx-vgap: 16px; }
+
+/* =============================================================================
+ * SIZING - Width
+ * ============================================================================= */
+
+.w-auto { -fx-pref-width: USE_PREF_SIZE; }
+.w-full { -fx-pref-width: 100%; }
+.w-min { -fx-pref-width: USE_PREF_SIZE; }
+.w-max { -fx-pref-width: -1; }
+
+.w-0 { -fx-pref-width: 0px; }
+.w-1 { -fx-pref-width: 2px; }
+.w-2 { -fx-pref-width: 4px; }
+.w-4 { -fx-pref-width: 8px; }
+.w-8 { -fx-pref-width: 16px; }
+.w-12 { -fx-pref-width: 24px; }
+.w-16 { -fx-pref-width: 32px; }
+.w-20 { -fx-pref-width: 40px; }
+.w-24 { -fx-pref-width: 48px; }
+.w-32 { -fx-pref-width: 64px; }
+.w-40 { -fx-pref-width: 80px; }
+.w-48 { -fx-pref-width: 96px; }
+.w-56 { -fx-pref-width: 112px; }
+.w-64 { -fx-pref-width: 128px; }
+
+/* Min Width */
+.min-w-0 { -fx-min-width: 0px; }
+.min-w-full { -fx-min-width: 100%; }
+.min-w-max { -fx-min-width: USE_PREF_SIZE; }
+
+/* Max Width */
+.max-w-xs { -fx-max-width: 320px; }
+.max-w-sm { -fx-max-width: 384px; }
+.max-w-md { -fx-max-width: 448px; }
+.max-w-lg { -fx-max-width: 512px; }
+.max-w-xl { -fx-max-width: 576px; }
+.max-w-2xl { -fx-max-width: 672px; }
+.max-w-3xl { -fx-max-width: 768px; }
+.max-w-full { -fx-max-width: 100%; }
+
+/* =============================================================================
+ * SIZING - Height
+ * ============================================================================= */
+
+.h-auto { -fx-pref-height: USE_PREF_SIZE; }
+.h-full { -fx-pref-height: 100%; }
+.h-min { -fx-pref-height: USE_PREF_SIZE; }
+.h-max { -fx-pref-height: -1; }
+
+.h-0 { -fx-pref-height: 0px; }
+.h-1 { -fx-pref-height: 2px; }
+.h-2 { -fx-pref-height: 4px; }
+.h-4 { -fx-pref-height: 8px; }
+.h-8 { -fx-pref-height: 16px; }
+.h-12 { -fx-pref-height: 24px; }
+.h-16 { -fx-pref-height: 32px; }
+.h-20 { -fx-pref-height: 40px; }
+.h-24 { -fx-pref-height: 48px; }
+.h-32 { -fx-pref-height: 64px; }
+.h-40 { -fx-pref-height: 80px; }
+.h-48 { -fx-pref-height: 96px; }
+.h-56 { -fx-pref-height: 112px; }
+.h-64 { -fx-pref-height: 128px; }
+
+/* Min Height */
+.min-h-0 { -fx-min-height: 0px; }
+.min-h-full { -fx-min-height: 100%; }
+.min-h-max { -fx-min-height: USE_PREF_SIZE; }
+
+/* Max Height */
+.max-h-full { -fx-max-height: 100%; }
+.max-h-screen { -fx-max-height: 100vh; }
+
+/* =============================================================================
+ * SIZING - Size (width + height)
+ * ============================================================================= */
+
+.size-4 { -fx-pref-width: 8px; -fx-pref-height: 8px; }
+.size-8 { -fx-pref-width: 16px; -fx-pref-height: 16px; }
+.size-12 { -fx-pref-width: 24px; -fx-pref-height: 24px; }
+.size-16 { -fx-pref-width: 32px; -fx-pref-height: 32px; }
+.size-20 { -fx-pref-width: 40px; -fx-pref-height: 40px; }
+.size-24 { -fx-pref-width: 48px; -fx-pref-height: 48px; }
+.size-32 { -fx-pref-width: 64px; -fx-pref-height: 64px; }
+
+/* =============================================================================
+ * Z-INDEX (orden de apilamiento)
+ * ============================================================================= */
+
+.z-0 { -fx-z-index: 0; }
+.z-10 { -fx-z-index: 10; }
+.z-20 { -fx-z-index: 20; }
+.z-30 { -fx-z-index: 30; }
+.z-40 { -fx-z-index: 40; }
+.z-50 { -fx-z-index: 50; }
+.z-auto { -fx-z-index: auto; }
+
+/* =============================================================================
+ * POSITION (relativo, absoluto - JavaFX usa StackPane para posicionamiento)
+ * ============================================================================= */
+
+.relative { /* Default en JavaFX */ }
+.absolute { -fx-position: absolute; } /* Solo funciona en StackPane */
+
+/* =============================================================================
+ * OVERFLOW
+ * ============================================================================= */
+
+.overflow-visible { -fx-overflow: visible; }
+.overflow-hidden { -fx-overflow: hidden; }
+.overflow-scroll { -fx-overflow: scroll; }
+.overflow-auto { -fx-overflow: auto; }
+
+/* =============================================================================
+ * CURSOR
+ * ============================================================================= */
+
+.cursor-default { -fx-cursor: -cursor-default; }
+.cursor-pointer { -fx-cursor: -cursor-hand; }
+.cursor-text { -fx-cursor: -cursor-text; }
+.cursor-move { -fx-cursor: -cursor-move; }
+.cursor-wait { -fx-cursor: -cursor-wait; }
+.cursor-crosshair { -fx-cursor: -cursor-crosshair; }
