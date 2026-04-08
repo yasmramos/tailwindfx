@@ -217,7 +217,7 @@
 
 /* Max Height */
 .max-h-full { -fx-max-height: 100%; }
-.max-h-screen { -fx-max-height: 100vh; }
+.max-h-screen { -fx-max-height: 100%; }
 
 /* =============================================================================
  * SIZING - Size (width + height)

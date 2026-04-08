@@ -4,10 +4,12 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.RowConstraints;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,6 +90,27 @@ public final class FxGridPane extends Pane {
      */
     public static Builder create() {
         return new Builder();
+    }
+
+    /**
+     * Creates a FxGridPane with the specified gap (convenience method).
+     * 
+     * @param gapPx the gap in pixels for both horizontal and vertical
+     * @return a new FxGridPane instance
+     */
+    public static FxGridPane create(double gapPx) {
+        return new Builder().gap(gapPx).build();
+    }
+
+    /**
+     * Creates a FxGridPane with separate horizontal and vertical gaps (convenience method).
+     * 
+     * @param gapXpx horizontal gap in pixels
+     * @param gapYpx vertical gap in pixels
+     * @return a new FxGridPane instance
+     */
+    public static FxGridPane create(double gapXpx, double gapYpx) {
+        return new Builder().gapX(gapXpx).gapY(gapYpx).build();
     }
 
     public static final class Builder {
@@ -286,6 +309,57 @@ public final class FxGridPane extends Pane {
     }
 
     // =========================================================================
+    // Convenience methods for adding nodes (mimics GridPane API)
+    // =========================================================================
+    /**
+     * Adds a node at the specified column and row position.
+     *
+     * @param child the node to add
+     * @param colIndex the column index
+     * @param rowIndex the row index
+     */
+    public void add(Node child, int colIndex, int rowIndex) {
+        Preconditions.requireNonNull(child, "FxGridPane.add", "child");
+        GridPane.setConstraints(child, colIndex, rowIndex);
+        getChildren().add(child);
+        requestLayout();
+    }
+
+    /**
+     * Adds a node at the specified column and row position with column and row spans.
+     *
+     * @param child the node to add
+     * @param colIndex the column index
+     * @param rowIndex the row index
+     * @param colspan the column span
+     * @param rowspan the row span
+     */
+    public void add(Node child, int colIndex, int rowIndex, int colspan, int rowspan) {
+        Preconditions.requireNonNull(child, "FxGridPane.add", "child");
+        GridPane.setConstraints(child, colIndex, rowIndex, colspan, rowspan, HPos.LEFT, VPos.TOP);
+        getChildren().add(child);
+        requestLayout();
+    }
+
+    /**
+     * Adds a node with column constraints (Priority).
+     *
+     * @param child the node to add
+     * @param colIndex the column index
+     * @param rowIndex the row index
+     * @param hgrow horizontal growth priority
+     * @param vgrow vertical growth priority
+     */
+    public void add(Node child, int colIndex, int rowIndex, Priority hgrow, Priority vgrow) {
+        Preconditions.requireNonNull(child, "FxGridPane.add", "child");
+        GridPane.setConstraints(child, colIndex, rowIndex);
+        GridPane.setHgrow(child, hgrow);
+        GridPane.setVgrow(child, vgrow);
+        getChildren().add(child);
+        requestLayout();
+    }
+
+    // =========================================================================
     // Per-child span
     // =========================================================================
     /**
@@ -414,12 +488,49 @@ public final class FxGridPane extends Pane {
         return gapX;
     }
 
+    /**
+     * Returns the horizontal gap (alias for getGapX).
+     */
+    public double getHgap() {
+        return gapX;
+    }
+
     public double getGapY() {
+        return gapY;
+    }
+
+    /**
+     * Returns the vertical gap (alias for getGapY).
+     */
+    public double getVgap() {
         return gapY;
     }
 
     public AutoFlow getAutoFlow() {
         return autoFlow;
+    }
+
+    // =========================================================================
+    // Column and Row constraints support
+    // =========================================================================
+    private final javafx.collections.ObservableList<ColumnConstraints> columnConstraints
+            = javafx.collections.FXCollections.observableArrayList();
+
+    private final javafx.collections.ObservableList<RowConstraints> rowConstraints
+            = javafx.collections.FXCollections.observableArrayList();
+
+    /**
+     * Returns the observable list of column constraints.
+     */
+    public javafx.collections.ObservableList<ColumnConstraints> getColumnConstraints() {
+        return columnConstraints;
+    }
+
+    /**
+     * Returns the observable list of row constraints.
+     */
+    public javafx.collections.ObservableList<RowConstraints> getRowConstraints() {
+        return rowConstraints;
     }
 
     // =========================================================================

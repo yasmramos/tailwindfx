@@ -172,29 +172,29 @@
  * TYPOGRAPHY - Font Size
  * ============================================================================= */
 
-.text-xs { -fx-font-size: -font-size-xs; }
-.text-sm { -fx-font-size: -font-size-sm; }
-.text-base { -fx-font-size: -font-size-base; }
-.text-lg { -fx-font-size: -font-size-lg; }
-.text-xl { -fx-font-size: -font-size-xl; }
-.text-2xl { -fx-font-size: -font-size-2xl; }
-.text-3xl { -fx-font-size: -font-size-3xl; }
-.text-4xl { -fx-font-size: -font-size-4xl; }
-.text-5xl { -fx-font-size: -font-size-5xl; }
+.text-xs { -fx-font-size: 0.75em; }
+.text-sm { -fx-font-size: 0.875em; }
+.text-base { -fx-font-size: 1em; }
+.text-lg { -fx-font-size: 1.125em; }
+.text-xl { -fx-font-size: 1.25em; }
+.text-2xl { -fx-font-size: 1.5em; }
+.text-3xl { -fx-font-size: 1.875em; }
+.text-4xl { -fx-font-size: 2.25em; }
+.text-5xl { -fx-font-size: 3em; }
 
 /* =============================================================================
  * TYPOGRAPHY - Font Weight
  * ============================================================================= */
 
-.font-thin { -fx-font-weight: -font-weight-thin; }
-.font-extralight { -fx-font-weight: -font-weight-extralight; }
-.font-light { -fx-font-weight: -font-weight-light; }
-.font-normal { -fx-font-weight: -font-weight-normal; }
-.font-medium { -fx-font-weight: -font-weight-medium; }
-.font-semibold { -fx-font-weight: -font-weight-semibold; }
-.font-bold { -fx-font-weight: -font-weight-bold; }
-.font-extrabold { -fx-font-weight: -font-weight-extrabold; }
-.font-black { -fx-font-weight: -font-weight-black; }
+.font-thin { -fx-font-weight: 100; }
+.font-extralight { -fx-font-weight: 200; }
+.font-light { -fx-font-weight: 300; }
+.font-normal { -fx-font-weight: 400; }
+.font-medium { -fx-font-weight: 500; }
+.font-semibold { -fx-font-weight: 600; }
+.font-bold { -fx-font-weight: 700; }
+.font-extrabold { -fx-font-weight: 800; }
+.font-black { -fx-font-weight: 900; }
 
 /* =============================================================================
  * TYPOGRAPHY - Font Family

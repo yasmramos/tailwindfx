@@ -220,6 +220,8 @@ public final class StyleToken {
             case "gap-y"      -> new String[]{"gap", "y"};
             case "translate-x"-> new String[]{"translate", "x"};
             case "translate-y"-> new String[]{"translate", "y"};
+            case "skew-x"    -> new String[]{"skew", "x"};
+            case "skew-y"    -> new String[]{"skew", "y"};
             case "scale-x"    -> new String[]{"scale", "x"};
             case "scale-y"    -> new String[]{"scale", "y"};
             case "scroll-m"   -> new String[]{"scroll", "m"};

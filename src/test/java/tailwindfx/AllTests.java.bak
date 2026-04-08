@@ -1,0 +1,59 @@
+package tailwindfx;
+
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
+import org.junit.platform.suite.api.IncludeClassNamePatterns;
+
+/**
+ * Comprehensive Test Suite for TailwindFX.
+ * 
+ * This suite runs all unit tests including the newly added tests:
+ * - TailwindFXMainTest: Main entry point functionality
+ * - StyleTokenExtendedTest: Extended style token parsing
+ * - FxGridPaneTest: GridPane layout tests
+ * - ThemeScopeManagerTest: Theme scoping tests
+ * - JitCompilerExtendedTest: Extended JIT compiler tests
+ * - CssUtilitiesTest: CSS utilities validation
+ * 
+ * Run this suite to verify all CSS fixes and functionality.
+ */
+@Suite
+@SelectClasses({
+    // Core functionality tests
+    TailwindFXMainTest.class,
+    JitCompilerExtendedTest.class,
+    StyleTokenExtendedTest.class,
+    CssUtilitiesTest.class,
+    
+    // Layout tests
+    FxGridPaneTest.class,
+    FxFlexPaneTest.class,
+    FxLayoutTest.class,
+    
+    // Theme and styling tests
+    ThemeScopeManagerTest.class,
+    ThemeManagerTest.class,
+    ColorPaletteTest.class,
+    StylesTest.class,
+    
+    // Component tests
+    ComponentFactoryTest.class,
+    FxDataTableTest.class,
+    ResponsiveNodeTest.class,
+    
+    // Utility tests
+    StyleMergerTest.class,
+    StyleTokenTest.class,
+    JitCompilerTest.class,
+    PreconditionsTest.class,
+    AnimationUtilTest.class,
+    BreakpointManagerTest.class,
+    TailwindFXMetricsTest.class,
+    UtilityConflictResolverTest.class,
+    StylePerfTest.class,
+    TailwindFXIntegrationTest.class
+})
+@IncludeClassNamePatterns(".*Test")
+public class AllTests {
+    // This class is only a test suite container - no implementation needed
+}
