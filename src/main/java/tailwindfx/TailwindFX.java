@@ -160,60 +160,148 @@ public final class TailwindFX {
     }
 
     // =========================================================================
-    // CSS Classes — from stylesheet
+    // Unified Apply — Intelligent detection of CSS classes vs JIT tokens
     // =========================================================================
 
     /**
-     * Applies one or more CSS utility classes from the stylesheet to a node.
+     * Applies utility classes and JIT tokens to a node with intelligent auto-detection.
      *
-     * <p>Conflict resolution is automatic: calling {@code apply(node, "w-4")} and then
-     * {@code apply(node, "w-8")} leaves only {@code w-8} on the node — the previous
-     * class in the same category is removed.
+     * <p><b>UNIFIED API</b> — This method automatically detects:
+     * <ul>
+     * <li>CSS classes from stylesheet (e.g., {@code "btn-primary", "rounded-lg"})</li>
+     * <li>JIT tokens with opacity (e.g., {@code "bg-blue-500/80"})</li>
+     * <li>JIT tokens with negative values (e.g., {@code "-translate-x-4"})</li>
+     * <li>JIT tokens with arbitrary values (e.g., {@code "w-[320px]", "p-[13px]"})</li>
+     * </ul>
      *
-     * <p>Accepts varargs or space-separated strings:
+     * <p>Conflict resolution is automatic for CSS classes. JIT tokens are applied
+     * as inline styles and merged non-destructively with existing styles.
+     *
+     * <h3>Usage Examples</h3>
      * <pre>
+     * // Pure CSS classes
      * TailwindFX.apply(button, "btn-primary", "rounded-lg");
-     * TailwindFX.apply(button, "btn-primary rounded-lg");
+     *
+     * // Mixed CSS + JIT (auto-detected)
+     * TailwindFX.apply(card, "card", "shadow-md", "bg-blue-500/80", "p-[13px]");
+     *
+     * // JIT with arbitrary values
+     * TailwindFX.apply(node, "w-[320px]", "-translate-x-4", "rotate-[45deg]");
+     *
+     * // Space-separated strings work too
+     * TailwindFX.apply(button, "btn-primary rounded-lg bg-blue-500/80");
      * </pre>
      *
+     * <h3>Detection Logic</h3>
+     * <p>A token is treated as JIT if it contains:
+     * <ul>
+     * <li>Opacity slash: {@code "bg-blue-500/80"}</li>
+     * <li>Arbitrary value brackets: {@code "w-[320px]"}</li>
+     * <li>Leading minus: {@code "-translate-x-4"}</li>
+     * </ul>
+     * Otherwise, it's treated as a CSS class.
+     *
      * @param node    the JavaFX node to style
-     * @param classes one or more utility class names (space-separated or varargs)
-     * @see #applyRaw(Node, String...)
-     * @see #jit(Node, String...)
+     * @param tokens  one or more utility classes or JIT tokens (space-separated or varargs)
      */
-    public static void apply(Node node, String... classes) {
+    public static void apply(Node node, String... tokens) {
         Preconditions.requireNode(node, "TailwindFX.apply");
-        if (classes == null || classes.length == 0) return;
+        if (tokens == null || tokens.length == 0) return;
+        
         if (StylePerf.isBatchActive()) {
-            StylePerf.enqueueDeferredApply(node, classes);
+            StylePerf.enqueueDeferredApply(node, tokens);
         } else {
-            UtilityConflictResolver.applyAll(node, classes);
-            TailwindFXMetrics.instance().recordApply(classes.length);
+            applyInternal(node, tokens);
         }
+    }
+
+    /**
+     * Internal unified application logic.
+     * Separates tokens into CSS classes and JIT tokens, then applies both.
+     */
+    private static void applyInternal(Node node, String... tokens) {
+        java.util.List<String> cssClasses = new java.util.ArrayList<>();
+        java.util.List<String> jitTokens = new java.util.ArrayList<>();
+        
+        // Split and categorize tokens
+        for (String token : tokens) {
+            if (token == null || token.isBlank()) continue;
+            
+            // Handle space-separated tokens
+            for (String t : token.split("\\s+")) {
+                if (t.isBlank()) continue;
+                
+                if (isJitToken(t)) {
+                    jitTokens.add(t);
+                } else {
+                    cssClasses.add(t);
+                }
+            }
+        }
+        
+        // Apply CSS classes with conflict resolution
+        if (!cssClasses.isEmpty()) {
+            UtilityConflictResolver.applyAll(node, cssClasses.toArray(new String[0]));
+            TailwindFXMetrics.instance().recordApply(cssClasses.size());
+        }
+        
+        // Apply JIT tokens as inline styles
+        if (!jitTokens.isEmpty()) {
+            StyleMerger.applyJit(node, jitTokens.toArray(new String[0]));
+        }
+    }
+
+    /**
+     * Detects if a token should be compiled as JIT.
+     * Returns true for tokens with: opacity (/), arbitrary values ([]), or negatives (-)
+     */
+    private static boolean isJitToken(String token) {
+        // Fast path checks
+        if (token.contains("/")) return true;  // opacity: bg-blue-500/80
+        if (token.contains("[")) return true;  // arbitrary: w-[320px]
+        if (token.startsWith("-")) return true; // negative: -translate-x-4
+        
+        // Check for numeric patterns that indicate JIT (e.g., custom scale values)
+        // This catches edge cases like "rotate-45" vs "rotate" (CSS class)
+        return token.matches(".*\\d+.*") && 
+               (token.contains("-") && Character.isDigit(token.charAt(token.lastIndexOf("-") + 1)));
     }
 
     /**
      * Applies utility classes only if they differ from the last applied state
      * (StyleDiff). Skips the resolver entirely on a cache hit.
      *
+     * <p><b>Note:</b> This method works with both CSS classes and JIT tokens.
+     * Auto-detection is applied just like {@link #apply(Node, String...)}.
+     *
      * <pre>
-     * TailwindFX.applyDiff(button, "btn-primary rounded-lg");
-     * TailwindFX.applyDiff(button, "btn-primary rounded-lg"); // no-op
+     * TailwindFX.applyDiff(button, "btn-primary", "rounded-lg");
+     * TailwindFX.applyDiff(button, "btn-primary", "rounded-lg"); // no-op (cache hit)
+     * 
+     * // Works with JIT too
+     * TailwindFX.applyDiff(card, "shadow-md", "bg-blue-500/80"); // applied
+     * TailwindFX.applyDiff(card, "shadow-md", "bg-blue-500/80"); // skipped
      * </pre>
      *
      * @param node    the node to style
-     * @param classes utility classes to apply
-     * @return {@code true} if classes were applied, {@code false} if skipped (no change)
+     * @param tokens  utility classes or JIT tokens to apply
+     * @return {@code true} if styles were applied, {@code false} if skipped (no change)
      */
-    public static boolean applyDiff(Node node, String... classes) {
-        return StylePerf.apply(node, classes);
+    public static boolean applyDiff(Node node, String... tokens) {
+        return StylePerf.apply(node, tokens);
     }
 
     /**
-     * Aplica utility classes SIN resolver conflictos.
-     * Usar cuando quieres acumular clases deliberadamente.
-     * @param node
-     * @param classes
+     * Applies utility classes WITHOUT conflict resolution.
+     * Use when you want to accumulate classes deliberately.
+     * 
+     * <p><b>Warning:</b> This is a low-level method. Most users should use
+     * {@link #apply(Node, String...)} which handles conflicts automatically.
+     * 
+     * <p>This method only works with CSS classes, not JIT tokens.
+     * 
+     * @param node    the node to style
+     * @param classes CSS class names (JIT tokens will be ignored)
      */
     public static void applyRaw(Node node, String... classes) {
         for (String c : classes) {
@@ -243,31 +331,45 @@ public final class TailwindFX {
     }
 
     // =========================================================================
-    // JIT — Tokens with /alpha, negatives, and arbitrary [value]
+    // Legacy JIT methods — Now deprecated, use apply() instead
     // =========================================================================
 
     /**
-     * Applies JIT tokens as inline style (non-destructive with previous styles).
-     *
-     * Supports syntax that CSS classes cannot:
-     *   TailwindFX.jit(node, "bg-blue-500/80")     // color with opacity
-     *   TailwindFX.jit(node, "-translate-x-4")     // negative
-     *   TailwindFX.jit(node, "w-[320px]")          // arbitrary value
-     *   TailwindFX.jit(node, "p-[13px]", "bg-[#ff6600]", "opacity-[0.65]")
-     *   TailwindFX.jit(node, "rotate-[45deg]")
+     * @deprecated Use {@link #apply(Node, String...)} instead.
+     * The unified apply() method now auto-detects JIT tokens.
+     * 
+     * <p>This method is kept for backward compatibility but will be removed in v5.0.
+     * 
+     * <pre>
+     * // Old way:
+     * TailwindFX.jit(node, "bg-blue-500/80", "p-[13px]");
+     * 
+     * // New way (recommended):
+     * TailwindFX.apply(node, "bg-blue-500/80", "p-[13px]");
+     * </pre>
      */
+    @Deprecated(since = "4.4.0", forRemoval = true)
     public static void jit(Node node, String... tokens) {
-        StyleMerger.applyJit(node, tokens);
+        apply(node, tokens);
     }
 
     /**
-     * Combina apply() y jit() en una sola llamada.
-     * Detecta automáticamente qué tokens van como CSS class y cuáles como inline JIT.
-     *
-     *   TailwindFX.jitApply(node, "btn-primary", "bg-blue-500/80", "p-[13px]", "rounded-lg");
+     * @deprecated Use {@link #apply(Node, String...)} instead.
+     * The unified apply() method now auto-detects JIT tokens.
+     * 
+     * <p>This method is kept for backward compatibility but will be removed in v5.0.
+     * 
+     * <pre>
+     * // Old way:
+     * TailwindFX.jitApply(node, "btn-primary", "bg-blue-500/80", "rounded-lg");
+     * 
+     * // New way (recommended):
+     * TailwindFX.apply(node, "btn-primary", "bg-blue-500/80", "rounded-lg");
+     * </pre>
      */
+    @Deprecated(since = "4.4.0", forRemoval = true)
     public static void jitApply(Node node, String... tokens) {
-        StyleMerger.applyJit(node, tokens);
+        apply(node, tokens);
     }
 
     /**
