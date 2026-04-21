@@ -44,21 +44,27 @@ public final class ThemeManager {
     // =========================================================================
     private record ThemeVars(
             String base, String innerBg, String bg,
-            String accent, String focus, String faintFocus, String defaultBtn
-            ) {
+            String accent, String focus, String faintFocus, String defaultBtn) {
 
     }
 
     private static final Map<String, ThemeVars> PRESETS = new LinkedHashMap<>();
 
     static {
-        PRESETS.put("light", new ThemeVars("#ececec", "#f5f5f5", "#f9f9f9", "#0096C9", "#039ED3", "#039ED322", "#ABD8ED"));
-        PRESETS.put("dark", new ThemeVars("#2b2b2b", "#1e1e1e", "#161616", "#3b82f6", "#60a5fa", "rgba(96,165,250,0.15)", "#1e3a8a"));
-        PRESETS.put("blue", new ThemeVars("#dbeafe", "#e0ecff", "#f0f7ff", "#2563eb", "#3b82f6", "rgba(59,130,246,0.2)", "#93c5fd"));
-        PRESETS.put("green", new ThemeVars("#dcfce7", "#e0fbe9", "#f0fdf4", "#16a34a", "#22c55e", "rgba(34,197,94,0.2)", "#86efac"));
-        PRESETS.put("purple", new ThemeVars("#ede9fe", "#f0ecff", "#f9f7ff", "#7c3aed", "#8b5cf6", "rgba(139,92,246,0.2)", "#c4b5fd"));
-        PRESETS.put("rose", new ThemeVars("#ffe4e6", "#ffe8ea", "#fff5f6", "#e11d48", "#f43f5e", "rgba(244,63,94,0.2)", "#fda4af"));
-        PRESETS.put("slate", new ThemeVars("#e2e8f0", "#eaf0f6", "#f1f5f9", "#475569", "#64748b", "rgba(100,116,139,0.2)", "#94a3b8"));
+        PRESETS.put("light",
+                new ThemeVars("#ececec", "#f5f5f5", "#f9f9f9", "#0096C9", "#039ED3", "#039ED322", "#ABD8ED"));
+        PRESETS.put("dark", new ThemeVars("#2b2b2b", "#1e1e1e", "#161616", "#3b82f6", "#60a5fa",
+                "rgba(96,165,250,0.15)", "#1e3a8a"));
+        PRESETS.put("blue", new ThemeVars("#dbeafe", "#e0ecff", "#f0f7ff", "#2563eb", "#3b82f6", "rgba(59,130,246,0.2)",
+                "#93c5fd"));
+        PRESETS.put("green",
+                new ThemeVars("#dcfce7", "#e0fbe9", "#f0fdf4", "#16a34a", "#22c55e", "rgba(34,197,94,0.2)", "#86efac"));
+        PRESETS.put("purple", new ThemeVars("#ede9fe", "#f0ecff", "#f9f7ff", "#7c3aed", "#8b5cf6",
+                "rgba(139,92,246,0.2)", "#c4b5fd"));
+        PRESETS.put("rose",
+                new ThemeVars("#ffe4e6", "#ffe8ea", "#fff5f6", "#e11d48", "#f43f5e", "rgba(244,63,94,0.2)", "#fda4af"));
+        PRESETS.put("slate", new ThemeVars("#e2e8f0", "#eaf0f6", "#f1f5f9", "#475569", "#64748b",
+                "rgba(100,116,139,0.2)", "#94a3b8"));
     }
 
     /**
@@ -195,7 +201,8 @@ public final class ThemeManager {
      */
     public void apply() {
         if (vars.isEmpty()) {
-            Preconditions.LOG.warning("ThemeManager.apply: ninguna variable definida — usa preset() o base()/accent() antes de apply()");
+            Preconditions.LOG.warning(
+                    "ThemeManager.apply: ninguna variable definida — usa preset() o base()/accent() antes de apply()");
             return;
         }
 
@@ -212,11 +219,11 @@ public final class ThemeManager {
         } else {
             target.setStyle(newStyle);
         }
-        
+
         // CRITICAL FIX 1: Force style refresh on all descendant nodes
         // JavaFX caches computed styles, so we need to invalidate the cache
         forceStyleRefresh(target);
-        
+
         TailwindFXMetrics.instance().recordThemeSwitch();
 
         // Gestionar clase .dark
@@ -225,7 +232,7 @@ public final class ThemeManager {
         if (isDark) {
             target.getStyleClass().add("dark");
         }
-        
+
         // CRITICAL FIX 2: Apply theme to Stage window chrome (title bar, borders)
         if (scene != null && scene.getWindow() instanceof javafx.stage.Stage stage) {
             applyToStage(stage, isDark);
@@ -235,7 +242,8 @@ public final class ThemeManager {
     /**
      * Aplica el tema a un nodo específico (scope externo)
      * 
-     * <p>Forces style refresh on the scoped node tree.
+     * <p>
+     * Forces style refresh on the scoped node tree.
      */
     public void applyTo(Node node) {
         if (vars.isEmpty()) {
@@ -243,10 +251,10 @@ public final class ThemeManager {
         }
         String style = buildStyleString();
         node.setStyle(style);
-        
+
         // CRITICAL FIX: Force style refresh on scoped subtree
         forceStyleRefresh(node);
-        
+
         boolean isDark = isColorDark(vars.getOrDefault("-fx-base", "#ececec"));
         node.getStyleClass().remove("dark");
         if (isDark) {
@@ -334,8 +342,7 @@ public final class ThemeManager {
                         new KeyValue(target.opacityProperty(), 0.85, Interpolator.EASE_BOTH)),
                 new KeyFrame(Duration.millis(animDurationMs / 2.0 + 1), e -> target.setStyle(newStyle)),
                 new KeyFrame(Duration.millis(animDurationMs),
-                        new KeyValue(target.opacityProperty(), 1.0, Interpolator.EASE_BOTH))
-        );
+                        new KeyValue(target.opacityProperty(), 1.0, Interpolator.EASE_BOTH)));
         tl.play();
     }
 
@@ -367,8 +374,8 @@ public final class ThemeManager {
      * </pre>
      *
      * @param scene Scene cuyo tema guardar
-     * @param key clave única (ej: "myapp.theme"). Se recomienda usar el nombre
-     * de la app.
+     * @param key   clave única (ej: "myapp.theme"). Se recomienda usar el nombre
+     *              de la app.
      */
     public static void saveTheme(Scene scene, String key) {
         Preconditions.requireNonNull(scene, "ThemeManager.saveTheme", "scene");
@@ -390,13 +397,15 @@ public final class ThemeManager {
 
     /**
      * Restaura un tema guardado previamente con {@link #saveTheme}.
+     * 
      * <pre>
      * boolean loaded = ThemeManager.loadTheme(scene, "myapp.mainWindow");
-     * if (!loaded) ThemeManager.of(scene).preset("dark").apply(); // fallback
+     * if (!loaded)
+     *     ThemeManager.of(scene).preset("dark").apply(); // fallback
      * </pre>
      *
      * @param scene Scene a la que aplicar el tema
-     * @param key clave usada en {@link #saveTheme}
+     * @param key   clave usada en {@link #saveTheme}
      * @return {@code true} si se encontró y aplicó el tema guardado
      */
     public static boolean loadTheme(Scene scene, String key) {
@@ -412,10 +421,10 @@ public final class ThemeManager {
             Platform.runLater(() -> {
                 if (scene.getRoot() != null) {
                     scene.getRoot().setStyle(style);
-                    
+
                     // CRITICAL FIX: Force style refresh
                     forceStyleRefresh(scene.getRoot());
-                    
+
                     if (dark) {
                         if (!scene.getRoot().getStyleClass().contains("dark")) {
                             scene.getRoot().getStyleClass().add("dark");
@@ -423,7 +432,7 @@ public final class ThemeManager {
                     } else {
                         scene.getRoot().getStyleClass().remove("dark");
                     }
-                    
+
                     // Apply to Stage if available
                     if (scene.getWindow() instanceof javafx.stage.Stage stage) {
                         applyToStage(stage, dark);
@@ -457,37 +466,45 @@ public final class ThemeManager {
     // =========================================================================
     // CRITICAL FIX: Force style refresh helpers
     // =========================================================================
-    
+
     /**
      * Forces a complete style refresh on a node and all its descendants.
      * 
-     * <p>JavaFX caches computed styles for performance. When theme variables change,
-     * we need to invalidate this cache to ensure all components pick up the new values.
+     * <p>
+     * JavaFX caches computed styles for performance. When theme variables change,
+     * we need to invalidate this cache to ensure all components pick up the new
+     * values.
      * 
-     * <p>This method:
+     * <p>
+     * This method:
      * <ol>
      * <li>Triggers applyCss() on the node tree (forces style recalculation)</li>
-     * <li>Requests layout on all nodes (ensures proper sizing with new styles)</li>
-     * <li>Schedules a second pass on next frame (catches lazy-loaded components)</li>
+     * <li>Requests layout on Parent nodes (ensures proper sizing with new
+     * styles)</li>
+     * <li>Schedules a second pass on next frame (catches lazy-loaded
+     * components)</li>
      * </ol>
      */
     private static void forceStyleRefresh(Node root) {
-        if (root == null) return;
-        
+        if (root == null)
+            return;
+
         // Pass 1: Immediate refresh
         root.applyCss();
-        root.requestLayout();
-        
+        if (root instanceof javafx.scene.Parent) {
+            ((javafx.scene.Parent) root).requestLayout();
+        }
+
         // Refresh all descendants
         refreshDescendants(root);
-        
+
         // Pass 2: Deferred refresh (catches components that load lazily)
         Platform.runLater(() -> {
             root.applyCss();
             refreshDescendants(root);
         });
     }
-    
+
     /**
      * Recursively applies CSS and requests layout on all descendant nodes.
      */
@@ -495,26 +512,31 @@ public final class ThemeManager {
         if (node instanceof javafx.scene.Parent parent) {
             for (Node child : parent.getChildrenUnmodifiable()) {
                 child.applyCss();
-                child.requestLayout();
+                if (child instanceof javafx.scene.Parent) {
+                    ((javafx.scene.Parent) child).requestLayout();
+                }
                 refreshDescendants(child);
             }
         }
     }
-    
+
     /**
      * Applies theme styling to the Stage window chrome (title bar, borders).
      * 
-     * <p>On macOS and Windows, JavaFX allows styling the native window decorations.
+     * <p>
+     * On macOS and Windows, JavaFX allows styling the native window decorations.
      * This method applies appropriate styling based on the theme mode.
      * 
-     * <p>Note: This only works when the Stage is showing and uses native decorations.
+     * <p>
+     * Note: This only works when the Stage is showing and uses native decorations.
      * 
-     * @param stage the Stage to style
+     * @param stage  the Stage to style
      * @param isDark whether the current theme is dark mode
      */
     private static void applyToStage(javafx.stage.Stage stage, boolean isDark) {
-        if (stage == null || !stage.isShowing()) return;
-        
+        if (stage == null || !stage.isShowing())
+            return;
+
         try {
             // Apply user-agent stylesheet to the Scene
             // This ensures the Stage picks up the theme variables
@@ -522,7 +544,7 @@ public final class ThemeManager {
             if (scene != null) {
                 // Force a full style recalculation on the scene
                 scene.getRoot().applyCss();
-                
+
                 // On some platforms, we can hint the OS about the theme preference
                 // This affects the native window chrome (title bar, borders)
                 if (isDark) {
