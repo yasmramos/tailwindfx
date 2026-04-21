@@ -111,7 +111,7 @@ public class MyApp extends Application {
 TailwindFX.apply(node, "p-4", "bg-white", "rounded-lg", "shadow-md");
 
 // JIT — arbitrary values compiled at runtime:
-TailwindFX.jit(node, "bg-blue-500/80", "p-[13px]", "drop-shadow-[#3b82f6]");
+TailwindFX.apply(node, "bg-blue-500/80", "p-[13px]", "drop-shadow-[#3b82f6]");
 
 // No conflict-resolution (accumulate intentionally):
 TailwindFX.applyRaw(node, "w-4", "w-8");  // both stay
@@ -302,43 +302,6 @@ java -cp . tailwindfx.FxFlexPaneTest
 
 # All suites including FX-thread tests:
 java -cp . tailwindfx.TestRunner
-```
-
----
-
-## Project structure
-
-```
-src/
-├── tailwindfx/
-│   ├── TailwindFX.java          Main entry point
-│   ├── Styles.java              Java APIs for CSS-unsupported features
-│   ├── FxFlexPane.java          Flexbox layout container
-│   ├── FxGridPane.java          Grid-template-areas layout
-│   ├── FxLayout.java            Builder for HBox/VBox/GridPane
-│   ├── FxDataTable.java         Sortable/filterable/paginated table
-│   ├── ComponentFactory.java    High-level component builders
-│   ├── AnimationUtil.java       Animations + hover effects
-│   ├── ResponsiveNode.java      Per-node responsive rules
-│   ├── BreakpointManager.java   Scene-level breakpoints
-│   ├── ThemeManager.java        Theme presets + persistence
-│   ├── ThemeScopeManager.java   Scoped themes
-│   ├── JitCompiler.java         JIT token compiler
-│   ├── StylePerf.java           Batch + style diffing
-│   ├── TailwindFXMetrics.java   Runtime metrics + alerts
-│   ├── UtilityConflictResolver.java  Deterministic conflict resolution
-│   ├── ColorPalette.java        209 Tailwind colors
-│   ├── StyleToken.java          JIT token parser
-│   ├── StyleMerger.java         Non-destructive inline style merge
-│   ├── Preconditions.java       Validation guards
-│   ├── package-info.java        Package Javadoc
-│   ├── module-info.java         Java module descriptor
-│   ├── TailwindFXExample.java   Demo application
-│   └── *Test.java               Test suites (no JUnit required)
-├── tailwindfx.css               12 300+ lines, 1 400+ utility classes
-pom.xml                          Maven build file
-README.md
-CHANGELOG.md
 ```
 
 ---
