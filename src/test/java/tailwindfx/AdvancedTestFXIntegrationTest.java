@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.testfx.api.FxAssert.verifyThat;
 import static org.testfx.matcher.base.NodeMatchers.*;
 import static org.testfx.matcher.control.LabeledMatchers.*;
+import static org.testfx.matcher.control.LabeledMatchers.hasText;
 import static org.testfx.matcher.control.TextInputControlMatchers.*;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -59,12 +60,12 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
         void testSingleClick() {
             Button btn = new Button("Click Me");
             TailwindFX.apply(btn, "btn-primary");
-            
+
             AtomicBoolean clicked = new AtomicBoolean(false);
             btn.setOnAction(e -> clicked.set(true));
-            
+
             interact(() -> root.getChildren().add(btn));
-            
+
             clickOn("Click Me");
             assertTrue(clicked.get(), "Button should have been clicked");
         }
@@ -74,15 +75,15 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
         void testDoubleClick() {
             Button btn = new Button("Double Click");
             AtomicInteger clickCount = new AtomicInteger(0);
-            
+
             btn.setOnMouseClicked(e -> {
                 if (e.getClickCount() == 2) {
                     clickCount.incrementAndGet();
                 }
             });
-            
+
             interact(() -> root.getChildren().add(btn));
-            
+
             doubleClickOn("Double Click");
             assertEquals(1, clickCount.get());
         }
@@ -93,22 +94,21 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
             Button btn1 = new Button("First");
             Button btn2 = new Button("Second");
             Button btn3 = new Button("Third");
-            
+
             AtomicInteger counter = new AtomicInteger(0);
             btn1.setOnAction(e -> counter.set(1));
             btn2.setOnAction(e -> counter.set(2));
             btn3.setOnAction(e -> counter.set(3));
-            
+
             interact(() -> root.getChildren().addAll(
-                new HBox(btn1, btn2, btn3)
-            ));
-            
+                    new HBox(btn1, btn2, btn3)));
+
             clickOn("First");
             assertEquals(1, counter.get());
-            
+
             clickOn("Second");
             assertEquals(2, counter.get());
-            
+
             clickOn("Third");
             assertEquals(3, counter.get());
         }
@@ -123,12 +123,12 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
         void testTyping() {
             TextField field = new TextField();
             TailwindFX.apply(field, "input");
-            
+
             interact(() -> root.getChildren().add(field));
-            
+
             clickOn(field);
             write("Hello World");
-            
+
             assertEquals("Hello World", field.getText());
         }
 
@@ -137,13 +137,13 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
         void testClearAndReplace() {
             TextField field = new TextField();
             field.setText("Initial");
-            
+
             interact(() -> root.getChildren().add(field));
-            
+
             clickOn(field);
             field.clear();
             write("New Value");
-            
+
             assertEquals("New Value", field.getText());
         }
 
@@ -154,17 +154,16 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
             field1.setId("field1");
             TextField field2 = new TextField();
             field2.setId("field2");
-            
+
             interact(() -> root.getChildren().addAll(
-                new VBox(field1, field2)
-            ));
-            
+                    new VBox(field1, field2)));
+
             clickOn("#field1");
             write("First");
-            
+
             clickOn("#field2");
             write("Second");
-            
+
             assertEquals("First", field1.getText());
             assertEquals("Second", field2.getText());
         }
@@ -174,10 +173,11 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
         void testPromptText() {
             TextField field = new TextField();
             field.setPromptText("Enter your name");
-            
+
             interact(() -> root.getChildren().add(field));
 
-            verifyThat(lookup(TextField.class).queryAs(TextField.class), TextInputControlMatchers.hasPromptText("Enter your name"));
+            // Verificar directamente el promptText del TextField
+            assertEquals("Enter your name", field.getPromptText());
         }
     }
 
@@ -190,9 +190,9 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
         void testFindByCssSelector() {
             Label label = new Label("Target");
             label.getStyleClass().add("target-class");
-            
+
             interact(() -> root.getChildren().add(label));
-            
+
             verifyThat(".target-class", isNotNull());
             verifyThat(".target-class", LabeledMatchers.hasText("Target"));
         }
@@ -202,9 +202,9 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
         void testFindById() {
             Label label = new Label("ID Target");
             label.setId("my-label-id");
-            
+
             interact(() -> root.getChildren().add(label));
-            
+
             verifyThat("#my-label-id", isNotNull());
             verifyThat("#my-label-id", LabeledMatchers.hasText("ID Target"));
         }
@@ -214,11 +214,13 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
         void testVerifyProperties() {
             Button btn = new Button("Test Button");
             btn.setDisable(false);
-            
+
             interact(() -> root.getChildren().add(btn));
-            
-            verifyThat(lookup(Button.class).queryAs(Button.class), (b) -> !b.isDisabled());
-            verifyThat(lookup(Button.class).queryAs(Button.class), LabeledMatchers.hasText("Test Button"));
+
+            // Use text-based lookup instead of class-based lookup to match TestFX FxRobot
+            // API
+            verifyThat("Test Button", (Node n) -> !((Button) n).isDisabled());
+            verifyThat("Test Button", LabeledMatchers.hasText("Test Button"));
         }
 
         @Test
@@ -229,8 +231,8 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
                 label.getStyleClass().add("item");
                 interact(() -> root.getChildren().add(label));
             }
-            
-            long count = lookupAll(".item").size();
+
+            long count = lookup(".item").queryAll().size();
             assertEquals(5, count);
         }
     }
@@ -244,16 +246,16 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
         void testHover() {
             Label label = new Label("Hover Me");
             AtomicBoolean hovered = new AtomicBoolean(false);
-            
+
             label.setOnMouseEntered(e -> hovered.set(true));
             label.setOnMouseExited(e -> hovered.set(false));
-            
+
             interact(() -> root.getChildren().add(label));
-            
-            moveMouseTo(label);
+
+            moveTo(label); // Cambiar moveMouseTo por moveTo
             // Give time for hover event to process
-            interact(() -> {});
-            
+            sleep(100); // Pequeña pausa para que se procese el evento
+
             assertTrue(hovered.get(), "Hover should be triggered");
         }
 
@@ -262,22 +264,21 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
         void testMoveBetweenNodes() {
             Label label1 = new Label("First");
             Label label2 = new Label("Second");
-            
+
             AtomicReference<Node> hoveredNode = new AtomicReference<>();
-            
+
             label1.setOnMouseEntered(e -> hoveredNode.set(label1));
             label2.setOnMouseEntered(e -> hoveredNode.set(label2));
-            
+
             interact(() -> root.getChildren().addAll(
-                new VBox(label1, label2)
-            ));
-            
-            moveMouseTo(label1);
-            interact(() -> {});
+                    new VBox(label1, label2)));
+
+            moveTo(label1);
+            sleep(100);
             assertEquals(label1, hoveredNode.get());
-            
-            moveMouseTo(label2);
-            interact(() -> {});
+
+            moveTo(label2);
+            sleep(100);
             assertEquals(label2, hoveredNode.get());
         }
     }
@@ -292,37 +293,37 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
             TextField nameField = new TextField();
             nameField.setId("name");
             nameField.setPromptText("Your Name");
-            
+
             TextField emailField = new TextField();
             emailField.setId("email");
             emailField.setPromptText("Your Email");
-            
+
             Button submitBtn = new Button("Submit");
             TailwindFX.apply(submitBtn, "btn-primary");
-            
+
             AtomicBoolean submitted = new AtomicBoolean(false);
             submitBtn.setOnAction(e -> {
                 if (!nameField.getText().isEmpty() && !emailField.getText().isEmpty()) {
                     submitted.set(true);
                 }
             });
-            
+
             interact(() -> {
                 VBox form = new VBox(10, nameField, emailField, submitBtn);
                 TailwindFX.apply(form, "p-4", "gap-2");
                 root.getChildren().add(form);
             });
-            
+
             // Fill form
             clickOn("#name");
             write("John Doe");
-            
+
             clickOn("#email");
             write("john@example.com");
-            
+
             // Submit
             clickOn("Submit");
-            
+
             assertTrue(submitted.get(), "Form should be submitted");
         }
 
@@ -334,19 +335,18 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
             TextField field2 = new TextField();
             field2.setId("field2");
             Button btn = new Button("Go");
-            
+
             interact(() -> root.getChildren().addAll(
-                new VBox(field1, field2, btn)
-            ));
-            
+                    new VBox(field1, field2, btn)));
+
             clickOn("#field1");
             write("First");
-            
+
             // Tab to next field
             press(KeyCode.TAB);
             release(KeyCode.TAB);
             write("Second");
-            
+
             assertEquals("First", field1.getText());
             assertEquals("Second", field2.getText());
         }
@@ -360,10 +360,10 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
         @DisplayName("Should create and interact with avatar component")
         void testAvatarComponent() {
             StackPane avatar = ComponentFactory.avatar("JD", "blue", 48);
-            
+
             interact(() -> root.getChildren().add(avatar));
-            
-            verifyThat(lookup(StackPane.class).queryAs(StackPane.class), isNotNull());
+
+            verifyThat(lookup(".stack-pane").queryAs(StackPane.class), isNotNull());
             clickOn(avatar);
         }
 
@@ -371,10 +371,10 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
         @DisplayName("Should create and verify badge component")
         void testBadgeComponent() {
             Label badge = ComponentFactory.badge("New", "green");
-            
+
             interact(() -> root.getChildren().add(badge));
-            
-            verifyThat(Label.class, hasText("NEW"));
+
+            verifyThat(lookup(".label").queryAs(Label.class), hasText("NEW"));
         }
 
         @Test
@@ -383,16 +383,16 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
             Button actionBtn = new Button("Action");
             AtomicBoolean actionClicked = new AtomicBoolean(false);
             actionBtn.setOnAction(e -> actionClicked.set(true));
-            
+
             VBox card = ComponentFactory.card()
-                .body(new Label("Card Content"))
-                .build();
-            
+                    .body(new Label("Card Content"))
+                    .build();
+
             interact(() -> {
                 card.getChildren().add(actionBtn);
                 root.getChildren().add(card);
             });
-            
+
             clickOn("Action");
             assertTrue(actionClicked.get());
         }
