@@ -688,6 +688,19 @@ public final class FxGridPane extends Pane {
             double cy = oy + colHeights[shortestCol];
             child.resizeRelocate(cx, cy, cellW, childPrefH);
             colHeights[shortestCol] += childPrefH + gapY;
+
+            // CRITICAL FIX: Add height listener to invalidate layout when child content changes
+            // This ensures the masonry layout adapts when nodes grow/shrink dynamically
+            if (child instanceof Region region) {
+                // Remove any existing listener first to avoid duplicates
+                region.heightProperty().removeListener((obs, old, newVal) -> requestLayout());
+                // Add new listener
+                region.heightProperty().addListener((obs, old, newVal) -> {
+                    if (old.doubleValue() != newVal.doubleValue()) {
+                        requestLayout();
+                    }
+                });
+            }
         }
     }
 
