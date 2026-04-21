@@ -85,7 +85,6 @@
                         ${jacoco.argLine}
                         --add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
                         --add-opens javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
-                        --enable-preview
                     </argLine>
                     <systemPropertyVariables>
                         <testfx.robot>glass</testfx.robot>
@@ -177,7 +176,7 @@
                             <source>17</source>
                             <target>17</target>
                             <compilerArgs>
-                                <arg>--enable-preview</arg>
+                                
                             </compilerArgs>
                         </configuration>
                     </plugin>
