@@ -1,11 +1,13 @@
 package tailwindfx;
 
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.testfx.framework.junit5.ApplicationTest;
@@ -25,6 +27,15 @@ import static org.testfx.matcher.control.TextInputControlMatchers.*;
  */
 @DisplayName("ComponentFactory Tests with TestFX")
 class ComponentFactoryTest extends ApplicationTest {
+
+    private Scene scene;
+    private StackPane root;
+
+    @BeforeEach
+    void setUp() {
+        root = new StackPane();
+        scene = new Scene(root, 800, 600);
+    }
 
     @Nested
     @DisplayName("Avatar Component")
@@ -58,7 +69,7 @@ class ComponentFactoryTest extends ApplicationTest {
             });
             
             // Verify avatar is displayed
-            verifyThat(StackPane.class, hasMinimumSize(64, 64));
+            verifyThat(lookup(StackPane.class).queryAs(StackPane.class), hasMinimumSize(64, 64));
         }
 
         @Test
@@ -73,7 +84,7 @@ class ComponentFactoryTest extends ApplicationTest {
             });
             
             // Verify avatar contains the initials
-            verifyThat(Label.class, hasText("XY"));
+            verifyThat(lookup(Label.class).queryAs(Label.class), LabeledMatchers.hasText("XY"));
         }
     }
 
@@ -93,7 +104,7 @@ class ComponentFactoryTest extends ApplicationTest {
                 root.getChildren().add(badge);
             });
             
-            verifyThat(Label.class, hasText("NEW"));
+            verifyThat(lookup(Label.class).queryAs(Label.class), LabeledMatchers.hasText("NEW"));
             verifyThat(".badge", hasStyleClass("badge"));
         }
 
@@ -111,8 +122,8 @@ class ComponentFactoryTest extends ApplicationTest {
             });
             
             // Verify badges are visible
-            verifyThat(Label.class, (n) -> n.getText().equals("ERROR")).exists();
-            verifyThat(Label.class, (n) -> n.getText().equals("SUCCESS")).exists();
+            verifyThat(lookup(Label.class).queryAs(Label.class), (n) -> n.getText().equals("ERROR"));
+            verifyThat(lookup(Label.class).queryAs(Label.class), (n) -> n.getText().equals("SUCCESS"));
         }
     }
 
@@ -131,7 +142,7 @@ class ComponentFactoryTest extends ApplicationTest {
                 root.getChildren().add(card);
             });
             
-            verifyThat(VBox.class, isNotNull());
+            verifyThat(lookup(VBox.class).queryAs(VBox.class), isNotNull());
             verifyThat(".card", hasStyleClass("card"));
         }
 
@@ -149,7 +160,7 @@ class ComponentFactoryTest extends ApplicationTest {
             });
             
             // Verify card contains the label with text
-            verifyThat(Label.class, hasText("Test"));
+            verifyThat(lookup(Label.class).queryAs(Label.class), LabeledMatchers.hasText("Test"));
         }
     }
 
@@ -171,7 +182,7 @@ class ComponentFactoryTest extends ApplicationTest {
             });
             
             // Verify button is visible with correct text
-            verifyThat(Button.class, hasText("Save"));
+            verifyThat(lookup(Button.class).queryAs(Button.class), LabeledMatchers.hasText("Save"));
             verifyThat(".btn-primary", hasStyleClass("btn-primary"));
             
             // Test click interaction
@@ -190,7 +201,7 @@ class ComponentFactoryTest extends ApplicationTest {
                 root.getChildren().add(btn);
             });
             
-            verifyThat(Button.class, hasText("Cancel"));
+            verifyThat(lookup(Button.class).queryAs(Button.class), LabeledMatchers.hasText("Cancel"));
             verifyThat(".btn-secondary", hasStyleClass("btn-secondary"));
         }
 
@@ -213,9 +224,9 @@ class ComponentFactoryTest extends ApplicationTest {
             });
             
             // Verify all buttons are visible
-            verifyThat(Button.class, (n) -> n.getText().equals("Primary")).exists();
-            verifyThat(Button.class, (n) -> n.getText().equals("Secondary")).exists();
-            verifyThat(Button.class, (n) -> n.getText().equals("Delete")).exists();
+            verifyThat(lookup(Button.class).queryAs(Button.class), (n) -> n.getText().equals("Primary"));
+            verifyThat(lookup(Button.class).queryAs(Button.class), (n) -> n.getText().equals("Secondary"));
+            verifyThat(lookup(Button.class).queryAs(Button.class), (n) -> n.getText().equals("Delete"));
             
             // Test click interactions
             clickOn("Primary");
@@ -243,7 +254,7 @@ class ComponentFactoryTest extends ApplicationTest {
             });
             
             // Verify text field is visible with prompt
-            verifyThat(TextField.class, hasPromptText("Enter text..."));
+            verifyThat(lookup(TextField.class).queryAs(TextField.class), hasPromptText("Enter text..."));
             verifyThat(".input", hasStyleClass("input"));
             
             // Test text input interaction
@@ -294,7 +305,7 @@ class ComponentFactoryTest extends ApplicationTest {
             });
             
             // Verify modal is visible with content
-            verifyThat(Label.class, hasText("Content"));
+            verifyThat(lookup(Label.class).queryAs(Label.class), LabeledMatchers.hasText("Content"));
         }
 
         @Test
@@ -337,7 +348,7 @@ class ComponentFactoryTest extends ApplicationTest {
             });
             
             // Verify label is visible
-            verifyThat(Label.class, hasText("Hover me"));
+            verifyThat(lookup(Label.class).queryAs(Label.class), LabeledMatchers.hasText("Hover me"));
             
             // Simulate hover to show tooltip
             moveMouseTo(label);
@@ -363,7 +374,7 @@ class ComponentFactoryTest extends ApplicationTest {
             });
             
             // Verify drawer is visible
-            verifyThat(StackPane.class, isNotNull());
+            verifyThat(lookup(StackPane.class).queryAs(StackPane.class), isNotNull());
             
             // Test drawer interactions - simulate open/close
             // (actual implementation may vary)
