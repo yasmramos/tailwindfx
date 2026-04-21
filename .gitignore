@@ -21,4 +21,6 @@ htmlcov/
 
 # Test reports
 test-results/
+.settings/
+.qwen/
 ```
