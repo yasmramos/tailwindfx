@@ -1,26 +1,4 @@
 ```
-# Dependencies
-target/
-
-# IDE files
-.vscode/
-.idea/
-
-# Logs
-*.log
-
-# Environment
-.env
-.env.local
-*.env.*
-
-# Coverage reports
-coverage/
-htmlcov/
-.coverage
-
-# Test reports
-test-results/
-.settings/
-.qwen/
+# GitHub issue templates
+.github/ISSUE_TEMPLATE/
 ```
