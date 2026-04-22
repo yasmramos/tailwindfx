@@ -7,7 +7,8 @@
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>21</maven.compiler.release>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <exec.mainClass>tailwindfx.TailwindFXExample</exec.mainClass>
         <javafx.version>21</javafx.version>
         <junit.version>5.10.2</junit.version>
@@ -172,38 +173,14 @@
                     <source>21</source>
                     <target>21</target>
                     <compilerArgs>
-                        
+                        --enable-preview
                     </compilerArgs>
                 </configuration>
             </plugin>
         </plugins>
     </build>
 
-    <!-- Compiler plugin with preview features enabled -->
-    <profiles>
-        <profile>
-            <id>preview-features</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.11.0</version>
-                        <configuration>
-                            <source>21</source>
-                            <target>21</target>
-                            <compilerArgs>
-                                
-                            </compilerArgs>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+
 
     <reporting>
         <plugins>
