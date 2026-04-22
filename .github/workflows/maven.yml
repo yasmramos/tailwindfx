@@ -21,7 +21,7 @@ jobs:
         cache: maven
         
     - name: Build with Maven
-      run: mvn -B package --file pom.xml -Dmaven.compiler.args="--enable-preview"
+      run: mvn -B package --file pom.xml
       
     - name: Run tests
-      run: mvn test -Dmaven.compiler.args="--enable-preview"
+      run: mvn test
