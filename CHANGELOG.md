@@ -5,7 +5,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [4.3.0] — 2026-03-19
+## [Unreleased] - 1.0-SNAPSHOT
 
 ### Added
 - **Tailwind v4.1 CSS utilities** — `overflow-wrap`, `word-break`, `whitespace` classes
@@ -100,7 +100,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **`ThemeManager`** — save/load/delete theme persistence via `java.util.prefs.Preferences`
 - **`ThemeScopeManager`** — scoped themes for any Pane subtree
 - **`AnimationUtil`** — 14 animations, FxAnimation fluent API, AnimationRegistry, ResponsiveAnimationGuard
-- **`TailwindFX.Config`** — unit, breakpoints, debug, warnOnNoParent
+- **`TailwindFX.Config`** — unit, breakpoints, debug, warnOnParent
 - **`TailwindFX.watch()`** — hot-reload CSS in development
 - **`TailwindFX.debugReport()`** — runtime node inspection
 - CSS: 11 900+ lines, 1 400+ utility classes
