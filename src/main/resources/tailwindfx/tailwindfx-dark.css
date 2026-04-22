@@ -1,0 +1,769 @@
+/*
+ * =============================================================================
+ * TAILWINDFX-DARK - Modo Oscuro
+ * =============================================================================
+ * 
+ * Variantes de modo oscuro para todos los componentes.
+ * Activar agregando la clase .dark al root de la escena.
+ *
+ * DEPENDENCIA: Requiere tailwindfx-base.css y tailwindfx-components.css
+ *
+ * USO:
+ *   scene.getStylesheets().add("tailwindfx/tailwindfx-base.css");
+ *   scene.getStylesheets().add("tailwindfx/tailwindfx-components.css");
+ *   scene.getStylesheets().add("tailwindfx/tailwindfx-dark.css");
+ *   
+ *   // Activar modo oscuro:
+ *   root.getStyleClass().add("dark");
+ *   // O usar: TailwindFX.theme(scene).dark().apply();
+ * =============================================================================
+ */
+
+/* =============================================================================
+ * DARK MODE ROOT
+ * ============================================================================= */
+
+.dark {
+    /* Override de variables para modo oscuro */
+    -fx-base: #2b2b2b;
+    -fx-background: #1e1e1e;
+    -fx-control-inner-background: #2d2d2d;
+    -fx-accent: #3b82f6;
+    -fx-default-button: #1e3a8a;
+}
+
+/* =============================================================================
+ * DARK MODE - Fondos Generales
+ * ============================================================================= */
+
+.dark Scene {
+    -fx-background-color: #1a1a1a;
+}
+
+.dark .root {
+    -fx-background-color: #1a1a1a;
+}
+
+/* =============================================================================
+ * DARK MODE - Paneles
+ * ============================================================================= */
+
+.dark Pane,
+.dark AnchorPane,
+.dark BorderPane,
+.dark FlowPane,
+.dark GridPane,
+.dark HBox,
+.dark VBox,
+.dark StackPane,
+.dark Group {
+    -fx-background-color: transparent;
+}
+
+/* =============================================================================
+ * DARK MODE - Label
+ * ============================================================================= */
+
+.dark Label {
+    -fx-text-fill: -color-gray-300;
+}
+
+.dark .text-muted {
+    -fx-text-fill: -color-gray-500;
+}
+
+/* =============================================================================
+ * DARK MODE - Button
+ * ============================================================================= */
+
+.dark Button {
+    -fx-background-color: #3b82f6;
+    -fx-text-fill: #ffffff;
+}
+
+.dark Button:hover {
+    -fx-background-color: #2563eb;
+}
+
+.dark Button:pressed {
+    -fx-background-color: #1d4ed8;
+}
+
+.dark Button:disabled {
+    -fx-background-color: #404040;
+    -fx-text-fill: #666666;
+}
+
+.dark .btn-secondary {
+    -fx-background-color: #404040;
+    -fx-text-fill: #e5e5e5;
+    -fx-border-color: #525252;
+}
+
+.dark .btn-secondary:hover {
+    -fx-background-color: #525252;
+}
+
+.dark .btn-ghost {
+    -fx-text-fill: #d4d4d4;
+}
+
+.dark .btn-ghost:hover {
+    -fx-background-color: #262626;
+}
+
+.dark .btn-outline {
+    -fx-text-fill: #60a5fa;
+    -fx-border-color: #3b82f6;
+}
+
+.dark .btn-outline:hover {
+    -fx-background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* =============================================================================
+ * DARK MODE - TextField, TextArea, PasswordField
+ * ============================================================================= */
+
+.dark TextField,
+.dark TextArea,
+.dark PasswordField {
+    -fx-background-color: #262626;
+    -fx-border-color: #404040;
+    -fx-text-fill: #e5e5e5;
+    -fx-prompt-text-fill: #737373;
+}
+
+.dark TextField:focused,
+.dark TextArea:focused,
+.dark PasswordField:focused {
+    -fx-border-color: #3b82f6;
+}
+
+.dark TextField:disabled,
+.dark TextArea:disabled,
+.dark PasswordField:disabled {
+    -fx-background-color: #1a1a1a;
+    -fx-text-fill: #525252;
+}
+
+.dark .input-error {
+    -fx-border-color: #ef4444;
+}
+
+.dark .input-success {
+    -fx-border-color: #22c55e;
+}
+
+.dark .input-warning {
+    -fx-border-color: #f59e0b;
+}
+
+/* =============================================================================
+ * DARK MODE - ComboBox, ChoiceBox
+ * ============================================================================= */
+
+.dark ComboBox,
+.dark ChoiceBox {
+    -fx-background-color: #262626;
+    -fx-border-color: #404040;
+}
+
+.dark ComboBox:focused,
+.dark ChoiceBox:focused {
+    -fx-border-color: #3b82f6;
+}
+
+.dark ComboBox .arrow {
+    -fx-background-color: #a3a3a3;
+}
+
+.dark ComboBox .list-cell {
+    -fx-background-color: #262626;
+    -fx-text-fill: #e5e5e5;
+}
+
+.dark ComboBox .list-cell:hover {
+    -fx-background-color: #404040;
+}
+
+/* =============================================================================
+ * DARK MODE - CheckBox, RadioButton
+ * ============================================================================= */
+
+.dark CheckBox,
+.dark RadioButton {
+    -fx-text-fill: #d4d4d4;
+}
+
+.dark CheckBox .box,
+.dark RadioButton .radio {
+    -fx-background-color: #262626;
+    -fx-border-color: #525252;
+}
+
+.dark CheckBox:selected .box,
+.dark RadioButton:selected .radio {
+    -fx-background-color: #3b82f6;
+    -fx-border-color: #3b82f6;
+}
+
+/* =============================================================================
+ * DARK MODE - Slider
+ * ============================================================================= */
+
+.dark Slider .track {
+    -fx-background-color: #404040;
+}
+
+.dark Slider .thumb {
+    -fx-background-color: #262626;
+    -fx-border-color: #3b82f6;
+}
+
+.dark Slider .thumb:hover {
+    -fx-background-color: #404040;
+}
+
+.dark Slider .fill {
+    -fx-background-color: #3b82f6;
+}
+
+/* =============================================================================
+ * DARK MODE - ProgressBar, ProgressIndicator
+ * ============================================================================= */
+
+.dark ProgressBar {
+    -fx-background-color: #404040;
+}
+
+.dark ProgressBar .bar {
+    -fx-background-color: #3b82f6;
+}
+
+.dark ProgressIndicator {
+    -fx-progress-color: #3b82f6;
+}
+
+/* =============================================================================
+ * DARK MODE - ScrollBar
+ * ============================================================================= */
+
+.dark ScrollBar .track {
+    -fx-background-color: #262626;
+}
+
+.dark ScrollBar .thumb {
+    -fx-background-color: #525252;
+}
+
+.dark ScrollBar .thumb:hover {
+    -fx-background-color: #737373;
+}
+
+.dark ScrollBar .thumb:pressed {
+    -fx-background-color: #a3a3a3;
+}
+
+/* =============================================================================
+ * DARK MODE - ListView, TableView, TreeView
+ * ============================================================================= */
+
+.dark ListView,
+.dark TableView,
+.dark TreeView {
+    -fx-background-color: #262626;
+    -fx-border-color: #404040;
+}
+
+.dark ListView .list-cell,
+.dark TreeView .tree-cell {
+    -fx-background-color: #262626;
+    -fx-text-fill: #e5e5e5;
+}
+
+.dark ListView .list-cell:hover,
+.dark TreeView .tree-cell:hover {
+    -fx-background-color: #404040;
+}
+
+.dark ListView .list-cell:selected,
+.dark TreeView .tree-cell:selected {
+    -fx-background-color: rgba(59, 130, 246, 0.2);
+    -fx-text-fill: #93c5fd;
+}
+
+.dark TableView .column-header {
+    -fx-background-color: #1a1a1a;
+    -fx-text-fill: #d4d4d4;
+}
+
+.dark TableView .table-cell {
+    -fx-text-fill: #e5e5e5;
+}
+
+.dark TableView .table-row-cell:hover {
+    -fx-background-color: #404040;
+}
+
+.dark TableView .table-row-cell:selected {
+    -fx-background-color: rgba(59, 130, 246, 0.2);
+}
+
+/* =============================================================================
+ * DARK MODE - TabPane
+ * ============================================================================= */
+
+.dark TabPane {
+    -fx-background-color: #1a1a1a;
+}
+
+.dark TabPane .tab {
+    -fx-background-color: #262626;
+    -fx-text-fill: #a3a3a3;
+}
+
+.dark TabPane .tab:hover {
+    -fx-background-color: #404040;
+}
+
+.dark TabPane .tab:selected {
+    -fx-background-color: #1a1a1a;
+    -fx-text-fill: #60a5fa;
+    -fx-border-color: #404040;
+}
+
+.dark TabPane .tab-header-area {
+    -fx-background-color: #262626;
+}
+
+/* =============================================================================
+ * DARK MODE - MenuBar, ContextMenu
+ * ============================================================================= */
+
+.dark MenuBar {
+    -fx-background-color: #1a1a1a;
+    -fx-border-color: #404040;
+}
+
+.dark MenuBar .menu {
+    -fx-text-fill: #e5e5e5;
+}
+
+.dark MenuBar .menu:hover {
+    -fx-background-color: #404040;
+}
+
+.dark ContextMenu {
+    -fx-background-color: #262626;
+    -fx-border-color: #404040;
+}
+
+.dark MenuItem .label {
+    -fx-text-fill: #e5e5e5;
+}
+
+.dark MenuItem:hover {
+    -fx-background-color: #404040;
+}
+
+/* =============================================================================
+ * DARK MODE - Tooltip
+ * ============================================================================= */
+
+.dark Tooltip {
+    -fx-background-color: #404040;
+    -fx-text-fill: #e5e5e5;
+}
+
+/* =============================================================================
+ * DARK MODE - Separator
+ * ============================================================================= */
+
+.dark Separator {
+    -fx-background-color: #404040;
+}
+
+/* =============================================================================
+ * DARK MODE - ToolBar
+ * ============================================================================= */
+
+.dark ToolBar {
+    -fx-background-color: #1a1a1a;
+    -fx-border-color: #404040;
+}
+
+/* =============================================================================
+ * DARK MODE - ToggleButton
+ * ============================================================================= */
+
+.dark ToggleButton {
+    -fx-background-color: #262626;
+    -fx-border-color: #525252;
+    -fx-text-fill: #e5e5e5;
+}
+
+.dark ToggleButton:selected {
+    -fx-background-color: #3b82f6;
+    -fx-border-color: #3b82f6;
+    -fx-text-fill: #ffffff;
+}
+
+.dark ToggleButton:hover {
+    -fx-background-color: #404040;
+}
+
+.dark ToggleButton:selected:hover {
+    -fx-background-color: #2563eb;
+}
+
+/* =============================================================================
+ * DARK MODE - TitledPane, Accordion
+ * ============================================================================= */
+
+.dark TitledPane {
+    -fx-background-color: #1a1a1a;
+    -fx-border-color: #404040;
+}
+
+.dark TitledPane .title {
+    -fx-background-color: #262626;
+    -fx-text-fill: #e5e5e5;
+}
+
+.dark TitledPane:expanded .title {
+    -fx-background-color: #404040;
+}
+
+.dark Accordion {
+    -fx-background-color: #1a1a1a;
+    -fx-border-color: #404040;
+}
+
+/* =============================================================================
+ * DARK MODE - Card
+ * ============================================================================= */
+
+.dark .card {
+    -fx-background-color: #262626;
+    -fx-border-color: #404040;
+}
+
+/* =============================================================================
+ * DARK MODE - Additional Components
+ * ============================================================================= */
+
+.dark .badge {
+    -fx-background-color: #404040;
+    -fx-text-fill: #e5e5e5;
+}
+
+.dark .badge-primary {
+    -fx-background-color: #3b82f6;
+    -fx-text-fill: #ffffff;
+}
+
+.dark .badge-secondary {
+    -fx-background-color: #525252;
+    -fx-text-fill: #e5e5e5;
+}
+
+.dark .badge-success {
+    -fx-background-color: #22c55e;
+    -fx-text-fill: #ffffff;
+}
+
+.dark .badge-warning {
+    -fx-background-color: #f59e0b;
+    -fx-text-fill: #ffffff;
+}
+
+.dark .badge-error {
+    -fx-background-color: #ef4444;
+    -fx-text-fill: #ffffff;
+}
+
+/* Dark mode for all color families in badges */
+.dark .badge-slate { -fx-background-color: #64748b; -fx-text-fill: #ffffff; }
+.dark .badge-orange { -fx-background-color: #ea580c; -fx-text-fill: #ffffff; }
+.dark .badge-amber { -fx-background-color: #d97706; -fx-text-fill: #ffffff; }
+.dark .badge-lime { -fx-background-color: #65a30d; -fx-text-fill: #ffffff; }
+.dark .badge-emerald { -fx-background-color: #059669; -fx-text-fill: #ffffff; }
+.dark .badge-teal { -fx-background-color: #0d9488; -fx-text-fill: #ffffff; }
+.dark .badge-cyan { -fx-background-color: #0891b2; -fx-text-fill: #ffffff; }
+.dark .badge-sky { -fx-background-color: #0284c7; -fx-text-fill: #ffffff; }
+.dark .badge-indigo { -fx-background-color: #6366f1; -fx-text-fill: #ffffff; }
+.dark .badge-violet { -fx-background-color: #8b5cf6; -fx-text-fill: #ffffff; }
+.dark .badge-purple { -fx-background-color: #a855f7; -fx-text-fill: #ffffff; }
+.dark .badge-fuchsia { -fx-background-color: #c026d3; -fx-text-fill: #ffffff; }
+.dark .badge-pink { -fx-background-color: #db2777; -fx-text-fill: #ffffff; }
+.dark .badge-rose { -fx-background-color: #e11d48; -fx-text-fill: #ffffff; }
+
+/* Dark mode for alerts */
+.dark .alert {
+    -fx-background-color: #262626;
+    -fx-border-color: #404040;
+    -fx-text-fill: #e5e5e5;
+}
+
+.dark .alert-success {
+    -fx-background-color: rgba(34, 197, 94, 0.1);
+    -fx-border-color: #22c55e;
+    -fx-text-fill: #86efac;
+}
+
+.dark .alert-warning {
+    -fx-background-color: rgba(245, 158, 11, 0.1);
+    -fx-border-color: #f59e0b;
+    -fx-text-fill: #fcd34d;
+}
+
+.dark .alert-error {
+    -fx-background-color: rgba(239, 68, 68, 0.1);
+    -fx-border-color: #ef4444;
+    -fx-text-fill: #fca5a5;
+}
+
+/* Dark mode for modals */
+.dark .modal {
+    -fx-background-color: #262626;
+    -fx-border-color: #404040;
+}
+
+/* Dark mode for focus rings */
+.dark .focus\:ring:focused {
+    -fx-effect: dropshadow(gaussian, #3b82f6, 4, 0.5, 0, 0);
+}
+
+.dark .focus\:ring-blue:focused {
+    -fx-effect: dropshadow(gaussian, #3b82f6, 4, 0.5, 0, 0);
+}
+
+.dark .focus\:ring-red:focused {
+    -fx-effect: dropshadow(gaussian, #ef4444, 4, 0.5, 0, 0);
+}
+
+.dark .card-title {
+    -fx-text-fill: #f5f5f5;
+}
+
+.dark .card-header {
+    -fx-border-color: #404040;
+}
+
+.dark .card-footer {
+    -fx-border-color: #404040;
+}
+
+/* =============================================================================
+ * DARK MODE - Badge
+ * ============================================================================= */
+
+.dark .badge {
+    -fx-background-color: #404040;
+    -fx-text-fill: #e5e5e5;
+}
+
+.dark .badge-blue {
+    -fx-background-color: rgba(59, 130, 246, 0.2);
+    -fx-text-fill: #93c5fd;
+}
+
+.dark .badge-green {
+    -fx-background-color: rgba(34, 197, 94, 0.2);
+    -fx-text-fill: #86efac;
+}
+
+.dark .badge-red {
+    -fx-background-color: rgba(239, 68, 68, 0.2);
+    -fx-text-fill: #fca5a5;
+}
+
+.dark .badge-yellow {
+    -fx-background-color: rgba(245, 158, 11, 0.2);
+    -fx-text-fill: #fcd34d;
+}
+
+.dark .badge-purple {
+    -fx-background-color: rgba(168, 85, 247, 0.2);
+    -fx-text-fill: #d8b4fe;
+}
+
+/* =============================================================================
+ * DARK MODE - Alert
+ * ============================================================================= */
+
+.dark .alert-info {
+    -fx-background-color: rgba(59, 130, 246, 0.1);
+    -fx-border-color: rgba(59, 130, 246, 0.3);
+    -fx-text-fill: #93c5fd;
+}
+
+.dark .alert-success {
+    -fx-background-color: rgba(34, 197, 94, 0.1);
+    -fx-border-color: rgba(34, 197, 94, 0.3);
+    -fx-text-fill: #86efac;
+}
+
+.dark .alert-warning {
+    -fx-background-color: rgba(245, 158, 11, 0.1);
+    -fx-border-color: rgba(245, 158, 11, 0.3);
+    -fx-text-fill: #fcd34d;
+}
+
+.dark .alert-error {
+    -fx-background-color: rgba(239, 68, 68, 0.1);
+    -fx-border-color: rgba(239, 68, 68, 0.3);
+    -fx-text-fill: #fca5a5;
+}
+
+/* =============================================================================
+ * DARK MODE - Modal
+ * ============================================================================= */
+
+.dark .modal {
+    -fx-background-color: #262626;
+    -fx-border-color: #404040;
+}
+
+.dark .modal-header {
+    -fx-text-fill: #f5f5f5;
+}
+
+.dark .modal-body {
+    -fx-text-fill: #d4d4d4;
+}
+
+/* =============================================================================
+ * DARK MODE - Toast
+ * ============================================================================= */
+
+.dark .toast {
+    -fx-background-color: #262626;
+    -fx-border-color: #404040;
+    -fx-text-fill: #e5e5e5;
+}
+
+/* =============================================================================
+ * DARK MODE - Avatar
+ * ============================================================================= */
+
+.dark .avatar {
+    -fx-background-color: #525252;
+}
+
+.dark .avatar-group .avatar {
+    -fx-border-color: #262626;
+}
+
+/* =============================================================================
+ * DARK MODE - Divider
+ * ============================================================================= */
+
+.dark .divider {
+    -fx-background-color: #404040;
+}
+
+.dark .divider-vertical {
+    -fx-background-color: #404040;
+}
+
+/* =============================================================================
+ * DARK MODE - Skeleton
+ * ============================================================================= */
+
+.dark .skeleton,
+.dark .skeleton-text,
+.dark .skeleton-title,
+.dark .skeleton-circle,
+.dark .skeleton-wave {
+    -fx-background-color: #404040;
+}
+
+/* =============================================================================
+ * DARK MODE - Glassmorphism
+ * ============================================================================= */
+
+.dark .glass {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .glass-dark {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+}
+
+/* =============================================================================
+ * DARK MODE - Neumorphism
+ * ============================================================================= */
+
+.dark .neumorph {
+    -fx-background-color: #262626;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 8, 0, -4, -4),
+                dropshadow(gaussian, rgba(255, 255, 255, 0.05), 8, 0, 4, 4);
+}
+
+.dark .neumorph-pressed {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 4, 0, 2, 2),
+                dropshadow(gaussian, rgba(255, 255, 255, 0.05), 4, 0, -2, -2);
+}
+
+/* =============================================================================
+ * DARK MODE - Progress
+ * ============================================================================= */
+
+.dark .progress {
+    -fx-background-color: #404040;
+}
+
+/* =============================================================================
+ * DARK MODE - Hyperlink
+ * ============================================================================= */
+
+.dark Hyperlink {
+    -fx-text-fill: #60a5fa;
+}
+
+.dark Hyperlink:hover {
+    -fx-text-fill: #93c5fd;
+}
+
+/* =============================================================================
+ * DARK MODE - ColorPicker, DatePicker
+ * ============================================================================= */
+
+.dark ColorPicker,
+.dark DatePicker {
+    -fx-background-color: #262626;
+    -fx-border-color: #404040;
+}
+
+.dark ColorPicker:focused,
+.dark DatePicker:focused {
+    -fx-border-color: #3b82f6;
+}
+
+/* =============================================================================
+ * DARK MODE - Pagination
+ * ============================================================================= */
+
+.dark Pagination {
+    -fx-background-color: transparent;
+}
+
+.dark Pagination .pagination-control {
+    -fx-background-color: #262626;
+}
+
+/* =============================================================================
+ * DARK MODE - SplitPane
+ * ============================================================================= */
+
+.dark SplitPane {
+    -fx-background-color: #1a1a1a;
+}
+
+.dark SplitPane .split-pane-divider {
+    -fx-background-color: #404040;
+}
