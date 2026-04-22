@@ -5,7 +5,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [Unreleased] - 1.0-SNAPSHOT
+## [1.0-SNAPSHOT] - Unreleased
 
 ### Added
 - **Tailwind v4.1 CSS utilities** — `overflow-wrap`, `word-break`, `whitespace` classes
@@ -32,23 +32,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Package Javadoc** — `package-info.java` with class overview
 - **Build file** — `pom.xml` (Maven, JavaFX 21, shade plugin)
 - **Comprehensive example** — `TailwindFXExample` updated to demo all major features
-
-### Fixed
-- `FxFlexPane.computePrefHeight` returned wrong height for `wrap=true` rows
-- `UtilityConflictResolver` — skew, aspect, 3D transform categories were missing, causing classes to accumulate instead of replace
-- Spanish strings remaining in log messages (complete sweep)
-
-### Tests added
-- `FxDataTableTest` — 21 tests covering builder, filter, pagination, search, style
-- `StylesTest` — 13 new tests for v4.1 APIs (textShadow, dropShadow, clip, 3D, glass, neumorph, SVG)
-- `TailwindFXTest` — JIT v4.1 token tests + `TailwindFXMetrics` alert system tests
-- `TestRunner` — `FxDataTableTest` wired in
-
----
-
-## [4.2.0] — 2026-03-18
-
-### Added
 - **`ResponsiveNode`** — per-node responsive utility rules driven by `Scene.widthProperty()`
 - **`FxFlexPane`** — full Flexbox model: direction, wrap, justify-content (6), align-items (4), gap, flex-grow, flex-shrink, order, align-self
 - **`StylePerf`** — StyleDiff cache (skip redundant applies), batch apply, auto-batch threshold
@@ -60,17 +43,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **`UtilityConflictResolver`** — `cleanupNode()`, `autoCleanup()`, `invalidateCategoryCache()`
 - **`TailwindFX.Config`** — `autoBatch(threshold)` configuration
 - Specific imports replacing wildcards across all 13 files
-
-### Fixed
-- Hover effects (`onHoverScale/Lift/Dim`) used `setOnMouseEntered` (overwrites) → replaced with `addEventHandler` (chains)
-- `JitCompiler` alpha clamp: was warning-only, now actually clamps to `[0, 100]`
-- `UtilityConflictResolver.invalidateCache(null)` — added null safety
-
----
-
-## [4.1.0] — 2026-03-17
-
-### Added
 - **`TailwindFX.aspectRatio/Square()`** — Java equivalent of CSS `aspect-ratio`
 - **`TailwindFX.backdropBlur*()`** — BoxBlur glassmorphism helpers
 - **`TailwindFX.transition()`** — CSS `transition` equivalent via Timeline
@@ -81,17 +53,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **`FxFlexPane.ensureLayoutOnParent()`** — deferred `requestLayout()` for pre-parenting
 - **`TailwindFXMetrics.recordLayoutPass()`** — layout timing for FxFlexPane
 - **`TailwindFX.metrics()`** — entry-point access to `TailwindFXMetrics`
-- Build files: `pom.xml`
-
-### Fixed
-- All log/exception/comment strings normalized to English
-- Wildcard imports replaced with specific imports in all Java files
-
----
-
-## [4.0.0] — 2026-03-16
-
-### Added
 - **`FxGridPane`** — grid-template-areas, auto-flow, masonry layout
 - **`ComponentFactory`** — high-level card, badge, modal, drawer, tooltip, datatable builders
 - **`FxLayout` TilePane** — tile layout support in FxLayout builder
@@ -104,13 +65,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **`TailwindFX.watch()`** — hot-reload CSS in development
 - **`TailwindFX.debugReport()`** — runtime node inspection
 - CSS: 11 900+ lines, 1 400+ utility classes
-
----
-
-## [1.0.0] — Initial release
-
 - CSS utility framework: layout, typography, colors, borders, effects, transforms
 - `TailwindFX.install()`, `apply()`, `jit()`, `jitApply()`
 - `ColorPalette` — 209 Tailwind colors
 - `BreakpointManager` — SM/MD/LG/XL/XXL breakpoints
 - `ThemeManager` — dark/light/blue/green/purple/rose/slate presets
+
+### Fixed
+- `FxFlexPane.computePrefHeight` returned wrong height for `wrap=true` rows
+- `UtilityConflictResolver` — skew, aspect, 3D transform categories were missing, causing classes to accumulate instead of replace
+- Spanish strings remaining in log messages (complete sweep)
+- Hover effects (`onHoverScale/Lift/Dim`) used `setOnMouseEntered` (overwrites) → replaced with `addEventHandler` (chains)
+- `JitCompiler` alpha clamp: was warning-only, now actually clamps to `[0, 100]`
+- `UtilityConflictResolver.invalidateCache(null)` — added null safety
+- All log/exception/comment strings normalized to English
+- Wildcard imports replaced with specific imports in all Java files
+
+### Tests added
+- `FxDataTableTest` — 21 tests covering builder, filter, pagination, search, style
+- `StylesTest` — 13 new tests for v4.1 APIs (textShadow, dropShadow, clip, 3D, glass, neumorph, SVG)
+- `TailwindFXTest` — JIT v4.1 token tests + `TailwindFXMetrics` alert system tests
+- `TestRunner` — `FxDataTableTest` wired in
