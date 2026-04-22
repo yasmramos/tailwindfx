@@ -309,3 +309,23 @@ java -cp . tailwindfx.TestRunner
 ## License
 
 MIT — see [LICENSE](LICENSE) for details.
+
+---
+
+## Contributing
+
+We welcome contributions from the community! Here's how you can help:
+
+1. **Check existing issues** - Look for [Good First Issues](https://github.com/yasmramos/TailwindFX/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) to get started
+2. **Read our guides** - See [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+3. **Fork and submit PRs** - Create a branch from `develop`, make your changes, and submit a pull request
+4. **Report bugs** - Use our [bug report template](https://github.com/yasmramos/TailwindFX/issues/new?template=bug_report.md)
+5. **Suggest features** - Use our [feature request template](https://github.com/yasmramos/TailwindFX/issues/new?template=feature_request.md)
+
+### Quick Links
+- 📚 [Issues for Contributors](.github/ISSUES_FOR_CONTRIBUTORS.md)
+- 🐛 [Report a Bug](https://github.com/yasmramos/TailwindFX/issues/new?template=bug_report.md)
+- 💡 [Request a Feature](https://github.com/yasmramos/TailwindFX/issues/new?template=feature_request.md)
+- 🎯 [Good First Issues](https://github.com/yasmramos/TailwindFX/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+
+---
