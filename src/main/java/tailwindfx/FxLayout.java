@@ -580,63 +580,54 @@ public final class FxLayout {
         double v = vgapVal >= 0 ? vgapVal : gap;
         boolean hasPad = !padding.equals(Insets.EMPTY);
 
-        switch (p) {
-            case HBox -> {
-                hb.setSpacing(gap);
-                hb.setAlignment(alignment);
-                if (hasPad) hb.setPadding(padding);
+        if (p instanceof HBox hb) {
+            hb.setSpacing(gap);
+            hb.setAlignment(alignment);
+            if (hasPad) hb.setPadding(padding);
+        } else if (p instanceof VBox vb) {
+            vb.setSpacing(gap);
+            vb.setAlignment(alignment);
+            if (hasPad) vb.setPadding(padding);
+        } else if (p instanceof StackPane sp) {
+            sp.setAlignment(alignment);
+            if (hasPad) sp.setPadding(padding);
+        } else if (p instanceof GridPane gp) {
+            gp.setHgap(h); gp.setVgap(v);
+            gp.setAlignment(alignment);
+            if (hasPad) gp.setPadding(padding);
+            applyGridCols(gp);
+        } else if (p instanceof FlowPane fp) {
+            fp.setHgap(h); fp.setVgap(v);
+            fp.setAlignment(alignment);
+            if (hasPad) fp.setPadding(padding);
+            fp.setOrientation(type == LayoutType.FLOW_COL
+                ? Orientation.VERTICAL : Orientation.HORIZONTAL);
+        } else if (p instanceof TilePane tp) {
+            double th = hgapVal >= 0 ? hgapVal : (gap >= 0 ? gap : 0);
+            double tv = vgapVal >= 0 ? vgapVal : (gap >= 0 ? gap : 0);
+            tp.setHgap(th); tp.setVgap(tv);
+            tp.setAlignment(alignment);
+            if (hasPad) tp.setPadding(padding);
+        } else if (p instanceof AnchorPane ap) {
+            if (hasPad) ap.setPadding(padding);
+            anchors.forEach((n, cc) -> applyAnchor(n, cc));
+        } else if (p instanceof FxFlexPane fp) {
+            fp.setDirection(FxFlexPane.Direction.ROW);
+            fp.setJustify(flexJustify);
+            fp.setAlign(flexAlign);
+            fp.setWrap(flexWrap);
+            fp.gap(gap);
+            if (hasPad) fp.padding(padding);
+        } else if (p instanceof FxGridPane fg) {
+            if (gridAreas != null) {
+                fg.areas(gridAreas);
+            } else {
+                fg.cols(gridCols2);
             }
-            case VBox -> {
-                vb.setSpacing(gap);
-                vb.setAlignment(alignment);
-                if (hasPad) vb.setPadding(padding);
-            }
-            case StackPane -> {
-                sp.setAlignment(alignment);
-                if (hasPad) sp.setPadding(padding);
-            }
-            case GridPane -> {
-                gp.setHgap(h); gp.setVgap(v);
-                gp.setAlignment(alignment);
-                if (hasPad) gp.setPadding(padding);
-                applyGridCols(gp);
-            }
-            case FlowPane -> {
-                fp.setHgap(h); fp.setVgap(v);
-                fp.setAlignment(alignment);
-                if (hasPad) fp.setPadding(padding);
-                fp.setOrientation(type == LayoutType.FLOW_COL
-                    ? Orientation.VERTICAL : Orientation.HORIZONTAL);
-            }
-            case TilePane -> {
-                double th = hgapVal >= 0 ? hgapVal : (gap >= 0 ? gap : 0);
-                double tv = vgapVal >= 0 ? vgapVal : (gap >= 0 ? gap : 0);
-                tp.setHgap(th); tp.setVgap(tv);
-                tp.setAlignment(alignment);
-                if (hasPad) tp.setPadding(padding);
-            }
-            case AnchorPane -> {
-                if (hasPad) ap.setPadding(padding);
-                anchors.forEach((n, cc) -> applyAnchor(n, cc));
-            }
-            case FxFlexPane -> {
-                fp.setDirection(FxFlexPane.Direction.ROW);
-                fp.setJustify(flexJustify);
-                fp.setAlign(flexAlign);
-                fp.setWrap(flexWrap);
-                fp.gap(gap);
-                if (hasPad) fp.padding(padding);
-            }
-            case FxGridPane -> {
-                if (gridAreas != null) {
-                    fg.areas(gridAreas);
-                } else {
-                    fg.cols(gridCols2);
-                }
-                if (gap > 0) fg.gap(gap);
-                if (hasPad)  fg.padding(padding);
-            }
-            default -> { if (hasPad) p.setPadding(padding); }
+            if (gap > 0) fg.gap(gap);
+            if (hasPad)  fg.padding(padding);
+        } else {
+            if (hasPad) p.setPadding(padding);
         }
     }
 
