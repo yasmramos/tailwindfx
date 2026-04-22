@@ -18,7 +18,6 @@ class TailwindFXUnifiedApplyTest extends ApplicationTest {
     private Label label;
     private Button button;
 
-    @Override
     @BeforeEach
     void setUp() {
         label = new Label("Test");
