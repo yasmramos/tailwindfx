@@ -69,9 +69,15 @@ mvn test
 ### Running Examples
 
 ```bash
-# Run example applications
-java -cp target/tailwindfx-1.0-SNAPSHOT.jar io.github.tailwindfx.examples.BasicExample
+# Build the project first
+mvn clean install
+
+# Run example applications from the examples module
+cd tailwindfx-examples
+mvn javafx:run -Djavafx.mainClass=tailwindfx.examples.DashboardApp
 ```
+
+For more examples, check the `tailwindfx-examples/src/main/java/tailwindfx/examples/` directory.
 
 ## Coding Guidelines
 
