@@ -59,13 +59,6 @@ AnimationUtil.onHoverScale(btn, 1.05);
     <version>1.0-SNAPSHOT</version>
 </dependency>
 ```
-
-### Manual
-
-1. Copy all `.java` files from `src/` to your project's `tailwindfx` package.
-2. Copy `tailwindfx.css` to your resources root.
-3. Ensure JavaFX 21+ is on the classpath.
-
 ---
 
 ## Quick Start
