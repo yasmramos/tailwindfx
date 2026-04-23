@@ -4,17 +4,19 @@ import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.util.Duration;
 
 /**
- * FxAnimation — Wrapper fluido para animaciones de JavaFX.
+ * FxAnimation — Fluent wrapper for JavaFX animations.
  *
- * Proporciona una API declarativa sobre Timeline + KeyFrame + Interpolator.
- * Cero imports de javafx.animation en el código del usuario.
+ * Provides a declarative API over Timeline + KeyFrame + Interpolator.
+ * Zero javafx.animation imports in user code.
  *
- * Uso:
+ * Usage:
  *   FxAnimation.fadeIn(node).play();
  *   FxAnimation.fadeIn(node, 300).play();
  *   FxAnimation.slideUp(node).onFinished(e -> ...).play();
@@ -27,7 +29,7 @@ import javafx.util.Duration;
  */
 public final class FxAnimation {
 
-    // Duraciones por defecto (ms)
+    // Default durations (ms)
     public static final int FAST    = 150;
     public static final int NORMAL  = 250;
     public static final int SLOW    = 400;
@@ -467,4 +469,201 @@ public final class FxAnimation {
 
     /** Acceso al Animation subyacente para configuración avanzada */
     public Animation raw() { return timeline; }
+
+    // =========================================================================
+    // Hover effects (onHoverLift, onHoverDim, removeHoverEffects)
+    // =========================================================================
+
+    /** Efecto lift en hover: desplaza hacia arriba 4px por defecto */
+    public static void onHoverLift(Node node) { onHoverLift(node, -4); }
+    
+    /** Efecto lift en hover con offset personalizado */
+    public static void onHoverLift(Node node, double offsetY) {
+        double originalY = node.getTranslateY();
+        Timeline hoverIn  = new Timeline(new KeyFrame(Duration.millis(FAST),
+            new KeyValue(node.translateYProperty(), originalY + offsetY, Interpolator.EASE_OUT)));
+        Timeline hoverOut = new Timeline(new KeyFrame(Duration.millis(FAST),
+            new KeyValue(node.translateYProperty(), originalY, Interpolator.EASE_OUT)));
+        javafx.event.EventHandler<javafx.scene.input.MouseEvent> enterLift =
+            e -> { hoverOut.stop(); hoverIn.play(); };
+        javafx.event.EventHandler<javafx.scene.input.MouseEvent> exitLift =
+            e -> { hoverIn.stop();  hoverOut.play(); };
+        node.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_ENTERED, enterLift);
+        node.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_EXITED,  exitLift);
+        storeHoverHandlers(node, enterLift, exitLift);
+    }
+
+    /** Efecto dim en hover: reduce opacidad */
+    public static void onHoverDim(Node node, double targetOpacity) {
+        Timeline hoverIn  = new Timeline(new KeyFrame(Duration.millis(FAST),
+            new KeyValue(node.opacityProperty(), targetOpacity, Interpolator.EASE_OUT)));
+        Timeline hoverOut = new Timeline(new KeyFrame(Duration.millis(FAST),
+            new KeyValue(node.opacityProperty(), 1.0, Interpolator.EASE_OUT)));
+        javafx.event.EventHandler<javafx.scene.input.MouseEvent> enterH2 =
+            e -> { hoverOut.stop(); hoverIn.play(); };
+        javafx.event.EventHandler<javafx.scene.input.MouseEvent> exitH2 =
+            e -> { hoverIn.stop();  hoverOut.play(); };
+        node.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_ENTERED, enterH2);
+        node.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_EXITED,  exitH2);
+        storeHoverHandlers(node, enterH2, exitH2);
+    }
+
+    /** Elimina todos los efectos hover instalados */
+    public static void removeHoverEffects(Node node) {
+        @SuppressWarnings("unchecked")
+        var handlers = (java.util.List<javafx.event.EventHandler<javafx.scene.input.MouseEvent>>)
+            node.getProperties().remove("tailwindfx.hover.handlers");
+        if (handlers != null) {
+            for (int i = 0; i < handlers.size(); i += 2) {
+                node.removeEventHandler(javafx.scene.input.MouseEvent.MOUSE_ENTERED, handlers.get(i));
+                if (i + 1 < handlers.size())
+                    node.removeEventHandler(javafx.scene.input.MouseEvent.MOUSE_EXITED, handlers.get(i + 1));
+            }
+        }
+        node.setScaleX(1.0); node.setScaleY(1.0);
+        node.setOpacity(1.0);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void storeHoverHandlers(Node node, 
+            javafx.event.EventHandler<javafx.scene.input.MouseEvent> enter,
+            javafx.event.EventHandler<javafx.scene.input.MouseEvent> exit) {
+        var handlers = (java.util.List<javafx.event.EventHandler<javafx.scene.input.MouseEvent>>)
+            node.getProperties().computeIfAbsent("tailwindfx.hover.handlers", k -> new java.util.ArrayList<>());
+        handlers.add(enter);
+        handlers.add(exit);
+    }
+
+    // =========================================================================
+    // Inner classes moved from AnimationUtil
+    // =========================================================================
+
+    /**
+     * AnimationRegistry — Manages active animations per node to prevent memory leaks.
+     * Registers animations in slots, auto-cancels on scene detach.
+     */
+    public static final class AnimationRegistry {
+
+        private static final String KEY = "tailwindfx.animations";
+
+        private AnimationRegistry() {}
+
+        public static void play(javafx.scene.Node node, String slot, Animation animation) {
+            cancel(node, slot);
+            getSlots(node).put(slot, animation);
+            animation.setOnFinished(e -> getSlots(node).remove(slot));
+            animation.play();
+            installSceneListener(node);
+        }
+
+        private static void installSceneListener(javafx.scene.Node node) {
+            final String LISTENER_KEY = "tailwindfx.anim.scene-listener";
+            if (node.getProperties().containsKey(LISTENER_KEY)) return;
+
+            javafx.beans.value.ChangeListener<javafx.scene.Scene> listener =
+                (obs, oldScene, newScene) -> {
+                    if (newScene == null) {
+                        cancelAll(node);
+                    }
+                };
+            node.sceneProperty().addListener(listener);
+            node.getProperties().put(LISTENER_KEY, Boolean.TRUE);
+        }
+
+        public static void cancel(javafx.scene.Node node, String slot) {
+            Animation prev = getSlots(node).get(slot);
+            if (prev != null) { prev.stop(); getSlots(node).remove(slot); }
+        }
+
+        public static void cancelAll(javafx.scene.Node node) {
+            getSlots(node).values().forEach(Animation::stop);
+            getSlots(node).clear();
+        }
+
+        @SuppressWarnings("unchecked")
+        private static java.util.Map<String, Animation> getSlots(javafx.scene.Node node) {
+            return (java.util.Map<String, Animation>) node.getProperties()
+                .computeIfAbsent(KEY, k -> new java.util.HashMap<String, Animation>());
+        }
+    }
+
+    /**
+     * ResponsiveAnimationGuard — Pauses/resumes animations during responsive layout changes.
+     */
+    public static final class ResponsiveAnimationGuard {
+
+        private static final String PAUSED_KEY = "tailwindfx.anim.paused";
+
+        private ResponsiveAnimationGuard() {}
+
+        public static void onLayoutChangeStart(javafx.scene.Scene scene) {
+            if (scene == null || scene.getRoot() == null) return;
+            pauseAnimationsInSubtree(scene.getRoot());
+        }
+
+        public static void onLayoutChangeEnd(javafx.scene.Scene scene) {
+            if (scene == null || scene.getRoot() == null) return;
+            resumeAnimationsInSubtree(scene.getRoot());
+        }
+
+        public static void resetNode(javafx.scene.Node node) {
+            AnimationRegistry.cancelAll(node);
+            node.setTranslateX(0);
+            node.setTranslateY(0);
+            node.setScaleX(1);
+            node.setScaleY(1);
+            node.setOpacity(1);
+            node.setRotate(0);
+        }
+
+        private static void pauseAnimationsInSubtree(javafx.scene.Node node) {
+            @SuppressWarnings("unchecked")
+            var slots = (java.util.Map<String, Animation>) node.getProperties()
+                .get("tailwindfx.animations");
+            if (slots != null) {
+                java.util.List<String> toPause = new java.util.ArrayList<>();
+                for (var entry : slots.entrySet()) {
+                    if (entry.getValue().getStatus() == Animation.Status.RUNNING
+                        && isTransformAnimation(entry.getKey())) {
+                        entry.getValue().pause();
+                        toPause.add(entry.getKey());
+                    }
+                }
+                if (!toPause.isEmpty()) {
+                    node.getProperties().put(PAUSED_KEY, toPause);
+                }
+            }
+            if (node instanceof javafx.scene.Parent parent) {
+                for (javafx.scene.Node child : parent.getChildrenUnmodifiable()) {
+                    pauseAnimationsInSubtree(child);
+                }
+            }
+        }
+
+        private static void resumeAnimationsInSubtree(javafx.scene.Node node) {
+            @SuppressWarnings("unchecked")
+            var paused = (java.util.List<String>) node.getProperties().remove(PAUSED_KEY);
+            @SuppressWarnings("unchecked")
+            var slots = (java.util.Map<String, Animation>) node.getProperties()
+                .get("tailwindfx.animations");
+            if (paused != null && slots != null) {
+                for (String slot : paused) {
+                    Animation a = slots.get(slot);
+                    if (a != null && a.getStatus() == Animation.Status.PAUSED) {
+                        a.play();
+                    }
+                }
+            }
+            if (node instanceof javafx.scene.Parent parent) {
+                for (javafx.scene.Node child : parent.getChildrenUnmodifiable()) {
+                    resumeAnimationsInSubtree(child);
+                }
+            }
+        }
+
+        private static boolean isTransformAnimation(String slot) {
+            return "translate".equals(slot) || "scale".equals(slot) ||
+                   "rotate".equals(slot) || "slide".equals(slot);
+        }
+    }
 }
