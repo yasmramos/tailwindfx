@@ -51,7 +51,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <h3>Integration with TailwindFX</h3>
  * <p>Both features are available directly via the entry point:
  * <pre>
- * TailwindFX.applyDiff(node, "btn-primary", "rounded-lg");
+ * TailwindFX.apply(node, "btn-primary", "rounded-lg");
  * TailwindFX.batch(() -> { ... });
  * TailwindFX.batchJit(() -> { ... });
  * </pre>

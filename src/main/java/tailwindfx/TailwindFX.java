@@ -275,19 +275,19 @@ public final class TailwindFX {
      * Auto-detection is applied just like {@link #apply(Node, String...)}.
      *
      * <pre>
-     * TailwindFX.applyDiff(button, "btn-primary", "rounded-lg");
-     * TailwindFX.applyDiff(button, "btn-primary", "rounded-lg"); // no-op (cache hit)
+     * TailwindFX.apply(button, "btn-primary", "rounded-lg");
+     * TailwindFX.apply(button, "btn-primary", "rounded-lg"); // no-op (cache hit)
      * 
      * // Works with JIT too
-     * TailwindFX.applyDiff(card, "shadow-md", "bg-blue-500/80"); // applied
-     * TailwindFX.applyDiff(card, "shadow-md", "bg-blue-500/80"); // skipped
+     * TailwindFX.apply(card, "shadow-md", "bg-blue-500/80"); // applied
+     * TailwindFX.apply(card, "shadow-md", "bg-blue-500/80"); // skipped
      * </pre>
      *
      * @param node    the node to style
      * @param tokens  utility classes or JIT tokens to apply
      * @return {@code true} if styles were applied, {@code false} if skipped (no change)
      */
-    public static boolean applyDiff(Node node, String... tokens) {
+    private static boolean applyDiff(Node node, String... tokens) {
         return StylePerf.apply(node, tokens);
     }
 
