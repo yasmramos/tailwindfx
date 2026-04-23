@@ -152,7 +152,7 @@ public final class FxAnimationTest {
     static void testFadeInCreatesTimeline() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            FxAnimation.FxAnimation anim = FxAnimation.fadeIn(n, 100);
+            FxAnimation anim = FxAnimation.fadeIn(n, 100);
             check("fadeIn returns FxAnimation", anim != null);
             check("fadeIn raw() is Animation", anim.raw() instanceof Animation);
             check("node opacity reset to 0", n.getOpacity() == 0.0);
@@ -162,7 +162,7 @@ public final class FxAnimationTest {
     static void testFadeInWithInterpolator() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            FxAnimation.FxAnimation anim = FxAnimation.fadeIn(n, 200, Interpolator.LINEAR);
+            FxAnimation anim = FxAnimation.fadeIn(n, 200, Interpolator.LINEAR);
             check("fadeIn(interpolator) non-null", anim != null);
             throws_("fadeIn(null interpolator)", IllegalArgumentException.class,
                     () -> FxAnimation.fadeIn(new Region(), 100, null));
@@ -178,7 +178,7 @@ public final class FxAnimationTest {
         runFx(() -> {
             Region n = new Region();
             n.setOpacity(1.0);
-            FxAnimation.FxAnimation anim = FxAnimation.fadeOut(n, 100);
+            FxAnimation anim = FxAnimation.fadeOut(n, 100);
             check("fadeOut non-null", anim != null);
         });
     }
@@ -186,7 +186,7 @@ public final class FxAnimationTest {
     static void testSlideUpCreatesTimeline() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            FxAnimation.FxAnimation anim = FxAnimation.slideUp(n);
+            FxAnimation anim = FxAnimation.slideUp(n);
             check("slideUp non-null", anim != null);
             check("opacity reset to 0", n.getOpacity() == 0.0);
         });
@@ -195,7 +195,7 @@ public final class FxAnimationTest {
     static void testScaleInCreatesTimeline() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            FxAnimation.FxAnimation anim = FxAnimation.scaleIn(n);
+            FxAnimation anim = FxAnimation.scaleIn(n);
             check("scaleIn non-null", anim != null);
             approx("scaleX reset", 0.85, n.getScaleX());
         });
@@ -204,7 +204,7 @@ public final class FxAnimationTest {
     static void testScaleInWithInterpolator() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            FxAnimation.FxAnimation a = FxAnimation.scaleIn(n, 150, Interpolator.EASE_IN);
+            FxAnimation a = FxAnimation.scaleIn(n, 150, Interpolator.EASE_IN);
             check("scaleIn(interpolator) non-null", a != null);
         });
     }
@@ -212,7 +212,7 @@ public final class FxAnimationTest {
     static void testShakeCreatesTimeline() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            FxAnimation.FxAnimation a = FxAnimation.shake(n);
+            FxAnimation a = FxAnimation.shake(n);
             check("shake non-null", a != null);
         });
     }
@@ -220,7 +220,7 @@ public final class FxAnimationTest {
     static void testBounceCreatesTimeline() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            FxAnimation.FxAnimation a = FxAnimation.bounce(n);
+            FxAnimation a = FxAnimation.bounce(n);
             check("bounce non-null", a != null);
         });
     }
@@ -228,7 +228,7 @@ public final class FxAnimationTest {
     static void testPulseIsInfinite() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            FxAnimation.FxAnimation a = FxAnimation.pulse(n);
+            FxAnimation a = FxAnimation.pulse(n);
             eq("pulse cycleCount INDEFINITE",
                     Animation.INDEFINITE, a.raw().getCycleCount());
         });
@@ -237,7 +237,7 @@ public final class FxAnimationTest {
     static void testSpinIsInfinite() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            FxAnimation.FxAnimation a = FxAnimation.spin(n);
+            FxAnimation a = FxAnimation.spin(n);
             eq("spin cycleCount INDEFINITE",
                     Animation.INDEFINITE, a.raw().getCycleCount());
         });
@@ -246,7 +246,7 @@ public final class FxAnimationTest {
     static void testBreatheIsInfinite() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            FxAnimation.FxAnimation a = FxAnimation.breathe(n);
+            FxAnimation a = FxAnimation.breathe(n);
             eq("breathe cycleCount INDEFINITE",
                     Animation.INDEFINITE, a.raw().getCycleCount());
         });
