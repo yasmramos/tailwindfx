@@ -31,8 +31,8 @@
  *     .column("Name", User::name).searchable(true).pageSize(20).build();
  *
  * // 8. Animations:
- * AnimationUtil.fadeIn(node).play();
- * AnimationUtil.onHoverScale(button, 1.05);
+ * FxAnimation.fadeIn(node).play();
+ * FxAnimation.onHoverScale(button, 1.05);
  * </pre>
  *
  * <h2>Class overview</h2>
@@ -45,7 +45,7 @@
  *   <tr><td>{@link tailwindfx.FxLayout}</td><td>Builder for HBox/VBox/GridPane/etc.</td></tr>
  *   <tr><td>{@link tailwindfx.FxDataTable}</td><td>Sortable/filterable/paginated table</td></tr>
  *   <tr><td>{@link tailwindfx.ComponentFactory}</td><td>High-level component builders</td></tr>
- *   <tr><td>{@link tailwindfx.AnimationUtil}</td><td>Animations + hover effects</td></tr>
+ *   <tr><td>{@link tailwindfx.FxAnimation}</td><td>Animations + hover effects</td></tr>
  *   <tr><td>{@link tailwindfx.ResponsiveNode}</td><td>Per-node responsive rules</td></tr>
  *   <tr><td>{@link tailwindfx.BreakpointManager}</td><td>Scene-level breakpoint detection</td></tr>
  *   <tr><td>{@link tailwindfx.ThemeManager}</td><td>Theme presets + persistence</td></tr>
