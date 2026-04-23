@@ -3,6 +3,7 @@ package tailwindfx;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,9 +19,13 @@ class TailwindFXUnifiedApplyTest {
     private Label label;
     private Button button;
 
+    @BeforeAll
+    static void initPlatform() {
+        Platform.startup(() -> {});
+    }
+
     @BeforeEach
     void setUp() {
-        Platform.startup(() -> {});
         label = new Label("Test");
         button = new Button("Click");
     }

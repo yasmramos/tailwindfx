@@ -19,9 +19,12 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
-        
+    
+    - name: Install xvfb
+      run: sudo apt-get update && sudo apt-get install -y xvfb
+    
     - name: Build with Maven
       run: mvn -B package --file pom.xml
       
-    - name: Run tests
-      run: mvn test
+    - name: Run tests with headless JavaFX
+      run: xvfb-run -a mvn test -Dtestfx.headless=true -Dtestfx.robot=glass -Dtestfx.setup.timeout=2500 -Dglass.platform=monocle -Dmonocle.platform=headless
