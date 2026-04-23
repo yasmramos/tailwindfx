@@ -108,9 +108,6 @@ TailwindFX.apply(node, "bg-blue-500/80", "p-[13px]", "drop-shadow-[#3b82f6]");
 
 // No conflict-resolution (accumulate intentionally):
 TailwindFX.applyRaw(node, "w-4", "w-8");  // both stay
-
-// StyleDiff — skip if classes unchanged:
-TailwindFX.applyDiff(node, "btn-primary", "rounded-lg");  // no-op on 2nd call
 ```
 
 ### Responsive
