@@ -1140,7 +1140,7 @@ public final class Styles {
      *
      * @param animation the animation to conditionally play
      */
-    public static void playIfMotionOk(FxAnimation.FxAnimation animation) {
+    public static void playIfMotionOk(FxAnimation animation) {
         Preconditions.requireNonNull(animation, "Styles.playIfMotionOk", "animation");
         if (shouldAnimate()) {
             animation.play();
