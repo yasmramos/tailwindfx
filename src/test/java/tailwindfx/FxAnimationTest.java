@@ -276,7 +276,7 @@ public final class FxAnimationTest {
 
     static void testDelayCreatesTimeline() throws Exception {
         runFx(() -> {
-            FxAnimation d = FxAnimation.delay(200);
+            FxAnimation d = FxAnimation.createDelay(200);
             check("delay non-null", d != null);
         });
     }
