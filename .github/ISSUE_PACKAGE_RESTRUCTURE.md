@@ -9,7 +9,8 @@ Restructure the source code packages to improve modularity, maintainability, and
 **Problem:** All classes are in the root package `tailwindfx`:
 - Core library classes (TailwindFX, FxLayout, JIT compiler)
 - UI components (FxButton, FxCard, FxDataTable, etc.)
-- Utilities (ColorUtil, AnimationUtil, CssParser)
+- Utilities (ColorUtil, CssParser)
+- Animations (FxAnimation)
 - Theme management (ThemeManager, ThemeScopeManager)
 - Internationalization (FxI18n)
 - Data components (FxVirtualFlow)
@@ -51,10 +52,11 @@ tailwindfx/
 │       └── FxSpinner.java
 ├── utils/                   # Utility classes
 │   ├── ColorUtil.java
-│   ├── AnimationUtil.java
 │   ├── CssParser.java
 │   ├── ComponentFactory.java
 │   └── JitCompiler.java
+├── animation/               # Animation utilities
+│   └── FxAnimation.java
 ├── theme/                   # Theme management
 │   ├── ThemeManager.java
 │   ├── ThemeScopeManager.java
