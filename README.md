@@ -22,7 +22,7 @@ btn.setOnMouseEntered(e -> btn.setStyle(...));
 // With TailwindFX
 Button btn = new Button("Submit");
 TailwindFX.apply(btn, "btn-primary", "rounded-lg", "px-4", "py-2");
-AnimationUtil.onHoverScale(btn, 1.05);
+FxAnimation.onHoverScale(btn, 1.05);
 ```
 
 ---
@@ -82,7 +82,7 @@ public class MyApp extends Application {
 
         Button btn = new Button("Get Started");
         TailwindFX.apply(btn, "btn-primary", "rounded-lg");
-        AnimationUtil.onHoverScale(btn, 1.05);
+        FxAnimation.onHoverScale(btn, 1.05);
 
         card.getChildren().addAll(title, btn);
         root.getChildren().add(card);
@@ -204,19 +204,19 @@ TailwindFX.refreshScope(panel);                // after reparenting
 ### Animations
 
 ```java
-AnimationUtil.fadeIn(node, 300).play();
-AnimationUtil.slideUp(node).play();
-AnimationUtil.shake(button).play();        // validation error
-AnimationUtil.spin(loadingIcon).loop().play();
+FxAnimation.fadeIn(node, 300).play();
+FxAnimation.slideUp(node).play();
+FxAnimation.shake(button).play();        // validation error
+FxAnimation.spin(loadingIcon).loop().play();
 
-AnimationUtil.onHoverScale(btn, 1.05);    // permanent hover scale
-AnimationUtil.onHoverLift(btn);           // hover lift (-4px)
-AnimationUtil.onHoverDim(btn, 0.8);       // hover dim
-AnimationUtil.removeHoverEffects(btn);    // clean up all hover effects
+FxAnimation.onHoverScale(btn, 1.05);    // permanent hover scale
+FxAnimation.onHoverLift(btn);           // hover lift (-4px)
+FxAnimation.onHoverDim(btn, 0.8);       // hover dim
+FxAnimation.removeHoverEffects(btn);    // clean up all hover effects
 
 // Chain / parallel:
-AnimationUtil.chain(fadeIn, slideUp).play();
-AnimationUtil.parallel(pulse, bounce).play();
+FxAnimation.chain(fadeIn, slideUp).play();
+FxAnimation.parallel(pulse, bounce).play();
 
 // Motion reduce:
 TailwindFX.setReducedMotion(true);

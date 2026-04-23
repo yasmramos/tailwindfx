@@ -24,11 +24,11 @@ This document contains curated issues for contributors at all levels.
 **Description:** Add resize property utilities (`resize-none`, `resize-y`, `resize-x`, `resize`).  
 **Files:** `src/main/resources/tailwindfx.css`
 
-### 4. Document AnimationUtil Class
+### 4. Document FxAnimation Class
 **Difficulty:** Beginner  
 **Labels:** `good first issue`, `documentation`, `java`  
-**Description:** Add comprehensive Javadoc to all public methods in AnimationUtil.java with examples.  
-**Files:** `src/main/java/io/github/tailwindfx/util/AnimationUtil.java`
+**Description:** Add comprehensive Javadoc to all public methods in FxAnimation.java with examples.  
+**Files:** `src/main/java/io/github/yasmramos/tailwindfx/FxAnimation.java`
 
 ### 5. Add Unit Tests for ColorPalette
 **Difficulty:** Beginner  
