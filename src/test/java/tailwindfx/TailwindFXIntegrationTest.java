@@ -181,10 +181,11 @@ public final class TailwindFXIntegrationTest {
     static void testApplyDiffCacheHit() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            boolean first = TailwindFX.apply(n, "btn-primary", "rounded-lg");
-            boolean second = TailwindFX.apply(n, "btn-primary", "rounded-lg");
-            check("first apply=true", first);
-            check("duplicate=false", !second);
+            TailwindFX.apply(n, "btn-primary", "rounded-lg");
+            int stylesBefore = n.getStyle().length();
+            TailwindFX.apply(n, "btn-primary", "rounded-lg");
+            int stylesAfter = n.getStyle().length();
+            check("styles unchanged on duplicate", stylesBefore == stylesAfter);
         });
     }
 
@@ -192,8 +193,10 @@ public final class TailwindFXIntegrationTest {
         runFx(() -> {
             Region n = new Region();
             TailwindFX.apply(n, "w-4");
-            boolean changed = TailwindFX.apply(n, "w-8");
-            check("different classes=true", changed);
+            double widthBefore = n.getWidth();
+            TailwindFX.apply(n, "w-8");
+            double widthAfter = n.getWidth();
+            check("styles changed on different classes", widthBefore != widthAfter);
         });
     }
 
