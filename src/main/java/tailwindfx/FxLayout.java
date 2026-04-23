@@ -542,35 +542,32 @@ public final class FxLayout {
     private void restore(Pane target, List<Snap> snaps) {
         for (Snap s : snaps) {
             target.getChildren().add(s.n());
-            switch (target) {
-                case HBox -> {
-                    if (s.hgrow() != null) HBox.setHgrow(s.n(),  s.hgrow());
-                    if (s.hm()    != null) HBox.setMargin(s.n(), s.hm());
-                }
-                case VBox -> {
-                    if (s.vgrow() != null) VBox.setVgrow(s.n(),  s.vgrow());
-                    if (s.vm()    != null) VBox.setMargin(s.n(), s.vm());
-                }
-                case GridPane -> {
-                    if (s.col() != null) GridPane.setColumnIndex(s.n(), s.col());
-                    if (s.row() != null) GridPane.setRowIndex(s.n(),    s.row());
-                    if (s.cs()  != null) GridPane.setColumnSpan(s.n(), s.cs());
-                    if (s.rs()  != null) GridPane.setRowSpan(s.n(),    s.rs());
-                    if (s.ha()  != null) GridPane.setHalignment(s.n(), s.ha());
-                    if (s.va()  != null) GridPane.setValignment(s.n(), s.va());
-                    if (s.gm()  != null) GridPane.setMargin(s.n(),     s.gm());
-                }
-                case AnchorPane -> {
-                    // First restore edges captured from original source
-                    if (s.anchorEdges() != null) applyAnchor(s.n(), s.anchorEdges());
-                    // Then apply any builder-specified anchors (override)
-                    double[] builderC = anchors.get(s.n());
-                    if (builderC != null) applyAnchor(s.n(), builderC);
-                }
-                case StackPane -> {
-                    if (s.stackAlign() != null) StackPane.setAlignment(s.n(), s.stackAlign());
-                }
-                default -> {}
+            if (target instanceof HBox) {
+                HBox hb = (HBox) target;
+                if (s.hgrow() != null) HBox.setHgrow(s.n(),  s.hgrow());
+                if (s.hm()    != null) HBox.setMargin(s.n(), s.hm());
+            } else if (target instanceof VBox) {
+                VBox vb = (VBox) target;
+                if (s.vgrow() != null) VBox.setVgrow(s.n(),  s.vgrow());
+                if (s.vm()    != null) VBox.setMargin(s.n(), s.vm());
+            } else if (target instanceof GridPane) {
+                GridPane gp = (GridPane) target;
+                if (s.col() != null) GridPane.setColumnIndex(s.n(), s.col());
+                if (s.row() != null) GridPane.setRowIndex(s.n(),    s.row());
+                if (s.cs()  != null) GridPane.setColumnSpan(s.n(), s.cs());
+                if (s.rs()  != null) GridPane.setRowSpan(s.n(),    s.rs());
+                if (s.ha()  != null) GridPane.setHalignment(s.n(), s.ha());
+                if (s.va()  != null) GridPane.setValignment(s.n(), s.va());
+                if (s.gm()  != null) GridPane.setMargin(s.n(),     s.gm());
+            } else if (target instanceof AnchorPane) {
+                // First restore edges captured from original source
+                if (s.anchorEdges() != null) applyAnchor(s.n(), s.anchorEdges());
+                // Then apply any builder-specified anchors (override)
+                double[] builderC = anchors.get(s.n());
+                if (builderC != null) applyAnchor(s.n(), builderC);
+            } else if (target instanceof StackPane) {
+                StackPane sp = (StackPane) target;
+                if (s.stackAlign() != null) StackPane.setAlignment(s.n(), s.stackAlign());
             }
         }
     }
