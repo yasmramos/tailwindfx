@@ -275,19 +275,19 @@ public final class TailwindFX {
      * Auto-detection is applied just like {@link #apply(Node, String...)}.
      *
      * <pre>
-     * TailwindFX.applyDiff(button, "btn-primary", "rounded-lg");
-     * TailwindFX.applyDiff(button, "btn-primary", "rounded-lg"); // no-op (cache hit)
+     * TailwindFX.apply(button, "btn-primary", "rounded-lg");
+     * TailwindFX.apply(button, "btn-primary", "rounded-lg"); // no-op (cache hit)
      * 
      * // Works with JIT too
-     * TailwindFX.applyDiff(card, "shadow-md", "bg-blue-500/80"); // applied
-     * TailwindFX.applyDiff(card, "shadow-md", "bg-blue-500/80"); // skipped
+     * TailwindFX.apply(card, "shadow-md", "bg-blue-500/80"); // applied
+     * TailwindFX.apply(card, "shadow-md", "bg-blue-500/80"); // skipped
      * </pre>
      *
      * @param node    the node to style
      * @param tokens  utility classes or JIT tokens to apply
      * @return {@code true} if styles were applied, {@code false} if skipped (no change)
      */
-    public static boolean applyDiff(Node node, String... tokens) {
+    private static boolean applyDiff(Node node, String... tokens) {
         return StylePerf.apply(node, tokens);
     }
 
@@ -455,42 +455,42 @@ public final class TailwindFX {
 
     /**
      * Enter/exit/attention animations for nodes.
-     * Delegates to AnimationUtil — can also be used directly.
+     * Delegates to FxAnimation — can also be used directly.
      *
      *   TailwindFX.fadeIn(node).play();
      *   TailwindFX.fadeIn(node, 300).play();
      *   TailwindFX.shake(node).play();
      *   TailwindFX.onHoverScale(button, 1.05);
-     *   AnimationUtil.chain(TailwindFX.fadeIn(node), TailwindFX.slideUp(node)).play();
+     *   FxAnimation.chain(TailwindFX.fadeIn(node), TailwindFX.slideUp(node)).play();
      */
-    public static AnimationUtil.FxAnimation fadeIn(javafx.scene.Node n)              { return AnimationUtil.fadeIn(n); }
-    public static AnimationUtil.FxAnimation fadeIn(javafx.scene.Node n, int ms)      { return AnimationUtil.fadeIn(n, ms); }
-    public static AnimationUtil.FxAnimation fadeOut(javafx.scene.Node n)             { return AnimationUtil.fadeOut(n); }
-    public static AnimationUtil.FxAnimation fadeOut(javafx.scene.Node n, int ms)     { return AnimationUtil.fadeOut(n, ms); }
-    public static AnimationUtil.FxAnimation slideUp(javafx.scene.Node n)             { return AnimationUtil.slideUp(n); }
-    public static AnimationUtil.FxAnimation slideDown(javafx.scene.Node n)           { return AnimationUtil.slideDown(n); }
-    public static AnimationUtil.FxAnimation slideLeft(javafx.scene.Node n)           { return AnimationUtil.slideLeft(n); }
-    public static AnimationUtil.FxAnimation slideRight(javafx.scene.Node n)          { return AnimationUtil.slideRight(n); }
-    public static AnimationUtil.FxAnimation scaleIn(javafx.scene.Node n)             { return AnimationUtil.scaleIn(n); }
-    public static AnimationUtil.FxAnimation scaleOut(javafx.scene.Node n)            { return AnimationUtil.scaleOut(n); }
-    public static AnimationUtil.FxAnimation pulse(javafx.scene.Node n)               { return AnimationUtil.pulse(n); }
-    public static AnimationUtil.FxAnimation shake(javafx.scene.Node n)               { return AnimationUtil.shake(n); }
-    public static AnimationUtil.FxAnimation bounce(javafx.scene.Node n)              { return AnimationUtil.bounce(n); }
-    public static AnimationUtil.FxAnimation flash(javafx.scene.Node n)               { return AnimationUtil.flash(n); }
-    public static AnimationUtil.FxAnimation spin(javafx.scene.Node n)                { return AnimationUtil.spin(n); }
-    public static AnimationUtil.FxAnimation breathe(javafx.scene.Node n)             { return AnimationUtil.breathe(n); }
-    public static void onHoverScale(javafx.scene.Node n, double f)    { AnimationUtil.onHoverScale(n, f); }
-    public static void onHoverLift(javafx.scene.Node n)                { AnimationUtil.onHoverLift(n); }
-    public static void onHoverDim(javafx.scene.Node n, double opacity) { AnimationUtil.onHoverDim(n, opacity); }
+    public static FxAnimation fadeIn(javafx.scene.Node n)              { return FxAnimation.fadeIn(n); }
+    public static FxAnimation fadeIn(javafx.scene.Node n, int ms)      { return FxAnimation.fadeIn(n, ms); }
+    public static FxAnimation fadeOut(javafx.scene.Node n)             { return FxAnimation.fadeOut(n); }
+    public static FxAnimation fadeOut(javafx.scene.Node n, int ms)     { return FxAnimation.fadeOut(n, ms); }
+    public static FxAnimation slideUp(javafx.scene.Node n)             { return FxAnimation.slideUp(n); }
+    public static FxAnimation slideDown(javafx.scene.Node n)           { return FxAnimation.slideDown(n); }
+    public static FxAnimation slideLeft(javafx.scene.Node n)           { return FxAnimation.slideLeft(n); }
+    public static FxAnimation slideRight(javafx.scene.Node n)          { return FxAnimation.slideRight(n); }
+    public static FxAnimation scaleIn(javafx.scene.Node n)             { return FxAnimation.scaleIn(n); }
+    public static FxAnimation scaleOut(javafx.scene.Node n)            { return FxAnimation.scaleOut(n); }
+    public static FxAnimation pulse(javafx.scene.Node n)               { return FxAnimation.pulse(n); }
+    public static FxAnimation shake(javafx.scene.Node n)               { return FxAnimation.shake(n); }
+    public static FxAnimation bounce(javafx.scene.Node n)              { return FxAnimation.bounce(n); }
+    public static FxAnimation flash(javafx.scene.Node n)               { return FxAnimation.flash(n); }
+    public static FxAnimation spin(javafx.scene.Node n)                { return FxAnimation.spin(n); }
+    public static FxAnimation breathe(javafx.scene.Node n)             { return FxAnimation.breathe(n); }
+    public static void onHoverScale(javafx.scene.Node n, double f)    { FxAnimation.onHoverScale(n, f); }
+    public static void onHoverLift(javafx.scene.Node n)                { FxAnimation.onHoverLift(n); }
+    public static void onHoverDim(javafx.scene.Node n, double opacity) { FxAnimation.onHoverDim(n, opacity); }
     /**
      * Removes all hover effects (scale, lift, dim) previously installed on a node.
      * Call before re-installing effects to avoid stacking.
      */
-    public static void removeHoverEffects(javafx.scene.Node n) { AnimationUtil.removeHoverEffects(n); }
+    public static void removeHoverEffects(javafx.scene.Node n) { FxAnimation.removeHoverEffects(n); }
 
     /** Cancela todas las animaciones activas en un nodo */
     public static void cancelAnimations(javafx.scene.Node n) {
-        AnimationUtil.AnimationRegistry.cancelAll(n);
+        FxAnimation.AnimationRegistry.cancelAll(n);
     }
 
     /**
@@ -498,7 +498,7 @@ public final class TailwindFX {
      * Útil antes de aplicar un nuevo layout responsive.
      */
     public static void resetNode(javafx.scene.Node n) {
-        AnimationUtil.ResponsiveAnimationGuard.resetNode(n);
+        FxAnimation.ResponsiveAnimationGuard.resetNode(n);
     }
 
     /**
@@ -518,11 +518,11 @@ public final class TailwindFX {
             BreakpointManager.BP.LG, BreakpointManager.BP.XL
         }) {
             bpm.onBreakpoint(bp, () -> {
-                AnimationUtil.ResponsiveAnimationGuard.onLayoutChangeStart(scene);
+                FxAnimation.ResponsiveAnimationGuard.onLayoutChangeStart(scene);
                 // El reconfigure del layout ocurre en el listener del usuario
                 // Este guard solo maneja el ciclo pause/resume de animaciones
                 javafx.application.Platform.runLater(() ->
-                    AnimationUtil.ResponsiveAnimationGuard.onLayoutChangeEnd(scene));
+                    FxAnimation.ResponsiveAnimationGuard.onLayoutChangeEnd(scene));
             });
         }
     }
@@ -1343,7 +1343,7 @@ public final class TailwindFX {
      * Plays an animation only if motion is not reduced; otherwise applies end state instantly.
      * @param animation the animation to conditionally play
      */
-    public static void playIfMotionOk(AnimationUtil.FxAnimation animation) {
+    public static void playIfMotionOk(FxAnimation animation) {
         Styles.playIfMotionOk(animation);
     }
 
@@ -1465,15 +1465,15 @@ public final class TailwindFX {
      * @param node       target node (used for slot registration in AnimationRegistry)
      * @param durationMs transition duration in milliseconds
      * @param values     target {@link javafx.animation.KeyValue}s to animate toward
-     * @return a ready-to-play {@link AnimationUtil.FxAnimation}
+     * @return a ready-to-play {@link FxAnimation}
      */
-    public static AnimationUtil.FxAnimation transition(
+    public static FxAnimation transition(
             Node node, int durationMs, javafx.animation.KeyValue... values) {
         Preconditions.requireNode(node, "TailwindFX.transition");
         Preconditions.requirePositiveDuration(durationMs, "TailwindFX.transition");
         javafx.animation.Timeline tl = new javafx.animation.Timeline(
             new javafx.animation.KeyFrame(javafx.util.Duration.millis(durationMs), values));
-        return new AnimationUtil.FxAnimation(tl).register(node, "transition");
+        return new FxAnimation(tl).register(node, "transition");
     }
 
 }

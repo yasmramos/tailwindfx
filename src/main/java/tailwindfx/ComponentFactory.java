@@ -120,7 +120,7 @@ public final class ComponentFactory {
             }
 
             if (hoverable) {
-                AnimationUtil.onHoverLift(card, -3);
+                FxAnimation.onHoverLift(card, -3);
             }
             return card;
         }
@@ -266,8 +266,8 @@ public final class ComponentFactory {
             root.getChildren().add(overlay);
 
             if (animated) {
-                AnimationUtil.fadeIn(overlay, 180).play();
-                AnimationUtil.scaleIn(panel, 180).play();
+                FxAnimation.fadeIn(overlay, 180).play();
+                FxAnimation.scaleIn(panel, 180).play();
             }
             return overlay;
         }

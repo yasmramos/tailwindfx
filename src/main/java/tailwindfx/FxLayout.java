@@ -363,10 +363,10 @@ public final class FxLayout {
      * TailwindFX.layout(pane).col()
      *     .onTransition(new FxLayout.LayoutTransitionListener() {
      *         public void onLayoutChanging(Pane src, FxLayout.LayoutType t) {
-     *             AnimationUtil.fadeOut(src, 150).play();
+     *             FxAnimation.fadeOut(src, 150).play();
      *         }
      *         public void onLayoutChanged(Pane result) {
-     *             AnimationUtil.fadeIn(result, 150).play();
+     *             FxAnimation.fadeIn(result, 150).play();
      *         }
      *     })
      *     .build();
@@ -542,35 +542,32 @@ public final class FxLayout {
     private void restore(Pane target, List<Snap> snaps) {
         for (Snap s : snaps) {
             target.getChildren().add(s.n());
-            switch (target) {
-                case HBox hb -> {
-                    if (s.hgrow() != null) HBox.setHgrow(s.n(),  s.hgrow());
-                    if (s.hm()    != null) HBox.setMargin(s.n(), s.hm());
-                }
-                case VBox vb -> {
-                    if (s.vgrow() != null) VBox.setVgrow(s.n(),  s.vgrow());
-                    if (s.vm()    != null) VBox.setMargin(s.n(), s.vm());
-                }
-                case GridPane gp -> {
-                    if (s.col() != null) GridPane.setColumnIndex(s.n(), s.col());
-                    if (s.row() != null) GridPane.setRowIndex(s.n(),    s.row());
-                    if (s.cs()  != null) GridPane.setColumnSpan(s.n(), s.cs());
-                    if (s.rs()  != null) GridPane.setRowSpan(s.n(),    s.rs());
-                    if (s.ha()  != null) GridPane.setHalignment(s.n(), s.ha());
-                    if (s.va()  != null) GridPane.setValignment(s.n(), s.va());
-                    if (s.gm()  != null) GridPane.setMargin(s.n(),     s.gm());
-                }
-                case AnchorPane ap -> {
-                    // First restore edges captured from original source
-                    if (s.anchorEdges() != null) applyAnchor(s.n(), s.anchorEdges());
-                    // Then apply any builder-specified anchors (override)
-                    double[] builderC = anchors.get(s.n());
-                    if (builderC != null) applyAnchor(s.n(), builderC);
-                }
-                case StackPane sp -> {
-                    if (s.stackAlign() != null) StackPane.setAlignment(s.n(), s.stackAlign());
-                }
-                default -> {}
+            if (target instanceof HBox) {
+                HBox hb = (HBox) target;
+                if (s.hgrow() != null) HBox.setHgrow(s.n(),  s.hgrow());
+                if (s.hm()    != null) HBox.setMargin(s.n(), s.hm());
+            } else if (target instanceof VBox) {
+                VBox vb = (VBox) target;
+                if (s.vgrow() != null) VBox.setVgrow(s.n(),  s.vgrow());
+                if (s.vm()    != null) VBox.setMargin(s.n(), s.vm());
+            } else if (target instanceof GridPane) {
+                GridPane gp = (GridPane) target;
+                if (s.col() != null) GridPane.setColumnIndex(s.n(), s.col());
+                if (s.row() != null) GridPane.setRowIndex(s.n(),    s.row());
+                if (s.cs()  != null) GridPane.setColumnSpan(s.n(), s.cs());
+                if (s.rs()  != null) GridPane.setRowSpan(s.n(),    s.rs());
+                if (s.ha()  != null) GridPane.setHalignment(s.n(), s.ha());
+                if (s.va()  != null) GridPane.setValignment(s.n(), s.va());
+                if (s.gm()  != null) GridPane.setMargin(s.n(),     s.gm());
+            } else if (target instanceof AnchorPane) {
+                // First restore edges captured from original source
+                if (s.anchorEdges() != null) applyAnchor(s.n(), s.anchorEdges());
+                // Then apply any builder-specified anchors (override)
+                double[] builderC = anchors.get(s.n());
+                if (builderC != null) applyAnchor(s.n(), builderC);
+            } else if (target instanceof StackPane) {
+                StackPane sp = (StackPane) target;
+                if (s.stackAlign() != null) StackPane.setAlignment(s.n(), s.stackAlign());
             }
         }
     }
@@ -580,63 +577,54 @@ public final class FxLayout {
         double v = vgapVal >= 0 ? vgapVal : gap;
         boolean hasPad = !padding.equals(Insets.EMPTY);
 
-        switch (p) {
-            case HBox hb -> {
-                hb.setSpacing(gap);
-                hb.setAlignment(alignment);
-                if (hasPad) hb.setPadding(padding);
+        if (p instanceof HBox hb) {
+            hb.setSpacing(gap);
+            hb.setAlignment(alignment);
+            if (hasPad) hb.setPadding(padding);
+        } else if (p instanceof VBox vb) {
+            vb.setSpacing(gap);
+            vb.setAlignment(alignment);
+            if (hasPad) vb.setPadding(padding);
+        } else if (p instanceof StackPane sp) {
+            sp.setAlignment(alignment);
+            if (hasPad) sp.setPadding(padding);
+        } else if (p instanceof GridPane gp) {
+            gp.setHgap(h); gp.setVgap(v);
+            gp.setAlignment(alignment);
+            if (hasPad) gp.setPadding(padding);
+            applyGridCols(gp);
+        } else if (p instanceof FlowPane fp) {
+            fp.setHgap(h); fp.setVgap(v);
+            fp.setAlignment(alignment);
+            if (hasPad) fp.setPadding(padding);
+            fp.setOrientation(type == LayoutType.FLOW_COL
+                ? Orientation.VERTICAL : Orientation.HORIZONTAL);
+        } else if (p instanceof TilePane tp) {
+            double th = hgapVal >= 0 ? hgapVal : (gap >= 0 ? gap : 0);
+            double tv = vgapVal >= 0 ? vgapVal : (gap >= 0 ? gap : 0);
+            tp.setHgap(th); tp.setVgap(tv);
+            tp.setAlignment(alignment);
+            if (hasPad) tp.setPadding(padding);
+        } else if (p instanceof AnchorPane ap) {
+            if (hasPad) ap.setPadding(padding);
+            anchors.forEach((n, cc) -> applyAnchor(n, cc));
+        } else if (p instanceof FxFlexPane fp) {
+            fp.setDirection(FxFlexPane.Direction.ROW);
+            fp.setJustify(flexJustify);
+            fp.setAlign(flexAlign);
+            fp.setWrap(flexWrap);
+            fp.gap(gap);
+            if (hasPad) fp.padding(padding);
+        } else if (p instanceof FxGridPane fg) {
+            if (gridAreas != null) {
+                fg.areas(gridAreas);
+            } else {
+                fg.cols(gridCols2);
             }
-            case VBox vb -> {
-                vb.setSpacing(gap);
-                vb.setAlignment(alignment);
-                if (hasPad) vb.setPadding(padding);
-            }
-            case StackPane sp -> {
-                sp.setAlignment(alignment);
-                if (hasPad) sp.setPadding(padding);
-            }
-            case GridPane gp -> {
-                gp.setHgap(h); gp.setVgap(v);
-                gp.setAlignment(alignment);
-                if (hasPad) gp.setPadding(padding);
-                applyGridCols(gp);
-            }
-            case FlowPane fp -> {
-                fp.setHgap(h); fp.setVgap(v);
-                fp.setAlignment(alignment);
-                if (hasPad) fp.setPadding(padding);
-                fp.setOrientation(type == LayoutType.FLOW_COL
-                    ? Orientation.VERTICAL : Orientation.HORIZONTAL);
-            }
-            case TilePane tp -> {
-                double th = hgapVal >= 0 ? hgapVal : (gap >= 0 ? gap : 0);
-                double tv = vgapVal >= 0 ? vgapVal : (gap >= 0 ? gap : 0);
-                tp.setHgap(th); tp.setVgap(tv);
-                tp.setAlignment(alignment);
-                if (hasPad) tp.setPadding(padding);
-            }
-            case AnchorPane ap -> {
-                if (hasPad) ap.setPadding(padding);
-                anchors.forEach((n, cc) -> applyAnchor(n, cc));
-            }
-            case FxFlexPane fp -> {
-                fp.setDirection(FxFlexPane.Direction.ROW);
-                fp.setJustify(flexJustify);
-                fp.setAlign(flexAlign);
-                fp.setWrap(flexWrap);
-                fp.gap(gap);
-                if (hasPad) fp.padding(padding);
-            }
-            case FxGridPane fg -> {
-                if (gridAreas != null) {
-                    fg.areas(gridAreas);
-                } else {
-                    fg.cols(gridCols2);
-                }
-                if (gap > 0) fg.gap(gap);
-                if (hasPad)  fg.padding(padding);
-            }
-            default -> { if (hasPad) p.setPadding(padding); }
+            if (gap > 0) fg.gap(gap);
+            if (hasPad)  fg.padding(padding);
+        } else {
+            if (hasPad) p.setPadding(padding);
         }
     }
 

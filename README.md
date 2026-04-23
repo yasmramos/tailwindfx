@@ -22,7 +22,7 @@ btn.setOnMouseEntered(e -> btn.setStyle(...));
 // With TailwindFX
 Button btn = new Button("Submit");
 TailwindFX.apply(btn, "btn-primary", "rounded-lg", "px-4", "py-2");
-AnimationUtil.onHoverScale(btn, 1.05);
+FxAnimation.onHoverScale(btn, 1.05);
 ```
 
 ---
@@ -59,13 +59,6 @@ AnimationUtil.onHoverScale(btn, 1.05);
     <version>1.0-SNAPSHOT</version>
 </dependency>
 ```
-
-### Manual
-
-1. Copy all `.java` files from `src/` to your project's `tailwindfx` package.
-2. Copy `tailwindfx.css` to your resources root.
-3. Ensure JavaFX 21+ is on the classpath.
-
 ---
 
 ## Quick Start
@@ -89,7 +82,7 @@ public class MyApp extends Application {
 
         Button btn = new Button("Get Started");
         TailwindFX.apply(btn, "btn-primary", "rounded-lg");
-        AnimationUtil.onHoverScale(btn, 1.05);
+        FxAnimation.onHoverScale(btn, 1.05);
 
         card.getChildren().addAll(title, btn);
         root.getChildren().add(card);
@@ -115,9 +108,6 @@ TailwindFX.apply(node, "bg-blue-500/80", "p-[13px]", "drop-shadow-[#3b82f6]");
 
 // No conflict-resolution (accumulate intentionally):
 TailwindFX.applyRaw(node, "w-4", "w-8");  // both stay
-
-// StyleDiff — skip if classes unchanged:
-TailwindFX.applyDiff(node, "btn-primary", "rounded-lg");  // no-op on 2nd call
 ```
 
 ### Responsive
@@ -211,19 +201,19 @@ TailwindFX.refreshScope(panel);                // after reparenting
 ### Animations
 
 ```java
-AnimationUtil.fadeIn(node, 300).play();
-AnimationUtil.slideUp(node).play();
-AnimationUtil.shake(button).play();        // validation error
-AnimationUtil.spin(loadingIcon).loop().play();
+FxAnimation.fadeIn(node, 300).play();
+FxAnimation.slideUp(node).play();
+FxAnimation.shake(button).play();        // validation error
+FxAnimation.spin(loadingIcon).loop().play();
 
-AnimationUtil.onHoverScale(btn, 1.05);    // permanent hover scale
-AnimationUtil.onHoverLift(btn);           // hover lift (-4px)
-AnimationUtil.onHoverDim(btn, 0.8);       // hover dim
-AnimationUtil.removeHoverEffects(btn);    // clean up all hover effects
+FxAnimation.onHoverScale(btn, 1.05);    // permanent hover scale
+FxAnimation.onHoverLift(btn);           // hover lift (-4px)
+FxAnimation.onHoverDim(btn, 0.8);       // hover dim
+FxAnimation.removeHoverEffects(btn);    // clean up all hover effects
 
 // Chain / parallel:
-AnimationUtil.chain(fadeIn, slideUp).play();
-AnimationUtil.parallel(pulse, bounce).play();
+FxAnimation.chain(fadeIn, slideUp).play();
+FxAnimation.parallel(pulse, bounce).play();
 
 // Motion reduce:
 TailwindFX.setReducedMotion(true);
@@ -288,24 +278,28 @@ TailwindFX.configure().autoBatch(20);
 TailwindFX.cleanupNode(removedNode);   // explicit
 TailwindFX.autoCleanup(cellNode);      // auto on scene removal
 ```
-
----
-
-## Running tests
-
-```bash
-# Pure-Java suites (no display needed):
-java -cp . tailwindfx.TailwindFXTest
-
-# FxFlexPane layout math:
-java -cp . tailwindfx.FxFlexPaneTest
-
-# All suites including FX-thread tests:
-java -cp . tailwindfx.TestRunner
-```
-
 ---
 
 ## License
 
 MIT — see [LICENSE](LICENSE) for details.
+
+---
+
+## Contributing
+
+We welcome contributions from the community! Here's how you can help:
+
+1. **Check existing issues** - Look for [Good First Issues](https://github.com/yasmramos/TailwindFX/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) to get started
+2. **Read our guides** - See [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+3. **Fork and submit PRs** - Create a branch from `develop`, make your changes, and submit a pull request
+4. **Report bugs** - Use our [bug report template](https://github.com/yasmramos/TailwindFX/issues/new?template=bug_report.md)
+5. **Suggest features** - Use our [feature request template](https://github.com/yasmramos/TailwindFX/issues/new?template=feature_request.md)
+
+### Quick Links
+- 📚 [Issues for Contributors](.github/ISSUES_FOR_CONTRIBUTORS.md)
+- 🐛 [Report a Bug](https://github.com/yasmramos/TailwindFX/issues/new?template=bug_report.md)
+- 💡 [Request a Feature](https://github.com/yasmramos/TailwindFX/issues/new?template=feature_request.md)
+- 🎯 [Good First Issues](https://github.com/yasmramos/TailwindFX/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+
+---

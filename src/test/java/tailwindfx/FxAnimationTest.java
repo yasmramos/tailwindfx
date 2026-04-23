@@ -11,15 +11,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Tests for {@link AnimationUtil} — requires JavaFX Application Thread.
+ * Tests for {@link FxAnimation} — requires JavaFX Application Thread.
  *
  * <p>
  * Run via {@link #runAll()} after the JavaFX platform is initialized. Each test
  * runs on the FX thread via {@code runFx()} and blocks until done.
  */
-public final class AnimationUtilTest {
+public final class FxAnimationTest {
 
-    private AnimationUtilTest() {
+    private FxAnimationTest() {
     }
 
     private static int passed = 0, failed = 0;
@@ -97,7 +97,7 @@ public final class AnimationUtilTest {
     public static boolean runAll() throws Exception {
         passed = 0;
         failed = 0;
-        System.out.println("\n── AnimationUtil ──");
+        System.out.println("\n── FxAnimation ──");
 
         testNullGuards();
         testFadeInCreatesTimeline();
@@ -134,25 +134,25 @@ public final class AnimationUtilTest {
     // ── Guard tests ────────────────────────────────────────────────────
     static void testNullGuards() {
         throws_("fadeIn(null)", IllegalArgumentException.class,
-                () -> AnimationUtil.fadeIn(null));
+                () -> FxAnimation.fadeIn(null));
         throws_("fadeOut(null)", IllegalArgumentException.class,
-                () -> AnimationUtil.fadeOut(null));
+                () -> FxAnimation.fadeOut(null));
         throws_("shake(null)", IllegalArgumentException.class,
-                () -> AnimationUtil.shake(null));
+                () -> FxAnimation.shake(null));
         throws_("spin(null)", IllegalArgumentException.class,
-                () -> AnimationUtil.spin(null));
+                () -> FxAnimation.spin(null));
         throws_("onHoverScale(null)", IllegalArgumentException.class,
-                () -> AnimationUtil.onHoverScale(null, 1.05));
+                () -> FxAnimation.onHoverScale(null, 1.05));
         throws_("fadeIn(node, 0ms)", IllegalArgumentException.class,
-                () -> AnimationUtil.fadeIn(new Region(), 0));
+                () -> FxAnimation.fadeIn(new Region(), 0));
         throws_("fadeIn(node, -1ms)", IllegalArgumentException.class,
-                () -> AnimationUtil.fadeIn(new Region(), -1));
+                () -> FxAnimation.fadeIn(new Region(), -1));
     }
 
     static void testFadeInCreatesTimeline() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            AnimationUtil.FxAnimation anim = AnimationUtil.fadeIn(n, 100);
+            FxAnimation anim = FxAnimation.fadeIn(n, 100);
             check("fadeIn returns FxAnimation", anim != null);
             check("fadeIn raw() is Animation", anim.raw() instanceof Animation);
             check("node opacity reset to 0", n.getOpacity() == 0.0);
@@ -162,23 +162,23 @@ public final class AnimationUtilTest {
     static void testFadeInWithInterpolator() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            AnimationUtil.FxAnimation anim = AnimationUtil.fadeIn(n, 200, Interpolator.LINEAR);
+            FxAnimation anim = FxAnimation.fadeIn(n, 200, Interpolator.LINEAR);
             check("fadeIn(interpolator) non-null", anim != null);
             throws_("fadeIn(null interpolator)", IllegalArgumentException.class,
-                    () -> AnimationUtil.fadeIn(new Region(), 100, null));
+                    () -> FxAnimation.fadeIn(new Region(), 100, null));
         });
     }
 
     static void testFadeInDurationGuard() {
         throws_("fadeIn(-1ms)", IllegalArgumentException.class,
-                () -> AnimationUtil.fadeIn(new Region(), -1));
+                () -> FxAnimation.fadeIn(new Region(), -1));
     }
 
     static void testFadeOutCreatesTimeline() throws Exception {
         runFx(() -> {
             Region n = new Region();
             n.setOpacity(1.0);
-            AnimationUtil.FxAnimation anim = AnimationUtil.fadeOut(n, 100);
+            FxAnimation anim = FxAnimation.fadeOut(n, 100);
             check("fadeOut non-null", anim != null);
         });
     }
@@ -186,7 +186,7 @@ public final class AnimationUtilTest {
     static void testSlideUpCreatesTimeline() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            AnimationUtil.FxAnimation anim = AnimationUtil.slideUp(n);
+            FxAnimation anim = FxAnimation.slideUp(n);
             check("slideUp non-null", anim != null);
             check("opacity reset to 0", n.getOpacity() == 0.0);
         });
@@ -195,7 +195,7 @@ public final class AnimationUtilTest {
     static void testScaleInCreatesTimeline() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            AnimationUtil.FxAnimation anim = AnimationUtil.scaleIn(n);
+            FxAnimation anim = FxAnimation.scaleIn(n);
             check("scaleIn non-null", anim != null);
             approx("scaleX reset", 0.85, n.getScaleX());
         });
@@ -204,7 +204,7 @@ public final class AnimationUtilTest {
     static void testScaleInWithInterpolator() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            AnimationUtil.FxAnimation a = AnimationUtil.scaleIn(n, 150, Interpolator.EASE_IN);
+            FxAnimation a = FxAnimation.scaleIn(n, 150, Interpolator.EASE_IN);
             check("scaleIn(interpolator) non-null", a != null);
         });
     }
@@ -212,7 +212,7 @@ public final class AnimationUtilTest {
     static void testShakeCreatesTimeline() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            AnimationUtil.FxAnimation a = AnimationUtil.shake(n);
+            FxAnimation a = FxAnimation.shake(n);
             check("shake non-null", a != null);
         });
     }
@@ -220,7 +220,7 @@ public final class AnimationUtilTest {
     static void testBounceCreatesTimeline() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            AnimationUtil.FxAnimation a = AnimationUtil.bounce(n);
+            FxAnimation a = FxAnimation.bounce(n);
             check("bounce non-null", a != null);
         });
     }
@@ -228,7 +228,7 @@ public final class AnimationUtilTest {
     static void testPulseIsInfinite() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            AnimationUtil.FxAnimation a = AnimationUtil.pulse(n);
+            FxAnimation a = FxAnimation.pulse(n);
             eq("pulse cycleCount INDEFINITE",
                     Animation.INDEFINITE, a.raw().getCycleCount());
         });
@@ -237,7 +237,7 @@ public final class AnimationUtilTest {
     static void testSpinIsInfinite() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            AnimationUtil.FxAnimation a = AnimationUtil.spin(n);
+            FxAnimation a = FxAnimation.spin(n);
             eq("spin cycleCount INDEFINITE",
                     Animation.INDEFINITE, a.raw().getCycleCount());
         });
@@ -246,7 +246,7 @@ public final class AnimationUtilTest {
     static void testBreatheIsInfinite() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            AnimationUtil.FxAnimation a = AnimationUtil.breathe(n);
+            FxAnimation a = FxAnimation.breathe(n);
             eq("breathe cycleCount INDEFINITE",
                     Animation.INDEFINITE, a.raw().getCycleCount());
         });
@@ -256,9 +256,9 @@ public final class AnimationUtilTest {
     static void testChainSequential() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            AnimationUtil.FxAnimation a1 = AnimationUtil.fadeIn(n, 50);
-            AnimationUtil.FxAnimation a2 = AnimationUtil.fadeOut(n, 50);
-            AnimationUtil.FxAnimation chain = AnimationUtil.chain(a1, a2);
+            FxAnimation a1 = FxAnimation.fadeIn(n, 50);
+            FxAnimation a2 = FxAnimation.fadeOut(n, 50);
+            FxAnimation chain = FxAnimation.chain(a1, a2);
             check("chain non-null", chain != null);
             check("chain raw non-null", chain.raw() != null);
         });
@@ -267,16 +267,16 @@ public final class AnimationUtilTest {
     static void testParallelTransition() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            AnimationUtil.FxAnimation a1 = AnimationUtil.fadeIn(n, 50);
-            AnimationUtil.FxAnimation a2 = AnimationUtil.scaleIn(n, 50);
-            AnimationUtil.FxAnimation par = AnimationUtil.parallel(a1, a2);
+            FxAnimation a1 = FxAnimation.fadeIn(n, 50);
+            FxAnimation a2 = FxAnimation.scaleIn(n, 50);
+            FxAnimation par = FxAnimation.parallel(a1, a2);
             check("parallel non-null", par != null);
         });
     }
 
     static void testDelayCreatesTimeline() throws Exception {
         runFx(() -> {
-            AnimationUtil.FxAnimation d = AnimationUtil.delay(200);
+            FxAnimation d = FxAnimation.pause(200);
             check("delay non-null", d != null);
         });
     }
@@ -285,7 +285,7 @@ public final class AnimationUtilTest {
     static void testFxAnimationSpeed() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            AnimationUtil.FxAnimation a = AnimationUtil.fadeIn(n, 200).speed(2.0);
+            FxAnimation a = FxAnimation.fadeIn(n, 200).speed(2.0);
             approx("speed=2.0", 2.0, a.raw().getRate());
         });
     }
@@ -293,7 +293,7 @@ public final class AnimationUtilTest {
     static void testFxAnimationCycleCount() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            AnimationUtil.FxAnimation a = AnimationUtil.fadeIn(n, 200).cycleCount(3);
+            FxAnimation a = FxAnimation.fadeIn(n, 200).cycleCount(3);
             eq("cycleCount=3", 3, a.raw().getCycleCount());
         });
     }
@@ -301,7 +301,7 @@ public final class AnimationUtilTest {
     static void testFxAnimationAutoReverse() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            AnimationUtil.FxAnimation a = AnimationUtil.fadeIn(n, 200).autoReverse();
+            FxAnimation a = FxAnimation.fadeIn(n, 200).autoReverse();
             check("autoReverse=true", a.raw().isAutoReverse());
         });
     }
@@ -310,7 +310,7 @@ public final class AnimationUtilTest {
         runFx(() -> {
             Region n = new Region();
             AtomicBoolean fired = new AtomicBoolean(false);
-            AnimationUtil.FxAnimation a = AnimationUtil.fadeIn(n, 1)
+            FxAnimation a = FxAnimation.fadeIn(n, 1)
                     .onFinished(e -> fired.set(true));
             check("onFinished set", a.raw().getOnFinished() != null);
         });
@@ -319,7 +319,7 @@ public final class AnimationUtilTest {
     static void testFxAnimationEaseIn() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            AnimationUtil.FxAnimation a = AnimationUtil.fadeIn(n, 200).easeIn();
+            FxAnimation a = FxAnimation.fadeIn(n, 200).easeIn();
             check("easeIn returns self", a != null);
         });
     }
@@ -328,14 +328,14 @@ public final class AnimationUtilTest {
     static void testRegistrySlotIsolation() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            AnimationUtil.FxAnimation enter = AnimationUtil.fadeIn(n, 50);
-            AnimationUtil.FxAnimation loop = AnimationUtil.spin(n).loop();
+            FxAnimation enter = FxAnimation.fadeIn(n, 50);
+            FxAnimation loop = FxAnimation.spin(n).loop();
             // Different slots — both should coexist
-            AnimationUtil.AnimationRegistry.play(n, "enter", enter.raw());
-            AnimationUtil.AnimationRegistry.play(n, "loop", loop.raw());
-            check("enter active", AnimationUtil.AnimationRegistry.isActive(n, "enter"));
-            check("loop active", AnimationUtil.AnimationRegistry.isActive(n, "loop"));
-            AnimationUtil.AnimationRegistry.cancelAll(n);
+            FxAnimation.AnimationRegistry.play(n, "enter", enter.raw());
+            FxAnimation.AnimationRegistry.play(n, "loop", loop.raw());
+            check("enter active", FxAnimation.AnimationRegistry.isActive(n, "enter"));
+            check("loop active", FxAnimation.AnimationRegistry.isActive(n, "loop"));
+            FxAnimation.AnimationRegistry.cancelAll(n);
         });
     }
 
@@ -344,31 +344,31 @@ public final class AnimationUtilTest {
             Region n = new Region();
             javafx.animation.Timeline t1 = new javafx.animation.Timeline();
             javafx.animation.Timeline t2 = new javafx.animation.Timeline();
-            AnimationUtil.AnimationRegistry.play(n, "enter", t1);
+            FxAnimation.AnimationRegistry.play(n, "enter", t1);
             check("t1 running", t1.getStatus() == Animation.Status.RUNNING);
-            AnimationUtil.AnimationRegistry.play(n, "enter", t2);
+            FxAnimation.AnimationRegistry.play(n, "enter", t2);
             check("t1 stopped after replace", t1.getStatus() == Animation.Status.STOPPED);
             check("t2 running", t2.getStatus() == Animation.Status.RUNNING);
-            AnimationUtil.AnimationRegistry.cancelAll(n);
+            FxAnimation.AnimationRegistry.cancelAll(n);
         });
     }
 
     // ── Hover effects ─────────────────────────────────────────────────────
     static void testOnHoverScaleNullGuard() {
         throws_("onHoverScale(null)", IllegalArgumentException.class,
-                () -> AnimationUtil.onHoverScale(null, 1.05));
+                () -> FxAnimation.onHoverScale(null, 1.05));
     }
 
     static void testOnHoverScaleZeroGuard() {
         throws_("onHoverScale(node, 0)", IllegalArgumentException.class,
-                () -> AnimationUtil.onHoverScale(new Region(), 0));
+                () -> FxAnimation.onHoverScale(new Region(), 0));
     }
 
     static void testRemoveHoverEffectsNoop() throws Exception {
         runFx(() -> {
             Region n = new Region();
             // removeHoverEffects on a node with no hover effects should not throw
-            AnimationUtil.removeHoverEffects(n);
+            FxAnimation.removeHoverEffects(n);
             ok("removeHoverEffects on clean node: no throw");
         });
     }
@@ -381,7 +381,7 @@ public final class AnimationUtilTest {
             n.setTranslateY(-10);
             n.setScaleX(1.5);
             n.setOpacity(0.3);
-            AnimationUtil.ResponsiveAnimationGuard.resetNode(n);
+            FxAnimation.ResponsiveAnimationGuard.resetNode(n);
             approx("translateX=0", 0, n.getTranslateX());
             approx("translateY=0", 0, n.getTranslateY());
             approx("scaleX=1", 1, n.getScaleX());
