@@ -40,7 +40,7 @@ public final class FxAnimation {
     private String registeredSlot;
     private Interpolator ease = null;
 
-    private FxAnimation(Animation animation) {
+    FxAnimation(Animation animation) {
         this.timeline = animation;
     }
 
