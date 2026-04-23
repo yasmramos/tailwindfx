@@ -138,7 +138,7 @@ final class Preconditions {
 
     /** Warns if an animation is applied to a node that already has one in the same slot */
     static void warnAnimationOverride(javafx.scene.Node node, String slot, String method) {
-        if (AnimationUtil.AnimationRegistry.isActive(node, slot)) {
+        if (FxAnimation.AnimationRegistry.isActive(node, slot)) {
             LOG.fine(method + ": replacing active animation in slot '" + slot + "'");
         }
     }
