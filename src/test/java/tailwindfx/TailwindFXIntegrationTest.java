@@ -177,12 +177,12 @@ public final class TailwindFXIntegrationTest {
         });
     }
 
-    // ── applyDiff ─────────────────────────────────────────────────────────
+    // ── apply with diff optimization ─────────────────────────────────────────────────────────
     static void testApplyDiffCacheHit() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            boolean first = TailwindFX.applyDiff(n, "btn-primary", "rounded-lg");
-            boolean second = TailwindFX.applyDiff(n, "btn-primary", "rounded-lg");
+            boolean first = TailwindFX.apply(n, "btn-primary", "rounded-lg");
+            boolean second = TailwindFX.apply(n, "btn-primary", "rounded-lg");
             check("first apply=true", first);
             check("duplicate=false", !second);
         });
@@ -191,8 +191,8 @@ public final class TailwindFXIntegrationTest {
     static void testApplyDiffCacheMiss() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            TailwindFX.applyDiff(n, "w-4");
-            boolean changed = TailwindFX.applyDiff(n, "w-8");
+            TailwindFX.apply(n, "w-4");
+            boolean changed = TailwindFX.apply(n, "w-8");
             check("different classes=true", changed);
         });
     }
