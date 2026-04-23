@@ -556,6 +556,10 @@ public final class FxAnimation {
             installSceneListener(node);
         }
 
+        public static boolean isActive(javafx.scene.Node node, String slot) {
+            return getSlots(node).containsKey(slot);
+        }
+
         private static void installSceneListener(javafx.scene.Node node) {
             final String LISTENER_KEY = "tailwindfx.anim.scene-listener";
             if (node.getProperties().containsKey(LISTENER_KEY)) return;
