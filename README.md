@@ -59,13 +59,6 @@ AnimationUtil.onHoverScale(btn, 1.05);
     <version>1.0-SNAPSHOT</version>
 </dependency>
 ```
-
-### Manual
-
-1. Copy all `.java` files from `src/` to your project's `tailwindfx` package.
-2. Copy `tailwindfx.css` to your resources root.
-3. Ensure JavaFX 21+ is on the classpath.
-
 ---
 
 ## Quick Start
@@ -288,22 +281,6 @@ TailwindFX.configure().autoBatch(20);
 TailwindFX.cleanupNode(removedNode);   // explicit
 TailwindFX.autoCleanup(cellNode);      // auto on scene removal
 ```
-
----
-
-## Running tests
-
-```bash
-# Pure-Java suites (no display needed):
-java -cp . tailwindfx.TailwindFXTest
-
-# FxFlexPane layout math:
-java -cp . tailwindfx.FxFlexPaneTest
-
-# All suites including FX-thread tests:
-java -cp . tailwindfx.TestRunner
-```
-
 ---
 
 ## License
