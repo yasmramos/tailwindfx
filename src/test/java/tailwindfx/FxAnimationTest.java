@@ -256,9 +256,9 @@ public final class FxAnimationTest {
     static void testChainSequential() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            FxAnimation.FxAnimation a1 = FxAnimation.fadeIn(n, 50);
-            FxAnimation.FxAnimation a2 = FxAnimation.fadeOut(n, 50);
-            FxAnimation.FxAnimation chain = FxAnimation.chain(a1, a2);
+            FxAnimation a1 = FxAnimation.fadeIn(n, 50);
+            FxAnimation a2 = FxAnimation.fadeOut(n, 50);
+            FxAnimation chain = FxAnimation.chain(a1, a2);
             check("chain non-null", chain != null);
             check("chain raw non-null", chain.raw() != null);
         });
@@ -267,16 +267,16 @@ public final class FxAnimationTest {
     static void testParallelTransition() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            FxAnimation.FxAnimation a1 = FxAnimation.fadeIn(n, 50);
-            FxAnimation.FxAnimation a2 = FxAnimation.scaleIn(n, 50);
-            FxAnimation.FxAnimation par = FxAnimation.parallel(a1, a2);
+            FxAnimation a1 = FxAnimation.fadeIn(n, 50);
+            FxAnimation a2 = FxAnimation.scaleIn(n, 50);
+            FxAnimation par = FxAnimation.parallel(a1, a2);
             check("parallel non-null", par != null);
         });
     }
 
     static void testDelayCreatesTimeline() throws Exception {
         runFx(() -> {
-            FxAnimation.FxAnimation d = FxAnimation.delay(200);
+            FxAnimation d = FxAnimation.delay(200);
             check("delay non-null", d != null);
         });
     }
@@ -285,7 +285,7 @@ public final class FxAnimationTest {
     static void testFxAnimationSpeed() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            FxAnimation.FxAnimation a = FxAnimation.fadeIn(n, 200).speed(2.0);
+            FxAnimation a = FxAnimation.fadeIn(n, 200).speed(2.0);
             approx("speed=2.0", 2.0, a.raw().getRate());
         });
     }
@@ -293,7 +293,7 @@ public final class FxAnimationTest {
     static void testFxAnimationCycleCount() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            FxAnimation.FxAnimation a = FxAnimation.fadeIn(n, 200).cycleCount(3);
+            FxAnimation a = FxAnimation.fadeIn(n, 200).cycleCount(3);
             eq("cycleCount=3", 3, a.raw().getCycleCount());
         });
     }
@@ -301,7 +301,7 @@ public final class FxAnimationTest {
     static void testFxAnimationAutoReverse() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            FxAnimation.FxAnimation a = FxAnimation.fadeIn(n, 200).autoReverse();
+            FxAnimation a = FxAnimation.fadeIn(n, 200).autoReverse();
             check("autoReverse=true", a.raw().isAutoReverse());
         });
     }
@@ -310,7 +310,7 @@ public final class FxAnimationTest {
         runFx(() -> {
             Region n = new Region();
             AtomicBoolean fired = new AtomicBoolean(false);
-            FxAnimation.FxAnimation a = FxAnimation.fadeIn(n, 1)
+            FxAnimation a = FxAnimation.fadeIn(n, 1)
                     .onFinished(e -> fired.set(true));
             check("onFinished set", a.raw().getOnFinished() != null);
         });
@@ -319,7 +319,7 @@ public final class FxAnimationTest {
     static void testFxAnimationEaseIn() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            FxAnimation.FxAnimation a = FxAnimation.fadeIn(n, 200).easeIn();
+            FxAnimation a = FxAnimation.fadeIn(n, 200).easeIn();
             check("easeIn returns self", a != null);
         });
     }
@@ -328,8 +328,8 @@ public final class FxAnimationTest {
     static void testRegistrySlotIsolation() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            FxAnimation.FxAnimation enter = FxAnimation.fadeIn(n, 50);
-            FxAnimation.FxAnimation loop = FxAnimation.spin(n).loop();
+            FxAnimation enter = FxAnimation.fadeIn(n, 50);
+            FxAnimation loop = FxAnimation.spin(n).loop();
             // Different slots — both should coexist
             FxAnimation.AnimationRegistry.play(n, "enter", enter.raw());
             FxAnimation.AnimationRegistry.play(n, "loop", loop.raw());
