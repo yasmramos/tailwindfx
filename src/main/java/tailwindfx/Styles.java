@@ -1111,7 +1111,7 @@ public final class Styles {
      *
      * // Or force it in tests:
      * Styles.setReducedMotion(true);
-     * if (Styles.shouldAnimate()) AnimationUtil.fadeIn(node).play();
+     * if (Styles.shouldAnimate()) FxAnimation.fadeIn(node).play();
      * </pre>
      *
      * @param reduced {@code true} to suppress animations
@@ -1135,12 +1135,12 @@ public final class Styles {
      * If reduced, the final state is applied instantly.
      *
      * <pre>
-     * Styles.playIfMotionOk(AnimationUtil.fadeIn(node, 300));
+     * Styles.playIfMotionOk(FxAnimation.fadeIn(node, 300));
      * </pre>
      *
      * @param animation the animation to conditionally play
      */
-    public static void playIfMotionOk(AnimationUtil.FxAnimation animation) {
+    public static void playIfMotionOk(FxAnimation.FxAnimation animation) {
         Preconditions.requireNonNull(animation, "Styles.playIfMotionOk", "animation");
         if (shouldAnimate()) {
             animation.play();

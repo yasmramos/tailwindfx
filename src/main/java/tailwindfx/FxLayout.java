@@ -363,10 +363,10 @@ public final class FxLayout {
      * TailwindFX.layout(pane).col()
      *     .onTransition(new FxLayout.LayoutTransitionListener() {
      *         public void onLayoutChanging(Pane src, FxLayout.LayoutType t) {
-     *             AnimationUtil.fadeOut(src, 150).play();
+     *             FxAnimation.fadeOut(src, 150).play();
      *         }
      *         public void onLayoutChanged(Pane result) {
-     *             AnimationUtil.fadeIn(result, 150).play();
+     *             FxAnimation.fadeIn(result, 150).play();
      *         }
      *     })
      *     .build();
