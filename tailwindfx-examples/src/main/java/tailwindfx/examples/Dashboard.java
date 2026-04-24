@@ -46,7 +46,7 @@ public class Dashboard {
         // Scrollable content
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setFitToWidth(true);
-        scrollPane.setStyle("-fx-background: transparent; -fx-border-color: transparent;");
+        TailwindFX.apply(scrollPane, "bg-transparent border-transparent");
         
         VBox content = createContent();
         scrollPane.setContent(content);
@@ -379,8 +379,7 @@ public class Dashboard {
 
         TextField searchField = new TextField();
         searchField.setPromptText("Search anything... (Ctrl+K)");
-        TailwindFX.apply(searchField, "bg-transparent", "text-sm");
-        searchField.setStyle("-fx-prompt-text-fill: -color-gray-400; -fx-text-fill: -color-gray-900;");
+        TailwindFX.apply(searchField, "bg-transparent", "text-sm", "text-gray-900");
         searchField.setPrefWidth(270);
         
         // Add keyboard shortcut

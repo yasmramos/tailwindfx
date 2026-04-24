@@ -226,8 +226,8 @@ public class DashboardComponents {
 
             Region colorBox = new Region();
             colorBox.setPrefSize(16, 16);
-            TailwindFX.apply(colorBox, "rounded");
-            colorBox.setStyle(String.format("-fx-background-color: #%02X%02X%02X;",
+            TailwindFX.apply(colorBox, "rounded", 
+                String.format("border-[#%02X%02X%02X]",
                     (int)(slice.color.getRed() * 255),
                     (int)(slice.color.getGreen() * 255),
                     (int)(slice.color.getBlue() * 255)));
@@ -410,23 +410,18 @@ public class DashboardComponents {
     public static void showToast(String message, ToastType type) {
         if (toastContainer == null) return;
 
+        // Border color based on type - using TailwindFX utility classes
+        String borderColorClass = switch (type) {
+            case SUCCESS -> "border-l-4 border-l-green-500";
+            case ERROR -> "border-l-4 border-l-red-500";
+            case WARNING -> "border-l-4 border-l-yellow-500";
+            case INFO -> "border-l-4 border-l-blue-500";
+        };
+
         HBox toast = new HBox(12);
         toast.setAlignment(Pos.CENTER_LEFT);
         toast.setMaxWidth(380);
-        TailwindFX.apply(toast, "bg-white", "rounded-lg", "shadow-lg", "p-4");
-
-        // Border color based on type
-        Color borderColor = switch (type) {
-            case SUCCESS -> Color.rgb(34, 197, 94);
-            case ERROR -> Color.rgb(239, 68, 68);
-            case WARNING -> Color.rgb(245, 158, 11);
-            case INFO -> Color.rgb(59, 130, 246);
-        };
-
-        toast.setStyle(String.format("-fx-border-color: #%02X%02X%02X; -fx-border-width: 0 0 0 4; -fx-border-radius: 8;",
-                (int)(borderColor.getRed() * 255),
-                (int)(borderColor.getGreen() * 255),
-                (int)(borderColor.getBlue() * 255)));
+        TailwindFX.apply(toast, "bg-white", "rounded-lg", "shadow-lg", "p-4", borderColorClass);
 
         // Icon
         Label icon = new Label(switch (type) {
@@ -436,7 +431,15 @@ public class DashboardComponents {
             case INFO -> "ℹ";
         });
         TailwindFX.apply(icon, "text-xl");
-        icon.setTextFill(borderColor);
+        
+        // Set icon color based on type using utility classes
+        Color iconColor = switch (type) {
+            case SUCCESS -> Color.rgb(34, 197, 94);
+            case ERROR -> Color.rgb(239, 68, 68);
+            case WARNING -> Color.rgb(245, 158, 11);
+            case INFO -> Color.rgb(59, 130, 246);
+        };
+        icon.setTextFill(iconColor);
 
         // Message
         Label messageLabel = new Label(message);
