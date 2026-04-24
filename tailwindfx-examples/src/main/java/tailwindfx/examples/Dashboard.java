@@ -29,7 +29,7 @@ public class Dashboard {
 
     public static BorderPane create() {
         BorderPane mainLayout = new BorderPane();
-        TailwindFX.jit(mainLayout, "bg-gray-100");
+        TailwindFX.apply(mainLayout, "bg-gray-100");
 
         // Sidebar
         VBox sidebar = createSidebar();
@@ -37,7 +37,7 @@ public class Dashboard {
 
         // Main content
         VBox mainContent = new VBox(0);
-        TailwindFX.jit(mainContent, "bg-gray-50");
+        TailwindFX.apply(mainContent, "bg-gray-50");
 
         // Top bar
         HBox topBar = createTopBar();
@@ -59,7 +59,7 @@ public class Dashboard {
 
     public static VBox createContent() {
         VBox content = new VBox(28);
-        TailwindFX.jit(content, "p-8", "bg-gray-50");
+        TailwindFX.apply(content, "p-8", "bg-gray-50");
 
         // Welcome banner with gradients
         content.getChildren().add(createWelcomeBanner());
@@ -113,11 +113,11 @@ public class Dashboard {
     private static VBox createSidebar() {
         VBox sidebar = new VBox(0);
         sidebar.setPrefWidth(280);
-        TailwindFX.jit(sidebar, "bg-gray-900");
+        TailwindFX.apply(sidebar, "bg-gray-900");
 
         // Header with gradient
         VBox header = new VBox(16);
-        TailwindFX.jit(header, "p-5", "bg-gradient-to-b", "from-gray-800", "to-gray-900");
+        TailwindFX.apply(header, "p-5", "bg-gradient-to-b", "from-gray-800", "to-gray-900");
 
         HBox headerRow = new HBox(12);
         headerRow.setAlignment(Pos.CENTER_LEFT);
@@ -125,7 +125,7 @@ public class Dashboard {
         // Enhanced logo with gradient
         StackPane logo = new StackPane();
         logo.setPrefSize(48, 48);
-        TailwindFX.jit(logo, "bg-gradient-to-br", "from-blue-500", "to-purple-600", "rounded-xl");
+        TailwindFX.apply(logo, "bg-gradient-to-br", "from-blue-500", "to-purple-600", "rounded-xl");
         
         Label logoText = new Label("T");
         TailwindFX.apply(logoText, "text-2xl", "font-bold", "text-white");
@@ -143,12 +143,12 @@ public class Dashboard {
         // Collapse button
         Button collapseBtn = new Button("◀");
         collapseBtn.setPrefSize(32, 32);
-        TailwindFX.jit(collapseBtn, "bg-gray-700", "rounded-lg", "text-sm", "text-gray-400");
+        TailwindFX.apply(collapseBtn, "bg-gray-700", "rounded-lg", "text-sm", "text-gray-400");
         collapseBtn.setCursor(javafx.scene.Cursor.HAND);
         collapseBtn.setOnMouseEntered(e -> 
-            TailwindFX.jit(collapseBtn, "bg-blue-600", "rounded-lg", "text-sm", "text-white"));
+            TailwindFX.apply(collapseBtn, "bg-blue-600", "rounded-lg", "text-sm", "text-white"));
         collapseBtn.setOnMouseExited(e -> 
-            TailwindFX.jit(collapseBtn, "bg-gray-700", "rounded-lg", "text-sm", "text-gray-400"));
+            TailwindFX.apply(collapseBtn, "bg-gray-700", "rounded-lg", "text-sm", "text-gray-400"));
         collapseBtn.setOnAction(e -> toggleSidebar(sidebar, collapseBtn));
 
         Region spacer = new Region();
@@ -160,7 +160,7 @@ public class Dashboard {
 
         // Navigation menu
         VBox menu = new VBox(4);
-        TailwindFX.jit(menu, "p-3");
+        TailwindFX.apply(menu, "p-3");
 
         menu.getChildren().addAll(
             createMenuItem("📊", "Dashboard", true),
@@ -193,7 +193,7 @@ public class Dashboard {
     private static HBox createMenuItem(String icon, String text, boolean active, int badge) {
         HBox item = new HBox(12);
         item.setAlignment(Pos.CENTER_LEFT);
-        TailwindFX.jit(item, "p-3", "px-4", "rounded-lg");
+        TailwindFX.apply(item, "p-3", "px-4", "rounded-lg");
         item.setCursor(javafx.scene.Cursor.HAND);
 
         Label iconLabel = new Label(icon);
@@ -203,7 +203,7 @@ public class Dashboard {
         TailwindFX.apply(label, "text-sm", "font-medium");
 
         if (active) {
-            TailwindFX.jit(item, "bg-blue-600", "rounded-lg");
+            TailwindFX.apply(item, "bg-blue-600", "rounded-lg");
             TailwindFX.apply(iconLabel, "text-white");
             TailwindFX.apply(label, "text-white");
         } else {
@@ -211,12 +211,12 @@ public class Dashboard {
             TailwindFX.apply(label, "text-gray-400");
 
             item.setOnMouseEntered(e -> {
-                TailwindFX.jit(item, "bg-gray-800", "rounded-lg");
+                TailwindFX.apply(item, "bg-gray-800", "rounded-lg");
                 TailwindFX.apply(iconLabel, "text-white");
                 TailwindFX.apply(label, "text-white");
             });
             item.setOnMouseExited(e -> {
-                TailwindFX.jit(item, "rounded-lg");
+                TailwindFX.apply(item, "rounded-lg");
                 TailwindFX.apply(iconLabel, "text-gray-400");
                 TailwindFX.apply(label, "text-gray-400");
             });
@@ -234,7 +234,7 @@ public class Dashboard {
 
             StackPane badgePane = new StackPane();
             badgePane.setPrefSize(20, 20);
-            TailwindFX.jit(badgePane, "bg-red-500", "rounded-full");
+            TailwindFX.apply(badgePane, "bg-red-500", "rounded-full");
 
             Label badgeLabel = new Label(String.valueOf(badge));
             TailwindFX.apply(badgeLabel, "text-xs", "font-bold", "text-white");
@@ -249,14 +249,14 @@ public class Dashboard {
     private static Region createSeparator() {
         Region separator = new Region();
         separator.setPrefHeight(1);
-        TailwindFX.jit(separator, "bg-gray-800", "py-3", "px-4");
+        TailwindFX.apply(separator, "bg-gray-800", "py-3", "px-4");
         return separator;
     }
 
     private static VBox createUserProfile() {
         VBox profile = new VBox(12);
         profile.setAlignment(Pos.CENTER_LEFT);
-        TailwindFX.jit(profile, "p-5", "bg-gray-800");
+        TailwindFX.apply(profile, "p-5", "bg-gray-800");
 
         HBox info = new HBox(12);
         info.setAlignment(Pos.CENTER_LEFT);
@@ -297,7 +297,7 @@ public class Dashboard {
     private static HBox createTopBar() {
         HBox topBar = new HBox(24);
         topBar.setAlignment(Pos.CENTER);
-        TailwindFX.jit(topBar, "p-3", "px-6", "bg-gradient-to-b", "from-white", "to-gray-50", "rounded-b-2xl");
+        TailwindFX.apply(topBar, "p-3", "px-6", "bg-gradient-to-b", "from-white", "to-gray-50", "rounded-b-2xl");
 
         // Breadcrumb
         HBox breadcrumb = createBreadcrumb();
@@ -319,7 +319,7 @@ public class Dashboard {
         Region vSeparator = new Region();
         vSeparator.setPrefWidth(1);
         vSeparator.setPrefHeight(32);
-        TailwindFX.jit(vSeparator, "bg-gray-200");
+        TailwindFX.apply(vSeparator, "bg-gray-200");
 
         HBox userMenu = createUserMenuWithDropdown();
 
@@ -370,7 +370,7 @@ public class Dashboard {
     private static HBox createSearchBox() {
         HBox searchBox = new HBox(10);
         searchBox.setAlignment(Pos.CENTER_LEFT);
-        TailwindFX.jit(searchBox, "p-2", "px-3", "bg-gray-100", "rounded-xl", "border-2", "border-transparent");
+        TailwindFX.apply(searchBox, "p-2", "px-3", "bg-gray-100", "rounded-xl", "border-2", "border-transparent");
         searchBox.setPrefWidth(320);
         searchBox.setCursor(javafx.scene.Cursor.TEXT);
 
@@ -379,7 +379,7 @@ public class Dashboard {
 
         TextField searchField = new TextField();
         searchField.setPromptText("Search anything... (Ctrl+K)");
-        TailwindFX.jit(searchField, "bg-transparent", "text-sm");
+        TailwindFX.apply(searchField, "bg-transparent", "text-sm");
         searchField.setStyle("-fx-prompt-text-fill: -color-gray-400; -fx-text-fill: -color-gray-900;");
         searchField.setPrefWidth(270);
         
@@ -393,10 +393,10 @@ public class Dashboard {
 
         Button quickSearchBtn = new Button("⚡");
         quickSearchBtn.setPrefSize(28, 28);
-        TailwindFX.jit(quickSearchBtn, "bg-blue-500", "rounded-lg", "text-xs");
+        TailwindFX.apply(quickSearchBtn, "bg-blue-500", "rounded-lg", "text-xs");
         quickSearchBtn.setCursor(javafx.scene.Cursor.HAND);
-        quickSearchBtn.setOnMouseEntered(e -> TailwindFX.jit(quickSearchBtn, "bg-blue-600", "rounded-lg"));
-        quickSearchBtn.setOnMouseExited(e -> TailwindFX.jit(quickSearchBtn, "bg-blue-500", "rounded-lg"));
+        quickSearchBtn.setOnMouseEntered(e -> TailwindFX.apply(quickSearchBtn, "bg-blue-600", "rounded-lg"));
+        quickSearchBtn.setOnMouseExited(e -> TailwindFX.apply(quickSearchBtn, "bg-blue-500", "rounded-lg"));
         quickSearchBtn.setOnAction(e -> 
             DashboardComponents.showToast("Searching: " + searchField.getText(), 
                 DashboardComponents.ToastType.INFO));
@@ -404,10 +404,10 @@ public class Dashboard {
         searchBox.getChildren().addAll(searchIcon, searchField, quickSearchBtn);
 
         searchBox.setOnMouseEntered(e -> {
-            TailwindFX.jit(searchBox, "bg-white", "rounded-xl", "border-blue-200");
+            TailwindFX.apply(searchBox, "bg-white", "rounded-xl", "border-blue-200");
         });
         searchBox.setOnMouseExited(e -> {
-            TailwindFX.jit(searchBox, "bg-gray-100", "rounded-xl", "border-transparent");
+            TailwindFX.apply(searchBox, "bg-gray-100", "rounded-xl", "border-transparent");
         });
 
         return searchBox;
@@ -416,7 +416,7 @@ public class Dashboard {
     private static StackPane createNotificationButtonWithDropdown() {
         StackPane btnWrapper = new StackPane();
         btnWrapper.setPrefSize(44, 44);
-        TailwindFX.jit(btnWrapper, "bg-gray-100", "rounded-xl");
+        TailwindFX.apply(btnWrapper, "bg-gray-100", "rounded-xl");
         btnWrapper.setCursor(javafx.scene.Cursor.HAND);
 
         Label bell = new Label("🔔");
@@ -425,7 +425,7 @@ public class Dashboard {
 
         StackPane badge = new StackPane();
         badge.setPrefSize(20, 20);
-        TailwindFX.jit(badge, "bg-gradient-to-br", "from-red-500", "to-red-600", "rounded-full");
+        TailwindFX.apply(badge, "bg-gradient-to-br", "from-red-500", "to-red-600", "rounded-full");
 
         Label badgeCount = new Label("3");
         TailwindFX.apply(badgeCount, "text-xs", "font-bold", "text-white");
@@ -435,9 +435,9 @@ public class Dashboard {
         btnWrapper.getChildren().add(badge);
 
         btnWrapper.setOnMouseEntered(e -> 
-            TailwindFX.jit(btnWrapper, "bg-blue-50", "rounded-xl", "border-blue-200"));
+            TailwindFX.apply(btnWrapper, "bg-blue-50", "rounded-xl", "border-blue-200"));
         btnWrapper.setOnMouseExited(e -> 
-            TailwindFX.jit(btnWrapper, "bg-gray-100", "rounded-xl"));
+            TailwindFX.apply(btnWrapper, "bg-gray-100", "rounded-xl"));
 
         btnWrapper.setOnMouseClicked(e -> {
             DashboardComponents.showToast("You have 3 new notifications", 
@@ -456,11 +456,11 @@ public class Dashboard {
 
         VBox dropdown = new VBox(0);
         dropdown.setPrefWidth(340);
-        TailwindFX.jit(dropdown, "bg-white", "rounded-xl", "shadow-2xl");
+        TailwindFX.apply(dropdown, "bg-white", "rounded-xl", "shadow-2xl");
 
         HBox header = new HBox();
         header.setAlignment(Pos.CENTER_LEFT);
-        TailwindFX.jit(header, "p-4", "bg-gray-50", "rounded-t-xl");
+        TailwindFX.apply(header, "p-4", "bg-gray-50", "rounded-t-xl");
 
         Label title = new Label("Notifications");
         TailwindFX.apply(title, "text-sm", "font-bold", "text-gray-900");
@@ -480,7 +480,7 @@ public class Dashboard {
         header.getChildren().addAll(title, spacer, markAllRead);
 
         Separator sep1 = new Separator();
-        TailwindFX.jit(sep1, "bg-gray-200");
+        TailwindFX.apply(sep1, "bg-gray-200");
 
         VBox notifications = new VBox(0);
         notifications.getChildren().addAll(
@@ -491,11 +491,11 @@ public class Dashboard {
         );
 
         Separator sep2 = new Separator();
-        TailwindFX.jit(sep2, "bg-gray-200");
+        TailwindFX.apply(sep2, "bg-gray-200");
 
         HBox footer = new HBox();
         footer.setAlignment(Pos.CENTER);
-        TailwindFX.jit(footer, "p-3");
+        TailwindFX.apply(footer, "p-3");
 
         Label viewAll = new Label("View all notifications");
         TailwindFX.apply(viewAll, "text-sm", "font-medium", "text-blue-600");
@@ -517,16 +517,16 @@ public class Dashboard {
     private static VBox createNotificationItem(String icon, String message, String time, boolean read) {
         HBox item = new HBox(12);
         item.setAlignment(Pos.CENTER_LEFT);
-        TailwindFX.jit(item, "p-3", "px-4");
+        TailwindFX.apply(item, "p-3", "px-4");
         item.setCursor(javafx.scene.Cursor.HAND);
 
         if (!read) {
-            TailwindFX.jit(item, "bg-blue-50");
+            TailwindFX.apply(item, "bg-blue-50");
         }
 
         StackPane iconBox = new StackPane();
         iconBox.setPrefSize(36, 36);
-        TailwindFX.jit(iconBox, "bg-white", "rounded-lg");
+        TailwindFX.apply(iconBox, "bg-white", "rounded-lg");
         Label iconLabel = new Label(icon);
         iconBox.getChildren().add(iconLabel);
 
@@ -540,14 +540,14 @@ public class Dashboard {
         if (!read) {
             StackPane unreadDot = new StackPane();
             unreadDot.setPrefSize(8, 8);
-            TailwindFX.jit(unreadDot, "bg-blue-500", "rounded-full");
+            TailwindFX.apply(unreadDot, "bg-blue-500", "rounded-full");
             item.getChildren().add(unreadDot);
         }
 
         item.getChildren().addAll(iconBox, content);
 
-        item.setOnMouseEntered(e -> TailwindFX.jit(item, "bg-gray-50"));
-        item.setOnMouseExited(e -> TailwindFX.jit(item, read ? "bg-transparent" : "bg-blue-50"));
+        item.setOnMouseEntered(e -> TailwindFX.apply(item, "bg-gray-50"));
+        item.setOnMouseExited(e -> TailwindFX.apply(item, read ? "bg-transparent" : "bg-blue-50"));
         item.setOnMouseClicked(e -> notificationDropdown.hide());
 
         VBox wrapper = new VBox(item);
@@ -557,11 +557,11 @@ public class Dashboard {
     private static Button createQuickActionsButton() {
         Button btn = new Button("➕");
         btn.setPrefSize(44, 44);
-        TailwindFX.jit(btn, "bg-gray-100", "rounded-xl");
+        TailwindFX.apply(btn, "bg-gray-100", "rounded-xl");
         btn.setCursor(javafx.scene.Cursor.HAND);
 
-        btn.setOnMouseEntered(e -> TailwindFX.jit(btn, "bg-blue-500", "rounded-xl"));
-        btn.setOnMouseExited(e -> TailwindFX.jit(btn, "bg-gray-100", "rounded-xl"));
+        btn.setOnMouseEntered(e -> TailwindFX.apply(btn, "bg-blue-500", "rounded-xl"));
+        btn.setOnMouseExited(e -> TailwindFX.apply(btn, "bg-gray-100", "rounded-xl"));
         
         btn.setOnAction(e -> 
             DashboardComponents.showToast("Quick actions menu opened", 
@@ -573,11 +573,11 @@ public class Dashboard {
     private static Button createThemeToggle() {
         Button toggle = new Button(darkModeEnabled ? "🌙" : "☀️");
         toggle.setPrefSize(44, 44);
-        TailwindFX.jit(toggle, "bg-gray-100", "rounded-xl");
+        TailwindFX.apply(toggle, "bg-gray-100", "rounded-xl");
         toggle.setCursor(javafx.scene.Cursor.HAND);
 
-        toggle.setOnMouseEntered(e -> TailwindFX.jit(toggle, "bg-blue-50", "rounded-xl"));
-        toggle.setOnMouseExited(e -> TailwindFX.jit(toggle, "bg-gray-100", "rounded-xl"));
+        toggle.setOnMouseEntered(e -> TailwindFX.apply(toggle, "bg-blue-50", "rounded-xl"));
+        toggle.setOnMouseExited(e -> TailwindFX.apply(toggle, "bg-gray-100", "rounded-xl"));
 
         toggle.setOnAction(e -> {
             darkModeEnabled = !darkModeEnabled;
@@ -602,7 +602,7 @@ public class Dashboard {
     private static HBox createUserMenuWithDropdown() {
         HBox userMenu = new HBox(10);
         userMenu.setAlignment(Pos.CENTER);
-        TailwindFX.jit(userMenu, "p-1", "px-2", "bg-gray-100", "rounded-xl");
+        TailwindFX.apply(userMenu, "p-1", "px-2", "bg-gray-100", "rounded-xl");
         userMenu.setCursor(javafx.scene.Cursor.HAND);
 
         VBox userText = new VBox(2);
@@ -622,9 +622,9 @@ public class Dashboard {
         userMenu.getChildren().addAll(userText, userAvatar, dropdownArrow);
 
         userMenu.setOnMouseEntered(e -> 
-            TailwindFX.jit(userMenu, "bg-white", "rounded-xl", "border-blue-200"));
+            TailwindFX.apply(userMenu, "bg-white", "rounded-xl", "border-blue-200"));
         userMenu.setOnMouseExited(e -> 
-            TailwindFX.jit(userMenu, "bg-gray-100", "rounded-xl"));
+            TailwindFX.apply(userMenu, "bg-gray-100", "rounded-xl"));
 
         userMenu.setOnMouseClicked(e -> showUserDropdown(userMenu));
 
@@ -639,11 +639,11 @@ public class Dashboard {
 
         VBox dropdown = new VBox(0);
         dropdown.setPrefWidth(280);
-        TailwindFX.jit(dropdown, "bg-white", "rounded-xl", "shadow-2xl");
+        TailwindFX.apply(dropdown, "bg-white", "rounded-xl", "shadow-2xl");
 
         HBox header = new HBox(12);
         header.setAlignment(Pos.CENTER_LEFT);
-        TailwindFX.jit(header, "p-4", "bg-gradient-to-r", "from-blue-50", "to-purple-50", "rounded-t-xl");
+        TailwindFX.apply(header, "p-4", "bg-gradient-to-r", "from-blue-50", "to-purple-50", "rounded-t-xl");
 
         StackPane avatar = ComponentFactory.avatar("JD", "blue", 50);
         TailwindFX.apply(avatar, "rounded-full");
@@ -658,7 +658,7 @@ public class Dashboard {
         header.getChildren().addAll(avatar, userInfo);
 
         Separator sep1 = new Separator();
-        TailwindFX.jit(sep1, "bg-gray-200");
+        TailwindFX.apply(sep1, "bg-gray-200");
 
         VBox menuItems = new VBox(0);
         menuItems.getChildren().addAll(
@@ -673,11 +673,11 @@ public class Dashboard {
         );
 
         Separator sep2 = new Separator();
-        TailwindFX.jit(sep2, "bg-gray-200");
+        TailwindFX.apply(sep2, "bg-gray-200");
 
         HBox logoutItem = new HBox(12);
         logoutItem.setAlignment(Pos.CENTER_LEFT);
-        TailwindFX.jit(logoutItem, "p-3", "px-4");
+        TailwindFX.apply(logoutItem, "p-3", "px-4");
         logoutItem.setCursor(javafx.scene.Cursor.HAND);
 
         Label logoutIcon = new Label("🚪");
@@ -691,8 +691,8 @@ public class Dashboard {
         logoutText.getChildren().addAll(logoutTitle, logoutDesc);
 
         logoutItem.getChildren().addAll(logoutIcon, logoutText);
-        logoutItem.setOnMouseEntered(e -> TailwindFX.jit(logoutItem, "bg-red-50"));
-        logoutItem.setOnMouseExited(e -> TailwindFX.jit(logoutItem, "bg-transparent"));
+        logoutItem.setOnMouseEntered(e -> TailwindFX.apply(logoutItem, "bg-red-50"));
+        logoutItem.setOnMouseExited(e -> TailwindFX.apply(logoutItem, "bg-transparent"));
         logoutItem.setOnMouseClicked(e -> {
             DashboardComponents.showToast("Signing out...", DashboardComponents.ToastType.SUCCESS);
             userDropdown.hide();
@@ -713,7 +713,7 @@ public class Dashboard {
     private static HBox createDropdownMenuItem(String icon, String title, String description, Runnable action) {
         HBox item = new HBox(12);
         item.setAlignment(Pos.CENTER_LEFT);
-        TailwindFX.jit(item, "p-3", "px-4", "bg-transparent");
+        TailwindFX.apply(item, "p-3", "px-4", "bg-transparent");
         item.setCursor(javafx.scene.Cursor.HAND);
 
         Label iconLabel = new Label(icon);
@@ -728,8 +728,8 @@ public class Dashboard {
 
         item.getChildren().addAll(iconLabel, text);
 
-        item.setOnMouseEntered(e -> TailwindFX.jit(item, "bg-gray-50"));
-        item.setOnMouseExited(e -> TailwindFX.jit(item, "bg-transparent"));
+        item.setOnMouseEntered(e -> TailwindFX.apply(item, "bg-gray-50"));
+        item.setOnMouseExited(e -> TailwindFX.apply(item, "bg-transparent"));
         item.setOnMouseClicked(e -> {
             action.run();
             userDropdown.hide();
@@ -745,7 +745,7 @@ public class Dashboard {
     private static HBox createWelcomeBanner() {
         HBox banner = new HBox(24);
         banner.setAlignment(Pos.CENTER_LEFT);
-        TailwindFX.jit(banner, "p-8", "px-10", "bg-gradient-to-r", "from-blue-600", "to-purple-700", "rounded-2xl");
+        TailwindFX.apply(banner, "p-8", "px-10", "bg-gradient-to-r", "from-blue-600", "to-purple-700", "rounded-2xl");
 
         VBox text = new VBox(8);
         Label title = new Label("Welcome back, John! 👋");
@@ -761,18 +761,18 @@ public class Dashboard {
 
         HBox actions = new HBox(12);
         Button reportsBtn = new Button("📊 View Reports");
-        TailwindFX.jit(reportsBtn, "bg-white", "rounded-xl", "text-sm", "font-semibold", "text-blue-600", "p-3", "px-6");
+        TailwindFX.apply(reportsBtn, "bg-white", "rounded-xl", "text-sm", "font-semibold", "text-blue-600", "p-3", "px-6");
         reportsBtn.setCursor(javafx.scene.Cursor.HAND);
-        reportsBtn.setOnMouseEntered(e -> TailwindFX.jit(reportsBtn, "bg-blue-50", "rounded-xl"));
-        reportsBtn.setOnMouseExited(e -> TailwindFX.jit(reportsBtn, "bg-white", "rounded-xl"));
+        reportsBtn.setOnMouseEntered(e -> TailwindFX.apply(reportsBtn, "bg-blue-50", "rounded-xl"));
+        reportsBtn.setOnMouseExited(e -> TailwindFX.apply(reportsBtn, "bg-white", "rounded-xl"));
         reportsBtn.setOnAction(e -> 
             DashboardComponents.showToast("Opening reports...", DashboardComponents.ToastType.INFO));
 
         Button exportBtn = new Button("📥 Export Data");
-        TailwindFX.jit(exportBtn, "bg-blue-700", "rounded-xl", "text-sm", "font-semibold", "text-white", "p-3", "px-6");
+        TailwindFX.apply(exportBtn, "bg-blue-700", "rounded-xl", "text-sm", "font-semibold", "text-white", "p-3", "px-6");
         exportBtn.setCursor(javafx.scene.Cursor.HAND);
-        exportBtn.setOnMouseEntered(e -> TailwindFX.jit(exportBtn, "bg-blue-800", "rounded-xl"));
-        exportBtn.setOnMouseExited(e -> TailwindFX.jit(exportBtn, "bg-blue-700", "rounded-xl"));
+        exportBtn.setOnMouseEntered(e -> TailwindFX.apply(exportBtn, "bg-blue-800", "rounded-xl"));
+        exportBtn.setOnMouseExited(e -> TailwindFX.apply(exportBtn, "bg-blue-700", "rounded-xl"));
         exportBtn.setOnAction(e -> 
             DashboardComponents.showToast("Exporting data...", DashboardComponents.ToastType.SUCCESS));
 
@@ -840,7 +840,7 @@ public class Dashboard {
 
     private static VBox createActivityFeed() {
         VBox section = new VBox(16);
-        TailwindFX.jit(section, "bg-white", "p-6", "rounded-xl", "shadow-md");
+        TailwindFX.apply(section, "bg-white", "p-6", "rounded-xl", "shadow-md");
 
         HBox header = new HBox();
         header.setAlignment(Pos.CENTER_LEFT);
@@ -878,7 +878,7 @@ public class Dashboard {
 
         StackPane iconBox = new StackPane();
         iconBox.setPrefSize(40, 40);
-        TailwindFX.jit(iconBox, "bg-blue-50", "rounded-lg");
+        TailwindFX.apply(iconBox, "bg-blue-50", "rounded-lg");
         Label iconLabel = new Label(icon);
         TailwindFX.apply(iconLabel, "text-lg");
         iconBox.getChildren().add(iconLabel);
@@ -893,8 +893,8 @@ public class Dashboard {
         content.getChildren().addAll(msgLabel, timeLabel);
         item.getChildren().addAll(iconBox, content);
 
-        item.setOnMouseEntered(e -> TailwindFX.jit(item, "bg-gray-50", "rounded-lg", "p-2"));
-        item.setOnMouseExited(e -> TailwindFX.jit(item, "bg-transparent", "p-0"));
+        item.setOnMouseEntered(e -> TailwindFX.apply(item, "bg-gray-50", "rounded-lg", "p-2"));
+        item.setOnMouseExited(e -> TailwindFX.apply(item, "bg-transparent", "p-0"));
 
         return item;
     }
@@ -905,7 +905,7 @@ public class Dashboard {
 
     private static VBox createEnhancedDataTable() {
         VBox section = new VBox(20);
-        TailwindFX.jit(section, "bg-white", "p-6", "rounded-xl", "shadow-md");
+        TailwindFX.apply(section, "bg-white", "p-6", "rounded-xl", "shadow-md");
 
         // Header with search and filters
         HBox header = new HBox();
@@ -919,16 +919,16 @@ public class Dashboard {
 
         TextField searchField = new TextField();
         searchField.setPromptText("Search orders...");
-        TailwindFX.jit(searchField, "input", "w-64");
+        TailwindFX.apply(searchField, "input", "w-64");
         
         Button filterBtn = new Button("🔍 Filter");
-        TailwindFX.jit(filterBtn, "bg-gray-100", "rounded-lg", "px-4", "py-2");
+        TailwindFX.apply(filterBtn, "bg-gray-100", "rounded-lg", "px-4", "py-2");
         filterBtn.setCursor(javafx.scene.Cursor.HAND);
         filterBtn.setOnAction(e -> 
             DashboardComponents.showToast("Filter options coming soon!", DashboardComponents.ToastType.INFO));
 
         Button exportBtn = new Button("📥 Export");
-        TailwindFX.jit(exportBtn, "bg-blue-600", "text-white", "rounded-lg", "px-4", "py-2");
+        TailwindFX.apply(exportBtn, "bg-blue-600", "text-white", "rounded-lg", "px-4", "py-2");
         exportBtn.setCursor(javafx.scene.Cursor.HAND);
         exportBtn.setOnAction(e -> 
             DashboardComponents.showToast("Exporting orders...", DashboardComponents.ToastType.SUCCESS));
@@ -992,7 +992,7 @@ public class Dashboard {
 
     private static VBox createDemoControls() {
         VBox section = new VBox(20);
-        TailwindFX.jit(section, "bg-white", "p-6", "rounded-xl", "shadow-md");
+        TailwindFX.apply(section, "bg-white", "p-6", "rounded-xl", "shadow-md");
 
         Label title = new Label("UI Components Showcase");
         TailwindFX.apply(title, "text-xl", "font-bold", "text-gray-900");
@@ -1002,29 +1002,29 @@ public class Dashboard {
         buttonsRow.setAlignment(Pos.CENTER_LEFT);
 
         Button primary = new Button("Primary Button");
-        TailwindFX.jit(primary, "bg-blue-600", "text-white", "rounded-lg", "px-4", "py-2");
+        TailwindFX.apply(primary, "bg-blue-600", "text-white", "rounded-lg", "px-4", "py-2");
         primary.setCursor(javafx.scene.Cursor.HAND);
         primary.setOnAction(e -> 
             DashboardComponents.showToast("Primary button clicked!", DashboardComponents.ToastType.SUCCESS));
 
         Button secondary = new Button("Secondary");
-        TailwindFX.jit(secondary, "bg-gray-200", "text-gray-800", "rounded-lg", "px-4", "py-2");
+        TailwindFX.apply(secondary, "bg-gray-200", "text-gray-800", "rounded-lg", "px-4", "py-2");
         secondary.setCursor(javafx.scene.Cursor.HAND);
 
         Button success = new Button("✓ Success");
-        TailwindFX.jit(success, "bg-green-600", "text-white", "rounded-lg", "px-4", "py-2");
+        TailwindFX.apply(success, "bg-green-600", "text-white", "rounded-lg", "px-4", "py-2");
         success.setCursor(javafx.scene.Cursor.HAND);
         success.setOnAction(e -> 
             DashboardComponents.showToast("Operation successful!", DashboardComponents.ToastType.SUCCESS));
 
         Button danger = new Button("✕ Delete");
-        TailwindFX.jit(danger, "bg-red-600", "text-white", "rounded-lg", "px-4", "py-2");
+        TailwindFX.apply(danger, "bg-red-600", "text-white", "rounded-lg", "px-4", "py-2");
         danger.setCursor(javafx.scene.Cursor.HAND);
         danger.setOnAction(e -> 
             DashboardComponents.showToast("Item deleted", DashboardComponents.ToastType.ERROR));
 
         Button warning = new Button("⚠ Warning");
-        TailwindFX.jit(warning, "bg-yellow-500", "text-white", "rounded-lg", "px-4", "py-2");
+        TailwindFX.apply(warning, "bg-yellow-500", "text-white", "rounded-lg", "px-4", "py-2");
         warning.setCursor(javafx.scene.Cursor.HAND);
         warning.setOnAction(e -> 
             DashboardComponents.showToast("This is a warning!", DashboardComponents.ToastType.WARNING));
@@ -1036,16 +1036,16 @@ public class Dashboard {
         badgesRow.setAlignment(Pos.CENTER_LEFT);
 
         Label badge1 = new Label("New");
-        TailwindFX.jit(badge1, "bg-blue-100", "text-blue-800", "px-3", "py-1", "rounded-full", "text-sm");
+        TailwindFX.apply(badge1, "bg-blue-100", "text-blue-800", "px-3", "py-1", "rounded-full", "text-sm");
 
         Label badge2 = new Label("Active");
-        TailwindFX.jit(badge2, "bg-green-100", "text-green-800", "px-3", "py-1", "rounded-full", "text-sm");
+        TailwindFX.apply(badge2, "bg-green-100", "text-green-800", "px-3", "py-1", "rounded-full", "text-sm");
 
         Label badge3 = new Label("Pending");
-        TailwindFX.jit(badge3, "bg-yellow-100", "text-yellow-800", "px-3", "py-1", "rounded-full", "text-sm");
+        TailwindFX.apply(badge3, "bg-yellow-100", "text-yellow-800", "px-3", "py-1", "rounded-full", "text-sm");
 
         Label badge4 = new Label("Error");
-        TailwindFX.jit(badge4, "bg-red-100", "text-red-800", "px-3", "py-1", "rounded-full", "text-sm");
+        TailwindFX.apply(badge4, "bg-red-100", "text-red-800", "px-3", "py-1", "rounded-full", "text-sm");
 
         badgesRow.getChildren().addAll(new Label("Badges: "), badge1, badge2, badge3, badge4);
 

@@ -36,7 +36,7 @@ public class DashboardComponents {
 
     public static VBox createLineChart(String title, List<ChartData> datasets, List<String> labels) {
         VBox container = new VBox(16);
-        TailwindFX.jit(container, "bg-white", "p-6", "rounded-xl", "shadow-md");
+        TailwindFX.apply(container, "bg-white", "p-6", "rounded-xl", "shadow-md");
 
         // Header with period selector
         HBox header = new HBox();
@@ -55,7 +55,7 @@ public class DashboardComponents {
 
         // Canvas for chart
         Canvas canvas = new Canvas(600, 300);
-        TailwindFX.jit(canvas, "w-full", "rounded-lg");
+        TailwindFX.apply(canvas, "w-full", "rounded-lg");
 
         drawLineChart(canvas, datasets, labels);
 
@@ -185,11 +185,11 @@ public class DashboardComponents {
             Button btn = new Button(period);
             boolean isActive = period.equals("30D");
             if (isActive) {
-                TailwindFX.jit(btn, "bg-blue-600", "text-white", "rounded-lg", "px-3", "py-1", "text-sm");
+                TailwindFX.apply(btn, "bg-blue-600", "text-white", "rounded-lg", "px-3", "py-1", "text-sm");
             } else {
-                TailwindFX.jit(btn, "bg-gray-100", "text-gray-700", "rounded-lg", "px-3", "py-1", "text-sm");
-                btn.setOnMouseEntered(e -> TailwindFX.jit(btn, "bg-gray-200"));
-                btn.setOnMouseExited(e -> TailwindFX.jit(btn, "bg-gray-100"));
+                TailwindFX.apply(btn, "bg-gray-100", "text-gray-700", "rounded-lg", "px-3", "py-1", "text-sm");
+                btn.setOnMouseEntered(e -> TailwindFX.apply(btn, "bg-gray-200"));
+                btn.setOnMouseExited(e -> TailwindFX.apply(btn, "bg-gray-100"));
             }
             btn.setCursor(javafx.scene.Cursor.HAND);
             selector.getChildren().add(btn);
@@ -204,7 +204,7 @@ public class DashboardComponents {
 
     public static VBox createPieChart(String title, List<PieSlice> slices) {
         VBox container = new VBox(16);
-        TailwindFX.jit(container, "bg-white", "p-6", "rounded-xl", "shadow-md");
+        TailwindFX.apply(container, "bg-white", "p-6", "rounded-xl", "shadow-md");
 
         Label titleLabel = new Label(title);
         TailwindFX.apply(titleLabel, "text-lg", "font-bold", "text-gray-800");
@@ -226,7 +226,7 @@ public class DashboardComponents {
 
             Region colorBox = new Region();
             colorBox.setPrefSize(16, 16);
-            TailwindFX.jit(colorBox, "rounded");
+            TailwindFX.apply(colorBox, "rounded");
             colorBox.setStyle(String.format("-fx-background-color: #%02X%02X%02X;",
                     (int)(slice.color.getRed() * 255),
                     (int)(slice.color.getGreen() * 255),
@@ -303,7 +303,7 @@ public class DashboardComponents {
                                                     boolean isPositive, List<Double> data, Color color) {
         HBox card = new HBox(16);
         card.setAlignment(Pos.CENTER_LEFT);
-        TailwindFX.jit(card, "bg-white", "p-5", "rounded-xl", "shadow-md");
+        TailwindFX.apply(card, "bg-white", "p-5", "rounded-xl", "shadow-md");
         card.setPrefWidth(280);
 
         // Text content
@@ -399,7 +399,7 @@ public class DashboardComponents {
     public static void initToastContainer(Pane parent) {
         toastContainer = new VBox(12);
         toastContainer.setAlignment(Pos.TOP_RIGHT);
-        TailwindFX.jit(toastContainer, "p-4");
+        TailwindFX.apply(toastContainer, "p-4");
         toastContainer.setTranslateX(-20);
         toastContainer.setTranslateY(20);
 
@@ -413,7 +413,7 @@ public class DashboardComponents {
         HBox toast = new HBox(12);
         toast.setAlignment(Pos.CENTER_LEFT);
         toast.setMaxWidth(380);
-        TailwindFX.jit(toast, "bg-white", "rounded-lg", "shadow-lg", "p-4");
+        TailwindFX.apply(toast, "bg-white", "rounded-lg", "shadow-lg", "p-4");
 
         // Border color based on type
         Color borderColor = switch (type) {
@@ -435,7 +435,7 @@ public class DashboardComponents {
             case WARNING -> "⚠";
             case INFO -> "ℹ";
         });
-        TailwindFX.jit(icon, "text-xl");
+        TailwindFX.apply(icon, "text-xl");
         icon.setTextFill(borderColor);
 
         // Message
@@ -445,7 +445,7 @@ public class DashboardComponents {
 
         // Close button
         Button closeBtn = new Button("✕");
-        TailwindFX.jit(closeBtn, "text-gray-400", "bg-transparent");
+        TailwindFX.apply(closeBtn, "text-gray-400", "bg-transparent");
         closeBtn.setCursor(javafx.scene.Cursor.HAND);
         closeBtn.setOnAction(e -> dismissToast(toast));
 
@@ -499,7 +499,7 @@ public class DashboardComponents {
 
     public static StackPane createModalOverlay(Node content) {
         StackPane modal = new StackPane();
-        TailwindFX.jit(modal, "bg-black");
+        TailwindFX.apply(modal, "bg-black");
         modal.setOpacity(0.5);
 
         modal.getChildren().add(content);
@@ -511,7 +511,7 @@ public class DashboardComponents {
     public static VBox createModalDialog(String title, Node body, List<Button> actions) {
         VBox dialog = new VBox(20);
         dialog.setMaxWidth(600);
-        TailwindFX.jit(dialog, "bg-white", "rounded-2xl", "shadow-2xl", "p-6");
+        TailwindFX.apply(dialog, "bg-white", "rounded-2xl", "shadow-2xl", "p-6");
 
         // Header
         HBox header = new HBox();
@@ -524,7 +524,7 @@ public class DashboardComponents {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         Button closeBtn = new Button("✕");
-        TailwindFX.jit(closeBtn, "text-gray-400", "bg-gray-100", "rounded-full", "w-8", "h-8");
+        TailwindFX.apply(closeBtn, "text-gray-400", "bg-gray-100", "rounded-full", "w-8", "h-8");
         closeBtn.setCursor(javafx.scene.Cursor.HAND);
         closeBtn.setOnAction(e -> {
             StackPane parent = (StackPane) dialog.getParent();
@@ -575,7 +575,7 @@ public class DashboardComponents {
 
     public static VBox createCalendarWidget() {
         VBox container = new VBox(16);
-        TailwindFX.jit(container, "bg-white", "p-5", "rounded-xl", "shadow-md");
+        TailwindFX.apply(container, "bg-white", "p-5", "rounded-xl", "shadow-md");
 
         // Month header
         HBox header = new HBox();
@@ -589,8 +589,8 @@ public class DashboardComponents {
 
         Button prevBtn = new Button("◀");
         Button nextBtn = new Button("▶");
-        TailwindFX.jit(prevBtn, "bg-gray-100", "rounded-lg", "w-7", "h-7");
-        TailwindFX.jit(nextBtn, "bg-gray-100", "rounded-lg", "w-7", "h-7");
+        TailwindFX.apply(prevBtn, "bg-gray-100", "rounded-lg", "w-7", "h-7");
+        TailwindFX.apply(nextBtn, "bg-gray-100", "rounded-lg", "w-7", "h-7");
         prevBtn.setCursor(javafx.scene.Cursor.HAND);
         nextBtn.setCursor(javafx.scene.Cursor.HAND);
 
@@ -627,15 +627,15 @@ public class DashboardComponents {
             dayCell.getChildren().add(dayNum);
 
             if (day == today.getDayOfMonth()) {
-                TailwindFX.jit(dayCell, "bg-blue-600", "rounded-full");
+                TailwindFX.apply(dayCell, "bg-blue-600", "rounded-full");
                 TailwindFX.apply(dayNum, "text-white", "font-bold");
             } else {
                 dayCell.setCursor(javafx.scene.Cursor.HAND);
                 final int currentDay = day; // Capture in final variable
-                dayCell.setOnMouseEntered(e -> TailwindFX.jit(dayCell, "bg-gray-100", "rounded-full"));
+                dayCell.setOnMouseEntered(e -> TailwindFX.apply(dayCell, "bg-gray-100", "rounded-full"));
                 dayCell.setOnMouseExited(e -> {
                     if (currentDay != today.getDayOfMonth()) {
-                        TailwindFX.jit(dayCell, "bg-transparent");
+                        TailwindFX.apply(dayCell, "bg-transparent");
                     }
                 });
             }
@@ -651,7 +651,7 @@ public class DashboardComponents {
 
         // Upcoming events
         VBox events = new VBox(8);
-        TailwindFX.jit(events, "mt-4", "pt-4", "border-t", "border-gray-200");
+        TailwindFX.apply(events, "mt-4", "pt-4", "border-t", "border-gray-200");
 
         Label eventsTitle = new Label("Upcoming Events");
         TailwindFX.apply(eventsTitle, "text-sm", "font-semibold", "text-gray-700");
@@ -675,7 +675,7 @@ public class DashboardComponents {
 
         Region colorIndicator = new Region();
         colorIndicator.setPrefSize(4, 32);
-        TailwindFX.jit(colorIndicator, "bg-" + color + "-500", "rounded");
+        TailwindFX.apply(colorIndicator, "bg-" + color + "-500", "rounded");
 
         VBox text = new VBox(2);
         Label titleLabel = new Label(title);
@@ -688,8 +688,8 @@ public class DashboardComponents {
         item.getChildren().addAll(colorIndicator, text);
 
         item.setCursor(javafx.scene.Cursor.HAND);
-        item.setOnMouseEntered(e -> TailwindFX.jit(item, "bg-gray-50", "rounded-lg", "p-2"));
-        item.setOnMouseExited(e -> TailwindFX.jit(item, "bg-transparent", "p-0"));
+        item.setOnMouseEntered(e -> TailwindFX.apply(item, "bg-gray-50", "rounded-lg", "p-2"));
+        item.setOnMouseExited(e -> TailwindFX.apply(item, "bg-transparent", "p-0"));
 
         return item;
     }
@@ -700,29 +700,29 @@ public class DashboardComponents {
 
     public static VBox createSkeletonCard() {
         VBox card = new VBox(16);
-        TailwindFX.jit(card, "bg-white", "p-6", "rounded-xl", "shadow-md");
+        TailwindFX.apply(card, "bg-white", "p-6", "rounded-xl", "shadow-md");
 
         // Animated skeleton lines
         VBox skeleton = new VBox(12);
         
         Region titleSkeleton = new Region();
         titleSkeleton.setPrefSize(200, 24);
-        TailwindFX.jit(titleSkeleton, "bg-gray-200", "rounded");
+        TailwindFX.apply(titleSkeleton, "bg-gray-200", "rounded");
         animateSkeleton(titleSkeleton);
 
         Region line1 = new Region();
         line1.setPrefSize(280, 16);
-        TailwindFX.jit(line1, "bg-gray-200", "rounded");
+        TailwindFX.apply(line1, "bg-gray-200", "rounded");
         animateSkeleton(line1);
 
         Region line2 = new Region();
         line2.setPrefSize(240, 16);
-        TailwindFX.jit(line2, "bg-gray-200", "rounded");
+        TailwindFX.apply(line2, "bg-gray-200", "rounded");
         animateSkeleton(line2);
 
         Region line3 = new Region();
         line3.setPrefSize(180, 16);
-        TailwindFX.jit(line3, "bg-gray-200", "rounded");
+        TailwindFX.apply(line3, "bg-gray-200", "rounded");
         animateSkeleton(line3);
 
         skeleton.getChildren().addAll(titleSkeleton, line1, line2, line3);
@@ -733,36 +733,36 @@ public class DashboardComponents {
 
     public static HBox createSkeletonStatCard() {
         HBox card = new HBox(16);
-        TailwindFX.jit(card, "bg-white", "p-5", "rounded-xl", "shadow-md");
+        TailwindFX.apply(card, "bg-white", "p-5", "rounded-xl", "shadow-md");
         card.setPrefWidth(280);
 
         VBox text = new VBox(12);
         
         Region iconSkeleton = new Region();
         iconSkeleton.setPrefSize(48, 48);
-        TailwindFX.jit(iconSkeleton, "bg-gray-200", "rounded-xl");
+        TailwindFX.apply(iconSkeleton, "bg-gray-200", "rounded-xl");
         animateSkeleton(iconSkeleton);
 
         Region titleSkeleton = new Region();
         titleSkeleton.setPrefSize(120, 16);
-        TailwindFX.jit(titleSkeleton, "bg-gray-200", "rounded");
+        TailwindFX.apply(titleSkeleton, "bg-gray-200", "rounded");
         animateSkeleton(titleSkeleton);
 
         Region valueSkeleton = new Region();
         valueSkeleton.setPrefSize(100, 32);
-        TailwindFX.jit(valueSkeleton, "bg-gray-200", "rounded");
+        TailwindFX.apply(valueSkeleton, "bg-gray-200", "rounded");
         animateSkeleton(valueSkeleton);
 
         Region changeSkeleton = new Region();
         changeSkeleton.setPrefSize(80, 20);
-        TailwindFX.jit(changeSkeleton, "bg-gray-200", "rounded-full");
+        TailwindFX.apply(changeSkeleton, "bg-gray-200", "rounded-full");
         animateSkeleton(changeSkeleton);
 
         text.getChildren().addAll(titleSkeleton, valueSkeleton, changeSkeleton);
 
         Region chartSkeleton = new Region();
         chartSkeleton.setPrefSize(100, 40);
-        TailwindFX.jit(chartSkeleton, "bg-gray-200", "rounded");
+        TailwindFX.apply(chartSkeleton, "bg-gray-200", "rounded");
         animateSkeleton(chartSkeleton);
 
         card.getChildren().addAll(text, chartSkeleton);
