@@ -15,8 +15,8 @@ import javafx.scene.shape.Arc;
 import javafx.scene.shape.ArcType;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
-import tailwindfx.AnimationUtil;
 import tailwindfx.ComponentFactory;
+import tailwindfx.FxAnimation;
 import tailwindfx.TailwindFX;
 
 import java.time.LocalDate;
@@ -339,7 +339,7 @@ public class DashboardComponents {
         card.setCursor(javafx.scene.Cursor.HAND);
         card.setOnMouseEntered(e -> {
             card.setEffect(new DropShadow(15, Color.rgb(0, 0, 0, 0.15)));
-            AnimationUtil.onHoverScale(card, 1.02);
+            FxAnimation.onHoverScale(card, 1.02);
         });
         card.setOnMouseExited(e -> {
             card.setEffect(new DropShadow(4, Color.rgb(0, 0, 0, 0.1)));

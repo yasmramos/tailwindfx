@@ -7,7 +7,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Popup;
-import tailwindfx.AnimationUtil;
 import tailwindfx.ComponentFactory;
 import tailwindfx.FxDataTable;
 import tailwindfx.TailwindFX;
