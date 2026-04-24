@@ -2,8 +2,8 @@
 
 > Utility-first UI framework for JavaFX, inspired by Tailwind CSS.
 
-[![Java](https://img.shields.io/badge/Java-21%2B-blue)](https://openjdk.org/projects/jdk/21/)
-[![JavaFX](https://img.shields.io/badge/JavaFX-21%2B-green)](https://openjfx.io/)
+[![Java](https://img.shields.io/badge/Java-17%2B-blue)](https://openjdk.org/projects/jdk/17/)
+[![JavaFX](https://img.shields.io/badge/JavaFX-17%2B-green)](https://openjfx.io/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
 ---
