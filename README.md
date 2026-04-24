@@ -31,7 +31,7 @@ AnimationUtil.onHoverScale(btn, 1.05);
 
 | Feature | Description |
 |---|---|
-| **1 400+ CSS utilities** | Layout, typography, colors, shadows, effects, transforms |
+| **1,400+ CSS utilities** | Layout, typography, colors, shadows, effects, transforms |
 | **JIT compiler** | `bg-blue-500/80`, `p-[13px]`, `drop-shadow-[#3b82f6]` arbitrary values |
 | **FxFlexPane** | Real flexbox: direction, wrap, justify-content (6), align-items (4), gap, flex-grow/shrink/basis |
 | **FxGridPane** | Grid-template-areas, masonry, auto-flow |
@@ -106,7 +106,7 @@ TailwindFX.apply(node, "p-4", "bg-white", "rounded-lg", "shadow-md");
 // JIT — arbitrary values compiled at runtime:
 TailwindFX.apply(node, "bg-blue-500/80", "p-[13px]", "drop-shadow-[#3b82f6]");
 
-// No conflict-resolution (accumulate intentionally):
+// No conflict resolution (accumulate intentionally):
 TailwindFX.applyRaw(node, "w-4", "w-8");  // both stay
 
 // StyleDiff — skip if classes unchanged:
@@ -116,7 +116,7 @@ TailwindFX.applyDiff(node, "btn-primary", "rounded-lg");  // no-op on 2nd call
 ### Responsive
 
 ```java
-// Per-node rules (uses Scene.widthProperty):
+// Per-node rules (uses Scene.widthProperty()):
 TailwindFX.responsive(sidebar)
     .base("w-64", "flex-col")
     .sm("w-full")
@@ -218,7 +218,7 @@ AnimationUtil.removeHoverEffects(btn);    // clean up all hover effects
 AnimationUtil.chain(fadeIn, slideUp).play();
 AnimationUtil.parallel(pulse, bounce).play();
 
-// Motion reduce:
+// Reduced motion:
 TailwindFX.setReducedMotion(true);
 TailwindFX.playIfMotionOk(animation);  // plays or jumps to end state
 ```
