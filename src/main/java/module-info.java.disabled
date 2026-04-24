@@ -8,8 +8,14 @@ module tailwindfx {
     requires transitive javafx.base;
     requires transitive javafx.controls;
     requires transitive javafx.graphics;
+    requires transitive javafx.fxml;
     requires java.logging;
     requires java.prefs;
 
     exports tailwindfx;
+    exports tailwindfx.components;
+    
+    // Opens for TestFX and reflection
+    opens tailwindfx to javafx.graphics, org.testfx.core;
+    opens tailwindfx.components to javafx.graphics, org.testfx.core;
 }
