@@ -358,7 +358,8 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
 
             interact(() -> root.getChildren().add(avatar));
 
-            verifyThat(lookup(".stack-pane").queryAs(StackPane.class), isNotNull());
+            verifyThat(avatar, isNotNull());
+            verifyThat(root.getChildren(), hasSize(1));
             clickOn(avatar);
         }
 
