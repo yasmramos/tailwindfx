@@ -5,7 +5,7 @@
  * component library, animations, and theme management for JavaFX applications.
  */
 module tailwindfx {
-    requires javafx.base;
+    requires transitive javafx.base;
     requires transitive javafx.controls;
     requires transitive javafx.graphics;
     requires java.logging;
