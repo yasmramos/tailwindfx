@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.testfx.api.FxAssert.verifyThat;
 import static org.testfx.matcher.base.NodeMatchers.*;
 import static org.testfx.matcher.control.LabeledMatchers.*;
-import static org.testfx.matcher.control.LabeledMatchers.hasText;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -359,7 +358,7 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
             interact(() -> root.getChildren().add(avatar));
 
             verifyThat(avatar, isNotNull());
-            verifyThat(root.getChildren(), hasSize(1));
+            assertEquals(1, root.getChildren().size());
             clickOn(avatar);
         }
 
