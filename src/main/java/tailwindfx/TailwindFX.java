@@ -348,7 +348,7 @@ public final class TailwindFX {
      * TailwindFX.apply(node, "bg-blue-500/80", "p-[13px]");
      * </pre>
      */
-    @Deprecated(since = "4.4.0", forRemoval = true)
+    @Deprecated(since = "1.0-SNAPSHOT", forRemoval = true)
     public static void jit(Node node, String... tokens) {
         apply(node, tokens);
     }
@@ -367,7 +367,7 @@ public final class TailwindFX {
      * TailwindFX.apply(node, "btn-primary", "bg-blue-500/80", "rounded-lg");
      * </pre>
      */
-    @Deprecated(since = "4.4.0", forRemoval = true)
+    @Deprecated(since = "1.0-SNAPSHOT", forRemoval = true)
     public static void jitApply(Node node, String... tokens) {
         apply(node, tokens);
     }
