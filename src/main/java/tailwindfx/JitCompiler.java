@@ -60,8 +60,9 @@ public final class JitCompiler {
     private static volatile boolean DEBUG = false;
 
     // Heurística: tokens que contienen estos patrones probablemente son JIT y no CSS classes
+    // Pattern anchored and escaped correctly to avoid false positives like "btn-2-col" or "card-v2"
     private static final Pattern LOOKS_LIKE_JIT
-            = Pattern.compile(".*\\d.*|.*[/\\[\\]].*|^-.*");
+            = Pattern.compile("^\\d+$|^\\[.*\\]$|^-.*|^.*/.*$");
 
     public static void setDebug(boolean enabled) {
         DEBUG = enabled;
@@ -119,21 +120,25 @@ public final class JitCompiler {
             return CompileResult.unknown(token);
         }
         String key = token.trim();
-        // Synchronized block ensures hit/miss detection and LRU access-order
-        // update are atomic with respect to concurrent reads/writes.
+        // Lock-free read with LRU touch via get() - synchronizedMap handles concurrency
+        CompileResult result = CACHE.get(key);
+        if (result != null) {
+            TailwindFXMetrics.instance().recordCacheHit();
+            return result;
+        }
+        // Synchronized only on cache miss for put + LRU eviction check
         synchronized (CACHE) {
-            boolean cached = CACHE.containsKey(key);
-            CompileResult result;
-            if (cached) {
-                result = CACHE.get(key); // touch for LRU access-order
+            // Double-check after acquiring lock (another thread may have compiled it)
+            result = CACHE.get(key);
+            if (result != null) {
                 TailwindFXMetrics.instance().recordCacheHit();
-            } else {
-                long t0 = System.nanoTime();
-                result = doCompile(key);
-                TailwindFXMetrics.instance().recordCompilation(System.nanoTime() - t0);
-                CACHE.put(key, result);
-                TailwindFXMetrics.instance().recordCacheMiss();
+                return result;
             }
+            long t0 = System.nanoTime();
+            result = doCompile(key);
+            TailwindFXMetrics.instance().recordCompilation(System.nanoTime() - t0);
+            CACHE.put(key, result);
+            TailwindFXMetrics.instance().recordCacheMiss();
             return result;
         }
     }
@@ -823,57 +828,57 @@ public final class JitCompiler {
 
             // Overflow (JavaFX no tiene CSS equivalente — usar Java API)
             case "overflow-auto" ->
-                prop("/* overflow-auto: handled by ScrollPane */", "");
+                null; // handled by ScrollPane in Java
             case "overflow-hidden" ->
                 prop("-fx-clip", "null"); // JavaFX clip se maneja en Java
             case "overflow-scroll" ->
-                prop("/* overflow-scroll: handled by ScrollPane */", "");
+                null; // handled by ScrollPane in Java
             case "overflow-x-auto" ->
-                prop("/* handled by ScrollPane */", "");
+                null; // handled by ScrollPane in Java
             case "overflow-y-auto" ->
-                prop("/* handled by ScrollPane */", "");
+                null; // handled by ScrollPane in Java
 
             // Display
             case "block" ->
-                prop("/* display: block — default en JavaFX */", "");
+                null; // default in JavaFX
             case "inline" ->
-                prop("/* display: inline — usar Label en vez de Region */", "");
+                null; // use Label instead of Region
             case "inline-block" ->
-                prop("/* display: inline-block — default en JavaFX */", "");
+                null; // default in JavaFX
             case "hidden" ->
                 prop("-fx-visible", "false");
             case "contents" ->
-                prop("/* display: contents — no aplica en JavaFX */", "");
+                null; // not applicable in JavaFX
 
             // Position (JavaFX usa layout panes en vez de position CSS)
             case "static" ->
-                prop("/* position: static — default en JavaFX */", "");
+                null; // default in JavaFX
             case "fixed" ->
-                prop("/* position: fixed — usar Stage o Popup */", "");
+                null; // use Stage or Popup
             case "absolute" ->
-                prop("/* position: absolute — usar Pane con layoutX/Y */", "");
+                null; // use Pane with layoutX/Y
             case "relative" ->
-                prop("/* position: relative — usar StackPane o AnchorPane */", "");
+                null; // use StackPane or AnchorPane
             case "sticky" ->
-                prop("/* position: sticky — implementar en Java */", "");
+                null; // implement in Java
 
             // Backdrop filters
             case "backdrop-blur-none" ->
-                prop("/* backdrop-blur: none — usar Java Effects */", "");
+                null; // use Java Effects
             case "backdrop-blur-sm" ->
-                prop("/* backdrop-blur: sm — usar BoxBlur en Java */", "");
+                null; // use BoxBlur in Java
             case "backdrop-blur" ->
-                prop("/* backdrop-blur: md — usar BoxBlur en Java */", "");
+                null; // use BoxBlur in Java
             case "backdrop-blur-md" ->
-                prop("/* backdrop-blur: md — usar BoxBlur en Java */", "");
+                null; // use BoxBlur in Java
             case "backdrop-blur-lg" ->
-                prop("/* backdrop-blur: lg — usar BoxBlur en Java */", "");
+                null; // use BoxBlur in Java
             case "backdrop-blur-xl" ->
-                prop("/* backdrop-blur: xl — usar BoxBlur en Java */", "");
+                null; // use BoxBlur in Java
             case "backdrop-blur-2xl" ->
-                prop("/* backdrop-blur: 2xl — usar BoxBlur en Java */", "");
+                null; // use BoxBlur in Java
             case "backdrop-blur-3xl" ->
-                prop("/* backdrop-blur: 3xl — usar BoxBlur en Java */", "");
+                null; // use BoxBlur in Java
 
             // Ring utilities
             case "ring-0" ->
@@ -911,19 +916,19 @@ public final class JitCompiler {
 
             // Transitions (JavaFX usa Animation API en Java)
             case "transition-none" ->
-                prop("/* transition: none — usar JavaFX Animation */", "");
+                null; // use JavaFX Animation API
             case "transition-all" ->
-                prop("/* transition: all — usar Timeline en Java */", "");
+                null; // use JavaFX Timeline
             case "transition" ->
-                prop("/* transition: default — usar JavaFX Animation */", "");
+                null; // use JavaFX Animation API
             case "transition-colors" ->
-                prop("/* transition: colors — usar Timeline en Java */", "");
+                null; // use JavaFX Timeline
             case "transition-opacity" ->
-                prop("/* transition: opacity — usar FadeTransition en Java */", "");
+                null; // use FadeTransition
             case "transition-shadow" ->
-                prop("/* transition: shadow — usar Timeline en Java */", "");
+                null; // use JavaFX Timeline
             case "transition-transform" ->
-                prop("/* transition: transform — usar TranslateTransition en Java */", "");
+                null; // use TranslateTransition
 
             // Blend mode
             case "blend-multiply" ->
@@ -951,9 +956,9 @@ public final class JitCompiler {
             case "h-auto" ->
                 prop("-fx-pref-height", "-1");
             case "w-screen" ->
-                prop("-fx-pref-width", Double.MAX_VALUE + "");
+                prop("-fx-pref-width", "-1"); // w-screen: USE_COMPUTED_SIZE
             case "h-screen" ->
-                prop("-fx-pref-height", Double.MAX_VALUE + "");
+                prop("-fx-pref-height", "-1"); // h-screen: USE_COMPUTED_SIZE
 
             // Overflow / display (no tienen equivalente CSS en JavaFX — delegar a CSS class)
             default ->
@@ -1051,13 +1056,34 @@ public final class JitCompiler {
         // Reemplazar _ por espacio (convención de Tailwind para valores con espacios)
         String expanded = val.replace("_", " ");
         // JavaFX dropshadow no acepta el formato CSS estándar de box-shadow directamente
-        // Lo aproximamos extrayendo el color y blur si es posible
-        // Si no podemos parsearlo, usamos un shadow genérico con el color dado
+        // Intentamos parsear el formato: [offset-x] [offset-y] [blur] [spread] [color]
         if (expanded.startsWith("rgba") || expanded.startsWith("rgb") || expanded.startsWith("#")) {
+            // Solo color proporcionado - usamos defaults razonables
             return prop("-fx-effect", "dropshadow(gaussian," + expanded + ",8,0,0,2)");
         }
-        // Formato "0 4px 6px rgba(...)" — extraemos blur y color aproximadamente
-        return prop("-fx-effect", "dropshadow(gaussian,rgba(0,0,0,0.1),6,0,0,2)");
+        // Intentar parsear formato completo "0 4px 6px -1px rgba(...)"
+        // Pattern simplificado: extraer color al final
+        java.util.regex.Pattern colorPattern = java.util.regex.Pattern.compile("(rgba?\\([^)]+\\)|#[0-9a-fA-F]{3,8})$");
+        java.util.regex.Matcher matcher = colorPattern.matcher(expanded);
+        if (matcher.find()) {
+            String color = matcher.group(1);
+            // Extraer valores numéricos (simplificado - solo primer valor como blur)
+            java.util.regex.Pattern numPattern = java.util.regex.Pattern.compile("^(\\d+(?:\\.\\d+)?)(?:px)?");
+            java.util.regex.Matcher numMatcher = numPattern.matcher(expanded);
+            if (numMatcher.find()) {
+                try {
+                    double blur = Double.parseDouble(numMatcher.group(1));
+                    return prop("-fx-effect", 
+                        String.format("dropshadow(gaussian,%s,%.1f,0,0,%.1f)", color, blur, blur / 3));
+                } catch (NumberFormatException e) {
+                    // Fall through to explicit failure
+                }
+            }
+        }
+        // No pudimos parsear - fallar explícitamente con warning
+        LOG.warning("TailwindFX JIT: shadow arbitrario no soportado '" + val 
+            + "' (formato complejo requiere API Java)");
+        return null;
     }
 
     /**
@@ -1093,7 +1119,11 @@ public final class JitCompiler {
      */
     private static String parseAspectRatioArbitrary(String val) {
         // aspect-ratio no tiene equivalente directo en JavaFX CSS
-        // Retornamos null para indicar que debe manejarse vía API Java
-        return null;
+        // Retornamos una clase CSS predecible para que el desarrollador pueda manejarlo
+        // Ej: aspect-[16/9] -> "-fx-aspect-ratio-16-9"
+        String sanitized = val.replaceAll("[^a-zA-Z0-9]", "-");
+        LOG.warning("TailwindFX JIT: aspect-ratio '" + val 
+            + "' no tiene equivalente CSS - usar FxLayout.setAspectRatio(node, ratio) en Java");
+        return null; // CompileResult.cssClass se encargará del fallback
     }
 }
