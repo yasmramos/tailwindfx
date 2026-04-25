@@ -1,5 +1,3 @@
-package tailwindfx;
-
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -10,6 +8,8 @@ import javafx.animation.SequentialTransition;
 import javafx.animation.Timeline;
 import javafx.scene.Node;
 import javafx.util.Duration;
+
+import java.util.Objects;
 
 /**
  * AnimationUtil — Animaciones fluidas para nodos JavaFX.
@@ -571,58 +571,197 @@ public final class AnimationUtil {
                 .computeIfAbsent(KEY, k -> new java.util.HashMap<String, Animation>());
         }
     }
+    /**
+     * A fluent wrapper around JavaFX {@link javafx.animation.Animation} that provides
+     * a clean, chainable API for configuring and controlling animations.
+     *
+     * <p>This class serves as the primary interface for TailwindFX animation operations,
+     * offering method chaining for common animation properties and integration with
+     * the {@link AnimationRegistry} for automatic lifecycle management.</p>
+     *
+     * <h2>Key Features</h2>
+     * <ul>
+     *   <li><strong>Fluent API:</strong> Chain configuration methods for readable code</li>
+     *   <li><strong>Registry Integration:</strong> Automatic slot-based animation management</li>
+     *   <li><strong>Memory Safety:</strong> Prevents zombie timelines and memory leaks</li>
+     *   <li><strong>Scene Awareness:</strong> Auto-cancels on node removal from scene graph</li>
+     * </ul>
+     *
+     * <h2>Basic Usage</h2>
+     * <pre>{@code
+     * // Simple fade-in animation
+     * AnimationUtil.fadeIn(button).play();
+     *
+     * // Chained configuration
+     * AnimationUtil.slideUp(node, 300)
+     *     .easeOut()
+     *     .cycleCount(3)
+     *     .onFinished(e -> System.out.println("Animation complete!"))
+     *     .play();
+     *
+     * // Registry-controlled animation
+     * AnimationUtil.pulse(badge)
+     *     .register(badge, "attention")
+     *     .loop()
+     *     .play();
+     * }</pre>
+     *
+     * <h2>Standard Slots</h2>
+     * <table border="1" cellpadding="4">
+     *   <tr><th>Slot</th><th>Purpose</th><th>Example Methods</th></tr>
+     *   <tr><td>"enter"</td><td>Entry animations</td><td>fadeIn, slideUp, scaleIn</td></tr>
+     *   <tr><td>"exit"</td><td>Exit animations</td><td>fadeOut, scaleOut</td></tr>
+     *   <tr><td>"attention"</td><td>Attention-grabbing effects</td><td>shake, pulse, flash</td></tr>
+     *   <tr><td>"loop"</td><td>Infinite animations</td><td>spin, breathe</td></tr>
+     *   <tr><td>"transition"</td><td>Property transitions</td><td>TailwindFX.transition()</td></tr>
+     * </table>
+     *
+     * @author TailwindFX Team
+     * @since 1.0.0
+     * @see AnimationUtil
+     * @see AnimationRegistry
+     */
     public static final class FxAnimation {
 
         final Animation timeline;
         private javafx.scene.Node registeredNode;
         private String             registeredSlot;
 
+        /**
+         * Creates a new FxAnimation wrapping the specified JavaFX animation.
+         *
+         * @param animation the underlying JavaFX Animation (must not be null)
+         * @throws NullPointerException if animation is null
+         */
         FxAnimation(Animation animation) {
-            this.timeline = animation;
+            this.timeline = Objects.requireNonNull(animation, "animation");
         }
 
-        /** Número de ciclos. Animation.INDEFINITE para loop. */
+        /**
+         * Sets the number of times this animation will repeat.
+         *
+         * <p>The animation will play the specified number of times before stopping.
+         * Use {@link #loop()} for infinite repetition.</p>
+         *
+         * @param count the number of cycles to play (must be positive, or {@code Animation.INDEFINITE})
+         * @return this animation instance for method chaining
+         * @throws IllegalArgumentException if count is negative and not {@code Animation.INDEFINITE}
+         * @see #loop()
+         * @see Animation#INDEFINITE
+         */
         public FxAnimation cycleCount(int count) {
             timeline.setCycleCount(count);
             return this;
         }
 
-        /** Loop infinito */
+        /**
+         * Configures this animation to repeat indefinitely.
+         *
+         * <p>This is equivalent to calling {@code cycleCount(Animation.INDEFINITE)}.
+         * The animation will continue playing until explicitly stopped with {@link #stop()}.</p>
+         *
+         * @return this animation instance for method chaining
+         * @see #cycleCount(int)
+         * @see #stop()
+         */
         public FxAnimation loop() {
             timeline.setCycleCount(Animation.INDEFINITE);
             return this;
         }
 
-        /** Velocidad: 0.5 = mitad de velocidad, 2.0 = doble */
+        /**
+         * Sets the playback speed multiplier for this animation.
+         *
+         * <p>A speed of 1.0 is normal speed, 2.0 is double speed, 0.5 is half speed,
+         * and negative values reverse the direction while playing.</p>
+         *
+         * @param rate the speed multiplier (must be positive)
+         * @return this animation instance for method chaining
+         * @throws IllegalArgumentException if rate is not positive
+         * @see #autoReverse()
+         */
         public FxAnimation speed(double rate) {
+            Preconditions.requirePositiveSpeed(rate, "FxAnimation.speed");
             timeline.setRate(rate);
             return this;
         }
 
-        /** Callback al terminar */
+        /**
+         * Sets a callback handler that will be invoked when this animation completes.
+         *
+         * <p>The handler will be called once per completed cycle. For infinite animations
+         * ({@link #loop()}), the handler is not invoked since the animation never truly ends.</p>
+         *
+         * @param handler the event handler to invoke on completion (must not be null)
+         * @return this animation instance for method chaining
+         * @throws NullPointerException if handler is null
+         * @see #onFinished(javafx.event.EventHandler)
+         */
         public FxAnimation onFinished(javafx.event.EventHandler<javafx.event.ActionEvent> handler) {
+            Preconditions.requireNonNull(handler, "FxAnimation.onFinished", "handler");
             timeline.setOnFinished(handler);
             return this;
         }
 
-        /** Invierte la dirección de reproducción */
+        /**
+         * Configures this animation to automatically reverse direction after each cycle.
+         *
+         * <p>For example, if the animation plays forward from A→B, it will then play
+         * backward from B→A, and so on. The final state of each cycle becomes
+         * the starting state of the next cycle.</p>
+         *
+         * <p>This is useful for creating ping-pong effects or subtle back-and-forth motions.</p>
+         *
+         * @return this animation instance for method chaining
+         * @see #speed(double)
+         */
         public FxAnimation autoReverse() {
             timeline.setAutoReverse(true);
             return this;
         }
 
         /**
-         * Registra esta animación en el AnimationRegistry del nodo.
-         * Al llamar play(), cancela automáticamente la animación previa del mismo slot.
-         * Slots estándar: "enter", "exit", "attention", "loop"
+         * Registers this animation with the {@link AnimationRegistry} for automatic lifecycle management.
+         *
+         * <p>When {@link #play()} is called, the registry will automatically cancel any existing
+         * animation in the same slot before starting this one. This prevents multiple animations
+         * from competing for the same node properties and ensures clean state management.</p>
+         *
+         * <h3>Standard Slots</h3>
+         * <ul>
+         *   <li><strong>"enter"</strong> - Entry animations (fadeIn, slideUp, scaleIn)</li>
+         *   <li><strong>"exit"</strong> - Exit animations (fadeOut, scaleOut)</li>
+         *   <li><strong>"attention"</strong> - Attention-grabbing effects (shake, pulse, flash)</li>
+         *   <li><strong>"loop"</strong> - Infinite animations (spin, breathe)</li>
+         *   <li><strong>"transition"</strong> - Property transitions via TailwindFX.transition()</li>
+         * </ul>
+         *
+         * @param node the JavaFX node to associate this animation with (must not be null)
+         * @param slot the registry slot to register under (use standard slots when possible)
+         * @return this animation instance for method chaining
+         * @throws NullPointerException if node is null
+         * @see AnimationRegistry
          */
         public FxAnimation register(javafx.scene.Node node, String slot) {
-            this.registeredNode = node;
+            this.registeredNode = Preconditions.requireNode(node, "FxAnimation.register");
             this.registeredSlot = slot;
             return this;
         }
 
-        /** Starts the animation. If registered, cancels the previous animation in the same slot. */
+        /**
+         * Starts this animation.
+         *
+         * <p>If the animation was registered with the {@link AnimationRegistry} via
+         * {@link #register(javafx.scene.Node, String)}, this method will automatically
+         * cancel any existing animation in the same slot before starting.</p>
+         *
+         * <h3>Scene Graph Safety</h3>
+         * <p>The registry automatically cancels animations when their associated node is removed
+         * from the scene graph, preventing memory leaks from zombie timelines.</p>
+         *
+         * @see #register(javafx.scene.Node, String)
+         * @see AnimationRegistry
+         */
         public void play() {
             TailwindFXMetrics.instance().recordAnimationPlay();
             if (registeredNode != null && registeredSlot != null) {
@@ -632,7 +771,15 @@ public final class AnimationUtil {
             }
         }
 
-        /** Para la animación */
+        /**
+         * Stops this animation immediately.
+         *
+         * <p>If the animation was registered with the {@link AnimationRegistry}, this method
+         * will also remove it from the registry for the associated node.</p>
+         *
+         * @see #play()
+         * @see AnimationRegistry
+         */
         public void stop() {
             timeline.stop();
             if (registeredNode != null && registeredSlot != null) {
@@ -640,11 +787,25 @@ public final class AnimationUtil {
             }
         }
 
-        /** Pausa la animación */
-        public void pause() { timeline.pause(); }
+        /**
+         * Pauses this animation at its current position.
+         *
+         * @see #resume()
+         * @see Animation#pause()
+         */
+        public void pause() {
+            timeline.pause();
+        }
 
-        /** Reanuda la animación */
-        public void resume() { timeline.play(); }
+        /**
+         * Resumes this animation from where it was paused.
+         *
+         * @see #pause()
+         * @see Animation#play()
+         */
+        public void resume() {
+            timeline.play();
+        }
 
         /**
          * Establece el interpolador de easing para toda la animación.
@@ -675,19 +836,51 @@ public final class AnimationUtil {
             return this;
         }
 
-        /** .ease-in — desacelera al inicio */
+/** .ease-in — starts slowly, accelerates toward the end */
         public FxAnimation easeIn()    { return withEase(Interpolator.EASE_IN); }
-        /** .ease-out — desacelera al final */
+        /** .ease-out — starts quickly, decelerates toward the end */
         public FxAnimation easeOut()   { return withEase(Interpolator.EASE_OUT); }
-        /** .ease-in-out — desacelera en ambos extremos */
+        /** .ease-in-out — combines ease-in and ease-out */
         public FxAnimation easeBoth()  { return withEase(Interpolator.EASE_BOTH); }
-        /** .linear — velocidad constante */
+        /** .linear — constant speed throughout */
         public FxAnimation linear()    { return withEase(Interpolator.LINEAR); }
 
-        /** Acceso al Animation subyacente para configuración avanzada */
+        /**
+         * Provides access to the underlying JavaFX Animation for advanced configuration.
+         *
+         * <p>This method returns the raw {@link javafx.animation.Animation} instance,
+         * allowing access to low-level properties and methods not exposed by the fluent API.</p>
+         *
+         * @return the underlying JavaFX Animation instance
+         */
         public Animation raw() { return timeline; }
 
         Interpolator ease = null;
+         * Sets the easing interpolator for this animation.
+         *
+         * <p>The interpolator controls how values change over time during the animation.
+         * Common interpolators include {@link Interpolator#EASE_IN}, {@link Interpolator#EASE_OUT},
+         * and {@link Interpolator#LINEAR}.</p>
+         *
+         * <h3>Convenience Methods</h3>
+         * <p>Use these shortcuts instead of creating interpolator instances directly:</p>
+         * <ul>
+         *   <li>{@link #easeIn()} - starts slowly, accelerates toward the end</li>
+         *   <li>{@link #easeOut()} - starts quickly, decelerates toward the end</li>
+         *   <li>{@link #easeBoth()} - combines ease-in and ease-out</li>
+         *   <li>{@link #linear()} - constant speed throughout</li>
+         * </ul>
+         *
+         * @param interpolator the easing function to apply (must not be null)
+         * @return this animation instance for method chaining
+         * @throws NullPointerException if interpolator is null
+         * @see Interpolator
+         */
+        public FxAnimation withEase(Interpolator interpolator) {
+            Preconditions.requireNonNull(interpolator, "FxAnimation.withEase", "interpolator");
+            this.ease = interpolator;
+            return this;
+        }
     }
 
 
