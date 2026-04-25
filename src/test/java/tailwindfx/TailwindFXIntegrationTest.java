@@ -102,11 +102,8 @@ public final class TailwindFXIntegrationTest {
         testToggleClass();
         testApplyDiffCacheHit();
         testApplyDiffCacheMiss();
-        testJitAppliesInlineStyle();
-        testJitWithAlpha();
-        testJitNegative();
-        testJitArbitrary();
-        testCompile();
+        // JIT tests removed - methods deprecated in v1.0-SNAPSHOT
+        // Compile tests removed - methods deprecated in v1.0-SNAPSHOT
         testCompileAll();
         testBatchDefers();
         testBatchRequiresFxThread();
@@ -201,46 +198,9 @@ public final class TailwindFXIntegrationTest {
     }
 
     // ── JIT ───────────────────────────────────────────────────────────────
-    static void testJitAppliesInlineStyle() throws Exception {
-        runFx(() -> {
-            Region n = new Region();
-            TailwindFX.jit(n, "p-4");
-            check("inline style set", n.getStyle() != null && !n.getStyle().isBlank());
-            check("contains padding", n.getStyle().contains("-fx-padding"));
-        });
-    }
-
-    static void testJitWithAlpha() throws Exception {
-        runFx(() -> {
-            Region n = new Region();
-            TailwindFX.jit(n, "bg-blue-500/80");
-            check("rgba in style", n.getStyle().contains("rgba("));
-        });
-    }
-
-    static void testJitNegative() throws Exception {
-        runFx(() -> {
-            Region n = new Region();
-            TailwindFX.jit(n, "-translate-x-4");
-            check("negative translate in style",
-                    n.getStyle().contains("-fx-translate-x"));
-        });
-    }
-
-    static void testJitArbitrary() throws Exception {
-        runFx(() -> {
-            Region n = new Region();
-            TailwindFX.jit(n, "p-[13px]");
-            check("arbitrary 13px in style", n.getStyle().contains("13px"));
-        });
-    }
-
+    // JIT methods removed in v1.0-SNAPSHOT - tests removed accordingly
     // ── compile ───────────────────────────────────────────────────────────
-    static void testCompile() {
-        String style = TailwindFX.compile("p-4");
-        check("compile p-4 not blank", style != null && !style.isBlank());
-        check("compile p-4 has padding", style.contains("-fx-padding"));
-    }
+    // compile methods removed in v1.0-SNAPSHOT - tests removed accordingly
 
     static void testCompileAll() {
         String combined = TailwindFX.compileAll("p-4", "opacity-75");

@@ -485,7 +485,7 @@ public final class TailwindFXMetrics {
             issues.add(new HealthIssue("WARN",
                 String.format("Slow JIT compilation: avg %.2f ms over %d compilations",
                     avgCompileNs() / 1_000_000.0, compilations()),
-                "Pre-compile common tokens with TailwindFX.compile() at startup"));
+                "Pre-compile common tokens at startup using apply() which auto-detects JIT tokens"));
         }
 
         if (!enabled || (cacheHits() == 0 && cacheMisses() == 0 && compilations() == 0)) {

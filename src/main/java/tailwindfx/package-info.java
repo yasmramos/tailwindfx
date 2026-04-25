@@ -11,8 +11,8 @@
  * TailwindFX.apply(button, "btn-primary", "rounded-lg", "shadow-md");
  * TailwindFX.apply(card,   "card", "w-80");
  *
- * // 3. JIT — compile arbitrary values at runtime:
- * TailwindFX.jit(pane, "bg-blue-500/80", "p-[13px]", "-translate-x-4");
+ * // 3. JIT — arbitrary values are auto-detected by apply():
+ * TailwindFX.apply(pane, "bg-blue-500/80", "p-[13px]", "-translate-x-4");
  *
  * // 4. Responsive per-node rules:
  * TailwindFX.responsive(sidebar)

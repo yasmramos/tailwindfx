@@ -417,7 +417,7 @@ public final class JitCompiler {
                 };
             case "aspect" -> {
                 // aspect-ratio is Java-only (no CSS equivalent in JavaFX)
-                // Return a special marker so TailwindFX.jit() can call Styles.aspectRatio()
+                // Return a special marker so apply() can call Styles.aspectRatio() via auto-detection
                 // aspect-ratio-16-9 → scale=16, subPrefix="9" won't parse well
                 // Better handled via aspect-ratio-[16/9] arbitrary token below
                 yield null; // handled in ARBITRARY case
