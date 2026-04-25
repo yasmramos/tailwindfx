@@ -374,9 +374,11 @@ public final class TailwindFX {
 
     /**
      * Elimina tokens JIT previamente aplicados como inline style.
+     * @deprecated Use {@link #remove(Node, String...)} instead.
      */
+    @Deprecated(since = "1.0-SNAPSHOT", forRemoval = true)
     public static void jitRemove(Node node, String... tokens) {
-        StyleMerger.removeJit(node, tokens);
+        remove(node, tokens);
     }
 
     /**
@@ -393,6 +395,7 @@ public final class TailwindFX {
     }
 
     /** Tamaño actual del cache JIT */
+    @Deprecated(since = "1.0-SNAPSHOT", forRemoval = true)
     public static int jitCacheSize() {
         return JitCompiler.cacheSize();
     }
@@ -532,10 +535,9 @@ public final class TailwindFX {
      * Con debug=true: loguea TODOS los tokens procesados (útil en desarrollo).
      * With debug=false (default): only warns on unrecognized JIT tokens.
      *
-     *   TailwindFX.jitDebug(true);
-     *   TailwindFX.jit(node, "p-4", "btn-primary", "bg-bleu-500");  // "bg-bleu-500" → warn
-     *   TailwindFX.jitDebug(false);
+     * @deprecated Use {@link #compileDebug(boolean)} instead.
      */
+    @Deprecated(since = "1.0-SNAPSHOT", forRemoval = true)
     public static void jitDebug(boolean enabled) {
         JitCompiler.setDebug(enabled);
     }
