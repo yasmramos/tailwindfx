@@ -352,6 +352,22 @@
 .cursor-help { -fx-cursor: -cursor-wait; }
 .cursor-not-allowed { -fx-cursor: -cursor-disappear; }
 
+/* TailwindCSS v4 cursors with no native JavaFX equivalent; each maps to
+ * the closest in-toolkit cursor:
+ *   - context-menu  -> default     (no JavaFX context-menu cursor)
+ *   - vertical-text -> text        (closest selectable-text signal)
+ *   - alias         -> hand        (reference/shortcut intent)
+ *   - all-scroll    -> move        (omnidirectional drag intent)
+ *   - nesw-resize   -> ne-resize   (JavaFX has no bidirectional diagonal)
+ *   - nwse-resize   -> nw-resize   (JavaFX has no bidirectional diagonal)
+ */
+.cursor-context-menu { -fx-cursor: -cursor-default; }
+.cursor-vertical-text { -fx-cursor: -cursor-text; }
+.cursor-alias { -fx-cursor: -cursor-hand; }
+.cursor-all-scroll { -fx-cursor: -cursor-move; }
+.cursor-nesw-resize { -fx-cursor: -cursor-ne-resize; }
+.cursor-nwse-resize { -fx-cursor: -cursor-nw-resize; }
+
 /* =============================================================================
  * ACCESSIBILITY
  * ============================================================================= */

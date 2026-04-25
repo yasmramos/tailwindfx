@@ -5116,6 +5116,44 @@ Group {
     -fx-cursor: -cursor-disappear;
 }
 
+/* JavaFX has no native context-menu cursor; fall back to the default
+ * pointer rather than guess at a substitute glyph. */
+.cursor-context-menu {
+    -fx-cursor: -cursor-default;
+}
+
+/* TailwindCSS `vertical-text` maps to the JavaFX text caret cursor, the
+ * closest in-toolkit signal that text is selectable. */
+.cursor-vertical-text {
+    -fx-cursor: -cursor-text;
+}
+
+/* JavaFX has no alias cursor; the hand cursor is the closest signal that
+ * the target represents a reference or shortcut. */
+.cursor-alias {
+    -fx-cursor: -cursor-hand;
+}
+
+/* TailwindCSS `all-scroll` (drag in any direction) maps to JavaFX `move`,
+ * which carries the same omnidirectional-drag intent. */
+.cursor-all-scroll {
+    -fx-cursor: -cursor-move;
+}
+
+/* TailwindCSS `nesw-resize` is the bidirectional diagonal cursor; JavaFX
+ * only ships single-direction diagonal cursors, so use `ne-resize` as the
+ * closest visual approximation. */
+.cursor-nesw-resize {
+    -fx-cursor: -cursor-ne-resize;
+}
+
+/* TailwindCSS `nwse-resize` is the bidirectional diagonal cursor; JavaFX
+ * only ships single-direction diagonal cursors, so use `nw-resize` as the
+ * closest visual approximation. */
+.cursor-nwse-resize {
+    -fx-cursor: -cursor-nw-resize;
+}
+
 /* =============================================================================
  * UTILIDADES DE ESTADO - HOVER
  * ============================================================================= */
