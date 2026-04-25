@@ -90,7 +90,7 @@ public final class FxAnimation {
      * @param durationMs animation duration in milliseconds (must be > 0)
      * @param ease       the interpolation function (must not be null)
      * @return a ready-to-play {@link FxAnimation} registered in slot {@code "enter"}
-     * @throws IllegalArgumentException if node, ease is null or durationMs <= 0
+     * @throws IllegalArgumentException if node is null, ease is null or durationMs <= 0
      * @see #fadeIn(Node)
      * @see #fadeIn(Node, int)
      */
@@ -312,7 +312,7 @@ public final class FxAnimation {
      * @return a ready-to-play {@link FxAnimation}
      * @see #scaleIn(Node)
      * @see #scaleIn(Node, int)
-     * @throws IllegalArgumentException if node, ease is null or durationMs <= 0
+     * @throws IllegalArgumentException if node is null, ease is null or durationMs <= 0
      */
     public static FxAnimation scaleIn(Node node, int durationMs, Interpolator ease) {
         Preconditions.requireNode(node, "FxAnimation.scaleIn");
@@ -358,7 +358,7 @@ public final class FxAnimation {
      * @param durationMs animation duration in milliseconds (must be > 0)
      * @return a ready-to-play {@link FxAnimation} registered in slot {@code "exit"}
      * @see #fadeOut(Node)
-     * @throws IllegalArgumentException if node is null or durationMs <= 0
+     * @throws IllegalArgumentException if node is null or durationMs <= 0 (calls requirePositiveDuration)
      */
     public static FxAnimation fadeOut(Node node, int durationMs) {
         Preconditions.requireNode(node, "FxAnimation.fadeOut");
