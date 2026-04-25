@@ -81,6 +81,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - All log/exception/comment strings normalized to English
 - Wildcard imports replaced with specific imports in all Java files
 
+### Documentation
+- **`FxAnimation`** — comprehensive JavaDoc added to all methods with detailed descriptions, parameters, return values, and usage examples
+
 ### Tests added
 - `FxDataTableTest` — 21 tests covering builder, filter, pagination, search, style
 - `StylesTest` — 13 new tests for v4.1 APIs (textShadow, dropShadow, clip, 3D, glass, neumorph, SVG)
