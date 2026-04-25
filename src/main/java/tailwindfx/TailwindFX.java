@@ -331,73 +331,6 @@ public final class TailwindFX {
     }
 
     // =========================================================================
-    // Legacy JIT methods — Now deprecated, use apply() instead
-    // =========================================================================
-
-    /**
-     * @deprecated Use {@link #apply(Node, String...)} instead.
-     * The unified apply() method now auto-detects JIT tokens.
-     * 
-     * <p>This method is kept for backward compatibility but will be removed in v5.0.
-     * 
-     * <pre>
-     * // Old way:
-     * TailwindFX.jit(node, "bg-blue-500/80", "p-[13px]");
-     * 
-     * // New way (recommended):
-     * TailwindFX.apply(node, "bg-blue-500/80", "p-[13px]");
-     * </pre>
-     */
-    @Deprecated(since = "4.4.0", forRemoval = true)
-    public static void jit(Node node, String... tokens) {
-        apply(node, tokens);
-    }
-
-    /**
-     * @deprecated Use {@link #apply(Node, String...)} instead.
-     * The unified apply() method now auto-detects JIT tokens.
-     * 
-     * <p>This method is kept for backward compatibility but will be removed in v5.0.
-     * 
-     * <pre>
-     * // Old way:
-     * TailwindFX.jitApply(node, "btn-primary", "bg-blue-500/80", "rounded-lg");
-     * 
-     * // New way (recommended):
-     * TailwindFX.apply(node, "btn-primary", "bg-blue-500/80", "rounded-lg");
-     * </pre>
-     */
-    @Deprecated(since = "4.4.0", forRemoval = true)
-    public static void jitApply(Node node, String... tokens) {
-        apply(node, tokens);
-    }
-
-    /**
-     * Elimina tokens JIT previamente aplicados como inline style.
-     */
-    public static void jitRemove(Node node, String... tokens) {
-        StyleMerger.removeJit(node, tokens);
-    }
-
-    /**
-     * Compila un token y devuelve su inline style string (sin aplicar a ningún nodo).
-     * Útil para debugging.
-     *
-     *   TailwindFX.compile("bg-blue-500/80") → "-fx-background-color: rgba(59,130,246,0.80);"
-     *   TailwindFX.compile("p-4")            → "-fx-padding: 16px;"
-     *   TailwindFX.compile("w-[320px]")      → "-fx-pref-width: 320px;"
-     */
-    public static String compile(String token) {
-        JitCompiler.CompileResult result = JitCompiler.compile(token);
-        return result.hasInlineStyle() ? result.inlineStyle() : "";
-    }
-
-    /** Tamaño actual del cache JIT */
-    public static int jitCacheSize() {
-        return JitCompiler.cacheSize();
-    }
-
-    // =========================================================================
     // Theme Scopes — Theme by subtree
     // =========================================================================
 
@@ -532,10 +465,9 @@ public final class TailwindFX {
      * Con debug=true: loguea TODOS los tokens procesados (útil en desarrollo).
      * With debug=false (default): only warns on unrecognized JIT tokens.
      *
-     *   TailwindFX.jitDebug(true);
-     *   TailwindFX.jit(node, "p-4", "btn-primary", "bg-bleu-500");  // "bg-bleu-500" → warn
-     *   TailwindFX.jitDebug(false);
+     * @deprecated Use {@link #compileDebug(boolean)} instead.
      */
+    @Deprecated(since = "1.0-SNAPSHOT", forRemoval = true)
     public static void jitDebug(boolean enabled) {
         JitCompiler.setDebug(enabled);
     }
