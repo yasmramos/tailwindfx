@@ -316,7 +316,7 @@ public final class UtilityConflictResolver {
         Preconditions.requireNode(node, "UtilityConflictResolver.apply");
         if (cssClass == null || cssClass.isBlank()) return;
         if (cssClass.length() > 200) {
-            Preconditions.LOG.warning("UtilityConflictResolver.apply: unusually long class name (" + cssClass.length() + " chars) — is this a JIT token? Use TailwindFX.jit() instead");
+            Preconditions.LOG.warning("UtilityConflictResolver.apply: unusually long class name (" + cssClass.length() + " chars) — is this a JIT token? Use TailwindFX.apply() instead for auto-detection.");
         }
         String category = findCategory(cssClass);
         if (category != null) {
