@@ -13,14 +13,31 @@
 TailwindFX brings Tailwind CSS's utility-first approach to JavaFX. Instead of writing boilerplate style code, you compose styles from a comprehensive set of pre-built utility classes — and where CSS falls short, TailwindFX provides equivalent Java APIs.
 
 ```java
-// Before TailwindFX
-Button btn = new Button("Submit");
-btn.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; "
-    + "-fx-background-radius: 8; -fx-padding: 8 16 8 16;");
-btn.setOnMouseEntered(e -> btn.setStyle(...));
+// Before — JavaFX vanilla
+btn.setStyle(
+    "-fx-background-color: #3b82f6; " +
+    "-fx-text-fill: white; " +
+    "-fx-background-radius: 8px; " +
+    "-fx-padding: 8px 16px;"
+);
+
+// Hover animation with vanilla JavaFX
+
+btn.addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
+    Timeline tl = new Timeline(
+        new KeyFrame(Duration.ZERO,
+            new KeyValue(btn.scaleXProperty(), btn.getScaleX()),
+            new KeyValue(btn.scaleYProperty(), btn.getScaleY())),
+        new KeyFrame(Duration.millis(150),
+            new KeyValue(btn.scaleXProperty(),1.05),
+            new KeyValue(btn.scaleYProperty(),1.05))
+    );
+    tl.play();
+});
+
+// ... same pattern for MOUSE_EXITED scaling back to 1.0
 
 // With TailwindFX
-Button btn = new Button("Submit");
 TailwindFX.apply(btn, "btn-primary", "rounded-lg", "px-4", "py-2");
 FxAnimation.onHoverScale(btn, 1.05);
 ```
