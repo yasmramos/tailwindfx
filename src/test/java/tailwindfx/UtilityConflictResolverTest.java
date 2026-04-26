@@ -20,9 +20,9 @@ class UtilityConflictResolverTest {
         @Test
         @DisplayName("Should detect padding category")
         void testPaddingCategory() {
-            assertEquals("p", UtilityConflictResolver.categoryOf("p-4"));
-            assertEquals("px", UtilityConflictResolver.categoryOf("px-4"));
-            assertEquals("py", UtilityConflictResolver.categoryOf("py-8"));
+            assertEquals("padding", UtilityConflictResolver.categoryOf("p-4"));
+            assertEquals("padding", UtilityConflictResolver.categoryOf("px-4"));
+            assertEquals("padding", UtilityConflictResolver.categoryOf("py-8"));
         }
 
         @Test
