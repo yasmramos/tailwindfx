@@ -323,6 +323,50 @@
 .cursor-move { -fx-cursor: -cursor-move; }
 .cursor-wait { -fx-cursor: -cursor-wait; }
 .cursor-crosshair { -fx-cursor: -cursor-crosshair; }
+.cursor-grab { -fx-cursor: -cursor-open-hand; }
+.cursor-grabbing { -fx-cursor: -cursor-closed-hand; }
+.cursor-col-resize { -fx-cursor: -cursor-h-resize; }
+.cursor-row-resize { -fx-cursor: -cursor-v-resize; }
+.cursor-n-resize { -fx-cursor: -cursor-n-resize; }
+.cursor-e-resize { -fx-cursor: -cursor-e-resize; }
+.cursor-s-resize { -fx-cursor: -cursor-s-resize; }
+.cursor-w-resize { -fx-cursor: -cursor-w-resize; }
+.cursor-ne-resize { -fx-cursor: -cursor-ne-resize; }
+.cursor-nw-resize { -fx-cursor: -cursor-nw-resize; }
+.cursor-se-resize { -fx-cursor: -cursor-se-resize; }
+.cursor-sw-resize { -fx-cursor: -cursor-sw-resize; }
+.cursor-none { -fx-cursor: -cursor-none; }
+
+/* JavaFX has no native equivalent for the TailwindCSS `help` and
+ * `not-allowed` cursors, so these fall back to the closest visual
+ * signal available in JavaFX:
+ *   - help          -> wait     (visual "loading" cue, the same JavaFX
+ *                                falls back to for unknown cursors)
+ *   - not-allowed   -> disappear (the dotted/blocked cursor JavaFX
+ *                                ships, used by drag-drop "not a drop
+ *                                target" feedback)
+ * Apps that need the exact CSS cursor glyphs should overlay a Region
+ * with a custom cursor image; this stays consistent with the rest of
+ * tailwindfx by using JavaFX's built-in cursor names.
+ */
+.cursor-help { -fx-cursor: -cursor-wait; }
+.cursor-not-allowed { -fx-cursor: -cursor-disappear; }
+
+/* TailwindCSS v4 cursors with no native JavaFX equivalent; each maps to
+ * the closest in-toolkit cursor:
+ *   - context-menu  -> default     (no JavaFX context-menu cursor)
+ *   - vertical-text -> text        (closest selectable-text signal)
+ *   - alias         -> hand        (reference/shortcut intent)
+ *   - all-scroll    -> move        (omnidirectional drag intent)
+ *   - nesw-resize   -> ne-resize   (JavaFX has no bidirectional diagonal)
+ *   - nwse-resize   -> nw-resize   (JavaFX has no bidirectional diagonal)
+ */
+.cursor-context-menu { -fx-cursor: -cursor-default; }
+.cursor-vertical-text { -fx-cursor: -cursor-text; }
+.cursor-alias { -fx-cursor: -cursor-hand; }
+.cursor-all-scroll { -fx-cursor: -cursor-move; }
+.cursor-nesw-resize { -fx-cursor: -cursor-ne-resize; }
+.cursor-nwse-resize { -fx-cursor: -cursor-nw-resize; }
 
 /* =============================================================================
  * ACCESSIBILITY

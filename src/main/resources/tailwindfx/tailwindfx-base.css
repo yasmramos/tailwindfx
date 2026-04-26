@@ -408,6 +408,10 @@
     -cursor-open-hand: open-hand;
     -cursor-closed-hand: closed-hand;
     -cursor-pointing-hand: pointing-hand;
+    -cursor-h-resize: h-resize;
+    -cursor-v-resize: v-resize;
+    -cursor-disappear: disappear;
+    -cursor-none: none;
 
     /* =========================================================================
      * SISTEMA DE THEMING MODENA — Variables derivadas
