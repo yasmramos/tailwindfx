@@ -410,6 +410,10 @@
     -cursor-open-hand: open-hand;
     -cursor-closed-hand: closed-hand;
     -cursor-pointing-hand: pointing-hand;
+    -cursor-h-resize: h-resize;
+    -cursor-v-resize: v-resize;
+    -cursor-disappear: disappear;
+    -cursor-none: none;
 
     /* =========================================================================
      * SISTEMA DE THEMING MODENA — Variables derivadas en cascada
@@ -5037,6 +5041,117 @@ Group {
 
 .cursor-closed-hand {
     -fx-cursor: -cursor-closed-hand;
+}
+
+/* TailwindCSS v4 cursor names. Map to the closest JavaFX cursor; when
+ * JavaFX has no equivalent (help, not-allowed) we fall back to wait /
+ * disappear so the page still gets a meaningful pointer change. */
+.cursor-pointer {
+    -fx-cursor: -cursor-hand;
+}
+
+.cursor-grab {
+    -fx-cursor: -cursor-open-hand;
+}
+
+.cursor-grabbing {
+    -fx-cursor: -cursor-closed-hand;
+}
+
+.cursor-col-resize {
+    -fx-cursor: -cursor-h-resize;
+}
+
+.cursor-row-resize {
+    -fx-cursor: -cursor-v-resize;
+}
+
+.cursor-n-resize {
+    -fx-cursor: -cursor-n-resize;
+}
+
+.cursor-e-resize {
+    -fx-cursor: -cursor-e-resize;
+}
+
+.cursor-s-resize {
+    -fx-cursor: -cursor-s-resize;
+}
+
+.cursor-w-resize {
+    -fx-cursor: -cursor-w-resize;
+}
+
+.cursor-ne-resize {
+    -fx-cursor: -cursor-ne-resize;
+}
+
+.cursor-nw-resize {
+    -fx-cursor: -cursor-nw-resize;
+}
+
+.cursor-se-resize {
+    -fx-cursor: -cursor-se-resize;
+}
+
+.cursor-sw-resize {
+    -fx-cursor: -cursor-sw-resize;
+}
+
+.cursor-none {
+    -fx-cursor: -cursor-none;
+}
+
+/* JavaFX has no native equivalent for the TailwindCSS `help` cursor; the
+ * closest visual cue is the wait cursor that JavaFX itself falls back to
+ * for unknown cursors. */
+.cursor-help {
+    -fx-cursor: -cursor-wait;
+}
+
+/* JavaFX's `disappear` cursor is the dotted/blocked pointer used by
+ * drag-and-drop "not a drop target" feedback, the closest match for
+ * TailwindCSS `not-allowed`. */
+.cursor-not-allowed {
+    -fx-cursor: -cursor-disappear;
+}
+
+/* JavaFX has no native context-menu cursor; fall back to the default
+ * pointer rather than guess at a substitute glyph. */
+.cursor-context-menu {
+    -fx-cursor: -cursor-default;
+}
+
+/* TailwindCSS `vertical-text` maps to the JavaFX text caret cursor, the
+ * closest in-toolkit signal that text is selectable. */
+.cursor-vertical-text {
+    -fx-cursor: -cursor-text;
+}
+
+/* JavaFX has no alias cursor; the hand cursor is the closest signal that
+ * the target represents a reference or shortcut. */
+.cursor-alias {
+    -fx-cursor: -cursor-hand;
+}
+
+/* TailwindCSS `all-scroll` (drag in any direction) maps to JavaFX `move`,
+ * which carries the same omnidirectional-drag intent. */
+.cursor-all-scroll {
+    -fx-cursor: -cursor-move;
+}
+
+/* TailwindCSS `nesw-resize` is the bidirectional diagonal cursor; JavaFX
+ * only ships single-direction diagonal cursors, so use `ne-resize` as the
+ * closest visual approximation. */
+.cursor-nesw-resize {
+    -fx-cursor: -cursor-ne-resize;
+}
+
+/* TailwindCSS `nwse-resize` is the bidirectional diagonal cursor; JavaFX
+ * only ships single-direction diagonal cursors, so use `nw-resize` as the
+ * closest visual approximation. */
+.cursor-nwse-resize {
+    -fx-cursor: -cursor-nw-resize;
 }
 
 /* =============================================================================
