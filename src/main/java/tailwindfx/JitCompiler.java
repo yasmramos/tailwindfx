@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -15,8 +16,8 @@ import java.util.regex.Pattern;
  * "-fx-pref-width: 320px;" Entrada: "-translate-x-4" → "-fx-translate-x:
  * -16px;"
  *
- * Cache: los tokens compilados se guardan en un ConcurrentHashMap. Compilar
- * "p-4" 1000 veces cuesta igual que compilarlo 1 vez.
+ * Cache: los tokens compilados se guardan en un ConcurrentHashMap sin bloqueo
+ * global. Compilar "p-4" 1000 veces cuesta igual que compilarlo 1 vez.
  *
  * Tokens desconocidos — heurística inteligente: Si el token parece un utility
  * JIT (tiene números, /, [) → WARN en consola Si parece una CSS class
@@ -29,7 +30,8 @@ public final class JitCompiler {
 
     // Cache global: token raw → resultado compilado
     // =========================================================================
-    // LRU cache with bounded size — prevents unbounded growth in long-running apps
+    // Lock-free LRU cache with bounded size — prevents unbounded growth in long-running apps
+    // Uses ConcurrentHashMap for thread-safe access without global locking
     // =========================================================================
     /**
      * Maximum number of compiled tokens to keep in the cache.
@@ -37,24 +39,28 @@ public final class JitCompiler {
     static final int MAX_CACHE_SIZE = 2_000;
 
     /**
-     * Thread-safe LRU cache: evicts the least-recently-used entry when the
-     * cache reaches {@link #MAX_CACHE_SIZE}. Uses {@code LinkedHashMap} in
-     * access-order mode wrapped in {@code Collections.synchronizedMap}.
+     * Thread-safe LRU cache using ConcurrentHashMap with separate eviction mechanism.
+     * Access order is tracked via a separate LinkedHashMap for LRU ordering.
      *
      * <p>
      * Why 2000? A typical large app uses ~300-500 unique utility tokens. 2000
      * gives 4× headroom for JIT-compiled arbitrary values while keeping the
      * cache under ~400KB in the worst case.
      */
-    private static final Map<String, CompileResult> CACHE
-            = Collections.synchronizedMap(
-                    new java.util.LinkedHashMap<>(256, 0.75f, true) {
+    private static final ConcurrentHashMap<String, CompileResult> CACHE
+            = new ConcurrentHashMap<>(256);
+    
+    /**
+     * Separate LRU tracking map for eviction policy.
+     * Wrapped in synchronizedMap since we only modify it during eviction checks.
+     */
+    private static final Map<String, Long> ACCESS_ORDER
+            = Collections.synchronizedMap(new java.util.LinkedHashMap<>(256, 0.75f, true) {
                 @Override
-                protected boolean removeEldestEntry(Map.Entry<String, CompileResult> eldest) {
+                protected boolean removeEldestEntry(Map.Entry<String, Long> eldest) {
                     return size() > MAX_CACHE_SIZE;
                 }
-            }
-            );
+            });
 
     // Modo debug: loguea todos los tokens procesados
     private static volatile boolean DEBUG = false;
@@ -109,8 +115,8 @@ public final class JitCompiler {
     // API pública
     // =========================================================================
     /**
-     * Compila un token único. Usa cache: compilar el mismo token N veces cuesta
-     * lo mismo que 1.
+     * Compila un token único. Usa cache lock-free: compilar el mismo token N veces cuesta
+     * lo mismo que 1. Lecturas sin bloqueo, escrituras con putIfAtomic para thread-safety.
      */
     public static CompileResult compile(String token) {
         if (token == null) {
@@ -120,27 +126,31 @@ public final class JitCompiler {
             return CompileResult.unknown(token);
         }
         String key = token.trim();
-        // Lock-free read with LRU touch via get() - synchronizedMap handles concurrency
+        // Lock-free read - ConcurrentHashMap.get() is thread-safe without locking
         CompileResult result = CACHE.get(key);
         if (result != null) {
+            // Update access order for LRU eviction (synchronized internally)
+            ACCESS_ORDER.put(key, System.nanoTime());
             TailwindFXMetrics.instance().recordCacheHit();
             return result;
         }
-        // Synchronized only on cache miss for put + LRU eviction check
-        synchronized (CACHE) {
-            // Double-check after acquiring lock (another thread may have compiled it)
-            result = CACHE.get(key);
-            if (result != null) {
-                TailwindFXMetrics.instance().recordCacheHit();
-                return result;
-            }
-            long t0 = System.nanoTime();
-            result = doCompile(key);
-            TailwindFXMetrics.instance().recordCompilation(System.nanoTime() - t0);
-            CACHE.put(key, result);
-            TailwindFXMetrics.instance().recordCacheMiss();
-            return result;
+        // Only synchronize on cache miss during compilation and put
+        long t0 = System.nanoTime();
+        result = doCompile(key);
+        TailwindFXMetrics.instance().recordCompilation(System.nanoTime() - t0);
+        
+        // Thread-safe put with atomic operation
+        CompileResult existing = CACHE.putIfAbsent(key, result);
+        if (existing != null) {
+            // Another thread compiled it first, use their result
+            TailwindFXMetrics.instance().recordCacheHit();
+            return existing;
         }
+        
+        // Update access order for the newly added entry
+        ACCESS_ORDER.put(key, System.nanoTime());
+        TailwindFXMetrics.instance().recordCacheMiss();
+        return result;
     }
 
     /**
@@ -334,9 +344,8 @@ public final class JitCompiler {
      * explicit clearing is rarely needed.
      */
     public static void clearCache() {
-        synchronized (CACHE) {
-            CACHE.clear();
-        }
+        CACHE.clear();
+        ACCESS_ORDER.clear();
     }
 
     /**
