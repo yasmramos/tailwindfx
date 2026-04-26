@@ -51,14 +51,10 @@ public final class UtilityConflictResolver {
         definitions.put("min-h",    new String[]{"min-h-"});
         definitions.put("max-h",    new String[]{"max-h-"});
 
-        // Padding — each side is independent; "p-" only conflicts with "p-"
-        definitions.put("p",        new String[]{"p-"});
-        definitions.put("px",       new String[]{"px-"});
-        definitions.put("py",       new String[]{"py-"});
-        definitions.put("pt",       new String[]{"pt-"});
-        definitions.put("pr",       new String[]{"pr-"});
-        definitions.put("pb",       new String[]{"pb-"});
-        definitions.put("pl",       new String[]{"pl-"});
+        // Padding — all padding utilities conflict with each other.
+        // Applying a shorthand (p-) removes specific sides (px-, py-, etc.)
+        // and applying a specific side removes the shorthand.
+        definitions.put("padding", new String[]{"p-", "px-", "py-", "pt-", "pr-", "pb-", "pl-"});
 
         // Colores de fondo
         definitions.put("bg-color", new String[]{"bg-slate-","bg-gray-","bg-red-","bg-orange-","bg-amber-",
@@ -115,10 +111,10 @@ public final class UtilityConflictResolver {
         definitions.put("visibility", new String[]{"visible","invisible","hidden-node"});
         definitions.put("cursor",     new String[]{"cursor-"});
 
-        // Spacing
-        definitions.put("gap",   new String[]{"gap-"});
-        definitions.put("gap-x", new String[]{"gap-x-"});
-        definitions.put("gap-y", new String[]{"gap-y-"});
+        // Gap — all gap utilities conflict with each other.
+        // Applying a shorthand (gap-) removes specific axes (gap-x-, gap-y-)
+        // and applying a specific axis removes the shorthand.
+        definitions.put("gap", new String[]{"gap-", "gap-x-", "gap-y-"});
 
         // Alineación
         definitions.put("alignment", new String[]{"items-start","items-center","items-end","items-stretch",

@@ -138,7 +138,8 @@ public final class FxAnimation {
      * @throws IllegalArgumentException if node is null or durationMs <= 0
      */
     public static FxAnimation slideUp(Node node, int durationMs) {
-        double startY = node.getTranslateY() + 20;
+        double originalY = node.getTranslateY();
+        double startY = originalY + 20;
         node.setOpacity(0);
         node.setTranslateY(startY);
         return new FxAnimation(new Timeline(
@@ -147,7 +148,7 @@ public final class FxAnimation {
                 new KeyValue(node.translateYProperty(), startY,  Interpolator.EASE_OUT)),
             new KeyFrame(Duration.millis(durationMs),
                 new KeyValue(node.opacityProperty(),    1,       Interpolator.EASE_OUT),
-                new KeyValue(node.translateYProperty(), node.getTranslateY() - 20 + 20, Interpolator.EASE_OUT))
+                new KeyValue(node.translateYProperty(), originalY, Interpolator.EASE_OUT))
         ));
     }
 
@@ -180,7 +181,8 @@ public final class FxAnimation {
      * @throws IllegalArgumentException if node is null or durationMs <= 0
      */
     public static FxAnimation slideDown(Node node, int durationMs) {
-        double startY = node.getTranslateY() - 20;
+        double originalY = node.getTranslateY();
+        double startY = originalY - 20;
         node.setOpacity(0);
         node.setTranslateY(startY);
         return new FxAnimation(new Timeline(
@@ -189,7 +191,7 @@ public final class FxAnimation {
                 new KeyValue(node.translateYProperty(), startY, Interpolator.EASE_OUT)),
             new KeyFrame(Duration.millis(durationMs),
                 new KeyValue(node.opacityProperty(),    1,      Interpolator.EASE_OUT),
-                new KeyValue(node.translateYProperty(), node.getTranslateY() + 20 - 20, Interpolator.EASE_OUT))
+                new KeyValue(node.translateYProperty(), originalY, Interpolator.EASE_OUT))
         ));
     }
 
