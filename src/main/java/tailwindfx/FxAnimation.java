@@ -45,10 +45,21 @@ public final class FxAnimation {
     }
 
     // =========================================================================
-    // Animaciones de ENTRADA
+    // ENTRY ANIMATIONS — Fade, Slide, Scale
     // =========================================================================
 
-    /** Aparece desde opacidad 0 → 1 */
+    /**
+     * Fades a node in from opacity 0 to 1 with default {@link #NORMAL} duration.
+     * 
+     * <p>The node's initial opacity is set to 0. The animation uses {@code EASE_OUT}
+     * interpolation for a smooth entrance effect.
+     *
+     * @param node the node to animate (must not be null)
+     * @return a ready-to-play {@link FxAnimation} registered in slot {@code "enter"}
+     * @see #fadeIn(Node, int)
+     * @see #fadeIn(Node, int, Interpolator)
+     * @throws IllegalArgumentException if node is null
+     */
     public static FxAnimation fadeIn(Node node) {
         return fadeIn(node, NORMAL);
     }
@@ -65,12 +76,23 @@ public final class FxAnimation {
     }
 
     /**
-     * fadeIn con easing personalizable.
+     * Fades a node in from opacity 0 to 1 with custom easing interpolation.
+     *
+     * <p>The node's initial opacity is set to 0. The animation applies the specified
+     * interpolator for fine-grained control over acceleration/deceleration.
      *
      * <pre>
-     * FxAnimation.fadeIn(node, 300, Interpolator.EASE_IN).play();
-     * FxAnimation.fadeIn(node, 200, Interpolator.LINEAR).play();
+     * FxAnimation.fadeIn(node, 300, Interpolator.EASE_IN).play();  // Ease in for 300ms
+     * FxAnimation.fadeIn(node, 200, Interpolator.LINEAR).play();   // Linear for 200ms
      * </pre>
+     *
+     * @param node       the node to animate (must not be null)
+     * @param durationMs animation duration in milliseconds (must be > 0)
+     * @param ease       the interpolation function (must not be null)
+     * @return a ready-to-play {@link FxAnimation} registered in slot {@code "enter"}
+     * @throws IllegalArgumentException if node is null, ease is null or durationMs <= 0
+     * @see #fadeIn(Node)
+     * @see #fadeIn(Node, int)
      */
     public static FxAnimation fadeIn(Node node, int durationMs, Interpolator ease) {
         Preconditions.requireNode(node, "FxAnimation.fadeIn");
@@ -87,11 +109,34 @@ public final class FxAnimation {
         return fxAnim.register(node, "enter");
     }
 
-    /** Se desliza hacia arriba mientras aparece */
+    /**
+     * Slides a node up from below while fading in with default {@link #NORMAL} duration.
+     * 
+     * <p>The node starts 20 pixels below its current position with opacity 0, then slides
+     * up and fades to full opacity. Uses {@code EASE_OUT} interpolation.
+     *
+     * @param node the node to animate (must not be null)
+     * @return a ready-to-play {@link FxAnimation}
+     * @see #slideUp(Node, int)
+     * @throws IllegalArgumentException if node is null
+     */
     public static FxAnimation slideUp(Node node) {
         return slideUp(node, NORMAL);
     }
 
+    /**
+     * Slides a node up from below while fading in with specified duration.
+     * 
+     * <p>The node starts 20 pixels below its current position with opacity 0, then slides
+     * up to its original position while fading to full opacity. Uses {@code EASE_OUT}
+     * interpolation for smooth motion.
+     *
+     * @param node       the node to animate (must not be null)
+     * @param durationMs animation duration in milliseconds (must be > 0)
+     * @return a ready-to-play {@link FxAnimation}
+     * @see #slideUp(Node)
+     * @throws IllegalArgumentException if node is null or durationMs <= 0
+     */
     public static FxAnimation slideUp(Node node, int durationMs) {
         double startY = node.getTranslateY() + 20;
         node.setOpacity(0);
@@ -106,11 +151,34 @@ public final class FxAnimation {
         ));
     }
 
-    /** Se desliza hacia abajo mientras aparece */
+    /**
+     * Slides a node down from above while fading in with default {@link #NORMAL} duration.
+     * 
+     * <p>The node starts 20 pixels above its current position with opacity 0, then slides
+     * down and fades to full opacity. Uses {@code EASE_OUT} interpolation.
+     *
+     * @param node the node to animate (must not be null)
+     * @return a ready-to-play {@link FxAnimation}
+     * @see #slideDown(Node, int)
+     * @throws IllegalArgumentException if node is null
+     */
     public static FxAnimation slideDown(Node node) {
         return slideDown(node, NORMAL);
     }
 
+    /**
+     * Slides a node down from above while fading in with specified duration.
+     * 
+     * <p>The node starts 20 pixels above its current position with opacity 0, then slides
+     * down to its original position while fading to full opacity. Uses {@code EASE_OUT}
+     * interpolation for smooth motion.
+     *
+     * @param node       the node to animate (must not be null)
+     * @param durationMs animation duration in milliseconds (must be > 0)
+     * @return a ready-to-play {@link FxAnimation}
+     * @see #slideDown(Node)
+     * @throws IllegalArgumentException if node is null or durationMs <= 0
+     */
     public static FxAnimation slideDown(Node node, int durationMs) {
         double startY = node.getTranslateY() - 20;
         node.setOpacity(0);
@@ -125,8 +193,31 @@ public final class FxAnimation {
         ));
     }
 
-    /** Se desliza desde la izquierda */
+    /**
+     * Slides a node from left to right while fading in with default {@link #NORMAL} duration.
+     * 
+     * <p>The node starts 24 pixels to the left with opacity 0, then slides right and fades
+     * to full opacity. Uses {@code EASE_OUT} interpolation.
+     *
+     * @param node the node to animate (must not be null)
+     * @return a ready-to-play {@link FxAnimation}
+     * @see #slideRight(Node, int)
+     * @throws IllegalArgumentException if node is null
+     */
     public static FxAnimation slideRight(Node node) { return slideRight(node, NORMAL); }
+    
+    /**
+     * Slides a node from left to right while fading in with specified duration.
+     * 
+     * <p>The node starts 24 pixels to the left with opacity 0, then slides right to its
+     * original position while fading to full opacity. Uses {@code EASE_OUT} interpolation.
+     *
+     * @param node       the node to animate (must not be null)
+     * @param durationMs animation duration in milliseconds (must be > 0)
+     * @return a ready-to-play {@link FxAnimation}
+     * @see #slideRight(Node)
+     * @throws IllegalArgumentException if node is null or durationMs <= 0
+     */
     public static FxAnimation slideRight(Node node, int durationMs) {
         double startX = node.getTranslateX() - 24;
         node.setOpacity(0); node.setTranslateX(startX);
@@ -140,8 +231,31 @@ public final class FxAnimation {
         ));
     }
 
-    /** Se desliza desde la derecha */
+    /**
+     * Slides a node from right to left while fading in with default {@link #NORMAL} duration.
+     * 
+     * <p>The node starts 24 pixels to the right with opacity 0, then slides left and fades
+     * to full opacity. Uses {@code EASE_OUT} interpolation.
+     *
+     * @param node the node to animate (must not be null)
+     * @return a ready-to-play {@link FxAnimation}
+     * @see #slideLeft(Node, int)
+     * @throws IllegalArgumentException if node is null
+     */
     public static FxAnimation slideLeft(Node node) { return slideLeft(node, NORMAL); }
+    
+    /**
+     * Slides a node from right to left while fading in with specified duration.
+     * 
+     * <p>The node starts 24 pixels to the right with opacity 0, then slides left to its
+     * original position while fading to full opacity. Uses {@code EASE_OUT} interpolation.
+     *
+     * @param node       the node to animate (must not be null)
+     * @param durationMs animation duration in milliseconds (must be > 0)
+     * @return a ready-to-play {@link FxAnimation}
+     * @see #slideLeft(Node)
+     * @throws IllegalArgumentException if node is null or durationMs <= 0
+     */
     public static FxAnimation slideLeft(Node node, int durationMs) {
         double startX = node.getTranslateX() + 24;
         node.setOpacity(0); node.setTranslateX(startX);
@@ -155,12 +269,51 @@ public final class FxAnimation {
         ));
     }
 
-    /** Aparece escalando desde 0.85 → 1 */
+    /**
+     * Scales a node up from 0.85 to 1.0 while fading in with default {@link #NORMAL} duration.
+     * 
+     * <p>Creates a "pop-in" entrance effect with {@code EASE_OUT} interpolation.
+     * The node starts at 85% scale with opacity 0.
+     *
+     * @param node the node to animate (must not be null)
+     * @return a ready-to-play {@link FxAnimation}
+     * @see #scaleIn(Node, int)
+     * @see #scaleIn(Node, int, Interpolator)
+     * @throws IllegalArgumentException if node is null
+     */
     public static FxAnimation scaleIn(Node node) { return scaleIn(node, NORMAL); }
+    
+    /**
+     * Scales a node up from 0.85 to 1.0 while fading in with specified duration.
+     * 
+     * <p>Creates a "pop-in" entrance effect with {@code EASE_OUT} interpolation.
+     * The node starts at 85% scale with opacity 0.
+     *
+     * @param node       the node to animate (must not be null)
+     * @param durationMs animation duration in milliseconds (must be > 0)
+     * @return a ready-to-play {@link FxAnimation}
+     * @see #scaleIn(Node)
+     * @see #scaleIn(Node, int, Interpolator)
+     * @throws IllegalArgumentException if node is null or durationMs <= 0
+     */
     public static FxAnimation scaleIn(Node node, int durationMs) {
         return scaleIn(node, durationMs, Interpolator.EASE_OUT);
     }
-    /** scaleIn con easing personalizable. */
+    
+    /**
+     * Scales a node up from 0.85 to 1.0 while fading in with custom easing.
+     * 
+     * <p>Creates a "pop-in" entrance effect. The node starts at 85% scale with opacity 0,
+     * then scales to 100% and fades to full opacity using the specified interpolator.
+     *
+     * @param node       the node to animate (must not be null)
+     * @param durationMs animation duration in milliseconds (must be > 0)
+     * @param ease       the interpolation function (must not be null)
+     * @return a ready-to-play {@link FxAnimation}
+     * @see #scaleIn(Node)
+     * @see #scaleIn(Node, int)
+     * @throws IllegalArgumentException if node is null, ease is null or durationMs <= 0
+     */
     public static FxAnimation scaleIn(Node node, int durationMs, Interpolator ease) {
         Preconditions.requireNode(node, "FxAnimation.scaleIn");
         Preconditions.requireNonNull(ease, "FxAnimation.scaleIn", "ease");
@@ -180,10 +333,33 @@ public final class FxAnimation {
     }
 
     // =========================================================================
-    // Animaciones de SALIDA
+    // EXIT ANIMATIONS — Fade Out, Scale Out
     // =========================================================================
 
+    /**
+     * Fades a node out from its current opacity to 0 with default {@link #NORMAL} duration.
+     * 
+     * <p>Uses {@code EASE_IN} interpolation. Automatically registered in the {@code "exit"} slot.
+     *
+     * @param node the node to animate (must not be null)
+     * @return a ready-to-play {@link FxAnimation} registered in slot {@code "exit"}
+     * @see #fadeOut(Node, int)
+     * @throws IllegalArgumentException if node is null
+     */
     public static FxAnimation fadeOut(Node node) { return fadeOut(node, NORMAL); }
+    
+    /**
+     * Fades a node out from its current opacity to 0 with specified duration.
+     * 
+     * <p>Uses {@code EASE_IN} interpolation for a smooth exit effect. Automatically
+     * registered in the {@code "exit"} slot, cancelling any previous exit animation.
+     *
+     * @param node       the node to animate (must not be null)
+     * @param durationMs animation duration in milliseconds (must be > 0)
+     * @return a ready-to-play {@link FxAnimation} registered in slot {@code "exit"}
+     * @see #fadeOut(Node)
+     * @throws IllegalArgumentException if node is null or durationMs <= 0 (calls requirePositiveDuration)
+     */
     public static FxAnimation fadeOut(Node node, int durationMs) {
         Preconditions.requireNode(node, "FxAnimation.fadeOut");
         Preconditions.requirePositiveDuration(durationMs, "FxAnimation.fadeOut");
@@ -193,7 +369,30 @@ public final class FxAnimation {
         )).register(node, "exit");
     }
 
+    /**
+     * Scales a node down from 1.0 to 0.85 while fading out with default {@link #NORMAL} duration.
+     * 
+     * <p>Creates a "pop-out" exit effect with {@code EASE_IN} interpolation.
+     *
+     * @param node the node to animate (must not be null)
+     * @return a ready-to-play {@link FxAnimation}
+     * @see #scaleOut(Node, int)
+     * @throws IllegalArgumentException if node is null
+     */
     public static FxAnimation scaleOut(Node node) { return scaleOut(node, NORMAL); }
+    
+    /**
+     * Scales a node down from 1.0 to 0.85 while fading out with specified duration.
+     * 
+     * <p>Creates a "pop-out" exit effect. The node scales down to 85% and fades to
+     * opacity 0 using {@code EASE_IN} interpolation.
+     *
+     * @param node       the node to animate (must not be null)
+     * @param durationMs animation duration in milliseconds (must be > 0)
+     * @return a ready-to-play {@link FxAnimation}
+     * @see #scaleOut(Node)
+     * @throws IllegalArgumentException if node is null or durationMs <= 0
+     */
     public static FxAnimation scaleOut(Node node, int durationMs) {
         return new FxAnimation(new Timeline(
             new KeyFrame(Duration.ZERO,
@@ -208,10 +407,20 @@ public final class FxAnimation {
     }
 
     // =========================================================================
-    // Animaciones de ATENCIÓN
+    // ATTENTION ANIMATIONS — Pulse, Shake, Bounce, Flash
     // =========================================================================
 
-    /** Pulsa la opacidad: útil para badges, notificaciones */
+    /**
+     * Pulses a node by fading its opacity in and out indefinitely.
+     * 
+     * <p>Useful for drawing attention to badges, notifications, or status indicators.
+     * The animation cycles with period of 1 second (500ms fade out, 500ms fade in).
+     * Call {@link FxAnimation#cycleCount(int)} to limit the number of pulses.
+     *
+     * @param node the node to animate (must not be null)
+     * @return a ready-to-play {@link FxAnimation} with infinite cycle count
+     * @throws IllegalArgumentException if node is null
+     */
     public static FxAnimation pulse(Node node) {
         Timeline tl = new Timeline(
             new KeyFrame(Duration.ZERO,         new KeyValue(node.opacityProperty(), 1.0)),
@@ -242,7 +451,16 @@ public final class FxAnimation {
         ));
     }
 
-    /** Rebota verticalmente */
+    /**
+     * Bounces a node vertically with a dampening effect.
+     * 
+     * <p>Useful for attention-drawing animations on errors or interactive feedback.
+     * The node bounces up and down with decreasing amplitude over 480 milliseconds.
+     *
+     * @param node the node to animate (must not be null)
+     * @return a ready-to-play {@link FxAnimation}
+     * @throws IllegalArgumentException if node is null
+     */
     public static FxAnimation bounce(Node node) {
         double y = node.getTranslateY();
         return new FxAnimation(new Timeline(
@@ -256,7 +474,16 @@ public final class FxAnimation {
         ));
     }
 
-    /** Flash de opacidad: para notificaciones tipo "toast" */
+    /**
+     * Flashes a node by rapidly toggling its opacity on and off.
+     * 
+     * <p>Useful for toast notifications or quick attention-grabbing effects.
+     * The animation completes a full flash cycle in 800 milliseconds (4 toggles).
+     *
+     * @param node the node to animate (must not be null)
+     * @return a ready-to-play {@link FxAnimation}
+     * @throws IllegalArgumentException if node is null
+     */
     public static FxAnimation flash(Node node) {
         Timeline tl = new Timeline(
             new KeyFrame(Duration.ZERO,        new KeyValue(node.opacityProperty(), 1.0)),
@@ -269,13 +496,36 @@ public final class FxAnimation {
     }
 
     // =========================================================================
-    // Animaciones LOOP
+    // LOOP ANIMATIONS — Spin, Breathe (Infinite Cycles)
     // =========================================================================
 
-    /** Gira continuamente: útil para spinners/loading */
+    /**
+     * Continuously rotates a node indefinitely.
+     * 
+     * <p>Perfect for loading spinners, progress indicators, or hover effects.
+     * Uses default duration of 1000ms per full rotation with {@code LINEAR} interpolation.
+     *
+     * @param node the node to animate (must not be null)
+     * @return a ready-to-play {@link FxAnimation} with infinite cycle count
+     * @see #spin(Node, int)
+     * @throws IllegalArgumentException if node is null
+     */
     public static FxAnimation spin(Node node) {
         return spin(node, 1000);
     }
+    
+    /**
+     * Continuously rotates a node indefinitely with specified rotation speed.
+     * 
+     * <p>Perfect for loading spinners or progress indicators. Rotates 360 degrees
+     * in the specified duration using {@code LINEAR} interpolation.
+     *
+     * @param node       the node to animate (must not be null)
+     * @param durationMs time for one full 360-degree rotation in milliseconds (must be > 0)
+     * @return a ready-to-play {@link FxAnimation} with infinite cycle count
+     * @see #spin(Node)
+     * @throws IllegalArgumentException if node is null or durationMs <= 0
+     */
     public static FxAnimation spin(Node node, int durationMs) {
         Preconditions.requireNode(node, "FxAnimation.spin");
         Preconditions.requirePositiveDuration(durationMs, "FxAnimation.spin");
@@ -287,7 +537,17 @@ public final class FxAnimation {
         return new FxAnimation(tl);
     }
 
-    /** Respira (escala suavemente): para indicadores de estado */
+    /**
+     * Gently scales a node in and out indefinitely (breathing effect).
+     * 
+     * <p>Useful for status indicators, pulsing notifications, or meditative UI elements.
+     * The node scales from 1.0 to 1.06 (6% growth) with fading opacity over a 2-second
+     * cycle, creating a calming breathing animation.
+     *
+     * @param node the node to animate (must not be null)
+     * @return a ready-to-play {@link FxAnimation} with infinite cycle count
+     * @throws IllegalArgumentException if node is null
+     */
     public static FxAnimation breathe(Node node) {
         Timeline tl = new Timeline(
             new KeyFrame(Duration.ZERO,            new KeyValue(node.scaleXProperty(), 1.0), new KeyValue(node.scaleYProperty(), 1.0)),
@@ -328,6 +588,17 @@ public final class FxAnimation {
         );
     }
 
+    /**
+     * Internal helper that animates scale transitions smoothly.
+     * 
+     * <p>Used by hover effects to animate between scale values. Supports smooth
+     * interpolation from current scale to target scale.
+     *
+     * @param node       the node to animate (must not be null)
+     * @param targetX    target scale X value
+     * @param targetY    target scale Y value
+     * @param durationMs animation duration in milliseconds
+     */
     private static void animateScale(Node node, double targetX, double targetY, int durationMs) {
         Timeline tl = new Timeline(
             new KeyFrame(Duration.ZERO,
@@ -341,10 +612,27 @@ public final class FxAnimation {
     }
 
     // =========================================================================
-    // Utilidades de composición
+    // COMPOSITION UTILITIES — Chain, Parallel, Pause
     // =========================================================================
 
-    /** Encadena múltiples animaciones en secuencia */
+    /**
+     * Chains multiple animations to execute sequentially, one after another.
+     * 
+     * <p>Each animation waits for the previous one to complete. Useful for
+     * choreographed entrance sequences or multi-step effects.
+     * 
+     * <pre>
+     * FxAnimation.chain(
+     *     FxAnimation.fadeIn(node),
+     *     FxAnimation.slideUp(node, 200)
+     * ).play();
+     * </pre>
+     *
+     * @param animations the animations to chain (must not be null or empty)
+     * @return a ready-to-play {@link FxAnimation} containing all animations in sequence
+     * @throws IllegalArgumentException if animations is null or empty
+     * @see #parallel(FxAnimation...)
+     */
     public static FxAnimation chain(FxAnimation... animations) {
         if (animations == null || animations.length == 0) {
             throw new IllegalArgumentException("FxAnimation.chain: al menos una animación requerida");
@@ -356,7 +644,18 @@ public final class FxAnimation {
         return new FxAnimation(seq);
     }
 
-    /** Ejecuta múltiples animaciones en paralelo */
+    /**
+     * Executes multiple animations simultaneously (in parallel).
+     * 
+     * <p>All animations play at the same time. The overall animation completes when
+     * the longest animation finishes. Useful for combined effects on the same or
+     * different nodes.
+     *
+     * @param animations the animations to play in parallel (must not be null or empty)
+     * @return a ready-to-play {@link FxAnimation} containing all animations in parallel
+     * @throws IllegalArgumentException if animations is null or empty
+     * @see #chain(FxAnimation...)
+     */
     public static FxAnimation parallel(FxAnimation... animations) {
         if (animations == null || animations.length == 0) {
             throw new IllegalArgumentException("FxAnimation.parallel: al menos una animación requerida");
@@ -368,50 +667,126 @@ public final class FxAnimation {
         return new FxAnimation(par);
     }
 
-    /** Pausa de duración específica */
+    /**
+     * Creates a pause animation of specified duration.
+     * 
+     * <p>Useful in animation chains to add delays between animations.
+     * 
+     * <pre>
+     * FxAnimation.chain(
+     *     FxAnimation.fadeIn(node1),
+     *     FxAnimation.pause(200),
+     *     FxAnimation.fadeIn(node2)
+     * ).play();
+     * </pre>
+     *
+     * @param durationMs pause duration in milliseconds (must be > 0)
+     * @return a ready-to-play {@link FxAnimation}
+     * @throws IllegalArgumentException if durationMs <= 0
+     * @see #chain(FxAnimation...)
+     */
     public static FxAnimation pause(int durationMs) {
         PauseTransition p = new PauseTransition(Duration.millis(durationMs));
         return new FxAnimation(p);
     }
 
     // =========================================================================
-    // Métodos de instancia (fluent API)
+    // FLUENT API METHODS — Configure animation behavior
     // =========================================================================
 
-    /** Número de ciclos. Animation.INDEFINITE para loop. */
+    /**
+     * Sets the number of times this animation repeats.
+     * 
+     * <p>Use {@link Animation#INDEFINITE} for infinite looping. By default,
+     * animations play once (cycle count = 1).
+     *
+     * @param count number of cycles (1 = play once, INDEFINITE = infinite loop)
+     * @return this animation for method chaining
+     * @see #loop()
+     */
     public FxAnimation cycleCount(int count) {
         timeline.setCycleCount(count);
         return this;
     }
 
-    /** Loop infinito */
+    /**
+     * Sets this animation to repeat infinitely.
+     * 
+     * <p>Convenience method equivalent to {@code cycleCount(Animation.INDEFINITE)}.
+     * Stop explicitly with {@link #stop()} or when the node is removed from the scene.
+     *
+     * @return this animation for method chaining
+     * @see #cycleCount(int)
+     */
     public FxAnimation loop() {
         timeline.setCycleCount(Animation.INDEFINITE);
         return this;
     }
 
-    /** Velocidad: 0.5 = mitad de velocidad, 2.0 = doble */
+    /**
+     * Adjusts the playback speed of this animation.
+     * 
+     * <p>Values less than 1.0 slow down the animation; values greater than 1.0
+     * speed it up. For example: 0.5 = half speed, 2.0 = double speed.
+     *
+     * @param rate playback rate multiplier (must be > 0)
+     * @return this animation for method chaining
+     * @throws IllegalArgumentException if rate <= 0
+     */
     public FxAnimation speed(double rate) {
         timeline.setRate(rate);
         return this;
     }
 
-    /** Callback al terminar */
+    /**
+     * Registers a callback to execute when this animation completes.
+     * 
+     * @param handler callback function (must not be null)
+     * @return this animation for method chaining
+     * @throws IllegalArgumentException if handler is null
+     */
     public FxAnimation onFinished(javafx.event.EventHandler<javafx.event.ActionEvent> handler) {
         timeline.setOnFinished(handler);
         return this;
     }
 
-    /** Invierte la dirección de reproducción */
+    /**
+     * Enables auto-reverse: the animation plays forward, then backward.
+     * 
+     * <p>Useful for animations that should return to their starting state
+     * automatically (e.g., hover effects, attention animations).
+     * Only has effect when cycle count is > 1.
+     *
+     * @return this animation for method chaining
+     */
     public FxAnimation autoReverse() {
         timeline.setAutoReverse(true);
         return this;
     }
 
     /**
-     * Registra esta animación en el AnimationRegistry del nodo.
-     * Al llamar play(), cancela automáticamente la animación previa del mismo slot.
-     * Slots estándar: "enter", "exit", "attention", "loop"
+     * Registers this animation in the AnimationRegistry of the target node.
+     * 
+     * <p>When {@link #play()} is called, any previous animation in the same slot is
+     * automatically cancelled. This prevents competing animations from fighting over
+     * the same node properties.
+     * 
+     * <p>Standard slots:
+     * <ul>
+     *   <li>{@code "enter"} — entry animations (fadeIn, slideUp, scaleIn, etc.)
+     *   <li>{@code "exit"} — exit animations (fadeOut, scaleOut, etc.)
+     *   <li>{@code "attention"} — attention animations (shake, bounce, pulse, etc.)
+     *   <li>{@code "loop"} — infinite animations (spin, breathe, etc.)
+     * </ul>
+     * 
+     * <p>Custom slots can be used for independent animations that should not
+     * cancel each other.
+     *
+     * @param node the target node (must not be null)
+     * @param slot animation slot name (must not be null or empty)
+     * @return this animation for method chaining
+     * @throws IllegalArgumentException if node or slot is null/empty
+     * @see AnimationRegistry
      */
     public FxAnimation register(javafx.scene.Node node, String slot) {
         this.registeredNode = node;
@@ -419,7 +794,17 @@ public final class FxAnimation {
         return this;
     }
 
-    /** Starts the animation. If registered, cancels the previous animation in the same slot. */
+    /**
+     * Starts playback of this animation.
+     * 
+     * <p>If this animation is registered, any previous animation in the same slot is
+     * automatically cancelled before this one starts. Otherwise, plays the animation
+     * directly on its underlying Timeline.
+     *
+     * @see #register(Node, String)
+     * @see #stop()
+     * @see #pause()
+     */
     public void play() {
         TailwindFXMetrics.instance().recordAnimationPlay();
         if (registeredNode != null && registeredSlot != null) {
@@ -429,7 +814,14 @@ public final class FxAnimation {
         }
     }
 
-    /** Para la animación */
+    /**
+     * Stops this animation and unregisters it if registered.
+     * 
+     * <p>Resets the animation to its initial state. To resume later, call {@link #play()}.
+     *
+     * @see #pause()
+     * @see #play()
+     */
     public void stop() {
         timeline.stop();
         if (registeredNode != null && registeredSlot != null) {
@@ -437,10 +829,24 @@ public final class FxAnimation {
         }
     }
 
-    /** Pausa la animación */
+    /**
+     * Pauses this animation, preserving its current state.
+     * 
+     * <p>Call {@link #resume()} or {@link #play()} to continue playback.
+     *
+     * @see #resume()
+     * @see #stop()
+     */
     public void pause() { timeline.pause(); }
 
-    /** Reanuda la animación */
+    /**
+     * Resumes this animation from where it was paused.
+     * 
+     * <p>Does nothing if the animation is not currently paused.
+     *
+     * @see #pause()
+     * @see #play()
+     */
     public void resume() { timeline.play(); }
 
     /**
@@ -458,26 +864,91 @@ public final class FxAnimation {
         return this;
     }
 
-    /** .ease-in — desacelera al inicio */
+    /**
+     * Applies {@code EASE_IN} interpolation — decelerates at the start.
+     * 
+     * <p>Use for animations that should start slow and end fast (e.g., exits).
+     *
+     * @return this animation for method chaining
+     * @see #easeOut()
+     * @see #easeBoth()
+     */
     public FxAnimation easeIn()    { return withEase(Interpolator.EASE_IN); }
-    /** .ease-out — desacelera al final */
+    
+    /**
+     * Applies {@code EASE_OUT} interpolation — decelerates at the end.
+     * 
+     * <p>Use for animations that should start fast and end slow (e.g., entrances).
+     * This is the most common easing for natural-feeling animations.
+     *
+     * @return this animation for method chaining
+     * @see #easeIn()
+     * @see #easeBoth()
+     */
     public FxAnimation easeOut()   { return withEase(Interpolator.EASE_OUT); }
-    /** .ease-in-out — desacelera en ambos extremos */
+    
+    /**
+     * Applies {@code EASE_IN_OUT} interpolation — decelerates at both ends.
+     * 
+     * <p>Use for animations that should ease in and out symmetrically.
+     *
+     * @return this animation for method chaining
+     * @see #easeIn()
+     * @see #easeOut()
+     */
     public FxAnimation easeBoth()  { return withEase(Interpolator.EASE_BOTH); }
-    /** .linear — velocidad constante */
+    
+    /**
+     * Applies {@code LINEAR} interpolation — constant speed throughout.
+     * 
+     * <p>Use for mechanical animations like spinners or progress indicators.
+     *
+     * @return this animation for method chaining
+     * @see #easeIn()
+     * @see #easeOut()
+     */
     public FxAnimation linear()    { return withEase(Interpolator.LINEAR); }
 
-    /** Acceso al Animation subyacente para configuración avanzada */
+    /**
+     * Returns the underlying JavaFX {@link Animation} for advanced configuration.
+     * 
+     * <p>Use this for direct access to features not exposed by FxAnimation's fluent API.
+     * Most users should use the fluent API methods instead.
+     *
+     * @return the underlying Timeline or Transition
+     */
     public Animation raw() { return timeline; }
 
     // =========================================================================
     // Hover effects (onHoverLift, onHoverDim, removeHoverEffects)
     // =========================================================================
 
-    /** Efecto lift en hover: desplaza hacia arriba 4px por defecto */
+    /**
+     * Lifts a node up slightly on hover (default 4 pixels).
+     * 
+     * <p>Installs permanent mouse enter/exit listeners. Multiple hover effects can
+     * be stacked on the same node. Remove all effects with {@link #removeHoverEffects(Node)}.
+     *
+     * @param node the node to add lift effect to (must not be null)
+     * @throws IllegalArgumentException if node is null
+     * @see #onHoverLift(Node, double)
+     * @see #removeHoverEffects(Node)
+     */
     public static void onHoverLift(Node node) { onHoverLift(node, -4); }
     
-    /** Efecto lift en hover con offset personalizado */
+    /**
+     * Lifts a node on hover with custom vertical offset.
+     * 
+     * <p>Installs permanent mouse enter/exit listeners that animate the node up/down.
+     * Negative offsets lift the node up; positive offsets push it down.
+     * Multiple hover effects can be stacked. Remove all with {@link #removeHoverEffects(Node)}.
+     *
+     * @param node    the node to add lift effect to (must not be null)
+     * @param offsetY vertical offset in pixels (typically negative for upward lift)
+     * @throws IllegalArgumentException if node is null
+     * @see #onHoverLift(Node)
+     * @see #removeHoverEffects(Node)
+     */
     public static void onHoverLift(Node node, double offsetY) {
         double originalY = node.getTranslateY();
         Timeline hoverIn  = new Timeline(new KeyFrame(Duration.millis(FAST),
@@ -493,7 +964,21 @@ public final class FxAnimation {
         storeHoverHandlers(node, enterLift, exitLift);
     }
 
-    /** Efecto dim en hover: reduce opacidad */
+    /**
+     * Dims a node (reduces opacity) on hover.
+     * 
+     * <p>Installs permanent mouse enter/exit listeners. Multiple hover effects can
+     * be stacked on the same node. Remove all effects with {@link #removeHoverEffects(Node)}.
+     * 
+     * <pre>
+     * FxAnimation.onHoverDim(button, 0.7);  // 70% opacity on hover
+     * </pre>
+     *
+     * @param node            the node to add dim effect to (must not be null)
+     * @param targetOpacity   opacity on hover (0.0 = transparent, 1.0 = opaque)
+     * @throws IllegalArgumentException if node is null
+     * @see #removeHoverEffects(Node)
+     */
     public static void onHoverDim(Node node, double targetOpacity) {
         Timeline hoverIn  = new Timeline(new KeyFrame(Duration.millis(FAST),
             new KeyValue(node.opacityProperty(), targetOpacity, Interpolator.EASE_OUT)));
@@ -508,7 +993,17 @@ public final class FxAnimation {
         storeHoverHandlers(node, enterH2, exitH2);
     }
 
-    /** Elimina todos los efectos hover instalados */
+    /**
+     * Removes all installed hover effects from a node.
+     * 
+     * <p>Unregisters all mouse listeners added by {@link #onHoverScale(Node, double)},
+     * {@link #onHoverLift(Node)}, {@link #onHoverLift(Node, double)}, and
+     * {@link #onHoverDim(Node, double)}. Also resets scale, opacity, and rotation
+     * to baseline values (1.0, 1.0, 0).
+     *
+     * @param node the node to remove hover effects from (must not be null)
+     * @throws IllegalArgumentException if node is null
+     */
     public static void removeHoverEffects(Node node) {
         @SuppressWarnings("unchecked")
         var handlers = (java.util.List<javafx.event.EventHandler<javafx.scene.input.MouseEvent>>)
@@ -524,6 +1019,16 @@ public final class FxAnimation {
         node.setOpacity(1.0);
     }
 
+    /**
+     * Internal helper that stores hover event handlers for later removal.
+     * 
+     * <p>Maintains a list of all hover handlers installed on a node so they can
+     * be unregistered cleanly by {@link #removeHoverEffects(Node)}.
+     *
+     * @param node  the target node (must not be null)
+     * @param enter the mouse enter handler (must not be null)
+     * @param exit  the mouse exit handler (must not be null)
+     */
     @SuppressWarnings("unchecked")
     private static void storeHoverHandlers(Node node, 
             javafx.event.EventHandler<javafx.scene.input.MouseEvent> enter,
@@ -540,7 +1045,33 @@ public final class FxAnimation {
 
     /**
      * AnimationRegistry — Manages active animations per node to prevent memory leaks.
-     * Registers animations in slots, auto-cancels on scene detach.
+     * 
+     * <p>Registers animations in named slots, auto-cancels previous animations in the
+     * same slot, and automatically cleans up when nodes are removed from the scene.
+     * This prevents Timeline objects from holding strong references to detached nodes.
+     * 
+     * <h3>Predefined Slots</h3>
+     * Each slot governs a semantic category of animation. Starting an animation
+     * in a slot cancels whatever is currently running in that slot:
+     * <ul>
+     *   <li>{@code "enter"} — entry animations (fadeIn, slideUp, slideDown, etc.)
+     *   <li>{@code "exit"} — exit animations (fadeOut, scaleOut)
+     *   <li>{@code "attention"} — attention animations (shake, bounce, pulse, flash)
+     *   <li>{@code "loop"} — infinite animations (spin, breathe)
+     * </ul>
+     * 
+     * <h3>Custom Slots</h3>
+     * Any string is a valid slot. Use custom slots when you need independent
+     * animations that should not cancel each other:
+     * <pre>
+     * registry.play(node, "highlight", fadeAnimation);
+     * registry.play(node, "bounce", bounceAnimation);
+     * // Both run concurrently
+     * </pre>
+     * 
+     * <h3>Scene Listener</h3>
+     * Automatically removes all active animations when the node is detached from
+     * the scene, preventing Timeline memory leaks.
      */
     public static final class AnimationRegistry {
 
@@ -548,6 +1079,18 @@ public final class FxAnimation {
 
         private AnimationRegistry() {}
 
+        /**
+         * Registers and starts an animation in a named slot.
+         * 
+         * <p>If an animation is already running in the same slot, it is automatically
+         * stopped and replaced. Also installs a scene listener that auto-cancels all
+         * animations if the node is removed from the scene, preventing Timeline-induced
+         * memory leaks.
+         *
+         * @param node      the target node (must not be null)
+         * @param slot      animation slot name (must not be null)
+         * @param animation the animation to play (must not be null)
+         */
         public static void play(javafx.scene.Node node, String slot, Animation animation) {
             cancel(node, slot);
             getSlots(node).put(slot, animation);
@@ -556,10 +1099,28 @@ public final class FxAnimation {
             installSceneListener(node);
         }
 
+        /**
+         * Checks if an animation is currently running in the specified slot.
+         *
+         * @param node the target node (must not be null)
+         * @param slot animation slot name (must not be null)
+         * @return true if an animation is active in the slot, false otherwise
+         */
         public static boolean isActive(javafx.scene.Node node, String slot) {
             return getSlots(node).containsKey(slot);
         }
 
+        /**
+         * Installs a scene listener (once per node) that cancels all active animations
+         * when the node is removed from the scene graph.
+         * 
+         * <p><b>Why this matters:</b> A running Timeline holds references to KeyValues,
+         * which hold references to node properties, creating a chain:
+         * Timeline → KeyValue → node. This prevents GC of detached nodes.
+         * Cancelling the Timeline on scene removal breaks this chain.
+         *
+         * @param node the target node (must not be null)
+         */
         private static void installSceneListener(javafx.scene.Node node) {
             final String LISTENER_KEY = "tailwindfx.anim.scene-listener";
             if (node.getProperties().containsKey(LISTENER_KEY)) return;
@@ -574,16 +1135,33 @@ public final class FxAnimation {
             node.getProperties().put(LISTENER_KEY, Boolean.TRUE);
         }
 
+        /**
+         * Stops and removes an animation from its slot.
+         *
+         * @param node the target node (must not be null)
+         * @param slot animation slot name (must not be null)
+         */
         public static void cancel(javafx.scene.Node node, String slot) {
             Animation prev = getSlots(node).get(slot);
             if (prev != null) { prev.stop(); getSlots(node).remove(slot); }
         }
 
+        /**
+         * Cancels all active animations on this node across all slots.
+         *
+         * @param node the target node (must not be null)
+         */
         public static void cancelAll(javafx.scene.Node node) {
             getSlots(node).values().forEach(Animation::stop);
             getSlots(node).clear();
         }
 
+        /**
+         * Internal helper to retrieve or create the animation slot map for a node.
+         *
+         * @param node the target node (must not be null)
+         * @return map of slot names to active animations
+         */
         @SuppressWarnings("unchecked")
         private static java.util.Map<String, Animation> getSlots(javafx.scene.Node node) {
             return (java.util.Map<String, Animation>) node.getProperties()
@@ -592,7 +1170,24 @@ public final class FxAnimation {
     }
 
     /**
-     * ResponsiveAnimationGuard — Pauses/resumes animations during responsive layout changes.
+     * ResponsiveAnimationGuard — Coordinates animations with responsive layout changes.
+     * 
+     * <p>Prevents animations from becoming desynchronized when the layout reorganizes
+     * (e.g., when crossing a breakpoint that changes from row to column layout).
+     * 
+     * <h3>Problem Scenario</h3>
+     * If a node is animating its translateX/Y while the layout simultaneously recalculates
+     * positions, the node can end up in an incorrect final position.
+     * 
+     * <h3>Solution</h3>
+     * Pause active transform animations before layout changes, then resume afterward.
+     * This integration with BreakpointManager ensures smooth responsive behavior.
+     * 
+     * <pre>
+     * BreakpointManager bpm = TailwindFX.responsive(stage);
+     * ResponsiveAnimationGuard.install(scene);
+     * // Animations now pause/resume automatically during breakpoint changes
+     * </pre>
      */
     public static final class ResponsiveAnimationGuard {
 
@@ -600,16 +1195,43 @@ public final class FxAnimation {
 
         private ResponsiveAnimationGuard() {}
 
+        /**
+         * Pauses all active transform animations in the scene subtree.
+         * 
+         * <p>Call at the start of a responsive layout change (before reorganizing Panes).
+         * Animations in transform slots (enter, exit, slide, scale) are paused to prevent
+         * conflicting with position recalculations.
+         *
+         * @param scene the scene whose animations to pause (must not be null)
+         */
         public static void onLayoutChangeStart(javafx.scene.Scene scene) {
             if (scene == null || scene.getRoot() == null) return;
             pauseAnimationsInSubtree(scene.getRoot());
         }
 
+        /**
+         * Resumes all animations that were paused during a responsive layout change.
+         * 
+         * <p>Call after completing the layout reorganization. Animations that were
+         * active before the layout change are automatically resumed.
+         *
+         * @param scene the scene whose animations to resume (must not be null)
+         */
         public static void onLayoutChangeEnd(javafx.scene.Scene scene) {
             if (scene == null || scene.getRoot() == null) return;
             resumeAnimationsInSubtree(scene.getRoot());
         }
 
+        /**
+         * Resets a node's animation state and visual properties to baseline.
+         * 
+     * <p>Cancels all active animations and restores the node to its default
+         * visual state: translateX/Y = 0, scaleX/Y = 1, opacity = 1, rotation = 0.
+         * Useful when switching layouts to prevent residual transform values from
+         * affecting the new layout.
+         *
+         * @param node the node to reset (must not be null)
+         */
         public static void resetNode(javafx.scene.Node node) {
             AnimationRegistry.cancelAll(node);
             node.setTranslateX(0);
@@ -620,6 +1242,11 @@ public final class FxAnimation {
             node.setRotate(0);
         }
 
+        /**
+         * Internal helper that recursively pauses transform animations in a node subtree.
+         *
+         * @param node the root node of the subtree (must not be null)
+         */
         private static void pauseAnimationsInSubtree(javafx.scene.Node node) {
             @SuppressWarnings("unchecked")
             var slots = (java.util.Map<String, Animation>) node.getProperties()
@@ -644,6 +1271,11 @@ public final class FxAnimation {
             }
         }
 
+        /**
+         * Internal helper that recursively resumes paused animations in a node subtree.
+         *
+         * @param node the root node of the subtree (must not be null)
+         */
         private static void resumeAnimationsInSubtree(javafx.scene.Node node) {
             @SuppressWarnings("unchecked")
             var paused = (java.util.List<String>) node.getProperties().remove(PAUSED_KEY);
@@ -665,6 +1297,15 @@ public final class FxAnimation {
             }
         }
 
+        /**
+         * Internal helper that identifies transform animation slots.
+         * 
+         * <p>Slots like "enter", "exit", "slide*", "scale*" animate position and size.
+         * These must be paused during responsive layout changes.
+         *
+         * @param slot the animation slot name
+         * @return true if this slot contains transform animations
+         */
         private static boolean isTransformAnimation(String slot) {
             return "translate".equals(slot) || "scale".equals(slot) ||
                    "rotate".equals(slot) || "slide".equals(slot);
