@@ -65,10 +65,84 @@ public final class JitCompiler {
     // Modo debug: loguea todos los tokens procesados
     private static volatile boolean DEBUG = false;
 
-    // Heurística: tokens que contienen estos patrones probablemente son JIT y no CSS classes
-    // Pattern anchored and escaped correctly to avoid false positives like "btn-2-col" or "card-v2"
-    private static final Pattern LOOKS_LIKE_JIT
-            = Pattern.compile("^\\d+$|^\\[.*\\]$|^-.*|^.*/.*$");
+    /**
+     * Detects if a token requires JIT compilation (arbitrary values only).
+     * Matches Tailwind CSS v4 candidate parsing logic.
+     * 
+     * JIT triggers:
+     * - Arbitrary values: w-[320px], bg-[#fff], text-[length:var(--x)]
+     * - Arbitrary modifiers: bg-red-500/[0.3], hover:bg-[#fff]/(0.5)
+     * - Arbitrary properties: [color:red], [mask-type:luminance]
+     * 
+     * NOT JIT (predefined utilities):
+     * - w-32, bg-red-500, -mt-4, col-1, z-10
+     */
+    private static boolean requiresJitCompilation(String token) {
+        if (token == null || token.isEmpty()) return false;
+        
+        // Fast path: arbitrary property [...]
+        if (token.startsWith("[") && token.endsWith("]")) {
+            // Must contain : for property:value syntax
+            return token.indexOf(':', 1) > 1; // [color:red] ✓, [] ✗
+        }
+        
+        // Split modifier (after /) - Tailwind uses segment() with top-level parsing
+        int slashIdx = token.lastIndexOf('/');
+        String base = (slashIdx > 0) ? token.substring(0, slashIdx) : token;
+        String modifier = (slashIdx > 0) ? token.substring(slashIdx + 1) : null;
+        
+        // Check if modifier is arbitrary (triggers JIT for opacity, etc.)
+        if (modifier != null && isArbitraryValue(modifier)) {
+            return true;
+        }
+        
+        // Check if base contains arbitrary value [...]
+        return containsArbitraryValue(base);
+    }
+
+    /**
+     * Checks if a string contains an arbitrary value in [...] syntax.
+     * Handles nested parens/brackets like calc(100px-4rem) or var(--x).
+     */
+    private static boolean containsArbitraryValue(String input) {
+        int bracketDepth = 0;
+        int start = -1;
+        
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            
+            if (c == '[' && bracketDepth == 0) {
+                start = i;
+                bracketDepth++;
+            } else if (c == '[') {
+                bracketDepth++;
+            } else if (c == ']') {
+                bracketDepth--;
+                if (bracketDepth == 0 && start >= 0) {
+                    // Found complete [...] - validate it's not empty
+                    String arbitrary = input.substring(start + 1, i);
+                    return !arbitrary.isEmpty() && !arbitrary.trim().isEmpty();
+                }
+            }
+            // Skip escaped chars and strings for robustness (simplified)
+        }
+        return false;
+    }
+
+    /**
+     * Checks if a modifier/value is arbitrary: [...] or (...) for CSS vars.
+     */
+    private static boolean isArbitraryValue(String value) {
+        if (value == null || value.length() < 2) return false;
+        
+        // Arbitrary: [value] or (var(--x))
+        if ((value.startsWith("[") && value.endsWith("]")) ||
+            (value.startsWith("(") && value.endsWith(")"))) {
+            String content = value.substring(1, value.length() - 1);
+            return !content.isEmpty() && !content.trim().isEmpty();
+        }
+        return false;
+    }
 
     public static void setDebug(boolean enabled) {
         DEBUG = enabled;
@@ -250,12 +324,12 @@ public final class JitCompiler {
                 cssClasses.add(result.cssClass());
             }
             if (!result.isKnown()) {
-                // Heurística: si parece un token JIT (tiene dígitos, /, [) → warn
+                // Heurística: si parece un token JIT (valores arbitrarios) → warn
                 // Si parece una CSS class intencional (btn-primary) → silencioso
                 // Excepciones: tokens de gradientes no reconocidos → silenciosos
                 boolean isGradientRelated = t.startsWith("from-") || t.startsWith("via-") 
                         || t.startsWith("to-") || t.startsWith("bg-gradient-");
-                if (LOOKS_LIKE_JIT.matcher(t).matches() && !isGradientRelated) {
+                if (requiresJitCompilation(t) && !isGradientRelated) {
                     LOG.warning("TailwindFX JIT: token desconocido '" + t
                             + "' (parece utility JIT pero no se reconoció)");
                 } else if (DEBUG) {
