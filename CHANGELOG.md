@@ -8,6 +8,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [1.0-SNAPSHOT] - Unreleased
 
 ### Added
+- **Comprehensive Javadoc for `FxAnimation`** — Complete API documentation with examples, parameter descriptions, and usage guidelines (PR #69)
 - **Tailwind v4.1 CSS utilities** — `overflow-wrap`, `word-break`, `whitespace` classes
 - **SVG utilities** — `.fill-*`, `.stroke-*`, `.stroke-width-*`, `.stroke-dashed`, `.stroke-dotted`
 - **Text-shadow** — `.text-shadow-sm/md/lg/xl/2xl` + colored variants (`.text-shadow-blue`, etc.)
@@ -71,7 +72,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `BreakpointManager` — SM/MD/LG/XL/XXL breakpoints
 - `ThemeManager` — dark/light/blue/green/purple/rose/slate presets
 
+### Changed
+- **Java 17 Migration** — Project migrated from Java 21 to Java 17 for broader compatibility
+- **`FxAnimation` as Public API** — Extracted `FxAnimation` as public class, deprecated `AnimationUtil`
+- **Unified `apply()` method** — Enhanced to auto-detect CSS classes and JIT tokens
+- **Examples refactored** — Moved to separate `tailwindfx-examples` Maven project
+- **TestFX integration** — Comprehensive headless testing with Monocle and xvfb
+- **Documentation overhaul** — Added CONTRIBUTING.md, CODE_OF_CONDUCT.md, updated README
+- **MIT License** — Added LICENSE file with 2026 copyright
+
 ### Fixed
+- `JitCompiler` regex patterns to prevent false positives in arbitrary value parsing
 - `FxFlexPane.computePrefHeight` returned wrong height for `wrap=true` rows
 - `UtilityConflictResolver` — skew, aspect, 3D transform categories were missing, causing classes to accumulate instead of replace
 - Spanish strings remaining in log messages (complete sweep)
@@ -80,6 +91,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `UtilityConflictResolver.invalidateCache(null)` — added null safety
 - All log/exception/comment strings normalized to English
 - Wildcard imports replaced with specific imports in all Java files
+- TestFX tests fixed for JavaFX 17 compatibility (disabled module-info)
+- Avatar component test updated for Java 17
+- Documentation typos and grammatical errors corrected
+- README updated to reflect Java 17 requirement
+
+### Removed
+- **`AnimationUtil.java`** — Removed dead code, functionality fully migrated to `FxAnimation`
+- **Deprecated JIT methods** — Cleaned up legacy API surface
+- **Old documentation files** — Removed outdated docs, keeping `docs/` folder empty for comprehensive rewrite
+- **Preview features** — Removed Java 21 preview features for Java 17 compatibility
+- **`TailwindFXExample.java`** — Moved to examples module
+- **Obsolete test suites** — Removed deprecated ComponentFactory, TailwindFXMain, and ThemeManagerRefresh tests
 
 ### Documentation
 - **`FxAnimation`** — comprehensive JavaDoc added to all methods with detailed descriptions, parameters, return values, and usage examples
@@ -89,3 +112,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `StylesTest` — 13 new tests for v4.1 APIs (textShadow, dropShadow, clip, 3D, glass, neumorph, SVG)
 - `TailwindFXTest` — JIT v4.1 token tests + `TailwindFXMetrics` alert system tests
 - `TestRunner` — `FxDataTableTest` wired in
+- `FxAnimationTest` — Comprehensive animation API tests
+- `ThemeManagerTest` — Theme persistence and propagation tests
+- `AdvancedTestFXIntegrationTest` — Advanced UI integration tests with Monocle
+- `TailwindFXUnifiedApplyTest` — Tests for unified apply() method with JIT detection
+- `FxI18nTest` — Internationalization tests
+- `FxFlexPaneTest` — Flexbox layout tests
+- `EdgeCaseTests` — Edge case handling tests
+
+### Breaking Changes
+- **`AnimationUtil` deprecated** — Migrate to `FxAnimation` fluent API
+- **Java 17 required** — Update your JDK from Java 21 to Java 17
+- **`jit()` method deprecated** — Use `apply()` which now auto-detects JIT tokens
+- **`applyDiff()` made private** — Internal optimization, use `apply()` instead
+- **Examples moved** — Example applications now in separate `tailwindfx-examples` module
