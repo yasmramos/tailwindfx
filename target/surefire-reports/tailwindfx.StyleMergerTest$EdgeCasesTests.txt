@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: tailwindfx.StyleMergerTest$EdgeCasesTests
--------------------------------------------------------------------------------
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.322 s -- in tailwindfx.StyleMergerTest$EdgeCasesTests

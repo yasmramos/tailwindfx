@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: tailwindfx.JitCompilerExtendedTest
--------------------------------------------------------------------------------
-Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.259 s -- in tailwindfx.JitCompilerExtendedTest
