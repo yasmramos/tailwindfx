@@ -131,7 +131,15 @@ public final class BreakpointManager {
     private String                           currentCustom;
     private final List<BpListener>           listeners = new ArrayList<>();
     private ChangeListener<Number>           widthListener;
+    private ChangeListener<Number>           heightListener;
     private boolean                          orientationEnabled = false;
+    
+    // Throttle para evitar thrashing en resize
+    private long lastUpdate = 0;
+    private static final long THROTTLE_MS = 120;
+    
+    // Set para evitar callbacks duplicados
+    private final java.util.Set<String> registeredCallbacks = new java.util.HashSet<>();
 
     // =========================================================================
     // Construcción
@@ -156,10 +164,17 @@ public final class BreakpointManager {
     /**
      * Registra un callback que se ejecuta al cruzar un breakpoint
      * (tanto al subir como al bajar).
+     * Evita duplicados: si ya está registrado el mismo callback para este breakpoint, no lo añade.
      */
     public BreakpointManager onBreakpoint(Breakpoint bp, Runnable callback) {
         Preconditions.requireNonNull(bp, "BreakpointManager.onBreakpoint", "breakpoint");
         Preconditions.requireNonNull(callback, "BreakpointManager.onBreakpoint", "callback");
+        
+        String key = bp.name() + ":" + System.identityHashCode(callback);
+        if (!registeredCallbacks.add(key)) {
+            return this; // Ya está registrado, evitar duplicado
+        }
+        
         listeners.add(new BpListener(bp.minWidth, callback));
         return this;
     }
@@ -179,8 +194,10 @@ public final class BreakpointManager {
         orientationEnabled = true;
         if (stage.getScene() != null)
             updateOrientation(stage.getScene(), stage.getWidth(), stage.getHeight());
-        stage.heightProperty().addListener((o, old, h) ->
-            updateOrientation(stage.getScene(), stage.getWidth(), h.doubleValue()));
+        
+        heightListener = (o, old, h) ->
+            updateOrientation(stage.getScene(), stage.getWidth(), h.doubleValue());
+        stage.heightProperty().addListener(heightListener);
         return this;
     }
 
@@ -196,6 +213,9 @@ public final class BreakpointManager {
     /** Desconecta todos los listeners */
     public void detach() {
         if (widthListener != null) stage.widthProperty().removeListener(widthListener);
+        if (heightListener != null) stage.heightProperty().removeListener(heightListener);
+        listeners.clear();
+        registeredCallbacks.clear();
     }
 
     // =========================================================================
@@ -209,11 +229,17 @@ public final class BreakpointManager {
     }
 
     private void update(double width) {
-        if (customBps != null && !customBps.isEmpty()) {
-            updateCustom(width);
-        } else {
-            updateDefault(width);
-        }
+        long now = System.nanoTime();
+        if (now - lastUpdate < THROTTLE_MS * 1_000_000L) return;
+        lastUpdate = now;
+        
+        javafx.application.Platform.runLater(() -> {
+            if (customBps != null && !customBps.isEmpty()) {
+                updateCustom(width);
+            } else {
+                updateDefault(width);
+            }
+        });
     }
 
     private void updateDefault(double width) {
@@ -272,7 +298,7 @@ public final class BreakpointManager {
         if (scene == null || scene.getRoot() == null) return;
         var root = scene.getRoot();
         root.getStyleClass().removeIf(c -> c.equals("portrait") || c.equals("landscape"));
-        root.getStyleClass().add(h > w ? "portrait" : "landscape");
+        root.getStyleClass().add((h > w ? "portrait" : "landscape").trim());
     }
 
     private record BpListener(
