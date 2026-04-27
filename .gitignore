@@ -1,66 +1,30 @@
 ```
-# Compiled and build artifacts
-*.class
-*.o
-*.obj
-*.exe
-*.dll
-*.so
-*.a
-*.out
-build/
+# Java/Maven build artifacts
 target/
+*.class
+*.jar
+*.war
+*.ear
 
-# Dependencies
-node_modules/
-venv/
-.venv/
-__pycache__/
-.mypy_cache/
-.pytest_cache/
-.gradle/
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
 
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-*.swo
+# Test reports
+**/surefire-reports/
+**/failsafe-reports/
 
-# Environment
-.env
-.env.local
-*.env.*
+# Code coverage
+jacoco.exec
+**/jacoco/
 
-# Editors
-.vscode/
-.idea/
+# Compiled CSS
+target/classes/**/*.css
 
-# System
-.DS_Store
-Thumbs.db
+# Maven status files
+target/maven-status/
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# Archives
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
+# Site documentation
+target/site/
 ```

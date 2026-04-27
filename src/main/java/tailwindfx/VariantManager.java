@@ -259,33 +259,50 @@ public class VariantManager {
     
     /**
      * Applies a group variant (group-hover, group-focus) to a node.
+     * Dynamically tracks parent changes to handle runtime graph modifications.
      */
     public static void applyGroupVariant(Node node, String variant, String utility, JitCompiler jitCompiler) {
         String groupVariant = variant.substring(6); // Remove "group-" prefix
         
-        javafx.scene.Parent parent = node.getParent();
-        while (parent != null) {
-            if (parent.getStyleClass().contains("group")) {
-                switch (groupVariant) {
-                    case "hover":
-                        parent.setOnMouseEntered(e -> {
-                            JitCompiler.CompileResult result = jitCompiler.compile(utility);
-                            if (result != null && result.hasInlineStyle()) {
-                                applyStyle(node, result.inlineStyle());
-                            }
-                        });
-                        parent.setOnMouseExited(e -> {
-                            JitCompiler.CompileResult result = jitCompiler.compile(utility);
-                            if (result != null && result.hasInlineStyle()) {
-                                removeStyle(node, result.inlineStyle());
-                            }
-                        });
-                        break;
-                }
-                break;
+        // Create a listener that searches for .group parent and attaches handlers
+        var parentListener = (javafx.beans.value.ChangeListener<javafx.scene.Parent>) (obs, oldParent, newParent) -> {
+            // Remove listeners from old parent
+            if (oldParent != null) {
+                oldParent.setOnMouseEntered(null);
+                oldParent.setOnMouseExited(null);
             }
-            parent = parent.getParent();
-        }
+            
+            // Search for .group parent in new hierarchy
+            javafx.scene.Parent parent = newParent;
+            while (parent != null) {
+                if (parent.getStyleClass().contains("group")) {
+                    switch (groupVariant) {
+                        case "hover":
+                            parent.setOnMouseEntered(e -> {
+                                JitCompiler.CompileResult result = jitCompiler.compile(utility);
+                                if (result != null && result.hasInlineStyle()) {
+                                    applyStyle(node, result.inlineStyle());
+                                }
+                            });
+                            parent.setOnMouseExited(e -> {
+                                JitCompiler.CompileResult result = jitCompiler.compile(utility);
+                                if (result != null && result.hasInlineStyle()) {
+                                    removeStyle(node, result.inlineStyle());
+                                }
+                            });
+                            break;
+                    }
+                    break;
+                }
+                parent = parent.getParent();
+            }
+        };
+        
+        // Attach listener to parent property
+        node.parentProperty().addListener(parentListener);
+        
+        // Trigger initial search
+        parentListener.changed(null, null, node.getParent());
     }
     
     /**
@@ -338,9 +355,10 @@ public class VariantManager {
     
     /**
      * Processes a token with variants and applies it to a node.
+     * Supports chained variants like hover:md:bg-blue-500.
      * 
      * @param node The target node
-     * @param token The full token (e.g., "hover:bg-blue-500", "md:w-full")
+     * @param token The full token (e.g., "hover:bg-blue-500", "md:w-full", "hover:md:bg-red-500")
      * @param jitCompiler JIT compiler
      */
     public static void processToken(Node node, String token, JitCompiler jitCompiler) {
@@ -357,33 +375,35 @@ public class VariantManager {
         
         List<String> variants = result.getVariants();
         String utility = result.getUtility();
-        String lastVariant = variants.get(variants.size() - 1);
         
-        // Route to appropriate handler based on variant type
-        String variantType = VariantParser.getVariantType(lastVariant);
-        
-        switch (variantType) {
-            case "state":
-                applyStateVariant(node, lastVariant, utility, jitCompiler);
-                break;
-            case "screen":
-                bindResponsiveVariant(node, lastVariant, utility, jitCompiler);
-                break;
-            case "theme":
-                applyThemeVariant(node, lastVariant, utility, jitCompiler);
-                break;
-            case "group":
-                applyGroupVariant(node, lastVariant, utility, jitCompiler);
-                break;
-            case "arbitrary":
-                applyArbitraryVariant(node, lastVariant, utility, jitCompiler);
-                break;
-            default:
-                // Unknown variant, apply directly
-                JitCompiler.CompileResult compileResult = jitCompiler.compile(utility);
-                if (compileResult != null && compileResult.hasInlineStyle()) {
-                    applyStyle(node, compileResult.inlineStyle());
-                }
+        // Process ALL variants in chain, not just the last one
+        // This enables combinations like group-hover:md:hover:bg-blue-500
+        for (String variant : variants) {
+            String variantType = VariantParser.getVariantType(variant);
+            
+            switch (variantType) {
+                case "state":
+                    applyStateVariant(node, variant, utility, jitCompiler);
+                    break;
+                case "screen":
+                    bindResponsiveVariant(node, variant, utility, jitCompiler);
+                    break;
+                case "theme":
+                    applyThemeVariant(node, variant, utility, jitCompiler);
+                    break;
+                case "group":
+                    applyGroupVariant(node, variant, utility, jitCompiler);
+                    break;
+                case "arbitrary":
+                    applyArbitraryVariant(node, variant, utility, jitCompiler);
+                    break;
+                default:
+                    // Unknown variant, apply directly
+                    JitCompiler.CompileResult compileResult = jitCompiler.compile(utility);
+                    if (compileResult != null && compileResult.hasInlineStyle()) {
+                        applyStyle(node, compileResult.inlineStyle());
+                    }
+            }
         }
     }
     
