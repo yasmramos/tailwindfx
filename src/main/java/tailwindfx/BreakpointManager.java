@@ -1,5 +1,7 @@
 package tailwindfx;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -8,45 +10,54 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 /**
- * BreakpointManager v2 — Responsive engine de TailwindFX.
- *
- * En JavaFX no existen @media queries. Este engine los simula:
- *   1. Escucha Stage.widthProperty() (y opcionalmente heightProperty)
- *   2. Calcula el breakpoint activo
- *   3. Inyecta clases CSS acumulativas en el root de la Scene (.bp-sm, .bp-md…)
- *   4. Ejecuta callbacks registrados al cruzar cada breakpoint
- *
- * Breakpoints por defecto (iguales a Tailwind):
- *   XS  < 640px   → sin clase
+ * BreakpointManager v2 — Responsive engine for TailwindFX.
+ * 
+ * JavaFX does not have @media queries. This engine simulates them:
+ *   1. Listens to Stage.widthProperty() (and optionally heightProperty)
+ *   2. Calculates the active breakpoint
+ *   3. Injects cumulative CSS classes into the Scene root (.bp-sm, .bp-md...)
+ *   4. Executes registered callbacks when crossing each breakpoint
+ * 
+ * Default breakpoints (same as Tailwind):
+ *   XS  < 640px   → no class
  *   SM  ≥ 640px   → .bp-sm
  *   MD  ≥ 768px   → .bp-sm .bp-md
  *   LG  ≥ 1024px  → .bp-sm .bp-md .bp-lg
  *   XL  ≥ 1280px  → .bp-sm .bp-md .bp-lg .bp-xl
  *   2XL ≥ 1536px  → .bp-sm .bp-md .bp-lg .bp-xl .bp-2xl
- *
- * Las clases son ACUMULATIVAS como en Tailwind.
- * .bp-lg implica que también .bp-sm y .bp-md están activas.
- *
- * Uso básico:
+ * 
+ * Classes are CUMULATIVE like in Tailwind.
+ * .bp-lg implies that .bp-sm and .bp-md are also active.
+ * 
+ * Basic usage:
  *   TailwindFX.responsive(stage)
  *       .onBreakpoint(Breakpoint.MD, () -> adaptLayout());
- *
- * Con breakpoints custom:
+ * 
+ * With custom breakpoints:
  *   BreakpointManager.custom()
  *       .add("phone",  0)
  *       .add("tablet", 600)
  *       .add("desktop", 960)
  *       .attach(stage);
- *
- * CSS en tailwindfx.css:
+ * 
+ * CSS in tailwindfx.css:
  *   .bp-md .sidebar  { -fx-pref-width: 240px; }
  *   .bp-sm .sidebar  { -fx-pref-width: 60px;  }
  *   .bp-lg .card-grid { -fx-vgap: 20px; }
+ * 
+ * Architecture: Publisher pattern
+ * - Single listener per Stage with throttling (~120ms)
+ * - Exposes activeBreakpointProperty() for subscribers (e.g., VariantManager)
+ * - Prevents O(N) listeners by centralizing breakpoint detection
  */
 public final class BreakpointManager {
+
+    // Cache of BreakpointManager instances per Stage
+    private static final ConcurrentHashMap<Stage, BreakpointManager> instances = new ConcurrentHashMap<>();
 
     // =========================================================================
     // Breakpoints
@@ -99,7 +110,7 @@ public final class BreakpointManager {
     }
 
     // =========================================================================
-    // Builder para breakpoints custom
+    // Builder for custom breakpoints
     // =========================================================================
 
     public static final class CustomBuilder {
@@ -118,11 +129,22 @@ public final class BreakpointManager {
 
     private record CustomBreakpoint(String cssClass, double minWidth) {}
 
-    /** Crea un builder para breakpoints personalizados */
+    /** Creates a builder for custom breakpoints */
     public static CustomBuilder custom() { return new CustomBuilder(); }
 
+    /**
+     * Gets or creates a BreakpointManager instance for the given Stage.
+     * Uses a cache to ensure only one instance per Stage.
+     * 
+     * @param stage The stage to get the BreakpointManager for
+     * @return The BreakpointManager instance
+     */
+    public static BreakpointManager from(Stage stage) {
+        return instances.computeIfAbsent(stage, s -> new BreakpointManager(s, null));
+    }
+
     // =========================================================================
-    // Estado
+    // State
     // =========================================================================
 
     private final Stage  stage;
@@ -134,37 +156,41 @@ public final class BreakpointManager {
     private ChangeListener<Number>           heightListener;
     private boolean                          orientationEnabled = false;
     
-    // Throttle para evitar thrashing en resize
+    // Throttle to avoid thrashing on resize
     private long lastUpdate = 0;
     private static final long THROTTLE_MS = 120;
     
-    // Set para evitar callbacks duplicados
+    // Set to prevent duplicate callbacks
     private final java.util.Set<String> registeredCallbacks = new java.util.HashSet<>();
+    
+    // Property for reactive breakpoint changes (Publisher pattern)
+    private final ObjectProperty<Breakpoint> activeBreakpoint;
 
     // =========================================================================
-    // Construcción
+    // Construction
     // =========================================================================
 
     private BreakpointManager(Stage stage, List<CustomBreakpoint> custom) {
         this.stage     = Preconditions.requireNonNull(stage, "BreakpointManager", "stage");
         this.customBps = custom;
         this.current   = Breakpoint.forWidth(stage.getWidth());
+        this.activeBreakpoint = new SimpleObjectProperty<>(current);
         attachWidthListener();
     }
 
-    /** Crea con breakpoints por defecto (Tailwind) */
+    /** Creates with default breakpoints (Tailwind) */
     static BreakpointManager attach(Stage stage) {
         return new BreakpointManager(stage, null);
     }
 
     // =========================================================================
-    // API pública
+    // Public API
     // =========================================================================
 
     /**
-     * Registra un callback que se ejecuta al cruzar un breakpoint
-     * (tanto al subir como al bajar).
-     * Evita duplicados: si ya está registrado el mismo callback para este breakpoint, no lo añade.
+     * Registers a callback that executes when crossing a breakpoint
+     * (both up and down).
+     * Prevents duplicates: if the same callback is already registered for this breakpoint, it won't be added again.
      */
     public BreakpointManager onBreakpoint(Breakpoint bp, Runnable callback) {
         Preconditions.requireNonNull(bp, "BreakpointManager.onBreakpoint", "breakpoint");
@@ -172,7 +198,7 @@ public final class BreakpointManager {
         
         String key = bp.name() + ":" + System.identityHashCode(callback);
         if (!registeredCallbacks.add(key)) {
-            return this; // Ya está registrado, evitar duplicado
+            return this; // Already registered, avoid duplicate
         }
         
         listeners.add(new BpListener(bp.minWidth, callback));
@@ -180,16 +206,16 @@ public final class BreakpointManager {
     }
 
     /**
-     * Registra un callback con información de si se está activando o desactivando.
-     * active=true → se cruzó hacia arriba (pantalla más grande)
-     * active=false → se cruzó hacia abajo (pantalla más pequeña)
+     * Registers a callback with information about whether it's activating or deactivating.
+     * active=true → crossed upward (larger screen)
+     * active=false → crossed downward (smaller screen)
      */
     public BreakpointManager onBreakpoint(Breakpoint bp, Consumer<Boolean> callback) {
         listeners.add(new BpListener(bp.minWidth, null, callback));
         return this;
     }
 
-    /** Activa detección de orientación (portrait/landscape) */
+    /** Enables orientation detection (portrait/landscape) */
     public BreakpointManager withOrientation() {
         orientationEnabled = true;
         if (stage.getScene() != null)
@@ -201,31 +227,43 @@ public final class BreakpointManager {
         return this;
     }
 
-    /** Breakpoint activo en este momento */
+    /** Currently active breakpoint */
     public Breakpoint current() { return current; }
 
-    /** Si el ancho actual es >= al breakpoint dado */
+    /**
+     * Returns a read-only property of the active breakpoint.
+     * Subscribers can listen to this property to react to breakpoint changes.
+     * This is the main mechanism for the Publisher-Subscriber pattern.
+     * 
+     * @return Read-only property of the active breakpoint
+     */
+    public javafx.beans.property.ReadOnlyObjectProperty<Breakpoint> activeBreakpointProperty() {
+        return activeBreakpoint;
+    }
+
+    /** If current width is >= the given breakpoint */
     public boolean is(Breakpoint bp) { return current.minWidth >= bp.minWidth; }
 
-    /** Si el ancho actual es < al breakpoint dado (below) */
+    /** If current width is < the given breakpoint (below) */
     public boolean below(Breakpoint bp) { return !is(bp); }
 
-    /** Desconecta todos los listeners */
+    /** Disconnects all listeners */
     public void detach() {
         if (widthListener != null) stage.widthProperty().removeListener(widthListener);
         if (heightListener != null) stage.heightProperty().removeListener(heightListener);
         listeners.clear();
         registeredCallbacks.clear();
+        instances.remove(stage);
     }
 
     // =========================================================================
-    // Internos
+    // Internal
     // =========================================================================
 
     private void attachWidthListener() {
         widthListener = (obs, old, newVal) -> update(newVal.doubleValue());
         stage.widthProperty().addListener(widthListener);
-        update(stage.getWidth()); // aplicar estado inicial
+        update(stage.getWidth()); // apply initial state
     }
 
     private void update(double width) {
@@ -248,6 +286,9 @@ public final class BreakpointManager {
 
         Breakpoint prev = current;
         current = next;
+
+        // Update the reactive property (notifies subscribers)
+        activeBreakpoint.set(next);
 
         Scene scene = stage.getScene();
         if (scene != null && scene.getRoot() != null)
