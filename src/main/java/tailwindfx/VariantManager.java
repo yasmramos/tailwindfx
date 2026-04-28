@@ -1,94 +1,56 @@
 package tailwindfx;
 
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Gestor de variantes que integra las variantes de Tailwind CSS con JavaFX.
+ * Variant Manager for TailwindFX — Handles variant application to JavaFX nodes.
  * 
- * Maneja la aplicación dinámica de estilos basados en:
- * - Estado (hover, focus, active, disabled)
- * - Breakpoints responsivos (sm, md, lg, xl, 2xl)
- * - Tema (dark, light)
- * - Variantes arbitrarias
+ * This manager applies dynamic styles based on:
+ * - State variants (hover, focus, active, disabled)
+ * - Theme variants (dark, light)
+ * - Group variants (group-hover, group-focus)
+ * - Arbitrary variants ([&:hover], [@media...])
+ * 
+ * IMPORTANT: Responsive breakpoints (sm:, md:, lg:) are NOT handled here.
+ * They are managed centrally by BreakpointManager to avoid O(N) listeners.
+ * This class subscribes ONCE per Scene to breakpoint changes, not per node.
+ * 
+ * Architecture: Publisher-Subscriber pattern
+ * - BreakpointManager: Single publisher (one listener per Stage with throttling)
+ * - VariantManager: Subscriber (one subscription per Scene, iterates affected nodes)
+ * 
+ * @see BreakpointManager
  */
 public class VariantManager {
     
-    private static final Map<Node, List<VariantListener>> nodeListeners = new ConcurrentHashMap<>();
-    private static final Map<String, Integer> breakpointWidths = new HashMap<>();
+    /** Tracks nodes that need responsive variant updates per Scene */
+    private static final Map<Scene, List<ResponsiveBinding>> responsiveNodes = new WeakHashMap<>();
     
-    static {
-        // Definir breakpoints estándar de Tailwind
-        breakpointWidths.put("sm", 640);
-        breakpointWidths.put("md", 768);
-        breakpointWidths.put("lg", 1024);
-        breakpointWidths.put("xl", 1280);
-        breakpointWidths.put("2xl", 1536);
-    }
+    /** Cache of compiled styles for responsive utilities */
+    private static final Map<String, JitCompiler.CompileResult> styleCache = new ConcurrentHashMap<>();
     
     /**
-     * Listener para manejar cambios de variante en un nodo.
-     */
-    @FunctionalInterface
-    public interface VariantListener {
-        void onVariantChange(boolean isActive);
-    }
-    
-    /**
-     * Aplica una variante a un nodo JavaFX.
+     * Applies a state variant (hover, focus, active, disabled) to a JavaFX node.
      * 
-     * @param node El nodo al que aplicar la variante
-     * @param variant El nombre de la variante (hover, focus, md, etc.)
-     * @param utility La utilidad base a aplicar cuando la variante está activa
-     * @param jitCompiler El compilador JIT para generar los estilos
+     * @param node The target node
+     * @param variant The variant name (e.g., "hover", "focus")
+     * @param utility The base utility to apply when variant is active
+     * @param jitCompiler JIT compiler for generating styles
      */
-    public static void applyVariant(Node node, String variant, String utility, JitCompiler jitCompiler) {
+    public static void applyStateVariant(Node node, String variant, String utility, JitCompiler jitCompiler) {
         if (node == null || variant == null || utility == null) {
             return;
         }
         
-        // Determinar el tipo de variante
-        String variantType = VariantParser.getVariantType(variant);
-        
-        switch (variantType) {
-            case "state":
-                applyStateVariant(node, variant, utility, jitCompiler);
-                break;
-            case "screen":
-                applyScreenVariant(node, variant, utility, jitCompiler);
-                break;
-            case "theme":
-                applyThemeVariant(node, variant, utility, jitCompiler);
-                break;
-            case "group":
-                applyGroupVariant(node, variant, utility, jitCompiler);
-                break;
-            case "arbitrary":
-                applyArbitraryVariant(node, variant, utility, jitCompiler);
-                break;
-            default:
-                // Variante no soportada, aplicar directamente
-                JitCompiler.CompileResult result = jitCompiler.compile(utility);
-                if (result != null && result.hasInlineStyle()) {
-                    node.setStyle(node.getStyle() + result.inlineStyle());
-                }
-        }
-    }
-    
-    /**
-     * Aplica una variante de estado (hover, focus, active, etc.).
-     */
-    private static void applyStateVariant(Node node, String variant, String utility, JitCompiler jitCompiler) {
-        // Compilar la utilidad base
+        // Compile the base utility
         JitCompiler.CompileResult result = jitCompiler.compile(utility);
         if (result == null || !result.hasInlineStyle()) {
             return;
         }
         String baseStyle = result.inlineStyle();
-        
-        // Limpiar listeners previos para este nodo
-        cleanupListeners(node);
         
         switch (variant) {
             case "hover":
@@ -143,51 +105,147 @@ public class VariantManager {
     }
     
     /**
-     * Aplica una variante de pantalla responsiva (sm, md, lg, etc.).
+     * Registers a node for responsive variant updates.
+     * 
+     * This method subscribes ONCE per Scene to breakpoint changes, not per node.
+     * When the breakpoint changes, all registered nodes in that Scene are updated.
+     * 
+     * @param node The target node
+     * @param breakpoint The breakpoint name (e.g., "md", "lg")
+     * @param utility The base utility to apply when breakpoint is active
+     * @param jitCompiler JIT compiler for generating styles
      */
-    private static void applyScreenVariant(Node node, String variant, String utility, JitCompiler jitCompiler) {
-        // Para variantes responsivas, necesitamos escuchar cambios en el tamaño de la ventana
-        // Esto requiere acceso a la escena, lo cual manejaremos de forma diferida
-        
-        Integer minWidth = breakpointWidths.get(variant);
-        if (minWidth == null) {
-            // Intentar con prefijos min- y max-
-            if (variant.startsWith("min-")) {
-                String baseBreakpoint = variant.substring(4);
-                minWidth = breakpointWidths.get(baseBreakpoint);
-            } else if (variant.startsWith("max-")) {
-                String baseBreakpoint = variant.substring(4);
-                Integer maxWidth = breakpointWidths.get(baseBreakpoint);
-                if (maxWidth != null) {
-                    // Para max-, usamos maxWidth - 1
-                    minWidth = maxWidth - 1;
-                }
-            }
+    public static void bindResponsiveVariant(Node node, String breakpoint, String utility, JitCompiler jitCompiler) {
+        if (node == null || breakpoint == null || utility == null) {
+            return;
         }
         
-        if (minWidth != null) {
-            // Registrar listener para cambios de tamaño
-            registerBreakpointListener(node, variant, utility, jitCompiler, minWidth);
+        // Cache the compiled style
+        String cacheKey = breakpoint + ":" + utility;
+        JitCompiler.CompileResult result = styleCache.computeIfAbsent(cacheKey, k -> jitCompiler.compile(utility));
+        if (result == null || !result.hasInlineStyle()) {
+            return;
+        }
+        
+        // Store the binding
+        ResponsiveBinding binding = new ResponsiveBinding(node, breakpoint, result.inlineStyle());
+        
+        node.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (oldScene != null) {
+                unregisterFromScene(oldScene, binding);
+            }
+            if (newScene != null) {
+                registerToScene(newScene, binding);
+            }
+        });
+        
+        // Register immediately if already in a scene
+        Scene currentScene = node.getScene();
+        if (currentScene != null) {
+            registerToScene(currentScene, binding);
         }
     }
     
     /**
-     * Aplica una variante de tema (dark, light).
+     * Registers a responsive binding to a Scene.
+     * Subscribes to BreakpointManager only once per Scene.
      */
-    private static void applyThemeVariant(Node node, String variant, String utility, JitCompiler jitCompiler) {
+    private static void registerToScene(Scene scene, ResponsiveBinding binding) {
+        List<ResponsiveBinding> bindings = responsiveNodes.computeIfAbsent(scene, k -> {
+            // First binding for this Scene — subscribe to breakpoint changes
+            subscribeToBreakpointChanges(scene);
+            return new ArrayList<>();
+        });
+        
+        // Avoid duplicate bindings
+        if (!bindings.contains(binding)) {
+            bindings.add(binding);
+        }
+        
+        // Apply initial state
+        applyResponsiveStyle(binding);
+    }
+    
+    /**
+     * Unregisters a responsive binding from a Scene.
+     */
+    private static void unregisterFromScene(Scene scene, ResponsiveBinding binding) {
+        List<ResponsiveBinding> bindings = responsiveNodes.get(scene);
+        if (bindings != null) {
+            bindings.remove(binding);
+            if (bindings.isEmpty()) {
+                responsiveNodes.remove(scene);
+            }
+        }
+    }
+    
+    /**
+     * Subscribes to breakpoint changes for a Scene.
+     * Called only once per Scene to avoid O(N) listeners.
+     */
+    private static void subscribeToBreakpointChanges(Scene scene) {
+        var window = scene.getWindow();
+        if (window instanceof javafx.stage.Stage) {
+            BreakpointManager bpm = BreakpointManager.from((javafx.stage.Stage) window);
+            
+            // Listen to breakpoint changes and update all nodes in this Scene
+            bpm.activeBreakpointProperty().addListener((obs, oldBp, newBp) -> {
+                List<ResponsiveBinding> bindings = responsiveNodes.get(scene);
+                if (bindings != null) {
+                    for (ResponsiveBinding binding : bindings) {
+                        applyResponsiveStyle(binding);
+                    }
+                }
+            });
+        }
+    }
+    
+    /**
+     * Applies or removes responsive style based on current breakpoint.
+     */
+    private static void applyResponsiveStyle(ResponsiveBinding binding) {
+        var scene = binding.node().getScene();
+        if (scene == null) return;
+        
+        var window = scene.getWindow();
+        if (!(window instanceof javafx.stage.Stage)) return;
+        
+        BreakpointManager.Breakpoint currentBp = BreakpointManager.from((javafx.stage.Stage) window).current();
+        int currentMinWidth = (int) currentBp.minWidth;
+        int targetMinWidth = getBreakpointMinWidth(binding.breakpoint());
+        
+        boolean isActive = currentMinWidth >= targetMinWidth;
+        
+        if (isActive) {
+            applyStyle(binding.node(), binding.style());
+        } else {
+            removeStyle(binding.node(), binding.style());
+        }
+    }
+    
+    /**
+     * Gets the minimum width for a breakpoint name.
+     */
+    private static int getBreakpointMinWidth(String breakpoint) {
+        return switch (breakpoint) {
+            case "sm" -> 640;
+            case "md" -> 768;
+            case "lg" -> 1024;
+            case "xl" -> 1280;
+            case "2xl" -> 1536;
+            default -> 0;
+        };
+    }
+    
+    /**
+     * Applies a theme variant (dark, light) to a node.
+     */
+    public static void applyThemeVariant(Node node, String variant, String utility, JitCompiler jitCompiler) {
         boolean isDark = "dark".equals(variant);
         
-        // Escuchar cambios en el tema - usar ThemeManager directamente
-        // Nota: ThemeManager no tiene getInstance(), usamos métodos estáticos
-        
-        // Aplicar inmediatamente si el tema coincide (verificar preferencia del usuario)
-        // Como no podemos acceder fácilmente al estado del tema, aplicamos diferido
         node.sceneProperty().addListener((obs, oldScene, newScene) -> {
-            if (newScene != null) {
-                // Verificar si la escena tiene modo oscuro activado
-                // Usamos una propiedad simple basada en el estilo de la escena
-                boolean sceneIsDark = newScene.getRoot() != null && 
-                    newScene.getRoot().getStyleClass().contains("dark");
+            if (newScene != null && newScene.getRoot() != null) {
+                boolean sceneIsDark = newScene.getRoot().getStyleClass().contains("dark");
                 
                 if (sceneIsDark == isDark) {
                     JitCompiler.CompileResult result = jitCompiler.compile(utility);
@@ -200,58 +258,67 @@ public class VariantManager {
     }
     
     /**
-     * Aplica una variante de grupo (group-hover, group-focus, etc.).
+     * Applies a group variant (group-hover, group-focus) to a node.
+     * Dynamically tracks parent changes to handle runtime graph modifications.
      */
-    private static void applyGroupVariant(Node node, String variant, String utility, JitCompiler jitCompiler) {
-        // Las variantes de grupo requieren encontrar el nodo padre con clase "group"
-        // Esto es complejo en JavaFX, lo implementaremos de forma simplificada
+    public static void applyGroupVariant(Node node, String variant, String utility, JitCompiler jitCompiler) {
+        String groupVariant = variant.substring(6); // Remove "group-" prefix
         
-        String groupVariant = variant.substring(6); // Remover "group-"
-        
-        // Buscar padre con clase "group"
-        javafx.scene.Parent parent = node.getParent();
-        while (parent != null) {
-            if (parent.getStyleClass().contains("group")) {
-                // Aplicar listener al padre
-                switch (groupVariant) {
-                    case "hover":
-                        parent.setOnMouseEntered(e -> {
-                            JitCompiler.CompileResult result = jitCompiler.compile(utility);
-                            if (result != null && result.hasInlineStyle()) {
-                                applyStyle(node, result.inlineStyle());
-                            }
-                        });
-                        parent.setOnMouseExited(e -> {
-                            JitCompiler.CompileResult result = jitCompiler.compile(utility);
-                            if (result != null && result.hasInlineStyle()) {
-                                removeStyle(node, result.inlineStyle());
-                            }
-                        });
-                        break;
-                }
-                break;
+        // Create a listener that searches for .group parent and attaches handlers
+        var parentListener = (javafx.beans.value.ChangeListener<javafx.scene.Parent>) (obs, oldParent, newParent) -> {
+            // Remove listeners from old parent
+            if (oldParent != null) {
+                oldParent.setOnMouseEntered(null);
+                oldParent.setOnMouseExited(null);
             }
-            parent = parent.getParent();
-        }
+            
+            // Search for .group parent in new hierarchy
+            javafx.scene.Parent parent = newParent;
+            while (parent != null) {
+                if (parent.getStyleClass().contains("group")) {
+                    switch (groupVariant) {
+                        case "hover":
+                            parent.setOnMouseEntered(e -> {
+                                JitCompiler.CompileResult result = jitCompiler.compile(utility);
+                                if (result != null && result.hasInlineStyle()) {
+                                    applyStyle(node, result.inlineStyle());
+                                }
+                            });
+                            parent.setOnMouseExited(e -> {
+                                JitCompiler.CompileResult result = jitCompiler.compile(utility);
+                                if (result != null && result.hasInlineStyle()) {
+                                    removeStyle(node, result.inlineStyle());
+                                }
+                            });
+                            break;
+                    }
+                    break;
+                }
+                parent = parent.getParent();
+            }
+        };
+        
+        // Attach listener to parent property
+        node.parentProperty().addListener(parentListener);
+        
+        // Trigger initial search
+        parentListener.changed(null, null, node.getParent());
     }
     
     /**
-     * Aplica una variante arbitraria ([@media...], [&:hover], etc.).
+     * Applies an arbitrary variant ([@media...], [&:hover]) to a node.
      */
-    private static void applyArbitraryVariant(Node node, String variant, String utility, JitCompiler jitCompiler) {
-        // Extraer contenido de la variante arbitraria
+    public static void applyArbitraryVariant(Node node, String variant, String utility, JitCompiler jitCompiler) {
         String content = variant.substring(1, variant.length() - 1);
         
-        // Si es una media query, manejar como variante responsiva
         if (content.startsWith("@media")) {
-            // Parsear la media query y aplicar listener apropiado
-            // Implementación simplificada
+            // Handle as responsive variant (simplified)
             JitCompiler.CompileResult result = jitCompiler.compile(utility);
             if (result != null && result.hasInlineStyle()) {
                 applyStyle(node, result.inlineStyle());
             }
         } else {
-            // Otras variantes arbitrarias
+            // Other arbitrary variants
             JitCompiler.CompileResult result = jitCompiler.compile(utility);
             if (result != null && result.hasInlineStyle()) {
                 applyStyle(node, result.inlineStyle());
@@ -260,38 +327,7 @@ public class VariantManager {
     }
     
     /**
-     * Registra un listener para cambios de breakpoint.
-     */
-    private static void registerBreakpointListener(Node node, String variant, String utility, 
-                                                    JitCompiler jitCompiler, int minWidth) {
-        // Esta implementación requiere acceso a la escena
-        // Se implementará cuando el nodo esté en una escena
-        
-        node.sceneProperty().addListener((obs, oldScene, newScene) -> {
-            if (newScene != null) {
-                newScene.widthProperty().addListener((widthObs, oldWidth, newWidth) -> {
-                    boolean isActive = newWidth.doubleValue() >= minWidth;
-                    JitCompiler.CompileResult result = jitCompiler.compile(utility);
-                    
-                    if (isActive && result != null && result.hasInlineStyle()) {
-                        applyStyle(node, result.inlineStyle());
-                    } else {
-                        removeStyle(node, result != null ? result.inlineStyle() : null);
-                    }
-                });
-                
-                // Evaluar inmediatamente
-                boolean isActive = newScene.getWidth() >= minWidth;
-                JitCompiler.CompileResult result = jitCompiler.compile(utility);
-                if (isActive && result != null && result.hasInlineStyle()) {
-                    applyStyle(node, result.inlineStyle());
-                }
-            }
-        });
-    }
-    
-    /**
-     * Aplica un estilo a un nodo.
+     * Applies a style to a node, avoiding duplicates.
      */
     private static void applyStyle(Node node, String style) {
         if (style == null || style.isEmpty()) {
@@ -305,7 +341,7 @@ public class VariantManager {
     }
     
     /**
-     * Remueve un estilo de un nodo.
+     * Removes a style from a node.
      */
     private static void removeStyle(Node node, String style) {
         if (style == null || style.isEmpty()) {
@@ -318,27 +354,18 @@ public class VariantManager {
     }
     
     /**
-     * Limpia los listeners de un nodo.
-     */
-    private static void cleanupListeners(Node node) {
-        List<VariantListener> listeners = nodeListeners.remove(node);
-        if (listeners != null) {
-            listeners.clear();
-        }
-    }
-    
-    /**
-     * Procesa un token con variantes y lo aplica a un nodo.
+     * Processes a token with variants and applies it to a node.
+     * Supports chained variants like hover:md:bg-blue-500.
      * 
-     * @param node El nodo al que aplicar el estilo
-     * @param token El token completo (ej: "hover:bg-blue-500")
-     * @param jitCompiler El compilador JIT
+     * @param node The target node
+     * @param token The full token (e.g., "hover:bg-blue-500", "md:w-full", "hover:md:bg-red-500")
+     * @param jitCompiler JIT compiler
      */
     public static void processToken(Node node, String token, JitCompiler jitCompiler) {
         VariantParser.VariantResult result = VariantParser.parse(token);
         
         if (!result.hasVariant()) {
-            // Sin variantes, aplicar directamente
+            // No variants, apply directly
             JitCompiler.CompileResult compileResult = jitCompiler.compile(token);
             if (compileResult != null && compileResult.hasInlineStyle()) {
                 applyStyle(node, compileResult.inlineStyle());
@@ -346,12 +373,42 @@ public class VariantManager {
             return;
         }
         
-        // Tiene variantes, procesar cada una
         List<String> variants = result.getVariants();
         String utility = result.getUtility();
         
-        // Aplicar la última variante (la más específica)
-        String lastVariant = variants.get(variants.size() - 1);
-        applyVariant(node, lastVariant, utility, jitCompiler);
+        // Process ALL variants in chain, not just the last one
+        // This enables combinations like group-hover:md:hover:bg-blue-500
+        for (String variant : variants) {
+            String variantType = VariantParser.getVariantType(variant);
+            
+            switch (variantType) {
+                case "state":
+                    applyStateVariant(node, variant, utility, jitCompiler);
+                    break;
+                case "screen":
+                    bindResponsiveVariant(node, variant, utility, jitCompiler);
+                    break;
+                case "theme":
+                    applyThemeVariant(node, variant, utility, jitCompiler);
+                    break;
+                case "group":
+                    applyGroupVariant(node, variant, utility, jitCompiler);
+                    break;
+                case "arbitrary":
+                    applyArbitraryVariant(node, variant, utility, jitCompiler);
+                    break;
+                default:
+                    // Unknown variant, apply directly
+                    JitCompiler.CompileResult compileResult = jitCompiler.compile(utility);
+                    if (compileResult != null && compileResult.hasInlineStyle()) {
+                        applyStyle(node, compileResult.inlineStyle());
+                    }
+            }
+        }
     }
+    
+    /**
+     * Record representing a responsive binding between a node and a breakpoint.
+     */
+    private record ResponsiveBinding(Node node, String breakpoint, String style) {}
 }
