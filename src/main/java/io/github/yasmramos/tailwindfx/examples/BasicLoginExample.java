@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import tailwindfx.TailwindFX;
 
 /**
  * Basic TailwindFX Login Example
@@ -18,31 +19,27 @@ public class BasicLoginExample extends Application {
     public void start(Stage stage) {
 
         Label title = new Label("Welcome Back");
-        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        TailwindFX.apply(title, "text-2xl", "font-bold");
 
         Label subtitle = new Label("Login to continue");
-        subtitle.setStyle("-fx-font-size: 14px;");
+        TailwindFX.apply(subtitle, "text-sm", "text-gray-600");
 
         TextField emailField = new TextField();
         emailField.setPromptText("Enter your email");
         emailField.setMaxWidth(250);
+        TailwindFX.apply(emailField, "rounded-lg", "border");
 
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Enter your password");
         passwordField.setMaxWidth(250);
+        TailwindFX.apply(passwordField, "rounded-lg", "border");
 
         Button loginButton = new Button("Login");
         loginButton.setPrefWidth(250);
-        loginButton.setStyle(
-                "-fx-background-color: #111827;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
-                "-fx-background-radius: 8px;" +
-                "-fx-padding: 10px;"
-        );
+        TailwindFX.apply(loginButton, "btn-primary", "rounded-lg");
 
         Hyperlink forgotPassword = new Hyperlink("Forgot Password?");
-        forgotPassword.setStyle("-fx-text-fill: #2563eb;");
+        TailwindFX.apply(forgotPassword, "text-blue-600");
 
         VBox root = new VBox(15,
                 title,
@@ -55,17 +52,16 @@ public class BasicLoginExample extends Application {
 
         root.setAlignment(Pos.CENTER);
         root.setPadding(new Insets(30));
-        root.setStyle(
-                "-fx-background-color: #f9fafb;" +
-                "-fx-border-color: #e5e7eb;" +
-                "-fx-border-radius: 12px;" +
-                "-fx-background-radius: 12px;"
-        );
+        TailwindFX.apply(root, "bg-gray-50", "border", "rounded-xl");
 
         Scene scene = new Scene(root, 450, 550);
 
+        // Install TailwindFX framework styles
+        TailwindFX.install(scene);
+
         stage.setTitle("TailwindFX Basic Login Example");
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
     }
 
