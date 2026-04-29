@@ -1,10 +1,10 @@
 package tailwindfx.examples;
 
+import io.github.yasmramos.tailwindfx.TailwindFX;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import tailwindfx.TailwindFX;
 
 /**
  * Dashboard Demo Application.
@@ -23,7 +23,7 @@ public class DashboardApp extends Application {
 
         // Scene with TailwindFX
         Scene scene = new Scene(dashboard, 1500, 1000);
-        TailwindFX.installAll(scene, primaryStage);
+        TailwindFX.install(scene, primaryStage);
 
         // Configure stage
         primaryStage.setTitle("TailwindFX — Advanced Dashboard");
