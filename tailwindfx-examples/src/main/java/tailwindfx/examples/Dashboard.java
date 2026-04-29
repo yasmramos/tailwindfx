@@ -1,5 +1,8 @@
 package tailwindfx.examples;
 
+import io.github.yasmramos.tailwindfx.TailwindFX;
+import io.github.yasmramos.tailwindfx.components.ComponentFactory;
+import io.github.yasmramos.tailwindfx.components.FxDataTable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -7,9 +10,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Popup;
-import tailwindfx.ComponentFactory;
-import tailwindfx.FxDataTable;
-import tailwindfx.TailwindFX;
 
 import java.util.Arrays;
 import java.util.List;
