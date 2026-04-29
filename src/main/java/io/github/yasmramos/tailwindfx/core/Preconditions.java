@@ -5,26 +5,16 @@ import java.util.logging.Logger;
 
 /**
  * Preconditions — Validación centralizada para TailwindFX.
- *
  * Tres niveles:
- *   requireNonNull()  → IllegalArgumentException (fallo inmediato, no recuperable)
- *   requireValid()    → IllegalArgumentException (value out of valid range)
- *   warnIf()          → LOG WARNING (válido pero probablemente incorrecto)
- *
- * Uso:
- *   Preconditions.requireNonNull(node, "Styles.colSpan", "node");
- *   Preconditions.requireSpan(span, "Styles.colSpan");
- *   Preconditions.warnNoParent(node, "Styles.margin");
+ * 1. requireNonNull()  → IllegalArgumentException (fallo inmediato)
+ * 2. requireValid()    → IllegalArgumentException (valor fuera de rango)
+ * 3. warnIf()          → LOG WARNING (válido pero sospechoso)
  */
 public final class Preconditions {
 
     public static final Logger LOG = Logger.getLogger("TailwindFX");
 
     private Preconditions() {}
-
-    // =========================================================================
-    // NULL CHECKS — THROW
-    // =========================================================================
 
     public static <T> T requireNonNull(T value, String method, String paramName) {
         if (value == null) {
@@ -39,7 +29,7 @@ public final class Preconditions {
         return requireNonNull(node, method, "node");
     }
 
-    static javafx.scene.layout.Pane requirePane(javafx.scene.layout.Pane pane, String method) {
+    public static javafx.scene.layout.Pane requirePane(javafx.scene.layout.Pane pane, String method) {
         return requireNonNull(pane, method, "pane");
     }
 
@@ -53,10 +43,6 @@ public final class Preconditions {
         return value;
     }
 
-    // =========================================================================
-    // RANGE CHECKS — THROW
-    // =========================================================================
-
     /** GridPane span: must be >= 1 */
     public static int requireSpan(int span, String method) {
         if (span < 1) {
@@ -67,17 +53,17 @@ public final class Preconditions {
         return span;
     }
 
-    /** Opacidad: 0.0 – 1.0 */
-    static double requireOpacity(double value, String method) {
+    /** Opacity: 0.0 – 1.0 */
+    public static double requireOpacity(double value, String method) {
         if (value < 0.0 || value > 1.0) {
             throw new IllegalArgumentException(
-                method + ": opacity debe estar entre 0.0 y 1.0, got: " + value
+                method + ": opacity must be between 0.0 and 1.0, got: " + value
             );
         }
         return value;
     }
 
-    /** Duración de animación: > 0 ms */
+    /** Animation duration: > 0 ms */
     public static int requirePositiveDuration(int ms, String method) {
         if (ms <= 0) {
             throw new IllegalArgumentException(
@@ -87,15 +73,19 @@ public final class Preconditions {
         return ms;
     }
 
-<<<<<<< HEAD:src/main/java/io/github/yasmramos/tailwindfx/core/Preconditions.java
-    /** Escala de animación: > 0 */
+    /** Animation scale: > 0 */
     public static double requirePositiveScale(double scale, String method) {
         if (scale <= 0) {
-=======
+            throw new IllegalArgumentException(
+                method + ": scale must be > 0, got: " + scale
+            );
+        }
+        return scale;
+    }
+
     /** Speed multiplier for animations: > 0 */
-    static double requirePositiveSpeed(double speed, String method) {
+    public static double requirePositiveSpeed(double speed, String method) {
         if (speed <= 0) {
->>>>>>> q404365631-fix/docs-typos:src/main/java/tailwindfx/Preconditions.java
             throw new IllegalArgumentException(
                 method + ": speed must be > 0, got: " + speed
             );
@@ -103,19 +93,15 @@ public final class Preconditions {
         return speed;
     }
 
-    /** Alpha /N en JIT: 0–100 */
+    /** Alpha/N in JIT: 0–100 */
     public static int requireAlpha(int alpha, String method) {
         if (alpha < 0 || alpha > 100) {
             throw new IllegalArgumentException(
-                method + ": alpha debe estar entre 0 y 100, got: " + alpha
+                method + ": alpha must be between 0 and 100, got: " + alpha
             );
         }
         return alpha;
     }
-
-    // =========================================================================
-    // WARNINGS — no lanza, solo loguea
-    // =========================================================================
 
     /** Warns if the node has no parent (margin/grow will have no effect) */
     public static void warnNoParent(javafx.scene.Node node, String method) {
@@ -124,7 +110,7 @@ public final class Preconditions {
         }
     }
 
-    /** Warns if brightness is out of the recommended range */
+    /** Warns if brightness is out of the recommended range [0.0-2.0] */
     public static void warnBrightnessRange(double value, String method) {
         if (value < 0.0 || value > 2.0) {
             LOG.warning(method + ": brightness " + value + " out of useful range [0.0-2.0]");
