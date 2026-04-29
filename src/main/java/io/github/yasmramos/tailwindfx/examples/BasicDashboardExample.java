@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import tailwindfx.TailwindFX;
 
 public class BasicDashboardExample extends Application {
 
@@ -15,7 +16,7 @@ public class BasicDashboardExample extends Application {
 
         // Sidebar
         Label logo = new Label("TailwindFX");
-        logo.setStyle("-fx-font-size: 22px; -fx-font-weight: bold;");
+        TailwindFX.apply(logo, "text-2xl", "font-bold");
 
         Button dashboardBtn = new Button("Dashboard");
         Button profileBtn = new Button("Profile");
@@ -26,6 +27,11 @@ public class BasicDashboardExample extends Application {
         profileBtn.setPrefWidth(150);
         settingsBtn.setPrefWidth(150);
         logoutBtn.setPrefWidth(150);
+
+        TailwindFX.apply(dashboardBtn, "btn-primary", "rounded-lg");
+        TailwindFX.apply(profileBtn, "rounded-lg", "border");
+        TailwindFX.apply(settingsBtn, "rounded-lg", "border");
+        TailwindFX.apply(logoutBtn, "rounded-lg", "border");
 
         VBox sidebar = new VBox(15,
                 logo,
@@ -39,10 +45,11 @@ public class BasicDashboardExample extends Application {
         sidebar.setPadding(new Insets(20));
         sidebar.setAlignment(Pos.TOP_CENTER);
         sidebar.setPrefWidth(200);
+        TailwindFX.apply(sidebar, "bg-gray-100", "border-r");
 
         // Navbar
         Label welcomeText = new Label("Welcome, User");
-        welcomeText.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        TailwindFX.apply(welcomeText, "text-2xl", "font-bold");
 
         HBox navbar = new HBox(welcomeText);
         navbar.setPadding(new Insets(20));
@@ -81,6 +88,7 @@ public class BasicDashboardExample extends Application {
         );
 
         mainContent.setPadding(new Insets(20));
+        TailwindFX.apply(mainContent, "bg-gray-50");
 
         // Root Layout
         BorderPane root = new BorderPane();
@@ -89,29 +97,28 @@ public class BasicDashboardExample extends Application {
 
         Scene scene = new Scene(root, 1100, 700);
 
+        // Install TailwindFX framework styles
+        TailwindFX.install(scene);
+
         stage.setTitle("TailwindFX Basic Dashboard Example");
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
     }
 
     private VBox createCard(String titleText, String valueText) {
 
         Label title = new Label(titleText);
-        title.setStyle("-fx-font-size: 14px;");
+        TailwindFX.apply(title, "text-sm", "text-gray-600");
 
         Label value = new Label(valueText);
-        value.setStyle("-fx-font-size: 22px; -fx-font-weight: bold;");
+        TailwindFX.apply(value, "text-2xl", "font-bold");
 
         VBox card = new VBox(10, title, value);
         card.setAlignment(Pos.CENTER);
         card.setPadding(new Insets(20));
         card.setPrefSize(180, 120);
-        card.setStyle(
-                "-fx-background-color: white;" +
-                "-fx-border-color: #e5e7eb;" +
-                "-fx-border-radius: 8px;" +
-                "-fx-background-radius: 8px;"
-        );
+        TailwindFX.apply(card, "bg-white", "border", "rounded-lg", "shadow-md");
 
         return card;
     }
