@@ -27,4 +27,7 @@ target/maven-status/
 
 # Site documentation
 target/site/
+.qwen
+.settings
+.vscode
 ```
