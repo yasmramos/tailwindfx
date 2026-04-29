@@ -87,14 +87,20 @@ public final class Preconditions {
         return ms;
     }
 
+<<<<<<< HEAD:src/main/java/io/github/yasmramos/tailwindfx/core/Preconditions.java
     /** Escala de animación: > 0 */
     public static double requirePositiveScale(double scale, String method) {
         if (scale <= 0) {
+=======
+    /** Speed multiplier for animations: > 0 */
+    static double requirePositiveSpeed(double speed, String method) {
+        if (speed <= 0) {
+>>>>>>> q404365631-fix/docs-typos:src/main/java/tailwindfx/Preconditions.java
             throw new IllegalArgumentException(
-                method + ": scale must be > 0, got: " + scale
+                method + ": speed must be > 0, got: " + speed
             );
         }
-        return scale;
+        return speed;
     }
 
     /** Alpha /N en JIT: 0–100 */
