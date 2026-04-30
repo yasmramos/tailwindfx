@@ -409,6 +409,46 @@
 .low-contrast { -fx-contrast: 50%; }
 
 /* Reduced motion (simulated - actual implementation needs Java code) */
-@media (prefers-reduced-motion: reduce) {
-    .motion-reduce\:animate-none { /* Disable animations */ }
+/* =============================================================================
+ * RESIZE - Control de indicador de redimensionamiento para controles como TextArea
+ * ============================================================================= */
+
+/* 
+ * JavaFX CSS no soporta la propiedad 'resize' estándar de web, pero los nodos
+ * como TextArea tienen un nodo interno '.corner' que sirve como manija visual.
+ * Estas clases se dirigen a ese nodo para controlar el indicador de redimensionamiento.
+ *
+ * Nota: El bloqueo completo de redimensionamiento (prevenir arrastre real) 
+ * requiere TextArea.setResizable(false) en código Java — a implementar más tarde
+ * vía Styles.java. Estas clases CSS manejan solo el indicador visual.
+ */
+
+/* Resize none - No mostrar indicador de redimensionamiento */
+.resize-none {
+    /* Hide the .corner node that serves as resize handle */
 }
+
+/* Resize y - Solo indicador vertical (bloqueado en JavaFX) */
+.resize-y {
+    /* Show .corner node (vertical-only restriction blocked in JavaFX) */
+}
+
+/* Resize x - Solo indicador horizontal (bloqueado en JavaFX) */
+.resize-x {
+    /* Show .corner node (horizontal-only restriction blocked in JavaFX) */
+}
+
+/* Resize - Ambos direcciones (comportamiento por defecto) */
+.resize {
+    /* Show .corner node (default behavior) */
+}
+
+/*
+ * Notas de implementación:
+ * - Las clases resize-y y resize-x no pueden distinguirse completamente 
+ *   mediante CSS solamente — JavaFX's TextArea solo soporta redimensionamiento 
+ *   omnidireccional nativamente. La restricción direccional necesita métodos 
+ *   Java complementarios como Styles.resizeY() / Styles.resizeX() (tarea futura).
+ * - Estas clases CSS mostrarán/ocultarán el nodo .corner. Un comentario 
+ *   indicará el complemento Java necesario para el control direccional completo.
+ */
