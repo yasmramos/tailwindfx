@@ -71,7 +71,7 @@ FxAnimation.onHoverScale(btn, 1.05);
 
 ```xml
 <dependency>
-    <groupId>io.github.tailwindfx</groupId>
+    <groupId>io.github.yasmramos</groupId>
     <artifactId>tailwindfx</artifactId>
     <version>1.0-SNAPSHOT</version>
 </dependency>
