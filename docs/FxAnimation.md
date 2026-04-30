@@ -16,13 +16,13 @@ The `FxAnimation` class is a fluent wrapper around JavaFX `Animation` that provi
 ### Simple Animation
 ```java
 // Simple fade-in animation
-AnimationUtil.fadeIn(button).play();
+FxAnimation.fadeIn(button).play();
 ```
 
 ### Chained Configuration
 ```java
 // Chained configuration with multiple options
-AnimationUtil.slideUp(node, 300)
+FxAnimation.slideUp(node, 300)
     .easeOut()
     .cycleCount(3)
     .onFinished(e -> System.out.println("Animation complete!"))
@@ -32,7 +32,7 @@ AnimationUtil.slideUp(node, 300)
 ### Registry-Controlled Animation
 ```java
 // Registry-controlled animation with automatic lifecycle management
-AnimationUtil.pulse(badge)
+FxAnimation.pulse(badge)
     .register(badge, "attention")
     .loop()
     .play();
@@ -57,7 +57,7 @@ Sets the number of times the animation will repeat.
 
 ```java
 // Play animation 3 times
-AnimationUtil.pulse(node).cycleCount(3).play();
+FxAnimation.pulse(node).cycleCount(3).play();
 ```
 
 ### loop()
@@ -65,7 +65,7 @@ Configures the animation to repeat indefinitely.
 
 ```java
 // Infinite spinning animation
-AnimationUtil.spin(node).loop().play();
+FxAnimation.spin(node).loop().play();
 ```
 
 ### speed(double rate)
@@ -73,14 +73,14 @@ Sets the playback speed multiplier.
 
 ```java
 // Double speed animation
-AnimationUtil.fadeIn(node).speed(2.0).play();
+FxAnimation.fadeIn(node).speed(2.0).play();
 ```
 
 ### onFinished(EventHandler handler)
 Sets a callback handler invoked when the animation completes.
 
 ```java
-AnimationUtil.slideUp(node)
+FxAnimation.slideUp(node)
     .onFinished(e -> System.out.println("Animation complete!"))
     .play();
 ```
@@ -90,14 +90,14 @@ Configures the animation to automatically reverse direction after each cycle.
 
 ```java
 // Ping-pong effect
-AnimationUtil.scaleIn(node).autoReverse().cycleCount(Animation.INDEFINITE).play();
+FxAnimation.scaleIn(node).autoReverse().cycleCount(Animation.INDEFINITE).play();
 ```
 
 ### register(Node node, String slot)
 Registers the animation with the AnimationRegistry for automatic lifecycle management.
 
 ```java
-AnimationUtil.fadeIn(node).register(node, "enter").play();
+FxAnimation.fadeIn(node).register(node, "enter").play();
 ```
 
 ### play()
@@ -125,10 +125,10 @@ Apply different easing functions for custom timing:
 
 ```java
 // Use built-in interpolators
-AnimationUtil.fadeIn(node).easeIn().play();
-AnimationUtil.fadeIn(node).easeOut().play();
-AnimationUtil.fadeIn(node).easeBoth().play();
-AnimationUtil.fadeIn(node).linear().play();
+FxAnimation.fadeIn(node).easeIn().play();
+FxAnimation.fadeIn(node).easeOut().play();
+FxAnimation.fadeIn(node).easeBoth().play();
+FxAnimation.fadeIn(node).linear().play();
 ```
 
 ### Animation Composition
@@ -136,15 +136,15 @@ Chain and parallelize animations:
 
 ```java
 // Sequential animations
-AnimationUtil.chain(
-    AnimationUtil.fadeIn(node),
-    AnimationUtil.slideUp(node)
+FxAnimation.chain(
+    FxAnimation.fadeIn(node),
+    FxAnimation.slideUp(node)
 ).play();
 
 // Parallel animations
-AnimationUtil.parallel(
-    AnimationUtil.scaleIn(node),
-    AnimationUtil.fadeIn(node)
+FxAnimation.parallel(
+    FxAnimation.scaleIn(node),
+    FxAnimation.fadeIn(node)
 ).play();
 ```
 
@@ -158,5 +158,4 @@ AnimationUtil.parallel(
 
 ## See Also
 
-- [AnimationUtil](AnimationUtil.md) - Factory methods for creating animations
 - [AnimationRegistry](AnimationRegistry.md) - Registry system for animation lifecycle management
