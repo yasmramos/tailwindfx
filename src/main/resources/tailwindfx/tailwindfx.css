@@ -9524,8 +9524,30 @@ Group {
 
 /* Scroll snap — no JavaFX CSS equivalent, handle with ScrollPane in Java */
 
-/* Touch action — no JavaFX CSS equivalent */
+/* Touch action — JavaFX has no `-fx-touch-action` property; gesture
+ * dispatch is controlled at the Node API level (e.g. `setOnSwipeLeft`,
+ * `setMouseTransparent`, gesture-event consumption). The web semantics
+ * map to JavaFX as follows:
+ *
+ *   .touch-none       → block all touch hits (closest signal:
+ *                       -fx-mouse-transparent: true)
+ *   .touch-auto       → default behaviour (mouse/touch hits flow normally)
+ *   .touch-pan-x      → no JavaFX CSS analog; callers must consume non-X
+ *                       gestures in their event handlers
+ *   .touch-pan-y      → same; consume non-Y gestures in event handlers
+ *   .touch-pinch-zoom → same; allow ZoomEvent dispatch and consume the
+ *                       rest in event handlers
+ *
+ * Browser/device compatibility: irrelevant — these classes ship only to
+ * JavaFX scenes, never to a browser. The pan-x / pan-y / pinch-zoom
+ * variants exist so contributors copying a TailwindCSS markup pattern
+ * don't break on missing class names; they intentionally do not change
+ * JavaFX behaviour. */
 .touch-none       { -fx-mouse-transparent: true; }
+.touch-auto       { -fx-mouse-transparent: false; }
+.touch-pan-x      { /* no-op: gesture filtering belongs in the Node API */ }
+.touch-pan-y      { /* no-op: gesture filtering belongs in the Node API */ }
+.touch-pinch-zoom { /* no-op: gesture filtering belongs in the Node API */ }
 
 /* User select */
 .select-none  { -fx-focus-traversable: false; }
