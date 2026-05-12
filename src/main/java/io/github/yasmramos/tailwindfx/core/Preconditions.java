@@ -138,11 +138,16 @@ public final class Preconditions {
     }
 
     /** Warns if brightness is out of the recommended range [0.0-2.0]. 
-     *  Note: This is a warning only; values outside this range are still allowed. */
+     *  Values < 0.0 are invalid and will throw; values > 2.0 trigger a warning only. */
     public static void warnBrightnessRange(double value, String method) {
-        if (value < 0.0 || value > 2.0) {
+        if (value < 0.0) {
+            throw new IllegalArgumentException(
+                method + ": brightness cannot be negative, got: " + value
+            );
+        }
+        if (value > 2.0) {
             LOG.warning(String.format(
-                "%s: brightness %.2f is outside the recommended range [0.0-2.0] and may produce unexpected visual results",
+                "%s: brightness %.2f exceeds recommended maximum of 2.0 and may produce washed-out colors",
                 method, value
             ));
         }
@@ -167,7 +172,7 @@ public final class Preconditions {
     /** Warns if an animation is applied to a node that already has one in the same slot */
     public static void warnAnimationOverride(javafx.scene.Node node, String slot, String method) {
         if (FxAnimation.AnimationRegistry.isActive(node, slot)) {
-            LOG.info(String.format(
+            LOG.warning(String.format(
                 "%s: replacing active animation in slot '%s' on node %s - previous animation will be stopped",
                 method, slot, node
             ));
