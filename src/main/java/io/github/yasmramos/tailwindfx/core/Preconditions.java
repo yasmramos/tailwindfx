@@ -12,7 +12,14 @@ import java.util.logging.Logger;
  */
 public final class Preconditions {
 
-    public static final Logger LOG = Logger.getLogger("TailwindFX");
+    // Logger público para uso en toda la librería
+    public static final Logger LOG = Logger.getLogger(Preconditions.class.getName());
+    
+    // Límites razonables para validaciones numéricas
+    private static final int MAX_SPAN = 1000;
+    private static final int MAX_DURATION_MS = 600_000; // 10 minutos
+    private static final double MAX_SCALE = 100.0;
+    private static final double MAX_SPEED = 100.0;
 
     private Preconditions() {}
 
@@ -43,11 +50,16 @@ public final class Preconditions {
         return value;
     }
 
-    /** GridPane span: must be >= 1 */
+    /** GridPane span: must be >= 1 and <= MAX_SPAN */
     public static int requireSpan(int span, String method) {
         if (span < 1) {
             throw new IllegalArgumentException(
                 method + ": span must be >= 1, got: " + span
+            );
+        }
+        if (span > MAX_SPAN) {
+            throw new IllegalArgumentException(
+                method + ": span exceeds maximum allowed (" + MAX_SPAN + "), got: " + span
             );
         }
         return span;
@@ -63,31 +75,46 @@ public final class Preconditions {
         return value;
     }
 
-    /** Animation duration: > 0 ms */
+    /** Animation duration: > 0 ms and <= MAX_DURATION_MS */
     public static int requirePositiveDuration(int ms, String method) {
         if (ms <= 0) {
             throw new IllegalArgumentException(
                 method + ": duration must be > 0 ms, got: " + ms
             );
         }
+        if (ms > MAX_DURATION_MS) {
+            throw new IllegalArgumentException(
+                method + ": duration exceeds maximum allowed (" + MAX_DURATION_MS + " ms), got: " + ms
+            );
+        }
         return ms;
     }
 
-    /** Animation scale: > 0 */
+    /** Animation scale: > 0 and <= MAX_SCALE */
     public static double requirePositiveScale(double scale, String method) {
         if (scale <= 0) {
             throw new IllegalArgumentException(
                 method + ": scale must be > 0, got: " + scale
             );
         }
+        if (scale > MAX_SCALE) {
+            throw new IllegalArgumentException(
+                method + ": scale exceeds maximum allowed (" + MAX_SCALE + "), got: " + scale
+            );
+        }
         return scale;
     }
 
-    /** Speed multiplier for animations: > 0 */
+    /** Speed multiplier for animations: > 0 and <= MAX_SPEED */
     public static double requirePositiveSpeed(double speed, String method) {
         if (speed <= 0) {
             throw new IllegalArgumentException(
                 method + ": speed must be > 0, got: " + speed
+            );
+        }
+        if (speed > MAX_SPEED) {
+            throw new IllegalArgumentException(
+                method + ": speed exceeds maximum allowed (" + MAX_SPEED + "), got: " + speed
             );
         }
         return speed;
@@ -110,10 +137,14 @@ public final class Preconditions {
         }
     }
 
-    /** Warns if brightness is out of the recommended range [0.0-2.0] */
+    /** Warns if brightness is out of the recommended range [0.0-2.0]. 
+     *  Note: This is a warning only; values outside this range are still allowed. */
     public static void warnBrightnessRange(double value, String method) {
         if (value < 0.0 || value > 2.0) {
-            LOG.warning(method + ": brightness " + value + " out of useful range [0.0-2.0]");
+            LOG.warning(String.format(
+                "%s: brightness %.2f is outside the recommended range [0.0-2.0] and may produce unexpected visual results",
+                method, value
+            ));
         }
     }
 
@@ -124,15 +155,22 @@ public final class Preconditions {
         }
     }
 
-    /** Warns if a JIT token looks like a known typo */
+    /** Warns if a JIT token looks like a known typo.
+     *  Note: This is a heuristic warning; not all unrecognized tokens are typos. */
     public static void warnLikelyTypo(String token, String method) {
-        LOG.warning(method + ": token '" + token + "' not recognized as a JIT utility or CSS class — possible typo?");
+        LOG.warning(String.format(
+            "%s: token '%s' was not recognized as a valid Tailwind utility or CSS class - verify spelling or check documentation",
+            method, token
+        ));
     }
 
     /** Warns if an animation is applied to a node that already has one in the same slot */
     public static void warnAnimationOverride(javafx.scene.Node node, String slot, String method) {
         if (FxAnimation.AnimationRegistry.isActive(node, slot)) {
-            LOG.fine(method + ": replacing active animation in slot '" + slot + "'");
+            LOG.info(String.format(
+                "%s: replacing active animation in slot '%s' on node %s - previous animation will be stopped",
+                method, slot, node
+            ));
         }
     }
 }
