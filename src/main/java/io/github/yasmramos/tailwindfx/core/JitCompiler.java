@@ -42,8 +42,9 @@ public final class JitCompiler {
     static final int MAX_CACHE_SIZE = 2_000;
 
     /**
-     * Thread-safe LRU cache using ConcurrentHashMap with separate eviction mechanism.
-     * Access order is tracked via a separate LinkedHashMap for LRU ordering.
+     * Thread-safe LRU cache using ConcurrentHashMap for storage.
+     * Access order is tracked via the ConcurrentHashMap itself using a secondary map
+     * with explicit synchronization to ensure atomic updates during eviction checks.
      *
      * <p>
      * Why 2000? A typical large app uses ~300-500 unique utility tokens. 2000
@@ -55,15 +56,16 @@ public final class JitCompiler {
     
     /**
      * Separate LRU tracking map for eviction policy.
-     * Wrapped in synchronizedMap since we only modify it during eviction checks.
+     * Synchronized explicitly to ensure thread-safe access and atomic eviction checks.
      */
     private static final Map<String, Long> ACCESS_ORDER
-            = Collections.synchronizedMap(new java.util.LinkedHashMap<>(256, 0.75f, true) {
-                @Override
-                protected boolean removeEldestEntry(Map.Entry<String, Long> eldest) {
-                    return size() > MAX_CACHE_SIZE;
-                }
-            });
+            = Collections.synchronizedMap(new java.util.LinkedHashMap<>(256, 0.75f, true));
+    
+    /**
+     * Lock object for coordinating cache eviction checks.
+     * Ensures that size checks and potential evictions are atomic.
+     */
+    private static final Object EVICTION_LOCK = new Object();
 
     // Modo debug: loguea todos los tokens procesados
     private static volatile boolean DEBUG = false;
@@ -79,6 +81,9 @@ public final class JitCompiler {
      * 
      * NOT JIT (predefined utilities):
      * - w-32, bg-red-500, -mt-4, col-1, z-10
+     * 
+     * IMPORTANT: This method validates that '/' is used for opacity/modifiers on known
+     * color utilities, not arbitrary class names like 'icon/large'.
      */
     private static boolean requiresJitCompilation(String token) {
         if (token == null || token.isEmpty()) return false;
@@ -100,7 +105,63 @@ public final class JitCompiler {
         }
         
         // Check if base contains arbitrary value [...]
-        return containsArbitraryValue(base);
+        if (containsArbitraryValue(base)) {
+            return true;
+        }
+        
+        // CRITICAL: Only treat '/' as JIT trigger if base is a known color utility.
+        // This prevents false positives like 'icon/large' being treated as JIT.
+        // Valid: bg-red-500/80, text-gray-900/50
+        // Invalid: icon/large, btn-primary/custom
+        if (modifier != null && !isArbitraryValue(modifier)) {
+            // Check if base matches color utility pattern (e.g., bg-red-500, text-blue-600)
+            // Color utilities have format: prefix-colorname-shade
+            if (!isValidColorUtilityBase(base)) {
+                // Not a valid color utility with opacity modifier, so not JIT
+                return false;
+            }
+        }
+        
+        return modifier != null;
+    }
+    
+    /**
+     * Validates if a base token (before /) is a valid color utility that can have opacity.
+     * Examples: bg-red-500, text-gray-900, border-blue-300
+     * 
+     * @param base the token before the '/' modifier
+     * @return true if this is a valid color utility base
+     */
+    private static boolean isValidColorUtilityBase(String base) {
+        if (base == null || base.isEmpty()) return false;
+        
+        // Known color utility prefixes
+        String[] colorPrefixes = {"bg", "text", "border", "fill", "stroke", "shadow", "ring", "outline"};
+        
+        for (String prefix : colorPrefixes) {
+            if (base.startsWith(prefix + "-")) {
+                // Extract the rest after prefix-
+                String rest = base.substring(prefix.length() + 1);
+                // Should have at least one more dash for color-shade (e.g., red-500)
+                int lastDash = rest.lastIndexOf('-');
+                if (lastDash > 0) {
+                    String shadeStr = rest.substring(lastDash + 1);
+                    // Validate that the last part is a number (shade)
+                    try {
+                        Integer.parseInt(shadeStr);
+                        return true;
+                    } catch (NumberFormatException e) {
+                        // Not a valid shade number
+                        return false;
+                    }
+                }
+                // Named colors without shade (e.g., bg-transparent)
+                if (!rest.contains("-")) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -207,7 +268,9 @@ public final class JitCompiler {
         CompileResult result = CACHE.get(key);
         if (result != null) {
             // Update access order for LRU eviction (synchronized internally)
-            ACCESS_ORDER.put(key, System.nanoTime());
+            synchronized (EVICTION_LOCK) {
+                ACCESS_ORDER.put(key, System.nanoTime());
+            }
             TailwindFXMetrics.instance().recordCacheHit();
             return result;
         }
@@ -224,10 +287,34 @@ public final class JitCompiler {
             return existing;
         }
         
-        // Update access order for the newly added entry
-        ACCESS_ORDER.put(key, System.nanoTime());
+        // Update access order and perform eviction check atomically
+        synchronized (EVICTION_LOCK) {
+            ACCESS_ORDER.put(key, System.nanoTime());
+            // Manual eviction check since we removed the automatic callback
+            if (ACCESS_ORDER.size() > MAX_CACHE_SIZE) {
+                evictOldestEntries();
+            }
+        }
         TailwindFXMetrics.instance().recordCacheMiss();
         return result;
+    }
+    
+    /**
+     * Evicts oldest entries from cache when size exceeds MAX_CACHE_SIZE.
+     * Must be called while holding EVICTION_LOCK.
+     */
+    private static void evictOldestEntries() {
+        // Remove eldest entries until we're under the limit
+        // The LinkedHashMap maintains access order, so eldest = least recently accessed
+        int toRemove = ACCESS_ORDER.size() - MAX_CACHE_SIZE;
+        if (toRemove <= 0) return;
+        
+        java.util.Iterator<Map.Entry<String, Long>> iterator = ACCESS_ORDER.entrySet().iterator();
+        for (int i = 0; i < toRemove && iterator.hasNext(); i++) {
+            Map.Entry<String, Long> entry = iterator.next();
+            iterator.remove();
+            CACHE.remove(entry.getKey());
+        }
     }
 
     /**
@@ -385,8 +472,15 @@ public final class JitCompiler {
         }
 
         String dir = direction != null ? direction : "to bottom";
-        String fromColor = from != null ? from : "#6B7280"; // gray-500 default
-        String toColor = to != null ? to : "#9CA3AF"; // gray-400 default
+        
+        // Validate that we have at least one valid color - fail explicitly if not
+        if (from == null && to == null) {
+            LOG.warning("TailwindFX JIT: gradiente sin colores válidos (se requieren from-* o to-*)");
+            return null;
+        }
+        
+        String fromColor = from != null ? from : to; // Use to color as fallback if from is missing
+        String toColor = to != null ? to : from;     // Use from color as fallback if to is missing
 
         StringBuilder gradient = new StringBuilder("linear-gradient(");
         gradient.append(dir);
