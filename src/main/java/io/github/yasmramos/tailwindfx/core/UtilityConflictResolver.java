@@ -58,6 +58,7 @@ public final class UtilityConflictResolver {
         definitions.put("padding", new String[]{"p-", "px-", "py-", "pt-", "pr-", "pb-", "pl-"});
 
         // Colores de fondo
+        definitions.put("bg-gradient", new String[]{"bg-gradient-to-r","bg-gradient-to-l","bg-gradient-to-t","bg-gradient-to-b","bg-gradient-to-tr","bg-gradient-to-tl","bg-gradient-to-br","bg-gradient-to-bl"});
         definitions.put("bg-color", new String[]{"bg-slate-","bg-gray-","bg-red-","bg-orange-","bg-amber-",
             "bg-yellow-","bg-lime-","bg-green-","bg-emerald-","bg-teal-","bg-cyan-","bg-sky-",
             "bg-blue-","bg-indigo-","bg-violet-","bg-purple-","bg-fuchsia-","bg-pink-","bg-rose-",
