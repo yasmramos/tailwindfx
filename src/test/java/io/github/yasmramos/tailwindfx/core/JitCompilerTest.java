@@ -94,12 +94,34 @@ class JitCompilerTest {
         }
 
         @Test
-        @DisplayName("Should use default colors when from/to not specified")
+        @DisplayName("Should require at least one color for gradient")
         void testGradientDefaultColors() {
+            // Gradient without colors should fail explicitly (no silent defaults)
             JitCompiler.BatchResult result = JitCompiler.compileBatch(
                 "bg-gradient-to-b");
             
+            // Should NOT have inline style since no valid colors were provided
+            assertFalse(result.hasInlineStyle());
+        }
+        
+        @Test
+        @DisplayName("Should build gradient with only from-* color")
+        void testGradientWithOnlyFromColor() {
+            JitCompiler.BatchResult result = JitCompiler.compileBatch(
+                "bg-gradient-to-b", "from-blue-500");
+            
             assertTrue(result.hasInlineStyle());
+            assertTrue(result.inlineStyle().contains("#3b82f6")); // blue-500 hex
+        }
+        
+        @Test
+        @DisplayName("Should build gradient with only to-* color")
+        void testGradientWithOnlyToColor() {
+            JitCompiler.BatchResult result = JitCompiler.compileBatch(
+                "bg-gradient-to-b", "to-purple-600");
+            
+            assertTrue(result.hasInlineStyle());
+            assertTrue(result.inlineStyle().contains("#9333ea")); // purple-600 hex
         }
     }
 
