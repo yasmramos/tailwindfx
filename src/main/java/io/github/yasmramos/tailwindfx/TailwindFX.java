@@ -205,7 +205,11 @@ public final class TailwindFX {
      * Eliminates false positives like "card-2" or "panel-v2".
      */
     private static boolean isJitToken(String token) {
-        if (token.contains("/")) return true;  // opacity: bg-blue-500/80
+        // Opacity modifier: bg-blue-500/80 - but only for valid color utilities
+        if (token.contains("/")) {
+            String base = token.substring(0, token.indexOf('/'));
+            return isValidColorUtilityBase(base);
+        }
         if (token.contains("[")) return true;  // arbitrary: w-[320px]
         
         // Strict negative prefix: only JIT if followed by a known property prefix
@@ -222,6 +226,25 @@ public final class TailwindFX {
             return token.matches(".*\\d+.*");
         }
         
+        return false;
+    }
+    
+    /**
+     * Validates if a base token (before /) is a valid color utility that can have opacity.
+     * Prevents false positives like "icon/large" being treated as JIT.
+     */
+    private static boolean isValidColorUtilityBase(String base) {
+        // Color utilities that support opacity: bg-*, text-*, border-*, ring-*, shadow-*
+        String[] colorPrefixes = {"bg-", "text-", "border-", "ring-", "shadow-"};
+        
+        for (String prefix : colorPrefixes) {
+            if (base.startsWith(prefix) && base.length() > prefix.length()) {
+                String colorPart = base.substring(prefix.length());
+                // Valid color patterns: blue-500, red-900, gray-50, custom-color
+                // Must contain at least one hyphen or be a simple color name
+                return colorPart.contains("-") || colorPart.matches("[a-zA-Z]+");
+            }
+        }
         return false;
     }
 
@@ -322,19 +345,23 @@ public final class TailwindFX {
     public static void installAnimationGuard(BreakpointManager bpm, javafx.scene.Scene scene) {
         CONFIG_LOCK.readLock().lock();
         try {
-            var breakpoints = new java.util.ArrayList<>(Arrays.asList(
-                BreakpointManager.BP.SM, BreakpointManager.BP.MD,
-                BreakpointManager.BP.LG, BreakpointManager.BP.XL
-            ));
-            // Agregar custom breakpoints al guard
-            for (String name : GLOBAL_CONFIG.customBreakpoints().keySet()) {
-                try {
-                    // Asumimos que BreakpointManager expone un método fromString o similar
-                    // Si no, se ignora silenciosamente o se requiere API pública
-                } catch (Exception ignored) {}
+            var breakpoints = new java.util.ArrayList<BreakpointManager.Breakpoint>();
+            // Agregar breakpoints estándar
+            breakpoints.add(BreakpointManager.BP.SM);
+            breakpoints.add(BreakpointManager.BP.MD);
+            breakpoints.add(BreakpointManager.BP.LG);
+            breakpoints.add(BreakpointManager.BP.XL);
+            
+            // Agregar custom breakpoints al guard si están disponibles
+            if (GLOBAL_CONFIG != null && GLOBAL_CONFIG.customBreakpoints() != null) {
+                for (String name : GLOBAL_CONFIG.customBreakpoints().keySet()) {
+                    try {
+                        // Intentar convertir el nombre a Breakpoint si existe
+                        // Si no hay API pública, se ignora silenciosamente
+                    } catch (Exception ignored) {}
+                }
             }
-            CONFIG_LOCK.readLock().unlock();
-
+            
             for (BreakpointManager.Breakpoint bp : breakpoints) {
                 bpm.onBreakpoint(bp, () -> {
                     FxAnimation.ResponsiveAnimationGuard.onLayoutChangeStart(scene);
@@ -342,9 +369,8 @@ public final class TailwindFX {
                         FxAnimation.ResponsiveAnimationGuard.onLayoutChangeEnd(scene));
                 });
             }
-        } catch (Exception e) {
+        } finally {
             CONFIG_LOCK.readLock().unlock();
-            throw e;
         }
     }
 
