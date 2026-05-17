@@ -192,15 +192,15 @@ public final class ThemeManagerTest {
             StackPane root = new StackPane();
             Scene scene = new Scene(root, 400, 300);
             TailwindFX.theme(scene).dark().apply();
-            TwTheme.INSTANCE.saveTheme(scene, "test.theme");
+            TwTheme.saveTheme(scene, "test.theme");
 
             // Load into fresh scene
             StackPane root2 = new StackPane();
             Scene scene2 = new Scene(root2, 400, 300);
-            boolean loaded = TwTheme.INSTANCE.loadTheme(scene2, "test.theme");
+            boolean loaded = TwTheme.loadTheme(scene2, "test.theme");
             check("loadTheme returns true", loaded);
             // Clean up
-            TwTheme.INSTANCE.deleteTheme("test.theme");
+            TwTheme.deleteTheme("test.theme");
         });
     }
 
@@ -251,7 +251,7 @@ public final class ThemeManagerTest {
     static void testScopePresetDark() throws Exception {
         runFx(() -> {
             StackPane pane = new StackPane();
-            TwTheme.INSTANCE.scope(pane).preset("dark").apply();
+            TwTheme.scope(pane).preset("dark").apply();
             check("scope dark: has -fx-base",
                     pane.getStyle().contains("-fx-base"));
             check("scope dark: dark class",

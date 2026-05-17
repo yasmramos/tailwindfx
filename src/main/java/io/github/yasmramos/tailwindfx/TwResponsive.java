@@ -11,20 +11,20 @@ import javafx.stage.Stage;
  * TwResponsive — Responsive facade for breakpoint management.
  * 
  * <pre>
- * TwResponsive.INSTANCE.on(stage);
- * TwResponsive.INSTANCE.forRegion(region);
+ * TwResponsive.on(stage);
+ * TwResponsive.forRegion(region);
  * </pre>
  */
 public final class TwResponsive {
     
-    public static final TwResponsive INSTANCE = new TwResponsive();
+    private static final TwResponsive INSTANCE = new TwResponsive();
     
     private TwResponsive() {}
     
     /**
      * Installs responsive support on a Stage.
      */
-    public ResponsiveNode on(Stage stage) {
+    public static ResponsiveNode on(Stage stage) {
         Scene scene = stage.getScene();
         if (scene == null) {
             throw new IllegalArgumentException("Stage must have a scene attached");
@@ -42,14 +42,14 @@ public final class TwResponsive {
     /**
      * Makes a Region responsive to breakpoint changes.
      */
-    public ResponsiveNode on(Region region) {
+    public static ResponsiveNode on(Region region) {
         return ResponsiveNode.on(region).install(region.getScene());
     }
     
     /**
      * Gets the BreakpointManager for a Stage.
      */
-    public BreakpointManager forStage(Stage stage) {
+    public static BreakpointManager forStage(Stage stage) {
         return BreakpointManager.from(stage);
     }
 }
