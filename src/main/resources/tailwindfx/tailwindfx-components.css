@@ -564,7 +564,40 @@ SplitPane .split-pane-divider {
  * COMPONENT VARIANTS
  * ============================================================================= */
 
+/* Button base */
+.btn {
+    -fx-background-radius: 6px;
+    -fx-font-weight: 500;
+    -fx-cursor: -cursor-hand;
+    -fx-background-insets: 0;
+    -fx-focus-traversable: true;
+    -fx-faint-focus-color: transparent;
+    -fx-padding: 8px 16px;
+}
+
 /* Button variants */
+.btn-primary {
+    -fx-text-fill: -color-white;
+    -fx-background-color: -color-blue-500;
+}
+
+.btn-primary:hover {
+    -fx-background-color: -color-blue-600;
+}
+
+.btn-primary:pressed {
+    -fx-background-color: -color-blue-700;
+}
+
+.btn-secondary {
+    -fx-text-fill: -color-gray-800;
+    -fx-background-color: -color-gray-100;
+}
+
+.btn-secondary:hover {
+    -fx-background-color: -color-gray-200;
+}
+
 .btn-outline {
     -fx-background-color: transparent;
     -fx-border-color: -color-blue-500;
@@ -593,6 +626,66 @@ SplitPane .split-pane-divider {
     -fx-background-color: -color-blue-100;
 }
 
+.btn-disabled {
+    -fx-background-color: -color-gray-300;
+    -fx-text-fill: -color-gray-500;
+    -fx-cursor: -cursor-default;
+}
+
+/* Button colors */
+.btn-blue.btn-primary,
+.btn-primary.btn-blue {
+    -fx-background-color: -color-blue-500;
+}
+
+.btn-blue.btn-primary:hover,
+.btn-primary.btn-blue:hover {
+    -fx-background-color: -color-blue-600;
+}
+
+.btn-green.btn-primary,
+.btn-primary.btn-green {
+    -fx-background-color: -color-green-500;
+}
+
+.btn-green.btn-primary:hover,
+.btn-primary.btn-green:hover {
+    -fx-background-color: -color-green-600;
+}
+
+.btn-red.btn-primary,
+.btn-primary.btn-red {
+    -fx-background-color: -color-red-500;
+}
+
+.btn-red.btn-primary:hover,
+.btn-primary.btn-red:hover {
+    -fx-background-color: -color-red-600;
+}
+
+.btn-gray.btn-secondary,
+.btn-secondary.btn-gray {
+    -fx-background-color: -color-gray-100;
+}
+
+.btn-gray.btn-secondary:hover,
+.btn-secondary.btn-gray:hover {
+    -fx-background-color: -color-gray-200;
+}
+
+.btn-icon {
+    -fx-padding: 0;
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+    -fx-font-size: 18px;
+}
+
+.btn-circle {
+    -fx-background-radius: 999px;
+}
+
 /* Button sizes */
 .btn-xs {
     -fx-padding: 4px 8px;
@@ -602,6 +695,11 @@ SplitPane .split-pane-divider {
 .btn-sm {
     -fx-padding: 6px 12px;
     -fx-font-size: 12px;
+}
+
+.btn-md {
+    -fx-padding: 8px 16px;
+    -fx-font-size: 14px;
 }
 
 .btn-lg {
@@ -625,6 +723,13 @@ SplitPane .split-pane-divider {
     -fx-font-size: 12px;
 }
 
+/* Card base */
+.card {
+    -fx-background-color: -color-white;
+    -fx-background-radius: 12px;
+    -fx-padding: 16px;
+}
+
 /* Card variants */
 .card-compact {
     -fx-padding: 12px;
@@ -634,7 +739,26 @@ SplitPane .split-pane-divider {
     -fx-padding: 32px;
 }
 
+.card-hoverable:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 4);
+}
+
+/* Alert base */
+.alert {
+    -fx-padding: 12px 16px;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-spacing: 12px;
+}
+
 /* Alert variants */
+.alert-info {
+    -fx-background-color: -color-blue-50;
+    -fx-border-color: -color-blue-200;
+    -fx-text-fill: -color-blue-800;
+}
+
 .alert-success {
     -fx-background-color: -color-green-50;
     -fx-border-color: -color-green-200;
@@ -653,6 +777,91 @@ SplitPane .split-pane-divider {
     -fx-text-fill: -color-red-800;
 }
 
+/* Badge base */
+.badge {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 2px 8px;
+    -fx-background-radius: 4px;
+}
+
+/* Badge variants */
+.badge-primary {
+    -fx-background-color: -color-blue-100;
+    -fx-text-fill: -color-blue-700;
+}
+
+.badge-success {
+    -fx-background-color: -color-green-100;
+    -fx-text-fill: -color-green-700;
+}
+
+.badge-warning {
+    -fx-background-color: -color-yellow-100;
+    -fx-text-fill: -color-yellow-700;
+}
+
+.badge-error {
+    -fx-background-color: -color-red-100;
+    -fx-text-fill: -color-red-700;
+}
+
+.badge-pill {
+    -fx-background-radius: 999px;
+}
+
+.badge-outline {
+    -fx-background-color: transparent;
+    -fx-border-color: -color-gray-600;
+    -fx-border-width: 1px;
+    -fx-text-fill: -color-gray-700;
+}
+
+/* Avatar base */
+.avatar {
+    -fx-background-radius: 999px;
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+    -fx-alignment: center;
+}
+
+.avatar-xs {
+    -fx-min-width: 24px;
+    -fx-min-height: 24px;
+    -fx-max-width: 24px;
+    -fx-max-height: 24px;
+}
+
+.avatar-sm {
+    -fx-min-width: 32px;
+    -fx-min-height: 32px;
+    -fx-max-width: 32px;
+    -fx-max-height: 32px;
+}
+
+.avatar-md {
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+}
+
+.avatar-lg {
+    -fx-min-width: 56px;
+    -fx-min-height: 56px;
+    -fx-max-width: 56px;
+    -fx-max-height: 56px;
+}
+
+.avatar-xl {
+    -fx-min-width: 72px;
+    -fx-min-height: 72px;
+    -fx-max-width: 72px;
+    -fx-max-height: 72px;
+}
+
 /* Modal variants */
 .modal-sm {
     -fx-pref-width: 300px;
@@ -667,4 +876,269 @@ SplitPane .split-pane-divider {
 .modal-full {
     -fx-pref-width: 100%;
     -fx-pref-height: 100%;
+}
+
+/* =============================================================================
+ * SPINNER / PROGRESS INDICATOR VARIANTS
+ * ============================================================================= */
+
+/* Spinner base */
+.spinner {
+    -fx-progress-color: -color-blue-500;
+}
+
+/* Spinner sizes */
+.spinner-xs {
+    -fx-pref-width: 16px;
+    -fx-pref-height: 16px;
+    -fx-max-width: 16px;
+    -fx-max-height: 16px;
+}
+
+.spinner-sm {
+    -fx-pref-width: 24px;
+    -fx-pref-height: 24px;
+    -fx-max-width: 24px;
+    -fx-max-height: 24px;
+}
+
+.spinner-md {
+    -fx-pref-width: 36px;
+    -fx-pref-height: 36px;
+    -fx-max-width: 36px;
+    -fx-max-height: 36px;
+}
+
+.spinner-lg {
+    -fx-pref-width: 48px;
+    -fx-pref-height: 48px;
+    -fx-max-width: 48px;
+    -fx-max-height: 48px;
+}
+
+.spinner-xl {
+    -fx-pref-width: 64px;
+    -fx-pref-height: 64px;
+    -fx-max-width: 64px;
+    -fx-max-height: 64px;
+}
+
+/* Spinner colors */
+.spinner-blue {
+    -fx-progress-color: -color-blue-500;
+}
+
+.spinner-green {
+    -fx-progress-color: -color-green-500;
+}
+
+.spinner-red {
+    -fx-progress-color: -color-red-500;
+}
+
+.spinner-yellow {
+    -fx-progress-color: -color-yellow-500;
+}
+
+.spinner-purple {
+    -fx-progress-color: -color-purple-500;
+}
+
+.spinner-gray {
+    -fx-progress-color: -color-gray-500;
+}
+
+/* =============================================================================
+ * PROGRESS BAR VARIANTS
+ * ============================================================================= */
+
+/* Progress bar base */
+.progress-bar {
+    -fx-background-color: -color-gray-200;
+    -fx-background-radius: 9999px;
+    -fx-pref-height: 8px;
+    -fx-accent: -color-blue-500;
+}
+
+.progress-bar .bar {
+    -fx-background-color: -color-blue-500;
+    -fx-background-radius: 9999px;
+}
+
+/* Progress bar sizes */
+.progress-sm {
+    -fx-pref-height: 4px;
+}
+
+.progress-md {
+    -fx-pref-height: 8px;
+}
+
+.progress-lg {
+    -fx-pref-height: 16px;
+}
+
+/* Progress bar colors */
+.progress-blue .bar {
+    -fx-background-color: -color-blue-500;
+}
+
+.progress-green .bar {
+    -fx-background-color: -color-green-500;
+}
+
+.progress-red .bar {
+    -fx-background-color: -color-red-500;
+}
+
+.progress-yellow .bar {
+    -fx-background-color: -color-yellow-500;
+}
+
+.progress-purple .bar {
+    -fx-background-color: -color-purple-500;
+}
+
+.progress-gray .bar {
+    -fx-background-color: -color-gray-500;
+}
+
+/* Progress bar striped */
+.progress-striped .bar {
+    -fx-background-image: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.15) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.15) 50%,
+        rgba(255, 255, 255, 0.15) 75%,
+        transparent 75%,
+        transparent
+    );
+    -fx-background-size: 1rem 1rem;
+}
+
+/* Progress bar animated */
+.progress-animated .bar {
+    -fx-animation: progress-stripes 1s linear infinite;
+}
+
+@keyframes progress-stripes {
+    from {
+        -fx-background-position: 1rem 0;
+    }
+    to {
+        -fx-background-position: 0 0;
+    }
+}
+
+/* =============================================================================
+ * UTILITY CLASSES FOR COMPONENTS
+ * ============================================================================= */
+
+/* Checkbox variants */
+.checkbox {
+    /* Base checkbox uses default CheckBox styles */
+}
+
+.checkbox-disabled {
+    -fx-opacity: 0.5;
+    -fx-cursor: -cursor-default;
+}
+
+.checkbox-error .box {
+    -fx-border-color: -color-red-500;
+}
+
+.checkbox-sm {
+    -fx-font-size: 12px;
+}
+
+.checkbox-sm .box {
+    -fx-pref-width: 14px;
+    -fx-pref-height: 14px;
+}
+
+.checkbox-lg {
+    -fx-font-size: 16px;
+}
+
+.checkbox-lg .box {
+    -fx-pref-width: 22px;
+    -fx-pref-height: 22px;
+}
+
+/* Switch/Toggle variants */
+.switch {
+    /* Base switch uses ToggleButton styles */
+}
+
+.switch-disabled {
+    -fx-opacity: 0.5;
+    -fx-cursor: -cursor-default;
+}
+
+/* Select/Combobox variants */
+.select {
+    /* Base select uses ChoiceBox/ComboBox styles */
+}
+
+.select-md {
+    -fx-padding: 8px 12px;
+    -fx-font-size: 14px;
+}
+
+.select-lg {
+    -fx-padding: 12px 16px;
+    -fx-font-size: 16px;
+}
+
+.select-sm {
+    -fx-padding: 4px 8px;
+    -fx-font-size: 12px;
+}
+
+.select-editable .text-field {
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+}
+
+.select-disabled {
+    -fx-opacity: 0.6;
+    -fx-cursor: -cursor-default;
+}
+
+.select-error {
+    -fx-border-color: -color-red-500;
+    -fx-border-width: 2;
+}
+
+/* Input variants */
+.input {
+    /* Base input uses TextField/TextArea styles */
+}
+
+.input-md {
+    -fx-padding: 8px 12px;
+    -fx-font-size: 14px;
+}
+
+.input-lg {
+    -fx-pref-height: 48px;
+    -fx-font-size: 16px;
+}
+
+.input-sm {
+    -fx-pref-height: 32px;
+    -fx-font-size: 12px;
+}
+
+.input-disabled {
+    -fx-opacity: 0.6;
+    -fx-cursor: -cursor-default;
+}
+
+.input-error {
+    -fx-border-color: -color-red-500;
+    -fx-border-width: 2;
 }

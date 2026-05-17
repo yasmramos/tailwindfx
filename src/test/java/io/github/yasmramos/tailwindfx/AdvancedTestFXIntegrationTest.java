@@ -1,6 +1,8 @@
 package io.github.yasmramos.tailwindfx;
 
-import io.github.yasmramos.tailwindfx.components.ComponentFactory;
+import io.github.yasmramos.tailwindfx.components.TwAvatar;
+import io.github.yasmramos.tailwindfx.components.TwBadge;
+import io.github.yasmramos.tailwindfx.components.TwCard;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -354,7 +356,7 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
         @Test
         @DisplayName("Should create and interact with avatar component")
         void testAvatarComponent() {
-            StackPane avatar = ComponentFactory.avatar("JD", "blue", 48);
+            StackPane avatar = TwAvatar.create("JD", "blue", 48);
 
             interact(() -> root.getChildren().add(avatar));
 
@@ -366,7 +368,7 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
         @Test
         @DisplayName("Should create and verify badge component")
         void testBadgeComponent() {
-            Label badge = ComponentFactory.badge("New", "green");
+            Label badge = TwBadge.create("New", "green");
 
             interact(() -> root.getChildren().add(badge));
 
@@ -380,7 +382,7 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
             AtomicBoolean actionClicked = new AtomicBoolean(false);
             actionBtn.setOnAction(e -> actionClicked.set(true));
 
-            VBox card = ComponentFactory.card()
+            VBox card = TwCard.create()
                     .body(new Label("Card Content"))
                     .build();
 

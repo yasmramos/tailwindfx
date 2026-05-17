@@ -9,20 +9,20 @@ import javafx.scene.Node;
  * <p>Provides access to TailwindFX metrics, debug reports, and health checks.</p>
  * 
  * <pre>
- * String report = TwMetrics.INSTANCE.debugReport(node);
- * TwMetrics.INSTANCE.healthCheck();
+ * String report = TwMetrics.debugReport(node);
+ * TwMetrics.healthCheck();
  * </pre>
  */
 public final class TwMetrics {
     
-    public static final TwMetrics INSTANCE = new TwMetrics();
+    private static final TwMetrics INSTANCE = new TwMetrics();
     
     private TwMetrics() {}
     
     /**
      * Generates a debug report for a node.
      */
-    public String debugReport(Node node) {
+    public static String debugReport(Node node) {
         // Delegate to existing report mechanism
         return TailwindFXMetrics.instance().report();
     }
@@ -30,7 +30,7 @@ public final class TwMetrics {
     /**
      * Runs a health check on the TailwindFX system.
      */
-    public void healthCheck() {
+    public static void healthCheck() {
         TailwindFXMetrics.instance().printHealth();
     }
 }

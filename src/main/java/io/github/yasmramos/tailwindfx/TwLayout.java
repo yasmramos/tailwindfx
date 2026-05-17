@@ -13,14 +13,14 @@ import javafx.scene.layout.Pane;
  * flexbox, grid, and aspect ratio helpers.</p>
  * 
  * <pre>
- * TwLayout.INSTANCE.of(container).row().gap(16).build();
- * TwLayout.INSTANCE.flexCol();
- * TwLayout.INSTANCE.aspectRatio(node, 16, 9);
+ * TwLayout.of(container).row().gap(16).build();
+ * TwLayout.flexCol();
+ * TwLayout.aspectRatio(node, 16, 9);
  * </pre>
  */
 public final class TwLayout {
     
-    public static final TwLayout INSTANCE = new TwLayout();
+    private static final TwLayout INSTANCE = new TwLayout();
     
     private TwLayout() {}
     
@@ -29,7 +29,7 @@ public final class TwLayout {
      * @param container the pane container
      * @return FxLayout builder
      */
-    public FxLayout of(Pane container) {
+    public static FxLayout of(Pane container) {
         return FxLayout.of(container);
     }
     
@@ -37,7 +37,7 @@ public final class TwLayout {
      * Create a horizontal flex pane (row direction).
      * @return new FxFlexPane with ROW direction
      */
-    public FxFlexPane flexRow() {
+    public static FxFlexPane flexRow() {
         return FxFlexPane.row();
     }
     
@@ -45,7 +45,7 @@ public final class TwLayout {
      * Create a vertical flex pane (column direction).
      * @return new FxFlexPane with COL direction
      */
-    public FxFlexPane flexCol() {
+    public static FxFlexPane flexCol() {
         return FxFlexPane.col();
     }
     
@@ -53,7 +53,7 @@ public final class TwLayout {
      * Create a grid pane builder.
      * @return FxGridPane.Builder to configure and build
      */
-    public FxGridPane.Builder grid() {
+    public static FxGridPane.Builder grid() {
         return FxGridPane.create();
     }
     
@@ -61,7 +61,7 @@ public final class TwLayout {
      * Create a grid pane with default gap.
      * @return new FxGridPane instance
      */
-    public FxGridPane gridBuild() {
+    public static FxGridPane gridBuild() {
         return FxGridPane.create().build();
     }
     
@@ -72,7 +72,7 @@ public final class TwLayout {
      * @param heightRatio height ratio
      * @throws IllegalArgumentException if ratios are not positive
      */
-    public void aspectRatio(Node node, int widthRatio, int heightRatio) {
+    public static void aspectRatio(Node node, int widthRatio, int heightRatio) {
         if (widthRatio <= 0 || heightRatio <= 0) {
             throw new IllegalArgumentException("Aspect ratio values must be positive");
         }

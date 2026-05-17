@@ -9,7 +9,6 @@ import io.github.yasmramos.tailwindfx.animation.FxAnimation;
 import io.github.yasmramos.tailwindfx.theme.ThemeManager;
 import io.github.yasmramos.tailwindfx.theme.ThemeScopeManager;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
-import io.github.yasmramos.tailwindfx.components.ComponentFactory;
 import io.github.yasmramos.tailwindfx.layout.FxLayout;
 
 import javafx.scene.Node;
@@ -22,11 +21,11 @@ import javafx.stage.Stage;
  * 
  * <p>This class delegates to specialized facades for each responsibility.</p>
  * 
- * <p>For new code, prefer using the specialized facades directly:</p>
+ * <p>All methods are static for direct access:</p>
  * <pre>
- * TwStyle.apply(node, "btn-primary", "rounded-lg");
- * TwInstall.install(scene);
- * TwTheme.of(scene).dark().apply();
+ * TailwindFX.apply(node, "btn-primary", "rounded-lg");
+ * TailwindFX.install(scene);
+ * TailwindFX.theme(scene).dark().apply();
  * </pre>
  * 
  * @see TwStyle
@@ -36,125 +35,154 @@ public final class TailwindFX {
     private TailwindFX() {}
 
     // =========================================================================
-    // Specialized Facades (preferred API)
+    // Style Operations
     // =========================================================================
 
-    /** Access the Style facade for utility classes and JIT tokens. */
-    public static TwStyle style() { return TwStyle.INSTANCE; }
-
-    /** Access the Install facade for CSS stylesheets. */
-    public static void install(Scene scene) { TwInstall.install(scene); }
-
-    /** Access the Install facade with Stage for responsive support. */
-    public static void install(Scene scene, Stage stage) { TwInstall.install(scene, stage); }
-
-    // =========================================================================
-    // Convenience Delegates (backward compatible)
-    // =========================================================================
-
-    /** @see TwStyle#apply */
+    /** Apply utility classes and JIT tokens to a node. */
     public static void apply(Node node, String... tokens) {
-        TwStyle.INSTANCE.apply(node, tokens);
+        TwStyle.apply(node, tokens);
     }
 
-    /** @see TwStyle#jit */
+    /** Apply JIT-compiled styles to a node. */
     public static void jit(Node node, String... tokens) {
-        TwStyle.INSTANCE.apply(node, tokens);
+        TwStyle.apply(node, tokens);
     }
 
-    /** @see TwStyle#remove */
+    /** Remove CSS classes from a node. */
     public static void remove(Node node, String... classes) {
-        TwStyle.INSTANCE.remove(node, classes);
+        TwStyle.remove(node, classes);
     }
 
-    /** @see TwStyle#toggle */
+    /** Toggle a CSS class on a node. */
     public static void toggle(Node node, String cssClass) {
-        TwStyle.INSTANCE.toggle(node, cssClass);
+        TwStyle.toggle(node, cssClass);
     }
 
-    /** @see TwInstall#installBase */
+    // =========================================================================
+    // Installation Operations
+    // =========================================================================
+
+    /** Install all CSS stylesheets. */
+    public static void install(Scene scene) {
+        TwInstall.install(scene);
+    }
+
+    /** Install all CSS stylesheets with Stage for responsive support. */
+    public static void install(Scene scene, Stage stage) {
+        TwInstall.install(scene, stage);
+    }
+
+    /** Install only the base module. */
     public static void installBase(Scene scene) {
         TwInstall.installBase(scene);
     }
 
-    /** @see TwInstall#installComponents */
+    /** Install components module. */
     public static void installComponents(Scene scene) {
         TwInstall.installComponents(scene);
     }
 
-    /** @see TwInstall#installUtilities */
+    /** Install utilities module. */
     public static void installUtilities(Scene scene) {
         TwInstall.installUtilities(scene);
     }
 
-    /** @see TwInstall#installColors */
+    /** Install colors module. */
     public static void installColors(Scene scene) {
         TwInstall.installColors(scene);
     }
 
-    /** @see TwInstall#installEffects */
+    /** Install effects module. */
     public static void installEffects(Scene scene) {
         TwInstall.installEffects(scene);
     }
 
-    /** @see TwInstall#installDark */
+    /** Install dark mode styles. */
     public static void installDark(Scene scene) {
         TwInstall.installDark(scene);
     }
 
-    /** @see TwInstall#installEssentials */
+    /** Install essential modules (base, components, presets). */
     public static void installEssentials(Scene scene) {
         TwInstall.installEssentials(scene);
     }
 
-    /** @see ThemeManager#forScene */
+    // =========================================================================
+    // Theme Operations
+    // =========================================================================
+
+    /** Get theme manager for a scene. */
     public static ThemeManager theme(Scene scene) {
         return ThemeManager.forScene(scene);
     }
 
-    /** @see FxLayout#of */
+    // =========================================================================
+    // Layout Operations
+    // =========================================================================
+
+    /** Get layout builder for a container. */
     public static FxLayout layout(Pane container) {
         return FxLayout.of(container);
     }
 
+    /** Create a horizontal flex pane. */
     public static FxFlexPane flexRow() {
         return FxFlexPane.row();
     }
 
+    /** Create a grid pane. */
     public static FxGridPane grid() {
         return FxGridPane.create().build();
     }
 
-    /** @see ResponsiveNode#on */
+    // =========================================================================
+    // Responsive Operations
+    // =========================================================================
+
+    /** Install responsive support on a Stage. */
     public static ResponsiveNode responsive(Stage stage) {
         return ResponsiveNode.on(stage.getScene().getRoot()).install(stage.getScene());
     }
 
+    // =========================================================================
+    // Batch Operations
+    // =========================================================================
+
+    /** Execute style operations in batch mode. */
     public static void batch(Runnable action) {
         StylePerf.batch(action);
     }
 
+    // =========================================================================
+    // Metrics Operations
+    // =========================================================================
+
+    /** Get metrics instance. */
     public static TailwindFXMetrics metrics() {
         return TailwindFXMetrics.instance();
     }
 
-    /** @see TwConfig#unit */
+    // =========================================================================
+    // Configuration Operations
+    // =========================================================================
+
+    /** Get current unit size. */
     public static double unit() {
-        return TwConfig.INSTANCE.unit();
+        return TwConfig.unit();
     }
 
-    /** @see TwConfig#unit(double) */
+    /** Set unit size. */
     public static void unit(double value) {
-        TwConfig.INSTANCE.unit(value);
+        TwConfig.unit(value);
     }
 
-    /** @see TwConfig#debug */
+    /** Enable/disable debug mode. */
     public static void debug(boolean enabled) {
-        TwConfig.INSTANCE.debug(enabled);
+        TwConfig.debug(enabled);
     }
 
-    /** @see TwConfig#isDebug */
+    /** Check if debug mode is enabled. */
     public static boolean isDebug() {
-        return TwConfig.INSTANCE.isDebug();
+        return TwConfig.isDebug();
     }
 }
