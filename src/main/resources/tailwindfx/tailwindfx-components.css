@@ -1031,3 +1031,114 @@ SplitPane .split-pane-divider {
         -fx-background-position: 0 0;
     }
 }
+
+/* =============================================================================
+ * UTILITY CLASSES FOR COMPONENTS
+ * ============================================================================= */
+
+/* Checkbox variants */
+.checkbox {
+    /* Base checkbox uses default CheckBox styles */
+}
+
+.checkbox-disabled {
+    -fx-opacity: 0.5;
+    -fx-cursor: -cursor-default;
+}
+
+.checkbox-error .box {
+    -fx-border-color: -color-red-500;
+}
+
+.checkbox-sm {
+    -fx-font-size: 12px;
+}
+
+.checkbox-sm .box {
+    -fx-pref-width: 14px;
+    -fx-pref-height: 14px;
+}
+
+.checkbox-lg {
+    -fx-font-size: 16px;
+}
+
+.checkbox-lg .box {
+    -fx-pref-width: 22px;
+    -fx-pref-height: 22px;
+}
+
+/* Switch/Toggle variants */
+.switch {
+    /* Base switch uses ToggleButton styles */
+}
+
+.switch-disabled {
+    -fx-opacity: 0.5;
+    -fx-cursor: -cursor-default;
+}
+
+/* Select/Combobox variants */
+.select {
+    /* Base select uses ChoiceBox/ComboBox styles */
+}
+
+.select-md {
+    -fx-padding: 8px 12px;
+    -fx-font-size: 14px;
+}
+
+.select-lg {
+    -fx-padding: 12px 16px;
+    -fx-font-size: 16px;
+}
+
+.select-sm {
+    -fx-padding: 4px 8px;
+    -fx-font-size: 12px;
+}
+
+.select-editable .text-field {
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+}
+
+.select-disabled {
+    -fx-opacity: 0.6;
+    -fx-cursor: -cursor-default;
+}
+
+.select-error {
+    -fx-border-color: -color-red-500;
+    -fx-border-width: 2;
+}
+
+/* Input variants */
+.input {
+    /* Base input uses TextField/TextArea styles */
+}
+
+.input-md {
+    -fx-padding: 8px 12px;
+    -fx-font-size: 14px;
+}
+
+.input-lg {
+    -fx-pref-height: 48px;
+    -fx-font-size: 16px;
+}
+
+.input-sm {
+    -fx-pref-height: 32px;
+    -fx-font-size: 12px;
+}
+
+.input-disabled {
+    -fx-opacity: 0.6;
+    -fx-cursor: -cursor-default;
+}
+
+.input-error {
+    -fx-border-color: -color-red-500;
+    -fx-border-width: 2;
+}
