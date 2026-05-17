@@ -27,7 +27,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.Callable;
 
 /**
- * FxI18n — Internationalization helper that dynamically updates UI text
+ * TwI18n — Internationalization helper that dynamically updates UI text
  * when the locale changes without requiring application restart.
  *
  * <p>
@@ -55,34 +55,34 @@ import java.util.concurrent.Callable;
  * //      button.save=Guardar
  * //      button.cancel=Cancelar
  *
- * // 2. Initialize FxI18n with your bundle base name
- * FxI18n.setBaseName("i18n/messages");
- * FxI18n.setLocale(Locale.ENGLISH); // or Locale.forLanguageTag("es")
+ * // 2. Initialize TwI18n with your bundle base name
+ * TwI18n.setBaseName("i18n/messages");
+ * TwI18n.setLocale(Locale.ENGLISH); // or Locale.forLanguageTag("es")
  * </pre>
  *
  * <h3>Usage</h3>
  * <pre>
  * // Bind a label to a translation key
  * Label titleLabel = new Label();
- * FxI18n.bind(titleLabel, "app.title");
+ * TwI18n.bind(titleLabel, "app.title");
  *
  * // Bind button text
  * Button saveBtn = new Button();
- * FxI18n.bind(saveBtn, "button.save");
+ * TwI18n.bind(saveBtn, "button.save");
  *
  * // Bind with parameters (uses MessageFormat)
  * Label statusLabel = new Label();
- * FxI18n.bind(statusLabel, "status.items", () -> new Object[]{itemCount});
+ * TwI18n.bind(statusLabel, "status.items", () -> new Object[]{itemCount});
  * // In properties: status.items=Found {0} items
  *
  * // Switch locale at runtime - all bound nodes update automatically
- * FxI18n.setLocale(Locale.forLanguageTag("es"));
+ * TwI18n.setLocale(Locale.forLanguageTag("es"));
  *
  * // Get translated string directly
- * String text = FxI18n.get("button.save");
+ * String text = TwI18n.get("button.save");
  *
  * // Create a StringBinding for custom use
- * StringBinding binding = FxI18n.createBinding("welcome.message");
+ * StringBinding binding = TwI18n.createBinding("welcome.message");
  * someProperty.bind(binding);
  * </pre>
  *
@@ -97,7 +97,7 @@ import java.util.concurrent.Callable;
  * <li>TitledPane (text)</li>
  * </ul>
  */
-public final class FxI18n {
+public final class TwI18n {
 
     // =========================================================================
     // Global state
@@ -125,7 +125,7 @@ public final class FxI18n {
         currentBundle.set(getOrLoadBundle(currentLocale.get()));
     }
 
-    private FxI18n() {} // Utility class
+    private TwI18n() {} // Utility class
 
     // =========================================================================
     // Configuration
@@ -138,8 +138,8 @@ public final class FxI18n {
      * @param baseName the resource bundle base name
      */
     public static void setBaseName(String baseName) {
-        Preconditions.requireNonNull(baseName, "FxI18n.setBaseName", "baseName");
-        FxI18n.baseName = baseName;
+        Preconditions.requireNonNull(baseName, "TwI18n.setBaseName", "baseName");
+        TwI18n.baseName = baseName;
         bundleCache.clear();
         currentBundle.set(getOrLoadBundle(currentLocale.get()));
     }
@@ -157,7 +157,7 @@ public final class FxI18n {
      * @param locale the new locale
      */
     public static void setLocale(Locale locale) {
-        Preconditions.requireNonNull(locale, "FxI18n.setLocale", "locale");
+        Preconditions.requireNonNull(locale, "TwI18n.setLocale", "locale");
         currentLocale.set(locale);
     }
 
@@ -285,8 +285,8 @@ public final class FxI18n {
      * @param paramsSupplier supplier for MessageFormat parameters
      */
     public static void bind(Node node, String key, Callable<Object[]> paramsSupplier) {
-        Preconditions.requireNonNull(node, "FxI18n.bind", "node");
-        Preconditions.requireNonNull(key, "FxI18n.bind", "key");
+        Preconditions.requireNonNull(node, "TwI18n.bind", "node");
+        Preconditions.requireNonNull(key, "TwI18n.bind", "key");
 
         StringBinding binding = createBinding(key, paramsSupplier);
 
@@ -299,7 +299,7 @@ public final class FxI18n {
             textArea.promptTextProperty().bind(binding);
         } else {
             throw new IllegalArgumentException(
-                "FxI18n.bind: Unsupported node type: " + node.getClass().getName()
+                "TwI18n.bind: Unsupported node type: " + node.getClass().getName()
             );
         }
     }
@@ -315,8 +315,8 @@ public final class FxI18n {
      * Binds a Tooltip's text to a translation key with parameters.
      */
     public static void bind(Tooltip tooltip, String key, Callable<Object[]> paramsSupplier) {
-        Preconditions.requireNonNull(tooltip, "FxI18n.bind", "tooltip");
-        Preconditions.requireNonNull(key, "FxI18n.bind", "key");
+        Preconditions.requireNonNull(tooltip, "TwI18n.bind", "tooltip");
+        Preconditions.requireNonNull(key, "TwI18n.bind", "key");
         
         StringBinding binding = createBinding(key, paramsSupplier);
         tooltip.textProperty().bind(binding);
@@ -326,8 +326,8 @@ public final class FxI18n {
      * Binds a TableColumn's text to a translation key.
      */
     public static void bind(TableColumn<?, ?> column, String key) {
-        Preconditions.requireNonNull(column, "FxI18n.bind", "column");
-        Preconditions.requireNonNull(key, "FxI18n.bind", "key");
+        Preconditions.requireNonNull(column, "TwI18n.bind", "column");
+        Preconditions.requireNonNull(key, "TwI18n.bind", "key");
         
         StringBinding binding = createBinding(key);
         column.textProperty().bind(binding);
@@ -337,8 +337,8 @@ public final class FxI18n {
      * Binds a Tab's text to a translation key.
      */
     public static void bind(Tab tab, String key) {
-        Preconditions.requireNonNull(tab, "FxI18n.bind", "tab");
-        Preconditions.requireNonNull(key, "FxI18n.bind", "key");
+        Preconditions.requireNonNull(tab, "TwI18n.bind", "tab");
+        Preconditions.requireNonNull(key, "TwI18n.bind", "key");
         
         StringBinding binding = createBinding(key);
         tab.textProperty().bind(binding);
@@ -348,8 +348,8 @@ public final class FxI18n {
      * Binds a MenuItem's text to a translation key.
      */
     public static void bind(MenuItem menuItem, String key) {
-        Preconditions.requireNonNull(menuItem, "FxI18n.bind", "menuItem");
-        Preconditions.requireNonNull(key, "FxI18n.bind", "key");
+        Preconditions.requireNonNull(menuItem, "TwI18n.bind", "menuItem");
+        Preconditions.requireNonNull(key, "TwI18n.bind", "key");
         
         StringBinding binding = createBinding(key);
         menuItem.textProperty().bind(binding);
@@ -359,8 +359,8 @@ public final class FxI18n {
      * Binds a TitledPane's text to a translation key.
      */
     public static void bind(TitledPane pane, String key) {
-        Preconditions.requireNonNull(pane, "FxI18n.bind", "pane");
-        Preconditions.requireNonNull(key, "FxI18n.bind", "key");
+        Preconditions.requireNonNull(pane, "TwI18n.bind", "pane");
+        Preconditions.requireNonNull(key, "TwI18n.bind", "key");
         
         StringBinding binding = createBinding(key);
         pane.textProperty().bind(binding);
@@ -396,7 +396,7 @@ public final class FxI18n {
             try {
                 return ResourceBundle.getBundle(baseName, loc);
             } catch (MissingResourceException e) {
-                System.err.println("FxI18n: Could not load bundle '" + baseName 
+                System.err.println("TwI18n: Could not load bundle '" + baseName 
                     + "' for locale '" + loc + "': " + e.getMessage());
                 // Return empty bundle as fallback
                 return new ResourceBundle() {
