@@ -12,14 +12,14 @@ import javafx.scene.Node;
  * theme scoping, and preset management.</p>
  * 
  * <pre>
- * TwTheme.INSTANCE.of(scene).dark().apply();
- * TwTheme.INSTANCE.scope(node).preset("blue").apply();
- * TwTheme.INSTANCE.saveTheme(scene, "my-theme");
+ * TwTheme.of(scene).dark().apply();
+ * TwTheme.scope(node).preset("blue").apply();
+ * TwTheme.saveTheme(scene, "my-theme");
  * </pre>
  */
 public final class TwTheme {
     
-    public static final TwTheme INSTANCE = new TwTheme();
+    private static final TwTheme INSTANCE = new TwTheme();
     
     private TwTheme() {}
     
@@ -28,7 +28,7 @@ public final class TwTheme {
      * @param scene the scene
      * @return ThemeManager instance
      */
-    public ThemeManager of(Scene scene) {
+    public static ThemeManager of(Scene scene) {
         return ThemeManager.forScene(scene);
     }
     
@@ -37,7 +37,7 @@ public final class TwTheme {
      * @param scene the scene
      * @return ThemeManager instance
      */
-    public ThemeManager forScene(Scene scene) {
+    public static ThemeManager forScene(Scene scene) {
         return ThemeManager.forScene(scene);
     }
     
@@ -46,7 +46,7 @@ public final class TwTheme {
      * @param pane the pane node
      * @return ScopeBuilder to configure and apply theme
      */
-    public ThemeScopeManager.ScopeBuilder scope(javafx.scene.layout.Pane pane) {
+    public static ThemeScopeManager.ScopeBuilder scope(javafx.scene.layout.Pane pane) {
         return ThemeScopeManager.scope(pane);
     }
     
@@ -55,7 +55,7 @@ public final class TwTheme {
      * @param scene the scene
      * @param themeName the theme name
      */
-    public void saveTheme(Scene scene, String themeName) {
+    public static void saveTheme(Scene scene, String themeName) {
         ThemeManager.saveTheme(scene, themeName);
     }
     
@@ -65,7 +65,7 @@ public final class TwTheme {
      * @param themeName the theme name
      * @return true if loaded successfully
      */
-    public boolean loadTheme(Scene scene, String themeName) {
+    public static boolean loadTheme(Scene scene, String themeName) {
         return ThemeManager.loadTheme(scene, themeName);
     }
     
@@ -73,7 +73,7 @@ public final class TwTheme {
      * Delete a saved theme.
      * @param themeName the theme name
      */
-    public void deleteTheme(String themeName) {
+    public static void deleteTheme(String themeName) {
         ThemeManager.deleteTheme(themeName);
     }
 }

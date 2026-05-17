@@ -101,7 +101,7 @@ public final class ComponentFactory {
 
         public VBox build() {
             VBox card = new VBox();
-            TwStyle.applyStatic(card, "bg-white", shadow ? "shadow-md" : "", "rounded-lg");
+            TwStyle.apply(card, "bg-white", shadow ? "shadow-md" : "", "rounded-lg");
             card.setStyle("-fx-background-radius: " + radius + "px;"
                 + (border ? " -fx-border-color: #e5e7eb; -fx-border-width: 1px; -fx-border-radius: " + radius + "px;" : ""));
             double pad = padding * 4;
@@ -110,7 +110,7 @@ public final class ComponentFactory {
 
             if (title != null) {
                 Label lbl = new Label(title);
-                TwStyle.applyStatic(lbl, "text-lg", "font-semibold", "text-gray-900");
+                TwStyle.apply(lbl, "text-lg", "font-semibold", "text-gray-900");
                 card.getChildren().add(lbl);
             }
             if (body != null) {
@@ -121,7 +121,7 @@ public final class ComponentFactory {
                 Region spacer = new Region();
                 VBox.setVgrow(spacer, Priority.ALWAYS);
                 if (body != null) card.getChildren().add(spacer);
-                TwStyle.applyStatic(footer, "pt-3", "border-t", "border-gray-100");
+                TwStyle.apply(footer, "pt-3", "border-t", "border-gray-100");
                 card.getChildren().add(footer);
             }
 
@@ -253,7 +253,7 @@ public final class ComponentFactory {
             // Modal panel
             VBox panel = new VBox();
             panel.setMaxWidth(maxWidth);
-            TwStyle.applyStatic(panel, "bg-white", "rounded-xl", "shadow-xl");
+            TwStyle.apply(panel, "bg-white", "rounded-xl", "shadow-xl");
             panel.setStyle("-fx-background-radius: 16px; -fx-padding: 24;");
             panel.getChildren().add(content);
 
@@ -313,7 +313,7 @@ public final class ComponentFactory {
          */
         public VBox show(Pane root, Node content) {
             VBox drawer = new VBox();
-            TwStyle.applyStatic(drawer, "bg-white", "shadow-xl");
+            TwStyle.apply(drawer, "bg-white", "shadow-xl");
 
             switch (side) {
                 case LEFT  -> {
