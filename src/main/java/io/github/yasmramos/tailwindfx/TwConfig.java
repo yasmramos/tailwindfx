@@ -16,7 +16,7 @@ import io.github.yasmramos.tailwindfx.core.Preconditions;
  */
 public final class TwConfig {
     
-    public static final TwConfig INSTANCE = new TwConfig();
+    private static final TwConfig INSTANCE = new TwConfig();
     
     private static double UNIT_SIZE = 4.0;
     private static boolean DEBUG_MODE = false;
@@ -27,7 +27,7 @@ public final class TwConfig {
      * Get the current unit size.
      * @return unit size in pixels
      */
-    public double unit() {
+    public static double unit() {
         return UNIT_SIZE;
     }
     
@@ -36,7 +36,7 @@ public final class TwConfig {
      * @param value the new unit size (must be positive)
      * @throws IllegalArgumentException if value <= 0
      */
-    public void unit(double value) {
+    public static void unit(double value) {
         if (value <= 0) {
             throw new IllegalArgumentException("unit size must be positive: " + value);
         }
@@ -47,7 +47,7 @@ public final class TwConfig {
      * Check if debug mode is enabled.
      * @return true if debug mode is on
      */
-    public boolean isDebug() {
+    public static boolean isDebug() {
         return DEBUG_MODE;
     }
     
@@ -55,7 +55,7 @@ public final class TwConfig {
      * Enable or disable debug mode.
      * @param enabled true to enable debug logging
      */
-    public void debug(boolean enabled) {
+    public static void debug(boolean enabled) {
         DEBUG_MODE = enabled;
     }
 }

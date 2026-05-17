@@ -27,7 +27,7 @@ import java.util.Set;
  */
 public final class TwStyle {
     
-    public static final TwStyle INSTANCE = new TwStyle();
+    private static final TwStyle INSTANCE = new TwStyle();
     
     private static final Set<String> JIT_PREFIXES = new HashSet<>(Arrays.asList(
         "bg", "text", "border", "ring", "shadow", "w", "h", "min-w", "min-h", "max-w", "max-h",
@@ -42,7 +42,7 @@ public final class TwStyle {
     /**
      * Applies utility classes and JIT tokens to a node with intelligent auto-detection.
      */
-    public void apply(Node node, String... tokens) {
+    public static void apply(Node node, String... tokens) {
         Preconditions.requireNode(node, "TwStyle.apply");
         if (tokens == null || tokens.length == 0) return;
         
@@ -53,14 +53,7 @@ public final class TwStyle {
         }
     }
     
-    /**
-     * Static convenience method for applying styles.
-     */
-    public static void applyStatic(Node node, String... tokens) {
-        INSTANCE.apply(node, tokens);
-    }
-    
-    private void applyInternal(Node node, String... tokens) {
+    private static void applyInternal(Node node, String... tokens) {
         java.util.List<String> cssClasses = new java.util.ArrayList<>();
         java.util.List<String> jitTokens = new java.util.ArrayList<>();
         
@@ -89,7 +82,7 @@ public final class TwStyle {
     /**
      * Applies utility classes WITHOUT conflict resolution.
      */
-    public void applyRaw(Node node, String... classes) {
+    public static void applyRaw(Node node, String... classes) {
         for (String c : classes) {
             if (c == null || c.isBlank()) continue;
             for (String part : c.split("\\s+")) {
@@ -103,21 +96,21 @@ public final class TwStyle {
     /**
      * Removes CSS classes from a node.
      */
-    public void remove(Node node, String... classes) { 
+    public static void remove(Node node, String... classes) { 
         node.getStyleClass().removeAll(Arrays.asList(classes));
     }
     
     /**
      * Replaces all CSS classes on a node.
      */
-    public void replace(Node node, String... classes) {
+    public static void replace(Node node, String... classes) {
         node.getStyleClass().setAll(Arrays.asList(classes));
     }
     
     /**
      * Toggles a CSS class on a node.
      */
-    public void toggle(Node node, String cssClass) {
+    public static void toggle(Node node, String cssClass) {
         if (node.getStyleClass().contains(cssClass)) {
             node.getStyleClass().remove(cssClass);
         } else {
@@ -128,7 +121,7 @@ public final class TwStyle {
     /**
      * Enables automatic cleanup of JIT styles when a node is removed from the scene.
      */
-    public void autoCleanup(Node node) {
+    public static void autoCleanup(Node node) {
         Preconditions.requireNode(node, "TwStyle.autoCleanup");
         // Delegate to existing cleanup mechanism in UtilityConflictResolver
         io.github.yasmramos.tailwindfx.core.UtilityConflictResolver.autoCleanup(node);
@@ -137,7 +130,7 @@ public final class TwStyle {
     /**
      * Invalidates the entire style cache for a node.
      */
-    public void invalidateCache(Node node) {
+    public static void invalidateCache(Node node) {
         Preconditions.requireNode(node, "TwStyle.invalidateCache");
         node.getProperties().remove("tailwindfx.category.cache");
         node.getProperties().remove("tailwindfx.cleanup-listener");
@@ -147,14 +140,14 @@ public final class TwStyle {
      * Removes all TailwindFX styles from a node (cleanup).
      * Alias for invalidateCache for backward compatibility.
      */
-    public void cleanupNode(Node node) {
+    public static void cleanupNode(Node node) {
         invalidateCache(node);
     }
     
     /**
      * Invalidates a specific category from the style cache for a node.
      */
-    public void invalidateCategoryCache(Node node, String category) {
+    public static void invalidateCategoryCache(Node node, String category) {
         Preconditions.requireNode(node, "TwStyle.invalidateCategoryCache");
         Preconditions.requireNonBlank(category, "TwStyle.invalidateCategoryCache", "category");
         @SuppressWarnings("unchecked")
@@ -170,7 +163,7 @@ public final class TwStyle {
      * Uses strict prefix matching + numeric/arbitrary/negative pattern validation.
      * Eliminates false positives like "card-2" or "panel-v2".
      */
-    private boolean isJitToken(String token) {
+    private static boolean isJitToken(String token) {
         // Opacity modifier: bg-blue-500/80 - but only for valid color utilities
         if (token.contains("/")) {
             String base = token.substring(0, token.indexOf('/'));
@@ -199,7 +192,7 @@ public final class TwStyle {
      * Validates if a base token (before /) is a valid color utility that can have opacity.
      * Prevents false positives like "icon/large" being treated as JIT.
      */
-    private boolean isValidColorUtilityBase(String base) {
+    private static boolean isValidColorUtilityBase(String base) {
         // Color utilities that support opacity: bg-*, text-*, border-*, ring-*, shadow-*
         String[] colorPrefixes = {"bg-", "text-", "border-", "ring-", "shadow-"};
         
