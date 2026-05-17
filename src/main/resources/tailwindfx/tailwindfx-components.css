@@ -786,6 +786,31 @@ SplitPane .split-pane-divider {
 }
 
 /* Badge variants */
+.badge-blue {
+    -fx-background-color: -color-blue-100;
+    -fx-text-fill: -color-blue-700;
+}
+
+.badge-green {
+    -fx-background-color: -color-green-100;
+    -fx-text-fill: -color-green-700;
+}
+
+.badge-red {
+    -fx-background-color: -color-red-100;
+    -fx-text-fill: -color-red-700;
+}
+
+.badge-yellow {
+    -fx-background-color: -color-yellow-100;
+    -fx-text-fill: -color-yellow-700;
+}
+
+.badge-gray {
+    -fx-background-color: -color-gray-100;
+    -fx-text-fill: -color-gray-700;
+}
+
 .badge-primary {
     -fx-background-color: -color-blue-100;
     -fx-text-fill: -color-blue-700;
@@ -817,13 +842,69 @@ SplitPane .split-pane-divider {
     -fx-text-fill: -color-gray-700;
 }
 
+.badge-md {
+    -fx-font-size: 10px;
+    -fx-padding: 2px 8px;
+}
+
+.badge-compact {
+    -fx-font-size: 10px;
+    -fx-padding: 0 4px;
+}
+
+/* Dot indicator for badges */
+.dot {
+    -fx-background-radius: 999px;
+    -fx-min-width: 8px;
+    -fx-min-height: 8px;
+    -fx-max-width: 8px;
+    -fx-max-height: 8px;
+}
+
+.dot-blue {
+    -fx-background-color: -color-blue-500;
+}
+
+.dot-green {
+    -fx-background-color: -color-green-500;
+}
+
+.dot-red {
+    -fx-background-color: -color-red-500;
+}
+
+.dot-yellow {
+    -fx-background-color: -color-yellow-500;
+}
+
+.dot-gray {
+    -fx-background-color: -color-gray-500;
+}
+
+.dot-sm {
+    -fx-min-width: 6px;
+    -fx-min-height: 6px;
+    -fx-max-width: 6px;
+    -fx-max-height: 6px;
+}
+
+.dot-md {
+    -fx-min-width: 8px;
+    -fx-min-height: 8px;
+    -fx-max-width: 8px;
+    -fx-max-height: 8px;
+}
+
+.dot-lg {
+    -fx-min-width: 10px;
+    -fx-min-height: 10px;
+    -fx-max-width: 10px;
+    -fx-max-height: 10px;
+}
+
 /* Avatar base */
 .avatar {
     -fx-background-radius: 999px;
-    -fx-min-width: 40px;
-    -fx-min-height: 40px;
-    -fx-max-width: 40px;
-    -fx-max-height: 40px;
     -fx-alignment: center;
 }
 
@@ -860,6 +941,71 @@ SplitPane .split-pane-divider {
     -fx-min-height: 72px;
     -fx-max-width: 72px;
     -fx-max-height: 72px;
+}
+
+/* Avatar color variants */
+.avatar-blue {
+    -fx-background-color: -color-blue-100;
+}
+
+.avatar-green {
+    -fx-background-color: -color-green-100;
+}
+
+.avatar-red {
+    -fx-background-color: -color-red-100;
+}
+
+.avatar-gray {
+    -fx-background-color: -color-gray-100;
+}
+
+.avatar-image {
+    -fx-border-color: -color-white;
+    -fx-border-width: 2px;
+}
+
+.avatar-group-item {
+    -fx-border-color: -color-white;
+    -fx-border-width: 2px;
+}
+
+/* Avatar text colors */
+.avatar-text {
+    -fx-font-weight: bold;
+}
+
+.avatar-text-blue {
+    -fx-text-fill: -color-blue-700;
+}
+
+.avatar-text-green {
+    -fx-text-fill: -color-green-700;
+}
+
+.avatar-text-red {
+    -fx-text-fill: -color-red-700;
+}
+
+.avatar-text-gray {
+    -fx-text-fill: -color-gray-700;
+}
+
+/* Avatar status dot */
+.avatar-status-dot {
+    -fx-background-radius: 999px;
+    -fx-min-width: 12px;
+    -fx-min-height: 12px;
+    -fx-max-width: 12px;
+    -fx-max-height: 12px;
+}
+
+.avatar-status-online {
+    -fx-background-color: -color-green-500;
+}
+
+.avatar-status-offline {
+    -fx-background-color: -color-gray-400;
 }
 
 /* Modal variants */
