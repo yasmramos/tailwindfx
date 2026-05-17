@@ -138,8 +138,10 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
             interact(() -> root.getChildren().add(field));
 
             clickOn(field);
-            field.clear();
-            write("New Value");
+            interact(() -> {
+                field.clear();
+                write("New Value");
+            });
 
             assertEquals("New Value", field.getText());
         }
@@ -356,7 +358,7 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
         @Test
         @DisplayName("Should create and interact with avatar component")
         void testAvatarComponent() {
-            StackPane avatar = TwAvatar.create("JD", "blue", 48);
+            StackPane avatar = TwAvatar.create("JD", "blue", "lg");
 
             interact(() -> root.getChildren().add(avatar));
 
