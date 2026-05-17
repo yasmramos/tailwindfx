@@ -150,7 +150,7 @@ public final class BreakpointManagerTest {
         runFx(() -> {
             Stage stage = new Stage();
             stage.setWidth(900); // LG range
-            BreakpointManager bpm = TailwindFX.responsive(stage);
+            BreakpointManager bpm = BreakpointManager.from(stage);
             check("is(LG) at 900", bpm.is(BreakpointManager.Breakpoint.LG));
             check("is(SM) at 900", bpm.is(BreakpointManager.Breakpoint.SM));
             check("is(MD) at 900", bpm.is(BreakpointManager.Breakpoint.MD));
@@ -162,7 +162,7 @@ public final class BreakpointManagerTest {
         runFx(() -> {
             Stage stage = new Stage();
             stage.setWidth(700); // between SM and MD
-            BreakpointManager bpm = TailwindFX.responsive(stage);
+            BreakpointManager bpm = BreakpointManager.from(stage);
             check("below(MD) at 700", bpm.below(BreakpointManager.Breakpoint.MD));
             check("not below(SM) at 700", !bpm.below(BreakpointManager.Breakpoint.SM));
             bpm.detach();
@@ -220,7 +220,7 @@ public final class BreakpointManagerTest {
         runFx(() -> {
             Stage stage = new Stage();
             stage.setWidth(400); // starts XS
-            BreakpointManager bpm = TailwindFX.responsive(stage);
+            BreakpointManager bpm = BreakpointManager.from(stage);
 
             bpm.onBreakpoint(BreakpointManager.Breakpoint.SM, () -> callbackLatch.countDown());
 
@@ -237,7 +237,7 @@ public final class BreakpointManagerTest {
         runFx(() -> {
             Stage stage = new Stage();
             stage.setWidth(400);
-            BreakpointManager bpm = TailwindFX.responsive(stage);
+            BreakpointManager bpm = BreakpointManager.from(stage);
             bpm.onBreakpoint(BreakpointManager.Breakpoint.MD, active -> {
                 lastActive.set(active);
                 latch.countDown();
@@ -254,7 +254,7 @@ public final class BreakpointManagerTest {
         runFx(() -> {
             Stage stage = new Stage();
             stage.setWidth(400);
-            BreakpointManager bpm = TailwindFX.responsive(stage);
+            BreakpointManager bpm = BreakpointManager.from(stage);
             bpm.onBreakpoint(BreakpointManager.Breakpoint.MD, active -> {
                 callCount.incrementAndGet();
                 latch.countDown();
@@ -271,7 +271,7 @@ public final class BreakpointManagerTest {
         runFx(() -> {
             Stage stage = new Stage();
             try {
-                BreakpointManager bpm = TailwindFX.responsive(stage).withOrientation();
+                BreakpointManager bpm = BreakpointManager.from(stage).withOrientation();
                 ok("withOrientation() no throw");
                 bpm.detach();
             } catch (Exception e) {
@@ -285,7 +285,7 @@ public final class BreakpointManagerTest {
         runFx(() -> {
             Stage stage = new Stage();
             stage.setWidth(1100);
-            BreakpointManager bpm = TailwindFX.responsive(stage);
+            BreakpointManager bpm = BreakpointManager.from(stage);
             check("initial current not null", bpm.current() != null);
             check("1100px → LG range",
                     bpm.current().minWidth >= BreakpointManager.Breakpoint.LG.minWidth);
@@ -299,7 +299,7 @@ public final class BreakpointManagerTest {
         runFx(() -> {
             Stage stage = new Stage();
             stage.setWidth(400);
-            BreakpointManager bpm = TailwindFX.responsive(stage);
+            BreakpointManager bpm = BreakpointManager.from(stage);
             bpm.onBreakpoint(BreakpointManager.Breakpoint.SM, () -> count.incrementAndGet());
             bpm.detach();
             // After detach, resizing should NOT fire callback

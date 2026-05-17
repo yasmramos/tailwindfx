@@ -1,6 +1,7 @@
 package io.github.yasmramos.tailwindfx.theme;
 
 import io.github.yasmramos.tailwindfx.TailwindFX;
+import io.github.yasmramos.tailwindfx.TwTheme;
 import io.github.yasmramos.tailwindfx.theme.ThemeManager;
 import io.github.yasmramos.tailwindfx.theme.ThemeScopeManager;
 import javafx.application.Platform;
@@ -191,15 +192,15 @@ public final class ThemeManagerTest {
             StackPane root = new StackPane();
             Scene scene = new Scene(root, 400, 300);
             TailwindFX.theme(scene).dark().apply();
-            TailwindFX.saveTheme(scene, "test.theme");
+            TwTheme.INSTANCE.saveTheme(scene, "test.theme");
 
             // Load into fresh scene
             StackPane root2 = new StackPane();
             Scene scene2 = new Scene(root2, 400, 300);
-            boolean loaded = TailwindFX.loadTheme(scene2, "test.theme");
+            boolean loaded = TwTheme.INSTANCE.loadTheme(scene2, "test.theme");
             check("loadTheme returns true", loaded);
             // Clean up
-            TailwindFX.deleteTheme("test.theme");
+            TwTheme.INSTANCE.deleteTheme("test.theme");
         });
     }
 
@@ -250,7 +251,7 @@ public final class ThemeManagerTest {
     static void testScopePresetDark() throws Exception {
         runFx(() -> {
             StackPane pane = new StackPane();
-            TailwindFX.scope(pane).preset("dark").apply();
+            TwTheme.INSTANCE.scope(pane).preset("dark").apply();
             check("scope dark: has -fx-base",
                     pane.getStyle().contains("-fx-base"));
             check("scope dark: dark class",
@@ -269,16 +270,16 @@ public final class ThemeManagerTest {
 
             // No scope yet
             check("no scope: findClosest=null",
-                    TailwindFX.findClosestScope(child) == null);
+                    ThemeScopeManager.findClosestScope(child) == null);
 
             // Apply scope to outer
             ThemeScopeManager.scope(outer).dark().apply();
-            Pane closest = TailwindFX.findClosestScope(child);
+            Pane closest = ThemeScopeManager.findClosestScope(child);
             check("child finds outer scope", closest == outer);
 
             // Apply scope to inner (closer)
             ThemeScopeManager.scope(inner).light().apply();
-            Pane closestNow = TailwindFX.findClosestScope(child);
+            Pane closestNow = ThemeScopeManager.findClosestScope(child);
             check("child finds inner scope (closer)", closestNow == inner);
         });
     }
@@ -291,7 +292,7 @@ public final class ThemeManagerTest {
             ThemeScopeManager.scope(panel).preset("rose").apply();
 
             StackPane modal = new StackPane();
-            TailwindFX.inheritScope(trigger, modal);
+            ThemeScopeManager.inheritScope(trigger, modal);
             check("modal inherits panel scope", ThemeScopeManager.hasScope(modal));
         });
     }

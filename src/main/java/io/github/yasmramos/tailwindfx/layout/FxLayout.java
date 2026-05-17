@@ -106,6 +106,7 @@ public final class FxLayout {
     private final Map<Node, double[]> anchors = new LinkedHashMap<>();
 
     public FxLayout(Pane source) { this.source = Preconditions.requireNonNull(source, "FxLayout", "pane"); }
+    public static FxLayout of(Pane container) { return new FxLayout(container); }
 
     // =========================================================================
     // Tipo de layout

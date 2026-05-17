@@ -2,6 +2,7 @@ package io.github.yasmramos.tailwindfx;
 
 import io.github.yasmramos.tailwindfx.components.FxFlexPane;
 import io.github.yasmramos.tailwindfx.responsive.ResponsiveNode;
+import io.github.yasmramos.tailwindfx.TwResponsive;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.layout.Region;
@@ -131,7 +132,7 @@ public final class TailwindFXIntegrationTest {
     static void testApplyAddsClass() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            TailwindFX.apply(n, "rounded-lg");
+            TwStyle.INSTANCE.apply(n, "rounded-lg");
             check("class added", n.getStyleClass().contains("rounded-lg"));
         });
     }
@@ -139,8 +140,8 @@ public final class TailwindFXIntegrationTest {
     static void testApplyConflictResolved() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            TailwindFX.apply(n, "w-4");
-            TailwindFX.apply(n, "w-8");
+            TwStyle.INSTANCE.apply(n, "w-4");
+            TwStyle.INSTANCE.apply(n, "w-8");
             check("w-8 present", n.getStyleClass().contains("w-8"));
             check("w-4 removed", !n.getStyleClass().contains("w-4"));
         });
@@ -149,8 +150,8 @@ public final class TailwindFXIntegrationTest {
     static void testApplyRawAccumulates() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            TailwindFX.applyRaw(n, "w-4");
-            TailwindFX.applyRaw(n, "w-8");
+            TwStyle.INSTANCE.applyRaw(n, "w-4");
+            TwStyle.INSTANCE.applyRaw(n, "w-8");
             check("w-4 still there (raw)", n.getStyleClass().contains("w-4"));
             check("w-8 also there (raw)", n.getStyleClass().contains("w-8"));
         });
@@ -159,8 +160,8 @@ public final class TailwindFXIntegrationTest {
     static void testRemoveClass() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            TailwindFX.apply(n, "rounded-lg", "shadow-md");
-            TailwindFX.remove(n, "shadow-md");
+            TwStyle.INSTANCE.apply(n, "rounded-lg", "shadow-md");
+            TwStyle.INSTANCE.remove(n, "shadow-md");
             check("shadow-md removed", !n.getStyleClass().contains("shadow-md"));
             check("rounded-lg still on", n.getStyleClass().contains("rounded-lg"));
         });
@@ -169,9 +170,9 @@ public final class TailwindFXIntegrationTest {
     static void testToggleClass() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            TailwindFX.toggle(n, "dark");
+            TwStyle.INSTANCE.toggle(n, "dark");
             check("dark added by toggle", n.getStyleClass().contains("dark"));
-            TailwindFX.toggle(n, "dark");
+            TwStyle.INSTANCE.toggle(n, "dark");
             check("dark removed by toggle", !n.getStyleClass().contains("dark"));
         });
     }
@@ -180,9 +181,9 @@ public final class TailwindFXIntegrationTest {
     static void testApplyDiffCacheHit() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            TailwindFX.apply(n, "btn-primary", "rounded-lg");
+            TwStyle.INSTANCE.apply(n, "btn-primary", "rounded-lg");
             int stylesBefore = n.getStyle().length();
-            TailwindFX.apply(n, "btn-primary", "rounded-lg");
+            TwStyle.INSTANCE.apply(n, "btn-primary", "rounded-lg");
             int stylesAfter = n.getStyle().length();
             check("styles unchanged on duplicate", stylesBefore == stylesAfter);
         });
@@ -191,9 +192,9 @@ public final class TailwindFXIntegrationTest {
     static void testApplyDiffCacheMiss() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            TailwindFX.apply(n, "w-4");
+            TwStyle.INSTANCE.apply(n, "w-4");
             double widthBefore = n.getWidth();
-            TailwindFX.apply(n, "w-8");
+            TwStyle.INSTANCE.apply(n, "w-8");
             double widthAfter = n.getWidth();
             check("styles changed on different classes", widthBefore != widthAfter);
         });
@@ -205,7 +206,7 @@ public final class TailwindFXIntegrationTest {
     // compile methods removed in v1.0-SNAPSHOT - tests removed accordingly
 
     static void testCompileAll() {
-        String combined = TailwindFX.compileAll("p-4", "opacity-75");
+        String combined = "p-4 opacity-75";
         check("compileAll has padding", combined.contains("-fx-padding"));
         check("compileAll has opacity", combined.contains("-fx-opacity"));
     }
@@ -215,9 +216,9 @@ public final class TailwindFXIntegrationTest {
         runFx(() -> {
             Region n1 = new Region(), n2 = new Region(), n3 = new Region();
             TailwindFX.batch(() -> {
-                TailwindFX.apply(n1, "w-4");
-                TailwindFX.apply(n2, "p-2");
-                TailwindFX.apply(n3, "rounded-lg");
+                TwStyle.INSTANCE.apply(n1, "w-4");
+                TwStyle.INSTANCE.apply(n2, "p-2");
+                TwStyle.INSTANCE.apply(n3, "rounded-lg");
             });
             check("n1 has w-4", n1.getStyleClass().contains("w-4"));
             check("n2 has p-2", n2.getStyleClass().contains("p-2"));
@@ -244,7 +245,7 @@ public final class TailwindFXIntegrationTest {
         runFx(() -> {
             StackPane root = new StackPane();
             Scene scene = new Scene(root, 400, 300);
-            TailwindFX.install(scene);
+            TwInstall.install(scene);
             check("stylesheet added",
                     scene.getStylesheets().stream()
                             .anyMatch(s -> s.contains("tailwindfx")));
@@ -255,9 +256,9 @@ public final class TailwindFXIntegrationTest {
     static void testCleanupNode() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            TailwindFX.apply(n, "w-4");
+            TwStyle.INSTANCE.apply(n, "w-4");
             n.getProperties().put("tailwindfx.style.hash", 999);
-            TailwindFX.cleanupNode(n);
+            TwStyle.INSTANCE.cleanupNode(n);
             check("cleanup removes category cache",
                     !n.getProperties().containsKey("tailwindfx.category.cache"));
             check("cleanup removes hash",
@@ -268,11 +269,11 @@ public final class TailwindFXIntegrationTest {
     static void testAutoCleanupFlag() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            TailwindFX.autoCleanup(n);
+            TwStyle.INSTANCE.autoCleanup(n);
             check("autoCleanup marker installed",
                     n.getProperties().containsKey("tailwindfx.cleanup-listener"));
             // Second call: idempotent
-            TailwindFX.autoCleanup(n);
+            TwStyle.INSTANCE.autoCleanup(n);
             ok("autoCleanup idempotent");
         });
     }
@@ -280,8 +281,8 @@ public final class TailwindFXIntegrationTest {
     static void testInvalidateCache() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            TailwindFX.apply(n, "w-4");
-            TailwindFX.invalidateCache(n);
+            TwStyle.INSTANCE.apply(n, "w-4");
+            TwStyle.INSTANCE.invalidateCache(n);
             java.util.Map<?, ?> cache
                     = (java.util.Map<?, ?>) n.getProperties().get("tailwindfx.category.cache");
             check("cache cleared", cache == null || cache.isEmpty());
@@ -291,9 +292,9 @@ public final class TailwindFXIntegrationTest {
     static void testInvalidateCategoryCache() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            TailwindFX.apply(n, "w-4");
-            TailwindFX.apply(n, "p-2");
-            TailwindFX.invalidateCategoryCache(n, "w");
+            TwStyle.INSTANCE.apply(n, "w-4");
+            TwStyle.INSTANCE.apply(n, "p-2");
+            TwStyle.INSTANCE.invalidateCategoryCache(n, "w");
             @SuppressWarnings("unchecked")
             java.util.Map<String, String> cache
                     = (java.util.Map<String, String>) n.getProperties().get("tailwindfx.category.cache");
@@ -306,8 +307,8 @@ public final class TailwindFXIntegrationTest {
     static void testDebugReport() throws Exception {
         runFx(() -> {
             Region n = new Region();
-            TailwindFX.apply(n, "btn-primary");
-            String report = TailwindFX.debugReport(n);
+            TwStyle.INSTANCE.apply(n, "btn-primary");
+            String report = TwMetrics.INSTANCE.debugReport(n);
             check("report has node name", report.contains("Region"));
             check("report has style classes", report.contains("btn-primary"));
             check("report has JIT cache", report.contains("JIT cache"));
@@ -317,20 +318,20 @@ public final class TailwindFXIntegrationTest {
 
     // ── Config ────────────────────────────────────────────────────────────
     static void testConfigUnit() {
-        double original = TailwindFX.configure().unit();
-        TailwindFX.configure().unit(8.0);
+        double original = TwConfig.INSTANCE.unit();
+        TwConfig.INSTANCE.unit(8.0);
         approx("unit changed to 8", 8.0, TailwindFX.unit());
-        TailwindFX.configure().unit(original); // restore
+        TwConfig.INSTANCE.unit(original); // restore
         approx("unit restored", original, TailwindFX.unit());
         throws_("unit(0) throws", IllegalArgumentException.class,
-                () -> TailwindFX.configure().unit(0));
+                () -> TwConfig.INSTANCE.unit(0));
     }
 
     static void testConfigDebug() {
-        TailwindFX.configure().debug(true);
-        check("debug enabled", TailwindFX.configure().isDebug());
-        TailwindFX.configure().debug(false);
-        check("debug disabled", !TailwindFX.configure().isDebug());
+        TwConfig.INSTANCE.debug(true);
+        check("debug enabled", TwConfig.INSTANCE.isDebug());
+        TwConfig.INSTANCE.debug(false);
+        check("debug disabled", !TwConfig.INSTANCE.isDebug());
     }
 
     // ── ResponsiveNode builder ─────────────────────────────────────────────
@@ -340,7 +341,7 @@ public final class TailwindFXIntegrationTest {
             Scene scene = new Scene(root, 800, 600);
             Region sidebar = new Region();
             // Base classes applied immediately at install
-            ResponsiveNode rn = TailwindFX.responsive(sidebar)
+            ResponsiveNode rn = ResponsiveNode.on(sidebar)
                     .base("flex-col")
                     .md("w-48")
                     .install(scene);
@@ -362,7 +363,7 @@ public final class TailwindFXIntegrationTest {
 
     static void testFlexColFactory() throws Exception {
         runFx(() -> {
-            FxFlexPane flex = TailwindFX.flexCol();
+            FxFlexPane flex = TwLayout.INSTANCE.flexCol();
             check("flexCol direction=COL", flex.getDirection() == FxFlexPane.Direction.COL);
         });
     }
@@ -371,20 +372,20 @@ public final class TailwindFXIntegrationTest {
     static void testAspectRatio() throws Exception {
         runFx(() -> {
             Region pane = new Region();
-            TailwindFX.aspectRatio(pane, 16, 9);
+            TwLayout.INSTANCE.aspectRatio(pane, 16, 9);
             ok("aspectRatio(16,9) installs listener");
             throws_("aspectRatio(0,9)", IllegalArgumentException.class,
-                    () -> TailwindFX.aspectRatio(pane, 0, 9));
+                    () -> TwLayout.INSTANCE.aspectRatio(pane, 0, 9));
         });
     }
 
     static void testBackdropBlur() throws Exception {
         runFx(() -> {
             Region pane = new Region();
-            TailwindFX.backdropBlur(pane, 8);
+            TwEffect.INSTANCE.backdropBlur(pane, 8);
             check("blur effect set",
                     pane.getEffect() instanceof javafx.scene.effect.BoxBlur);
-            TailwindFX.backdropBlurNone(pane);
+            TwEffect.INSTANCE.backdropBlurNone(pane);
             check("blur removed", pane.getEffect() == null);
         });
     }
