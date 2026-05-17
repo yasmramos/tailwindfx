@@ -1,34 +1,30 @@
 package io.github.yasmramos.tailwindfx.components;
 
 import io.github.yasmramos.tailwindfx.TwStyle;
-import io.github.yasmramos.tailwindfx.animation.FxAnimation;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 
 /**
  * TwAvatar — Pre-styled avatar component.
  * 
  * <pre>
- * StackPane avatar = TwAvatar.create("JD", "blue");
- * StackPane imgAvatar = TwAvatar.fromImage(imageView);
- * StackPane group = TwAvatar.group(avatar1, avatar2, avatar3);
+ * TwAvatar avatar = TwAvatar.create("JD", "blue");
+ * TwAvatar imgAvatar = TwAvatar.fromImage(imageView);
+ * TwAvatarGroup group = TwAvatar.group(avatar1, avatar2, avatar3);
  * </pre>
  */
-public final class TwAvatar {
-
-    private TwAvatar() {}
+public class TwAvatar extends StackPane {
 
     /**
      * Creates an avatar with initials.
      * @param initials the initials to display (e.g. "JD", "A")
-     * @return styled StackPane with default blue color and 40px size
+     * @return styled TwAvatar with default blue color and 40px size
      */
-    public static StackPane create(String initials) {
+    public static TwAvatar create(String initials) {
         return create(initials, "blue", 40);
     }
 
@@ -36,9 +32,9 @@ public final class TwAvatar {
      * Creates an avatar with initials and custom color.
      * @param initials the initials to display
      * @param color Tailwind color name
-     * @return styled StackPane with 40px size
+     * @return styled TwAvatar with 40px size
      */
-    public static StackPane create(String initials, String color) {
+    public static TwAvatar create(String initials, String color) {
         return create(initials, color, 40);
     }
 
@@ -47,10 +43,10 @@ public final class TwAvatar {
      * @param initials the initials to display
      * @param color Tailwind color name
      * @param size diameter in pixels
-     * @return styled StackPane
+     * @return styled TwAvatar
      */
-    public static StackPane create(String initials, String color, double size) {
-        StackPane avatar = new StackPane();
+    public static TwAvatar create(String initials, String color, double size) {
+        TwAvatar avatar = new TwAvatar();
         
         String bg = getLightColor(color);
         String fg = getDarkColor(color);
@@ -76,9 +72,9 @@ public final class TwAvatar {
     /**
      * Creates an avatar from an image node.
      * @param image the image node (ImageView)
-     * @return styled StackPane with 40px size
+     * @return styled TwAvatar with 40px size
      */
-    public static StackPane fromImage(Node image) {
+    public static TwAvatar fromImage(Node image) {
         return fromImage(image, 40);
     }
 
@@ -86,10 +82,10 @@ public final class TwAvatar {
      * Creates an avatar from an image node with custom size.
      * @param image the image node (ImageView)
      * @param size diameter in pixels
-     * @return styled StackPane
+     * @return styled TwAvatar
      */
-    public static StackPane fromImage(Node image, double size) {
-        StackPane avatar = new StackPane();
+    public static TwAvatar fromImage(Node image, double size) {
+        TwAvatar avatar = new TwAvatar();
         
         avatar.setStyle(String.format(
             "-fx-background-radius: 999px; -fx-min-width: %.0fpx;"
@@ -116,53 +112,27 @@ public final class TwAvatar {
     /**
      * Creates an avatar group (overlapping avatars).
      * @param avatars array of avatar nodes
-     * @return HBox with overlapping avatars
+     * @return TwAvatarGroup with overlapping avatars
      */
-    public static javafx.scene.layout.HBox group(StackPane... avatars) {
-        javafx.scene.layout.HBox group = new javafx.scene.layout.HBox();
-        group.setSpacing(-12); // Overlap
-        
-        for (StackPane avatar : avatars) {
-            // Add border to each avatar in group
-            String existingStyle = avatar.getStyle();
-            if (!existingStyle.contains("-fx-border-color")) {
-                avatar.setStyle(existingStyle + " -fx-border-color: #ffffff; -fx-border-width: 2px;");
-            }
-            group.getChildren().add(avatar);
-        }
-        
-        return group;
+    public static TwAvatarGroup group(TwAvatar... avatars) {
+        return new TwAvatarGroup(avatars);
     }
 
     /**
      * Creates an online status indicator for an avatar.
      * @param avatar the avatar to wrap
      * @param isOnline true for online (green), false for offline (gray)
-     * @return StackPane containing avatar with status dot
+     * @return TwAvatarWithStatus containing avatar with status dot
      */
-    public static StackPane withStatus(StackPane avatar, boolean isOnline) {
-        StackPane container = new StackPane();
-        container.getChildren().add(avatar);
-        
-        double size = avatar.getMinWidth();
-        double dotSize = size * 0.3;
-        
-        javafx.scene.shape.Circle statusDot = new javafx.scene.shape.Circle(dotSize / 2, dotSize / 2, dotSize / 2);
-        statusDot.setFill(isOnline ? 
-            javafx.scene.paint.Color.web("#22c55e") : // green-500
-            javafx.scene.paint.Color.web("#9ca3af"));  // gray-400
-        
-        statusDot.setStroke(javafx.scene.paint.Color.WHITE);
-        statusDot.setStrokeWidth(2);
-        
-        StackPane.setAlignment(statusDot, Pos.BOTTOM_RIGHT);
-        container.getChildren().add(statusDot);
-        
-        // Adjust position
-        statusDot.setTranslateX(size * 0.15);
-        statusDot.setTranslateY(size * 0.15);
-        
-        return container;
+    public static TwAvatarWithStatus withStatus(TwAvatar avatar, boolean isOnline) {
+        return new TwAvatarWithStatus(avatar, isOnline);
+    }
+
+    /**
+     * Protected constructor for internal usage.
+     */
+    protected TwAvatar() {
+        super();
     }
 
     private static String getLightColor(String color) {
@@ -182,6 +152,87 @@ public final class TwAvatar {
             return (String) method.invoke(null, color, 700);
         } catch (Exception e) {
             return "#1e40af";
+        }
+    }
+
+    /**
+     * Container for avatar group (overlapping avatars).
+     */
+    public static class TwAvatarGroup extends Pane {
+        
+        /**
+         * Creates an avatar group with overlapping avatars.
+         * @param avatars array of avatar nodes
+         */
+        public TwAvatarGroup(TwAvatar... avatars) {
+            super();
+            double spacing = -12; // Overlap
+            
+            double xOffset = 0;
+            for (TwAvatar avatar : avatars) {
+                // Add border to each avatar in group
+                String existingStyle = avatar.getStyle();
+                if (!existingStyle.contains("-fx-border-color")) {
+                    avatar.setStyle(existingStyle + " -fx-border-color: #ffffff; -fx-border-width: 2px;");
+                }
+                avatar.setTranslateX(xOffset);
+                getChildren().add(avatar);
+                xOffset += spacing;
+            }
+        }
+    }
+
+    /**
+     * Container for avatar with status indicator.
+     */
+    public static class TwAvatarWithStatus extends StackPane {
+        
+        private final TwAvatar avatar;
+        private final javafx.scene.shape.Circle statusDot;
+        
+        /**
+         * Creates an avatar with status indicator.
+         * @param avatar the avatar to wrap
+         * @param isOnline true for online (green), false for offline (gray)
+         */
+        public TwAvatarWithStatus(TwAvatar avatar, boolean isOnline) {
+            super();
+            this.avatar = avatar;
+            getChildren().add(avatar);
+            
+            double size = avatar.getMinWidth();
+            double dotSize = size * 0.3;
+            
+            statusDot = new javafx.scene.shape.Circle(dotSize / 2, dotSize / 2, dotSize / 2);
+            statusDot.setFill(isOnline ? 
+                javafx.scene.paint.Color.web("#22c55e") : // green-500
+                javafx.scene.paint.Color.web("#9ca3af"));  // gray-400
+            
+            statusDot.setStroke(javafx.scene.paint.Color.WHITE);
+            statusDot.setStrokeWidth(2);
+            
+            StackPane.setAlignment(statusDot, Pos.BOTTOM_RIGHT);
+            getChildren().add(statusDot);
+            
+            // Adjust position
+            statusDot.setTranslateX(size * 0.15);
+            statusDot.setTranslateY(size * 0.15);
+        }
+        
+        /**
+         * Gets the wrapped avatar.
+         * @return the TwAvatar
+         */
+        public TwAvatar getAvatar() {
+            return avatar;
+        }
+        
+        /**
+         * Gets the status dot.
+         * @return the Circle status indicator
+         */
+        public javafx.scene.shape.Circle getStatusDot() {
+            return statusDot;
         }
     }
 }

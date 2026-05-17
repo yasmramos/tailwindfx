@@ -13,18 +13,16 @@ import javafx.scene.layout.VBox;
  * TwCard — Pre-styled card container component.
  * 
  * <pre>
- * VBox card = TwCard.create()
+ * TwCard card = TwCard.create()
  *     .title("Revenue")
  *     .body(chart)
  *     .footer(actions)
  *     .build();
  * 
- * VBox simpleCard = TwCard.simple(content);
+ * TwCard simpleCard = TwCard.simple(content);
  * </pre>
  */
-public final class TwCard {
-
-    private TwCard() {}
+public class TwCard extends VBox {
 
     /**
      * Creates a card builder for complex cards.
@@ -37,9 +35,9 @@ public final class TwCard {
     /**
      * Creates a simple card with just content.
      * @param content the card content
-     * @return styled VBox
+     * @return styled TwCard
      */
-    public static VBox simple(Node content) {
+    public static TwCard simple(Node content) {
         return create().body(content).build();
     }
 
@@ -47,10 +45,17 @@ public final class TwCard {
      * Creates a card with title and content.
      * @param title card title
      * @param content card content
-     * @return styled VBox
+     * @return styled TwCard
      */
-    public static VBox withTitle(String title, Node content) {
+    public static TwCard withTitle(String title, Node content) {
         return create().title(title).body(content).build();
+    }
+
+    /**
+     * Protected constructor for builder usage.
+     */
+    protected TwCard() {
+        super();
     }
 
     /**
@@ -148,10 +153,10 @@ public final class TwCard {
 
         /**
          * Builds the card.
-         * @return styled VBox
+         * @return styled TwCard
          */
-        public VBox build() {
-            VBox card = new VBox();
+        public TwCard build() {
+            TwCard card = new TwCard();
             TwStyle.apply(card, "bg-white", shadow ? "shadow-md" : "", "rounded-lg");
             card.setStyle("-fx-background-radius: " + radius + "px;"
                 + (border ? " -fx-border-color: #e5e7eb; -fx-border-width: 1px; -fx-border-radius: " + radius + "px;" : ""));

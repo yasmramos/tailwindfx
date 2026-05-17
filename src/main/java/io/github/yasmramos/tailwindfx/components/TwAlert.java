@@ -1,7 +1,6 @@
 package io.github.yasmramos.tailwindfx.components;
 
 import io.github.yasmramos.tailwindfx.TwStyle;
-import io.github.yasmramos.tailwindfx.animation.FxAnimation;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -9,56 +8,52 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 
 /**
  * TwAlert — Pre-styled alert/notification component.
  * 
  * <pre>
- * HBox info = TwAlert.info("Operation completed successfully");
- * HBox warning = TwAlert.warning("Please review before continuing");
- * HBox error = TwAlert.error("Something went wrong");
- * HBox success = TwAlert.success("Data saved!");
+ * TwAlert info = TwAlert.info("Operation completed successfully");
+ * TwAlert warning = TwAlert.warning("Please review before continuing");
+ * TwAlert error = TwAlert.error("Something went wrong");
+ * TwAlert success = TwAlert.success("Data saved!");
  * </pre>
  */
-public final class TwAlert {
-
-    private TwAlert() {}
+public class TwAlert extends HBox {
 
     /**
      * Creates an info alert (blue).
      * @param message alert message
-     * @return styled HBox
+     * @return styled TwAlert
      */
-    public static HBox info(String message) {
+    public static TwAlert info(String message) {
         return create(message, "info", "blue");
     }
 
     /**
      * Creates a success alert (green).
      * @param message alert message
-     * @return styled HBox
+     * @return styled TwAlert
      */
-    public static HBox success(String message) {
+    public static TwAlert success(String message) {
         return create(message, "success", "green");
     }
 
     /**
      * Creates a warning alert (yellow/amber).
      * @param message alert message
-     * @return styled HBox
+     * @return styled TwAlert
      */
-    public static HBox warning(String message) {
+    public static TwAlert warning(String message) {
         return create(message, "warning", "amber");
     }
 
     /**
      * Creates an error alert (red).
      * @param message alert message
-     * @return styled HBox
+     * @return styled TwAlert
      */
-    public static HBox error(String message) {
+    public static TwAlert error(String message) {
         return create(message, "error", "red");
     }
 
@@ -67,10 +62,10 @@ public final class TwAlert {
      * @param message alert message
      * @param type type label (INFO, SUCCESS, WARNING, ERROR)
      * @param color Tailwind color name
-     * @return styled HBox
+     * @return styled TwAlert
      */
-    public static HBox create(String message, String type, String color) {
-        HBox alert = new HBox();
+    public static TwAlert create(String message, String type, String color) {
+        TwAlert alert = new TwAlert();
         alert.setSpacing(12);
         alert.setPadding(new Insets(12, 16, 12, 16));
         
@@ -104,10 +99,10 @@ public final class TwAlert {
      * @param type alert type
      * @param color Tailwind color name
      * @param onDismiss callback when dismissed
-     * @return styled HBox with dismiss button
+     * @return styled TwAlert with dismiss button
      */
-    public static HBox dismissible(String message, String type, String color, Runnable onDismiss) {
-        HBox alert = create(message, type, color);
+    public static TwAlert dismissible(String message, String type, String color, Runnable onDismiss) {
+        TwAlert alert = create(message, type, color);
         
         Label closeBtn = new Label("✕");
         String fg = getDarkColor(color);
@@ -127,6 +122,13 @@ public final class TwAlert {
         alert.setAlignment(Pos.CENTER_LEFT);
         
         return alert;
+    }
+
+    /**
+     * Protected constructor for internal usage.
+     */
+    protected TwAlert() {
+        super();
     }
 
     private static String getLightColor(String color) {
