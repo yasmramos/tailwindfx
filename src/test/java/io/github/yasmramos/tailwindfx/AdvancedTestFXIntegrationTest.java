@@ -138,8 +138,10 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
             interact(() -> root.getChildren().add(field));
 
             clickOn(field);
-            field.clear();
-            write("New Value");
+            interact(() -> {
+                field.clear();
+                write("New Value");
+            });
 
             assertEquals("New Value", field.getText());
         }
