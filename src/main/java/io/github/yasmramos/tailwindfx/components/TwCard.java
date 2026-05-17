@@ -1,6 +1,6 @@
 package io.github.yasmramos.tailwindfx.components;
 
-import io.github.yasmramos.tailwindfx.TwStyle;
+import io.github.yasmramos.tailwindfx.TailwindFX;
 import io.github.yasmramos.tailwindfx.animation.FxAnimation;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -11,6 +11,8 @@ import javafx.scene.layout.VBox;
 
 /**
  * TwCard — Pre-styled card container component.
+ * 
+ * Uses base .card class from tailwindfx-components.css with utility modifiers.
  * 
  * <pre>
  * TwCard card = TwCard.create()
@@ -68,8 +70,8 @@ public class TwCard extends VBox {
         private boolean shadow = true;
         private boolean border = false;
         private boolean hoverable = false;
-        private double padding = 4; // Tailwind units
-        private double radius = 12; // px
+        private String size = "md"; // sm, md, lg
+        private String radius = "lg"; // sm, md, lg, xl
 
         /**
          * Sets the card title.
@@ -132,21 +134,21 @@ public class TwCard extends VBox {
         }
 
         /**
-         * Sets padding in Tailwind units.
-         * @param p padding value
+         * Sets card size (sm, md, lg).
+         * @param s size value
          * @return this builder
          */
-        public CardBuilder padding(double p) {
-            this.padding = p;
+        public CardBuilder size(String s) {
+            this.size = s;
             return this;
         }
 
         /**
-         * Sets corner radius in pixels.
+         * Sets corner radius (sm, md, lg, xl).
          * @param r radius value
          * @return this builder
          */
-        public CardBuilder radius(double r) {
+        public CardBuilder radius(String r) {
             this.radius = r;
             return this;
         }
@@ -157,16 +159,22 @@ public class TwCard extends VBox {
          */
         public TwCard build() {
             TwCard card = new TwCard();
-            TwStyle.apply(card, "bg-white", shadow ? "shadow-md" : "", "rounded-lg");
-            card.setStyle("-fx-background-radius: " + radius + "px;"
-                + (border ? " -fx-border-color: #e5e7eb; -fx-border-width: 1px; -fx-border-radius: " + radius + "px;" : ""));
-            double pad = padding * 4;
-            card.setPadding(new Insets(pad));
+            
+            // Apply base card class and variants
+            TailwindFX.apply(card, 
+                "card",
+                shadow ? "shadow-md" : "",
+                border ? "border" : "",
+                hoverable ? "card-hoverable" : "",
+                "card-" + size,
+                "rounded-" + radius
+            );
+            
             card.setSpacing(12);
 
             if (title != null) {
                 Label lbl = new Label(title);
-                TwStyle.apply(lbl, "text-lg", "font-semibold", "text-gray-900");
+                TailwindFX.apply(lbl, "text-lg", "font-semibold", "text-gray-900");
                 card.getChildren().add(lbl);
             }
             if (body != null) {
@@ -177,7 +185,7 @@ public class TwCard extends VBox {
                 Region spacer = new Region();
                 VBox.setVgrow(spacer, Priority.ALWAYS);
                 if (body != null) card.getChildren().add(spacer);
-                TwStyle.apply(footer, "pt-3", "border-t", "border-gray-100");
+                TailwindFX.apply(footer, "pt-3", "border-t", "border-gray-100");
                 card.getChildren().add(footer);
             }
 
