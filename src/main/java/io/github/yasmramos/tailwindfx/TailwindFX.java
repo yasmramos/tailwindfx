@@ -9,7 +9,6 @@ import io.github.yasmramos.tailwindfx.animation.FxAnimation;
 import io.github.yasmramos.tailwindfx.theme.ThemeManager;
 import io.github.yasmramos.tailwindfx.theme.ThemeScopeManager;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
-import io.github.yasmramos.tailwindfx.components.ComponentFactory;
 import io.github.yasmramos.tailwindfx.layout.FxLayout;
 
 import javafx.scene.Node;
