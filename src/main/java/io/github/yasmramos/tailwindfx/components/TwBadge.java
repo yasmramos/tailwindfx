@@ -1,6 +1,6 @@
 package io.github.yasmramos.tailwindfx.components;
 
-import io.github.yasmramos.tailwindfx.TwStyle;
+import io.github.yasmramos.tailwindfx.TailwindFX;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -9,6 +9,8 @@ import javafx.scene.layout.Pane;
 
 /**
  * TwBadge — Pre-styled badge and pill components.
+ * 
+ * Uses base .badge class from tailwindfx-components.css with utility modifiers.
  * 
  * <pre>
  * TwBadge badge = TwBadge.create("NEW", "blue");
@@ -36,12 +38,11 @@ public class TwBadge extends Label {
     public static TwBadge create(String text, String color) {
         TwBadge lbl = new TwBadge();
         lbl.setText(text.toUpperCase());
-        String bg = getColor(color, 100);
-        String fg = getColor(color, 700);
-        lbl.setStyle(String.format(
-            "-fx-background-color: %s; -fx-text-fill: %s; -fx-font-size: 10px;"
-            + " -fx-font-weight: bold; -fx-padding: 2 8 2 8;"
-            + " -fx-background-radius: 4px;", bg, fg));
+        TailwindFX.apply(lbl, 
+            "badge",
+            "badge-" + color,
+            "badge-md"
+        );
         return lbl;
     }
 
@@ -62,8 +63,7 @@ public class TwBadge extends Label {
      */
     public static TwBadge pill(String text, String color) {
         TwBadge lbl = create(text, color);
-        lbl.setStyle(lbl.getStyle().replace("-fx-background-radius: 4px", "")
-            + " -fx-background-radius: 999px;");
+        TailwindFX.apply(lbl, "badge-pill");
         return lbl;
     }
 
@@ -106,13 +106,12 @@ public class TwBadge extends Label {
     public static TwBadge outline(String text, String color) {
         TwBadge lbl = new TwBadge();
         lbl.setText(text.toUpperCase());
-        String border = getColor(color, 600);
-        String fg = getColor(color, 700);
-        lbl.setStyle(String.format(
-            "-fx-border-color: %s; -fx-border-width: 1px;"
-            + " -fx-text-fill: %s; -fx-font-size: 10px;"
-            + " -fx-font-weight: bold; -fx-padding: 2 8 2 8;"
-            + " -fx-background-radius: 4px; -fx-border-radius: 4px;", border, fg));
+        TailwindFX.apply(lbl,
+            "badge",
+            "badge-outline",
+            "badge-" + color,
+            "badge-md"
+        );
         return lbl;
     }
 
@@ -121,20 +120,6 @@ public class TwBadge extends Label {
      */
     protected TwBadge() {
         super();
-    }
-
-    /**
-     * Helper to get hex color from Tailwind color name and shade.
-     */
-    private static String getColor(String color, int shade) {
-        try {
-            Class<?> palette = Class.forName("io.github.yasmramos.tailwindfx.color.ColorPalette");
-            java.lang.reflect.Method method = palette.getMethod("hex", String.class, int.class);
-            return (String) method.invoke(null, color, shade);
-        } catch (Exception e) {
-            // Fallback colors if ColorPalette is not available
-            return "#3b82f6";
-        }
     }
 
     /**
@@ -155,18 +140,19 @@ public class TwBadge extends Label {
             super();
             
             dot = new Label();
-            String dotBg = getColor(dotColor, 500);
-            dot.setStyle(String.format(
-                "-fx-background-color: %s; -fx-background-radius: 999px;"
-                + " -fx-min-width: 8px; -fx-min-height: 8px;"
-                + " -fx-max-width: 8px; -fx-max-height: 8px;", dotBg));
+            TailwindFX.apply(dot,
+                "dot",
+                "dot-" + dotColor,
+                "dot-sm"
+            );
 
             label = new TwBadge();
             label.setText(text);
-            String fg = getColor(textColor, 700);
-            label.setStyle(String.format(
-                "-fx-text-fill: %s; -fx-font-size: 12px;"
-                + " -fx-padding: 0 0 0 6;", fg));
+            TailwindFX.apply(label,
+                "badge",
+                "badge-" + textColor,
+                "badge-compact"
+            );
             label.setPadding(new Insets(0));
 
             getChildren().addAll(dot, label);
