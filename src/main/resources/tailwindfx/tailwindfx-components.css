@@ -877,3 +877,157 @@ SplitPane .split-pane-divider {
     -fx-pref-width: 100%;
     -fx-pref-height: 100%;
 }
+
+/* =============================================================================
+ * SPINNER / PROGRESS INDICATOR VARIANTS
+ * ============================================================================= */
+
+/* Spinner base */
+.spinner {
+    -fx-progress-color: -color-blue-500;
+}
+
+/* Spinner sizes */
+.spinner-xs {
+    -fx-pref-width: 16px;
+    -fx-pref-height: 16px;
+    -fx-max-width: 16px;
+    -fx-max-height: 16px;
+}
+
+.spinner-sm {
+    -fx-pref-width: 24px;
+    -fx-pref-height: 24px;
+    -fx-max-width: 24px;
+    -fx-max-height: 24px;
+}
+
+.spinner-md {
+    -fx-pref-width: 36px;
+    -fx-pref-height: 36px;
+    -fx-max-width: 36px;
+    -fx-max-height: 36px;
+}
+
+.spinner-lg {
+    -fx-pref-width: 48px;
+    -fx-pref-height: 48px;
+    -fx-max-width: 48px;
+    -fx-max-height: 48px;
+}
+
+.spinner-xl {
+    -fx-pref-width: 64px;
+    -fx-pref-height: 64px;
+    -fx-max-width: 64px;
+    -fx-max-height: 64px;
+}
+
+/* Spinner colors */
+.spinner-blue {
+    -fx-progress-color: -color-blue-500;
+}
+
+.spinner-green {
+    -fx-progress-color: -color-green-500;
+}
+
+.spinner-red {
+    -fx-progress-color: -color-red-500;
+}
+
+.spinner-yellow {
+    -fx-progress-color: -color-yellow-500;
+}
+
+.spinner-purple {
+    -fx-progress-color: -color-purple-500;
+}
+
+.spinner-gray {
+    -fx-progress-color: -color-gray-500;
+}
+
+/* =============================================================================
+ * PROGRESS BAR VARIANTS
+ * ============================================================================= */
+
+/* Progress bar base */
+.progress-bar {
+    -fx-background-color: -color-gray-200;
+    -fx-background-radius: 9999px;
+    -fx-pref-height: 8px;
+    -fx-accent: -color-blue-500;
+}
+
+.progress-bar .bar {
+    -fx-background-color: -color-blue-500;
+    -fx-background-radius: 9999px;
+}
+
+/* Progress bar sizes */
+.progress-sm {
+    -fx-pref-height: 4px;
+}
+
+.progress-md {
+    -fx-pref-height: 8px;
+}
+
+.progress-lg {
+    -fx-pref-height: 16px;
+}
+
+/* Progress bar colors */
+.progress-blue .bar {
+    -fx-background-color: -color-blue-500;
+}
+
+.progress-green .bar {
+    -fx-background-color: -color-green-500;
+}
+
+.progress-red .bar {
+    -fx-background-color: -color-red-500;
+}
+
+.progress-yellow .bar {
+    -fx-background-color: -color-yellow-500;
+}
+
+.progress-purple .bar {
+    -fx-background-color: -color-purple-500;
+}
+
+.progress-gray .bar {
+    -fx-background-color: -color-gray-500;
+}
+
+/* Progress bar striped */
+.progress-striped .bar {
+    -fx-background-image: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.15) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.15) 50%,
+        rgba(255, 255, 255, 0.15) 75%,
+        transparent 75%,
+        transparent
+    );
+    -fx-background-size: 1rem 1rem;
+}
+
+/* Progress bar animated */
+.progress-animated .bar {
+    -fx-animation: progress-stripes 1s linear infinite;
+}
+
+@keyframes progress-stripes {
+    from {
+        -fx-background-position: 1rem 0;
+    }
+    to {
+        -fx-background-position: 0 0;
+    }
+}
