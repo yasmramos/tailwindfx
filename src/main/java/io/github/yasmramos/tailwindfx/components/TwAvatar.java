@@ -1,6 +1,6 @@
 package io.github.yasmramos.tailwindfx.components;
 
-import io.github.yasmramos.tailwindfx.TwStyle;
+import io.github.yasmramos.tailwindfx.TailwindFX;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -10,6 +10,8 @@ import javafx.scene.layout.StackPane;
 
 /**
  * TwAvatar — Pre-styled avatar component.
+ * 
+ * Uses base .avatar class from tailwindfx-components.css with utility modifiers.
  * 
  * <pre>
  * TwAvatar avatar = TwAvatar.create("JD", "blue");
@@ -25,7 +27,7 @@ public class TwAvatar extends StackPane {
      * @return styled TwAvatar with default blue color and 40px size
      */
     public static TwAvatar create(String initials) {
-        return create(initials, "blue", 40);
+        return create(initials, "blue", "md");
     }
 
     /**
@@ -35,33 +37,28 @@ public class TwAvatar extends StackPane {
      * @return styled TwAvatar with 40px size
      */
     public static TwAvatar create(String initials, String color) {
-        return create(initials, color, 40);
+        return create(initials, color, "md");
     }
 
     /**
      * Creates an avatar with initials, color, and custom size.
      * @param initials the initials to display
      * @param color Tailwind color name
-     * @param size diameter in pixels
+     * @param size Tailwind size modifier (xs, sm, md, lg, xl)
      * @return styled TwAvatar
      */
-    public static TwAvatar create(String initials, String color, double size) {
+    public static TwAvatar create(String initials, String color, String size) {
         TwAvatar avatar = new TwAvatar();
         
-        String bg = getLightColor(color);
-        String fg = getDarkColor(color);
-        
-        avatar.setStyle(String.format(
-            "-fx-background-color: %s; -fx-text-fill: %s;"
-            + " -fx-background-radius: 999px; -fx-min-width: %.0fpx;"
-            + " -fx-min-height: %.0fpx; -fx-max-width: %.0fpx; -fx-max-height: %.0fpx;",
-            bg, fg, size, size, size, size));
+        TailwindFX.apply(avatar,
+            "avatar",
+            "avatar-" + size,
+            "avatar-" + color
+        );
         avatar.setPadding(new Insets(0));
         
         Label lbl = new Label(initials.toUpperCase());
-        lbl.setStyle(String.format(
-            "-fx-text-fill: %s; -fx-font-weight: bold; -fx-font-size: %.0fpx;",
-            fg, size * 0.4));
+        TailwindFX.apply(lbl, "avatar-text", "avatar-text-" + color);
         
         avatar.getChildren().add(lbl);
         StackPane.setAlignment(lbl, Pos.CENTER);
@@ -75,32 +72,33 @@ public class TwAvatar extends StackPane {
      * @return styled TwAvatar with 40px size
      */
     public static TwAvatar fromImage(Node image) {
-        return fromImage(image, 40);
+        return fromImage(image, "md");
     }
 
     /**
      * Creates an avatar from an image node with custom size.
      * @param image the image node (ImageView)
-     * @param size diameter in pixels
+     * @param size Tailwind size modifier (xs, sm, md, lg, xl)
      * @return styled TwAvatar
      */
-    public static TwAvatar fromImage(Node image, double size) {
+    public static TwAvatar fromImage(Node image, String size) {
         TwAvatar avatar = new TwAvatar();
         
-        avatar.setStyle(String.format(
-            "-fx-background-radius: 999px; -fx-min-width: %.0fpx;"
-            + " -fx-min-height: %.0fpx; -fx-max-width: %.0fpx; -fx-max-height: %.0fpx;"
-            + " -fx-border-color: #e5e7eb; -fx-border-width: 2px;",
-            size, size, size, size));
+        TailwindFX.apply(avatar,
+            "avatar",
+            "avatar-" + size,
+            "avatar-image"
+        );
         
         // Clip to circle
-        javafx.scene.shape.Circle clip = new javafx.scene.shape.Circle(size / 2, size / 2, size / 2);
+        double avatarSize = getAvatarSize(size);
+        javafx.scene.shape.Circle clip = new javafx.scene.shape.Circle(avatarSize / 2, avatarSize / 2, avatarSize / 2);
         avatar.setClip(clip);
         
         if (image instanceof javafx.scene.image.ImageView) {
             javafx.scene.image.ImageView imgView = (javafx.scene.image.ImageView) image;
-            imgView.setFitWidth(size);
-            imgView.setFitHeight(size);
+            imgView.setFitWidth(avatarSize);
+            imgView.setFitHeight(avatarSize);
             imgView.setPreserveRatio(true);
         }
         
@@ -135,23 +133,14 @@ public class TwAvatar extends StackPane {
         super();
     }
 
-    private static String getLightColor(String color) {
-        try {
-            Class<?> palette = Class.forName("io.github.yasmramos.tailwindfx.color.ColorPalette");
-            java.lang.reflect.Method method = palette.getMethod("hex", String.class, int.class);
-            return (String) method.invoke(null, color, 100);
-        } catch (Exception e) {
-            return "#dbeafe";
-        }
-    }
-
-    private static String getDarkColor(String color) {
-        try {
-            Class<?> palette = Class.forName("io.github.yasmramos.tailwindfx.color.ColorPalette");
-            java.lang.reflect.Method method = palette.getMethod("hex", String.class, int.class);
-            return (String) method.invoke(null, color, 700);
-        } catch (Exception e) {
-            return "#1e40af";
+    private static double getAvatarSize(String size) {
+        switch (size) {
+            case "xs": return 24;
+            case "sm": return 32;
+            case "md": return 40;
+            case "lg": return 56;
+            case "xl": return 72;
+            default: return 40;
         }
     }
 
@@ -170,11 +159,8 @@ public class TwAvatar extends StackPane {
             
             double xOffset = 0;
             for (TwAvatar avatar : avatars) {
-                // Add border to each avatar in group
-                String existingStyle = avatar.getStyle();
-                if (!existingStyle.contains("-fx-border-color")) {
-                    avatar.setStyle(existingStyle + " -fx-border-color: #ffffff; -fx-border-width: 2px;");
-                }
+                // Add border class to each avatar in group
+                TailwindFX.apply(avatar, "avatar-group-item");
                 avatar.setTranslateX(xOffset);
                 getChildren().add(avatar);
                 xOffset += spacing;
@@ -188,7 +174,7 @@ public class TwAvatar extends StackPane {
     public static class TwAvatarWithStatus extends StackPane {
         
         private final TwAvatar avatar;
-        private final javafx.scene.shape.Circle statusDot;
+        private final Label statusDot;
         
         /**
          * Creates an avatar with status indicator.
@@ -201,15 +187,13 @@ public class TwAvatar extends StackPane {
             getChildren().add(avatar);
             
             double size = avatar.getMinWidth();
-            double dotSize = size * 0.3;
+            if (size <= 0) size = 40; // default
             
-            statusDot = new javafx.scene.shape.Circle(dotSize / 2, dotSize / 2, dotSize / 2);
-            statusDot.setFill(isOnline ? 
-                javafx.scene.paint.Color.web("#22c55e") : // green-500
-                javafx.scene.paint.Color.web("#9ca3af"));  // gray-400
-            
-            statusDot.setStroke(javafx.scene.paint.Color.WHITE);
-            statusDot.setStrokeWidth(2);
+            statusDot = new Label();
+            TailwindFX.apply(statusDot,
+                "avatar-status-dot",
+                isOnline ? "avatar-status-online" : "avatar-status-offline"
+            );
             
             StackPane.setAlignment(statusDot, Pos.BOTTOM_RIGHT);
             getChildren().add(statusDot);
@@ -231,7 +215,7 @@ public class TwAvatar extends StackPane {
          * Gets the status dot.
          * @return the Circle status indicator
          */
-        public javafx.scene.shape.Circle getStatusDot() {
+        public Label getStatusDot() {
             return statusDot;
         }
     }

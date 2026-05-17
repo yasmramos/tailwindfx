@@ -356,7 +356,7 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
         @Test
         @DisplayName("Should create and interact with avatar component")
         void testAvatarComponent() {
-            StackPane avatar = TwAvatar.create("JD", "blue", 48);
+            StackPane avatar = TwAvatar.create("JD", "blue", "lg");
 
             interact(() -> root.getChildren().add(avatar));
 
