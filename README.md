@@ -12,6 +12,10 @@
 
 TailwindFX brings Tailwind CSS's utility-first approach to JavaFX. Instead of writing boilerplate style code, you compose styles from a comprehensive set of pre-built utility classes — and where CSS falls short, TailwindFX provides equivalent Java APIs.
 
+### Architecture: Specialized Facades
+
+TailwindFX uses a **facade pattern** to separate concerns. Each responsibility has its own specialized class, making the API more discoverable, testable, and maintainable.
+
 ```java
 // Before — JavaFX vanilla
 btn.setStyle(
@@ -22,7 +26,6 @@ btn.setStyle(
 );
 
 // Hover animation with vanilla JavaFX
-
 btn.addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
     Timeline tl = new Timeline(
         new KeyFrame(Duration.ZERO,
@@ -35,11 +38,9 @@ btn.addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
     tl.play();
 });
 
-// ... same pattern for MOUSE_EXITED scaling back to 1.0
-
-// With TailwindFX
-TailwindFX.apply(btn, "btn-primary", "rounded-lg", "px-4", "py-2");
-FxAnimation.onHoverScale(btn, 1.05);
+// With TailwindFX (New API)
+TwStyle.apply(btn, "btn-primary", "rounded-lg", "px-4", "py-2");
+TwAnimation.onHoverScale(btn, 1.05);
 ```
 
 ---
@@ -88,18 +89,18 @@ public class MyApp extends Application {
         Scene scene = new Scene(root, 900, 600);
 
         // 1. Install (loads CSS + wires breakpoints)
-        TailwindFX.install(scene, stage);
+        TwInstall.install(scene);
 
         // 2. Build UI with utilities
         VBox card = new VBox(12);
-        TailwindFX.apply(card, "card", "w-80");
+        TwStyle.apply(card, "card", "w-80");
 
         Label title = new Label("Hello TailwindFX");
-        TailwindFX.apply(title, "text-2xl", "font-bold", "text-blue-600");
+        TwStyle.apply(title, "text-2xl", "font-bold", "text-blue-600");
 
         Button btn = new Button("Get Started");
-        TailwindFX.apply(btn, "btn-primary", "rounded-lg");
-        FxAnimation.onHoverScale(btn, 1.05);
+        TwStyle.apply(btn, "btn-primary", "rounded-lg");
+        TwAnimation.onHoverScale(btn, 1.05);
 
         card.getChildren().addAll(title, btn);
         root.getChildren().add(card);
@@ -112,188 +113,95 @@ public class MyApp extends Application {
 
 ---
 
-## Core APIs
+## Specialized Facades
 
-### Applying utilities
+| Facade | Responsibility | Example |
+|--------|----------------|---------|
+| `TwStyle` | Apply utility classes, JIT tokens | `TwStyle.apply(node, "p-4", "bg-blue-500")` |
+| `TwInstall` | Install CSS, watch changes | `TwInstall.install(scene)` |
+| `TwTheme` | Dark/light themes, presets, scoped themes | `TwTheme.of(scene).dark().apply()` |
+| `TwLayout` | Flexbox, Grid, layout builders | `TwLayout.of(container).row().gap(16).build()` |
+| `TwAnimation` | Animations, hover effects | `TwAnimation.fadeIn(node).play()` |
+| `TwComponent` | Pre-built components (cards, badges) | `TwComponent.card().title("Hi").build()` |
+| `TwResponsive` | Breakpoint-aware nodes | `TwResponsive.on(region).sm("w-full").install(scene)` |
+| `TwEffect` | Glassmorphism, neumorphism, shadows | `TwEffect.glass(panel)` |
+| `TwMetrics` | Performance monitoring, alerts | `TwMetrics.print()` |
+| `TwConfig` | Global configuration | `TwConfig.unit(Unit.PX)` |
+| `TwBatch` | Batch operations for performance | `TwBatch.run(() -> applyStyles())` |
 
-```java
-// Single or multiple classes:
-TailwindFX.apply(node, "p-4", "bg-white", "rounded-lg", "shadow-md");
-
-// JIT — arbitrary values compiled at runtime:
-TailwindFX.apply(node, "bg-blue-500/80", "p-[13px]", "drop-shadow-[#3b82f6]");
-
-// No conflict resolution (accumulate intentionally):
-TailwindFX.applyRaw(node, "w-4", "w-8");  // both stay
-```
-
-### Responsive
-
-```java
-// Per-node rules (uses Scene.widthProperty()):
-TailwindFX.responsive(sidebar)
-    .base("w-64", "flex-col")
-    .sm("w-full")
-    .md("w-48")
-    .onBreakpoint(bp -> System.out.println("Breakpoint: " + bp))
-    .install(scene);
-
-// Scene-level breakpoints:
-BreakpointManager bpm = TailwindFX.responsive(stage);
-bpm.onBreakpoint(BreakpointManager.Breakpoint.MD,
-    () -> container.setDirection(FxFlexPane.Direction.ROW));
-```
-
-### FxFlexPane
+### Usage Examples
 
 ```java
-FxFlexPane flex = TailwindFX.flexRow()
-    .wrap(true)
-    .justify(FxFlexPane.Justify.BETWEEN)
-    .align(FxFlexPane.Align.CENTER)
-    .gap(16);
+// Style
+TwStyle.apply(btn, "btn-primary", "rounded-lg", "px-4", "py-2");
+TwStyle.jit(node, "bg-blue-500/80", "p-[13px]");
+TwStyle.remove(node, "text-red-500");
+TwStyle.toggle(node, "dark-mode");
 
-FxFlexPane.setGrow(mainContent, 1);     // flex-grow: 1
-FxFlexPane.setShrink(sidebar, 0);       // flex-shrink: 0
-FxFlexPane.setBasis(child, 0);          // flex-basis: 0
-FxFlexPane.setAlignSelf(btn, FxFlexPane.Align.END); // align-self: end
-FxFlexPane.setOrder(header, -1);        // order: -1 (first)
+// Theme
+TwTheme.of(scene).dark().apply();
+TwTheme.of(scene).preset("blue").apply();
+TwTheme.scope(panel).preset("rose").apply();
 
-// Animated direction change:
-flex.setDirectionAnimated(FxFlexPane.Direction.COL, 200);
-```
+// Layout
+TwLayout.of(container).row().gap(16).build();
+TwLayout.flexRow().wrap(true).justify(Justify.BETWEEN).build();
 
-### FxGridPane
+// Animation
+TwAnimation.fadeIn(node, 300).play();
+TwAnimation.onHoverScale(btn, 1.05);
+TwAnimation.shake(button).play();
 
-```java
-FxGridPane page = FxGridPane.create()
-    .areas(
-        "header header",
-        "sidebar main",
-        "footer footer"
-    )
-    .gap(12).build();
-
-page.placeIn(headerRegion,  "header");
-page.placeIn(sidebarRegion, "sidebar");
-page.placeIn(mainContent,   "main");
-page.placeIn(footerRegion,  "footer");
-
-// Masonry layout:
-FxGridPane pins = FxGridPane.create().masonry(3).gap(12).build();
-```
-
-### FxDataTable
-
-```java
-FxDataTable<User> table = TailwindFX.dataTable(User.class)
-    .column("Name",  User::name)
-    .column("Email", User::email)
-    .column("Age",   u -> String.valueOf(u.age()))
-    .searchable(true)
-    .pageSize(25)
-    .style("table-striped", "table-hover")
+// Component
+TwComponent.card()
+    .title("Welcome")
+    .content("Hello world")
     .build();
 
-table.setItems(userList);
-table.setFilter(u -> u.dept().equals("Engineering"));
-root.getChildren().add(table.container());
+// Responsive
+TwResponsive.on(sidebar)
+    .base("w-64")
+    .sm("w-full")
+    .md("w-48")
+    .install(scene);
+
+// Effect
+TwEffect.glass(overlayPane);
+TwEffect.neumorph(button);
+TwEffect.textShadowMd(heading);
+
+// Metrics
+TwMetrics.setEnabled(true);
+TwMetrics.print();
+
+// Config
+TwConfig.autoBatch(20);
+TwConfig.debug(true);
+
+// Batch
+TwBatch.run(() -> {
+    nodes.forEach(n -> TwStyle.apply(n, "p-4", "bg-white"));
+});
 ```
 
-### Themes
+### Backward Compatibility
+
+The old `TailwindFX` facade still works for backward compatibility, delegating to the specialized facades:
 
 ```java
-// Global theme:
+// Still works (delegates to TwStyle)
+TailwindFX.apply(node, "p-4", "bg-white");
+
+// Still works (delegates to TwInstall)
+TailwindFX.install(scene);
+
+// Still works (delegates to TwTheme)
 TailwindFX.theme(scene).dark().apply();
-TailwindFX.theme(scene).preset("blue").apply();
-TailwindFX.saveTheme(scene, "myapp.theme");
-TailwindFX.loadTheme(scene, "myapp.theme");
 
-// Scoped theme (subtree only):
-TailwindFX.scope(panel).preset("rose").apply();
-TailwindFX.inheritScope(triggerButton, modal); // modal inherits trigger's scope
-TailwindFX.refreshScope(panel);                // after reparenting
-```
-
-### Animations
-
-```java
-FxAnimation.fadeIn(node, 300).play();
-FxAnimation.slideUp(node).play();
-FxAnimation.shake(button).play();        // validation error
-FxAnimation.spin(loadingIcon).loop().play();
-
-FxAnimation.onHoverScale(btn, 1.05);    // permanent hover scale
-FxAnimation.onHoverLift(btn);           // hover lift (-4px)
-FxAnimation.onHoverDim(btn, 0.8);       // hover dim
-FxAnimation.removeHoverEffects(btn);    // clean up all hover effects
-
-// Chain / parallel:
-FxAnimation.chain(fadeIn, slideUp).play();
-FxAnimation.parallel(pulse, bounce).play();
-
-// Reduced motion:
-TailwindFX.setReducedMotion(true);
-TailwindFX.playIfMotionOk(animation);  // plays or jumps to end state
-```
-
-### Tailwind v4.1
-
-```java
-// Text shadow:
-TailwindFX.textShadowMd(heading);
-TailwindFX.textShadow(label, "#3b82f6", 6, 0, 2);  // colored
-
-// Colored drop shadow:
-TailwindFX.dropShadowBlue(card);
-TailwindFX.dropShadow(card, "#22c55e", 0.4, 12, 0, 4);
-
-// Clip/mask:
-TailwindFX.clipCircle(avatar);
-TailwindFX.clipRounded(imageView, 12);
-
-// 3D transforms:
-TailwindFX.rotateX(panel, 15);
-TailwindFX.rotateY(card, 30);
-TailwindFX.translateZ(tooltip, 50);
-
-// Glass / neumorph:
-TailwindFX.glass(overlayPane);
-TailwindFX.backdropBlurMd(overlayPane);
-TailwindFX.neumorph(button);
-
-// SVG:
-TailwindFX.fill(svgPath, "#3b82f6");
-TailwindFX.stroke(svgPath, "#000000");
-```
-
-### Metrics & alerts
-
-```java
-TailwindFX.metrics()
-    .setEnabled(true)
-    .onAlert((metric, value, threshold) ->
-        System.err.printf("Alert: %s=%.2f%n", metric, value))
-    .alertOnLowCacheHitRatio(0.70)
-    .alertOnHighConflictRate(0.30)
-    .alertOnSlowCompile(0.5);   // ms
-
-TailwindFX.metrics().print(); // formatted report
-```
-
-### Performance
-
-```java
-// Batch apply (1 CSS pass for many nodes):
-TailwindFX.batch(() ->
-    cards.forEach(c -> TailwindFX.apply(c, "card", "shadow-md")));
-
-// Configure auto-batch threshold:
-TailwindFX.configure().autoBatch(20);
-
-// Cleanup on node removal:
-TailwindFX.cleanupNode(removedNode);   // explicit
-TailwindFX.autoCleanup(cellNode);      // auto on scene removal
+// Recommended: use specialized facades directly
+TwStyle.apply(node, "p-4", "bg-white");
+TwInstall.install(scene);
+TwTheme.of(scene).dark().apply();
 ```
 ---
 
