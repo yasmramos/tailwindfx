@@ -564,7 +564,40 @@ SplitPane .split-pane-divider {
  * COMPONENT VARIANTS
  * ============================================================================= */
 
+/* Button base */
+.btn {
+    -fx-background-radius: 6px;
+    -fx-font-weight: 500;
+    -fx-cursor: -cursor-hand;
+    -fx-background-insets: 0;
+    -fx-focus-traversable: true;
+    -fx-faint-focus-color: transparent;
+    -fx-padding: 8px 16px;
+}
+
 /* Button variants */
+.btn-primary {
+    -fx-text-fill: -color-white;
+    -fx-background-color: -color-blue-500;
+}
+
+.btn-primary:hover {
+    -fx-background-color: -color-blue-600;
+}
+
+.btn-primary:pressed {
+    -fx-background-color: -color-blue-700;
+}
+
+.btn-secondary {
+    -fx-text-fill: -color-gray-800;
+    -fx-background-color: -color-gray-100;
+}
+
+.btn-secondary:hover {
+    -fx-background-color: -color-gray-200;
+}
+
 .btn-outline {
     -fx-background-color: transparent;
     -fx-border-color: -color-blue-500;
@@ -593,6 +626,66 @@ SplitPane .split-pane-divider {
     -fx-background-color: -color-blue-100;
 }
 
+.btn-disabled {
+    -fx-background-color: -color-gray-300;
+    -fx-text-fill: -color-gray-500;
+    -fx-cursor: -cursor-default;
+}
+
+/* Button colors */
+.btn-blue.btn-primary,
+.btn-primary.btn-blue {
+    -fx-background-color: -color-blue-500;
+}
+
+.btn-blue.btn-primary:hover,
+.btn-primary.btn-blue:hover {
+    -fx-background-color: -color-blue-600;
+}
+
+.btn-green.btn-primary,
+.btn-primary.btn-green {
+    -fx-background-color: -color-green-500;
+}
+
+.btn-green.btn-primary:hover,
+.btn-primary.btn-green:hover {
+    -fx-background-color: -color-green-600;
+}
+
+.btn-red.btn-primary,
+.btn-primary.btn-red {
+    -fx-background-color: -color-red-500;
+}
+
+.btn-red.btn-primary:hover,
+.btn-primary.btn-red:hover {
+    -fx-background-color: -color-red-600;
+}
+
+.btn-gray.btn-secondary,
+.btn-secondary.btn-gray {
+    -fx-background-color: -color-gray-100;
+}
+
+.btn-gray.btn-secondary:hover,
+.btn-secondary.btn-gray:hover {
+    -fx-background-color: -color-gray-200;
+}
+
+.btn-icon {
+    -fx-padding: 0;
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+    -fx-font-size: 18px;
+}
+
+.btn-circle {
+    -fx-background-radius: 999px;
+}
+
 /* Button sizes */
 .btn-xs {
     -fx-padding: 4px 8px;
@@ -602,6 +695,11 @@ SplitPane .split-pane-divider {
 .btn-sm {
     -fx-padding: 6px 12px;
     -fx-font-size: 12px;
+}
+
+.btn-md {
+    -fx-padding: 8px 16px;
+    -fx-font-size: 14px;
 }
 
 .btn-lg {
@@ -625,6 +723,13 @@ SplitPane .split-pane-divider {
     -fx-font-size: 12px;
 }
 
+/* Card base */
+.card {
+    -fx-background-color: -color-white;
+    -fx-background-radius: 12px;
+    -fx-padding: 16px;
+}
+
 /* Card variants */
 .card-compact {
     -fx-padding: 12px;
@@ -634,7 +739,26 @@ SplitPane .split-pane-divider {
     -fx-padding: 32px;
 }
 
+.card-hoverable:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 4);
+}
+
+/* Alert base */
+.alert {
+    -fx-padding: 12px 16px;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-spacing: 12px;
+}
+
 /* Alert variants */
+.alert-info {
+    -fx-background-color: -color-blue-50;
+    -fx-border-color: -color-blue-200;
+    -fx-text-fill: -color-blue-800;
+}
+
 .alert-success {
     -fx-background-color: -color-green-50;
     -fx-border-color: -color-green-200;
@@ -651,6 +775,91 @@ SplitPane .split-pane-divider {
     -fx-background-color: -color-red-50;
     -fx-border-color: -color-red-200;
     -fx-text-fill: -color-red-800;
+}
+
+/* Badge base */
+.badge {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 2px 8px;
+    -fx-background-radius: 4px;
+}
+
+/* Badge variants */
+.badge-primary {
+    -fx-background-color: -color-blue-100;
+    -fx-text-fill: -color-blue-700;
+}
+
+.badge-success {
+    -fx-background-color: -color-green-100;
+    -fx-text-fill: -color-green-700;
+}
+
+.badge-warning {
+    -fx-background-color: -color-yellow-100;
+    -fx-text-fill: -color-yellow-700;
+}
+
+.badge-error {
+    -fx-background-color: -color-red-100;
+    -fx-text-fill: -color-red-700;
+}
+
+.badge-pill {
+    -fx-background-radius: 999px;
+}
+
+.badge-outline {
+    -fx-background-color: transparent;
+    -fx-border-color: -color-gray-600;
+    -fx-border-width: 1px;
+    -fx-text-fill: -color-gray-700;
+}
+
+/* Avatar base */
+.avatar {
+    -fx-background-radius: 999px;
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+    -fx-alignment: center;
+}
+
+.avatar-xs {
+    -fx-min-width: 24px;
+    -fx-min-height: 24px;
+    -fx-max-width: 24px;
+    -fx-max-height: 24px;
+}
+
+.avatar-sm {
+    -fx-min-width: 32px;
+    -fx-min-height: 32px;
+    -fx-max-width: 32px;
+    -fx-max-height: 32px;
+}
+
+.avatar-md {
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+}
+
+.avatar-lg {
+    -fx-min-width: 56px;
+    -fx-min-height: 56px;
+    -fx-max-width: 56px;
+    -fx-max-height: 56px;
+}
+
+.avatar-xl {
+    -fx-min-width: 72px;
+    -fx-min-height: 72px;
+    -fx-max-width: 72px;
+    -fx-max-height: 72px;
 }
 
 /* Modal variants */

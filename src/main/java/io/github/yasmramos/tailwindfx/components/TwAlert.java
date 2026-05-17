@@ -1,6 +1,6 @@
 package io.github.yasmramos.tailwindfx.components;
 
-import io.github.yasmramos.tailwindfx.TwStyle;
+import io.github.yasmramos.tailwindfx.TailwindFX;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -11,6 +11,8 @@ import javafx.scene.layout.Priority;
 
 /**
  * TwAlert — Pre-styled alert/notification component.
+ * 
+ * Uses base .alert class from tailwindfx-components.css with utility modifiers.
  * 
  * <pre>
  * TwAlert info = TwAlert.info("Operation completed successfully");
@@ -45,7 +47,7 @@ public class TwAlert extends HBox {
      * @return styled TwAlert
      */
     public static TwAlert warning(String message) {
-        return create(message, "warning", "amber");
+        return create(message, "warning", "yellow");
     }
 
     /**
@@ -69,23 +71,16 @@ public class TwAlert extends HBox {
         alert.setSpacing(12);
         alert.setPadding(new Insets(12, 16, 12, 16));
         
-        String bg = getLightColor(color);
-        String border = getColor(color);
-        String fg = getDarkColor(color);
-        
-        alert.setStyle(String.format(
-            "-fx-background-color: %s; -fx-border-color: %s; -fx-border-width: 1px;"
-            + " -fx-border-radius: 8px; -fx-background-radius: 8px;", bg, border));
+        // Apply base alert class and variant
+        TailwindFX.apply(alert, "alert", "alert-" + color);
 
         // Icon/Type label
         Label typeLabel = new Label(type.toUpperCase());
-        typeLabel.setStyle(String.format(
-            "-fx-text-fill: %s; -fx-font-weight: bold; -fx-font-size: 12px;", fg));
+        TailwindFX.apply(typeLabel, "font-bold", "text-sm", "text-" + color + "-800");
         
         // Message
         Label msgLabel = new Label(message);
-        msgLabel.setStyle(String.format(
-            "-fx-text-fill: %s; -fx-font-size: 13px;", getDarkColor("gray")));
+        TailwindFX.apply(msgLabel, "text-gray-700");
         
         alert.getChildren().addAll(typeLabel, msgLabel);
         alert.setAlignment(Pos.CENTER_LEFT);
@@ -105,10 +100,14 @@ public class TwAlert extends HBox {
         TwAlert alert = create(message, type, color);
         
         Label closeBtn = new Label("✕");
-        String fg = getDarkColor(color);
-        closeBtn.setStyle(String.format(
-            "-fx-text-fill: %s; -fx-font-weight: bold; -fx-cursor: hand;"
-            + " -fx-padding: 4 8 4 8; -fx-background-radius: 4px;", fg));
+        TailwindFX.apply(closeBtn, 
+            "font-bold", 
+            "cursor-hand",
+            "px-2", "py-1",
+            "rounded",
+            "text-" + color + "-600",
+            "hover:bg-" + color + "-100"
+        );
         
         closeBtn.setOnMouseClicked(e -> {
             if (onDismiss != null) onDismiss.run();
@@ -119,7 +118,7 @@ public class TwAlert extends HBox {
         
         HBox.setHgrow(closeBtn, Priority.NEVER);
         alert.getChildren().add(closeBtn);
-        alert.setAlignment(Pos.CENTER_LEFT);
+        alert.setAlignment(Pos.CENTER_RIGHT);
         
         return alert;
     }
@@ -129,35 +128,5 @@ public class TwAlert extends HBox {
      */
     protected TwAlert() {
         super();
-    }
-
-    private static String getLightColor(String color) {
-        try {
-            Class<?> palette = Class.forName("io.github.yasmramos.tailwindfx.color.ColorPalette");
-            java.lang.reflect.Method method = palette.getMethod("hex", String.class, int.class);
-            return (String) method.invoke(null, color, 50);
-        } catch (Exception e) {
-            return "#eff6ff";
-        }
-    }
-
-    private static String getColor(String color) {
-        try {
-            Class<?> palette = Class.forName("io.github.yasmramos.tailwindfx.color.ColorPalette");
-            java.lang.reflect.Method method = palette.getMethod("hex", String.class, int.class);
-            return (String) method.invoke(null, color, 200);
-        } catch (Exception e) {
-            return "#bfdbfe";
-        }
-    }
-
-    private static String getDarkColor(String color) {
-        try {
-            Class<?> palette = Class.forName("io.github.yasmramos.tailwindfx.color.ColorPalette");
-            java.lang.reflect.Method method = palette.getMethod("hex", String.class, int.class);
-            return (String) method.invoke(null, color, 800);
-        } catch (Exception e) {
-            return "#1e40af";
-        }
     }
 }

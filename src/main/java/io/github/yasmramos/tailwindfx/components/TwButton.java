@@ -1,13 +1,13 @@
 package io.github.yasmramos.tailwindfx.components;
 
-import io.github.yasmramos.tailwindfx.TwStyle;
+import io.github.yasmramos.tailwindfx.TailwindFX;
 import io.github.yasmramos.tailwindfx.animation.FxAnimation;
 import javafx.scene.control.Button;
-import javafx.scene.effect.BoxBlur;
-import javafx.scene.effect.BlurType;
 
 /**
  * TwButton — Pre-styled button component with TailwindCSS variants.
+ * 
+ * Uses base .btn class from tailwindfx-components.css with utility modifiers.
  * 
  * <pre>
  * Button btn = TwButton.primary("Save");
@@ -38,17 +38,11 @@ public final class TwButton {
      */
     public static Button primary(String text, String color) {
         Button btn = new Button(text);
-        TwStyle.apply(btn, 
-            "bg-" + color + "-600", 
-            "hover:bg-" + color + "-700", 
-            "text-white", 
-            "font-semibold",
-            "py-2", 
-            "px-4", 
-            "rounded-lg",
-            "shadow-md",
-            "transition-colors",
-            "duration-200"
+        TailwindFX.apply(btn, 
+            "btn",
+            "btn-primary",
+            "btn-" + color,
+            "btn-md"
         );
         FxAnimation.onHoverLift(btn, -2);
         return btn;
@@ -71,16 +65,11 @@ public final class TwButton {
      */
     public static Button secondary(String text, String color) {
         Button btn = new Button(text);
-        TwStyle.apply(btn,
-            "bg-" + color + "-100",
-            "hover:bg-" + color + "-200",
-            "text-" + color + "-800",
-            "font-medium",
-            "py-2",
-            "px-4",
-            "rounded-lg",
-            "transition-colors",
-            "duration-200"
+        TailwindFX.apply(btn,
+            "btn",
+            "btn-secondary",
+            "btn-" + color,
+            "btn-md"
         );
         FxAnimation.onHoverLift(btn, -1);
         return btn;
@@ -103,18 +92,11 @@ public final class TwButton {
      */
     public static Button outline(String text, String color) {
         Button btn = new Button(text);
-        TwStyle.apply(btn,
-            "bg-transparent",
-            "border-2",
-            "border-" + color + "-600",
-            "text-" + color + "-600",
-            "hover:bg-" + color + "-50",
-            "font-medium",
-            "py-2",
-            "px-4",
-            "rounded-lg",
-            "transition-colors",
-            "duration-200"
+        TailwindFX.apply(btn,
+            "btn",
+            "btn-outline",
+            "btn-" + color,
+            "btn-md"
         );
         FxAnimation.onHoverLift(btn, -1);
         return btn;
@@ -137,16 +119,11 @@ public final class TwButton {
      */
     public static Button ghost(String text, String color) {
         Button btn = new Button(text);
-        TwStyle.apply(btn,
-            "bg-transparent",
-            "text-" + color + "-600",
-            "hover:bg-" + color + "-50",
-            "font-medium",
-            "py-2",
-            "px-4",
-            "rounded-lg",
-            "transition-colors",
-            "duration-200"
+        TailwindFX.apply(btn,
+            "btn",
+            "btn-ghost",
+            "btn-" + color,
+            "btn-md"
         );
         return btn;
     }
@@ -171,19 +148,12 @@ public final class TwButton {
     public static Button icon(String icon, String label, String color) {
         Button btn = new Button(icon);
         btn.setAccessibleText(label);
-        TwStyle.apply(btn,
-            "bg-" + color + "-100",
-            "hover:bg-" + color + "-200",
-            "text-" + color + "-700",
-            "font-bold",
-            "w-10",
-            "h-10",
-            "rounded-full",
-            "transition-colors",
-            "duration-200"
+        TailwindFX.apply(btn,
+            "btn",
+            "btn-icon",
+            "btn-" + color,
+            "btn-circle"
         );
-        btn.setStyle(btn.getStyle() + " -fx-font-size: 16px;");
-        FxAnimation.onHoverLift(btn, -2);
         return btn;
     }
 
@@ -213,14 +183,9 @@ public final class TwButton {
      */
     public static Button disabled(String text) {
         Button btn = new Button(text);
-        TwStyle.apply(btn,
-            "bg-gray-300",
-            "text-gray-500",
-            "font-medium",
-            "py-2",
-            "px-4",
-            "rounded-lg",
-            "cursor-not-allowed"
+        TailwindFX.apply(btn,
+            "btn",
+            "btn-disabled"
         );
         btn.setDisable(true);
         return btn;
