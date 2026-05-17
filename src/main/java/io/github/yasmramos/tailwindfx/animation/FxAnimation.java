@@ -243,25 +243,23 @@ public final class FxAnimation {
      *
      * @param node the node to animate (must not be null)
      * @return a ready-to-play {@link FxAnimation}
-     * @see #slideLeft(Node, int)
      * @throws IllegalArgumentException if node is null
      */
-    public static FxAnimation slideLeft(Node node) { return slideLeft(node, NORMAL); }
+    public static FxAnimation slideLeft(Node node) { return slideInLeft(node, NORMAL); }
     
     /**
-     * Slides a node from right to left while fading in with specified duration.
+     * Slides a node in from the left with specified duration.
      * 
-     * <p>The node starts 24 pixels to the right with opacity 0, then slides left to its
+     * <p>The node starts off-screen to the left with opacity 0, then slides in to its
      * original position while fading to full opacity. Uses {@code EASE_OUT} interpolation.
      *
      * @param node       the node to animate (must not be null)
      * @param durationMs animation duration in milliseconds (must be > 0)
      * @return a ready-to-play {@link FxAnimation}
-     * @see #slideLeft(Node)
      * @throws IllegalArgumentException if node is null or durationMs <= 0
      */
-    public static FxAnimation slideLeft(Node node, int durationMs) {
-        double startX = node.getTranslateX() + 24;
+    public static FxAnimation slideInLeft(Node node, int durationMs) {
+        double startX = -node.getLayoutBounds().getWidth();
         node.setOpacity(0); node.setTranslateX(startX);
         return new FxAnimation(new Timeline(
             new KeyFrame(Duration.ZERO,
@@ -269,7 +267,79 @@ public final class FxAnimation {
                 new KeyValue(node.translateXProperty(), startX, Interpolator.EASE_OUT)),
             new KeyFrame(Duration.millis(durationMs),
                 new KeyValue(node.opacityProperty(),    1,      Interpolator.EASE_OUT),
-                new KeyValue(node.translateXProperty(), node.getTranslateX() - 24 + 24, Interpolator.EASE_OUT))
+                new KeyValue(node.translateXProperty(), 0, Interpolator.EASE_OUT))
+        ));
+    }
+
+    /**
+     * Slides a node in from the right with specified duration.
+     * 
+     * <p>The node starts off-screen to the right with opacity 0, then slides in to its
+     * original position while fading to full opacity. Uses {@code EASE_OUT} interpolation.
+     *
+     * @param node       the node to animate (must not be null)
+     * @param durationMs animation duration in milliseconds (must be > 0)
+     * @return a ready-to-play {@link FxAnimation}
+     * @throws IllegalArgumentException if node is null or durationMs <= 0
+     */
+    public static FxAnimation slideInRight(Node node, int durationMs) {
+        double startX = node.getLayoutBounds().getWidth();
+        node.setOpacity(0); node.setTranslateX(startX);
+        return new FxAnimation(new Timeline(
+            new KeyFrame(Duration.ZERO,
+                new KeyValue(node.opacityProperty(),    0,      Interpolator.EASE_OUT),
+                new KeyValue(node.translateXProperty(), startX, Interpolator.EASE_OUT)),
+            new KeyFrame(Duration.millis(durationMs),
+                new KeyValue(node.opacityProperty(),    1,      Interpolator.EASE_OUT),
+                new KeyValue(node.translateXProperty(), 0, Interpolator.EASE_OUT))
+        ));
+    }
+
+    /**
+     * Slides a node in from the bottom with specified duration.
+     * 
+     * <p>The node starts off-screen below with opacity 0, then slides in to its
+     * original position while fading to full opacity. Uses {@code EASE_OUT} interpolation.
+     *
+     * @param node       the node to animate (must not be null)
+     * @param durationMs animation duration in milliseconds (must be > 0)
+     * @return a ready-to-play {@link FxAnimation}
+     * @throws IllegalArgumentException if node is null or durationMs <= 0
+     */
+    public static FxAnimation slideInBottom(Node node, int durationMs) {
+        double startY = node.getLayoutBounds().getHeight();
+        node.setOpacity(0); node.setTranslateY(startY);
+        return new FxAnimation(new Timeline(
+            new KeyFrame(Duration.ZERO,
+                new KeyValue(node.opacityProperty(),    0,      Interpolator.EASE_OUT),
+                new KeyValue(node.translateYProperty(), startY, Interpolator.EASE_OUT)),
+            new KeyFrame(Duration.millis(durationMs),
+                new KeyValue(node.opacityProperty(),    1,      Interpolator.EASE_OUT),
+                new KeyValue(node.translateYProperty(), 0, Interpolator.EASE_OUT))
+        ));
+    }
+
+    /**
+     * Slides a node in from the top with specified duration.
+     * 
+     * <p>The node starts off-screen above with opacity 0, then slides in to its
+     * original position while fading to full opacity. Uses {@code EASE_OUT} interpolation.
+     *
+     * @param node       the node to animate (must not be null)
+     * @param durationMs animation duration in milliseconds (must be > 0)
+     * @return a ready-to-play {@link FxAnimation}
+     * @throws IllegalArgumentException if node is null or durationMs <= 0
+     */
+    public static FxAnimation slideInTop(Node node, int durationMs) {
+        double startY = -node.getLayoutBounds().getHeight();
+        node.setOpacity(0); node.setTranslateY(startY);
+        return new FxAnimation(new Timeline(
+            new KeyFrame(Duration.ZERO,
+                new KeyValue(node.opacityProperty(),    0,      Interpolator.EASE_OUT),
+                new KeyValue(node.translateYProperty(), startY, Interpolator.EASE_OUT)),
+            new KeyFrame(Duration.millis(durationMs),
+                new KeyValue(node.opacityProperty(),    1,      Interpolator.EASE_OUT),
+                new KeyValue(node.translateYProperty(), 0, Interpolator.EASE_OUT))
         ));
     }
 

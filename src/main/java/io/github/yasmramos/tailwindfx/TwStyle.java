@@ -53,6 +53,13 @@ public final class TwStyle {
         }
     }
     
+    /**
+     * Static convenience method for applying styles.
+     */
+    public static void applyStatic(Node node, String... tokens) {
+        INSTANCE.apply(node, tokens);
+    }
+    
     private void applyInternal(Node node, String... tokens) {
         java.util.List<String> cssClasses = new java.util.ArrayList<>();
         java.util.List<String> jitTokens = new java.util.ArrayList<>();
@@ -115,6 +122,46 @@ public final class TwStyle {
             node.getStyleClass().remove(cssClass);
         } else {
             node.getStyleClass().add(cssClass);
+        }
+    }
+    
+    /**
+     * Enables automatic cleanup of JIT styles when a node is removed from the scene.
+     */
+    public void autoCleanup(Node node) {
+        Preconditions.requireNode(node, "TwStyle.autoCleanup");
+        // Delegate to existing cleanup mechanism in UtilityConflictResolver
+        io.github.yasmramos.tailwindfx.core.UtilityConflictResolver.autoCleanup(node);
+    }
+    
+    /**
+     * Invalidates the entire style cache for a node.
+     */
+    public void invalidateCache(Node node) {
+        Preconditions.requireNode(node, "TwStyle.invalidateCache");
+        node.getProperties().remove("tailwindfx.category.cache");
+        node.getProperties().remove("tailwindfx.cleanup-listener");
+    }
+    
+    /**
+     * Removes all TailwindFX styles from a node (cleanup).
+     * Alias for invalidateCache for backward compatibility.
+     */
+    public void cleanupNode(Node node) {
+        invalidateCache(node);
+    }
+    
+    /**
+     * Invalidates a specific category from the style cache for a node.
+     */
+    public void invalidateCategoryCache(Node node, String category) {
+        Preconditions.requireNode(node, "TwStyle.invalidateCategoryCache");
+        Preconditions.requireNonBlank(category, "TwStyle.invalidateCategoryCache", "category");
+        @SuppressWarnings("unchecked")
+        java.util.Map<String, String> cache = 
+            (java.util.Map<String, String>) node.getProperties().get("tailwindfx.category.cache");
+        if (cache != null) {
+            cache.remove(category);
         }
     }
     
