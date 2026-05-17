@@ -2,7 +2,8 @@ package io.github.yasmramos.tailwindfx.components;
 
 import io.github.yasmramos.tailwindfx.color.ColorPalette;
 import io.github.yasmramos.tailwindfx.animation.FxAnimation;
-import io.github.yasmramos.tailwindfx.TailwindFX;
+import io.github.yasmramos.tailwindfx.style.Styles;
+import io.github.yasmramos.tailwindfx.TwStyle;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -20,6 +21,8 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.effect.BoxBlur;
+import javafx.scene.effect.BlurType;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -98,7 +101,7 @@ public final class ComponentFactory {
 
         public VBox build() {
             VBox card = new VBox();
-            TailwindFX.apply(card, "bg-white", shadow ? "shadow-md" : "", "rounded-lg");
+            TwStyle.applyStatic(card, "bg-white", shadow ? "shadow-md" : "", "rounded-lg");
             card.setStyle("-fx-background-radius: " + radius + "px;"
                 + (border ? " -fx-border-color: #e5e7eb; -fx-border-width: 1px; -fx-border-radius: " + radius + "px;" : ""));
             double pad = padding * 4;
@@ -107,7 +110,7 @@ public final class ComponentFactory {
 
             if (title != null) {
                 Label lbl = new Label(title);
-                TailwindFX.apply(lbl, "text-lg", "font-semibold", "text-gray-900");
+                TwStyle.applyStatic(lbl, "text-lg", "font-semibold", "text-gray-900");
                 card.getChildren().add(lbl);
             }
             if (body != null) {
@@ -118,7 +121,7 @@ public final class ComponentFactory {
                 Region spacer = new Region();
                 VBox.setVgrow(spacer, Priority.ALWAYS);
                 if (body != null) card.getChildren().add(spacer);
-                TailwindFX.apply(footer, "pt-3", "border-t", "border-gray-100");
+                TwStyle.applyStatic(footer, "pt-3", "border-t", "border-gray-100");
                 card.getChildren().add(footer);
             }
 
@@ -250,7 +253,7 @@ public final class ComponentFactory {
             // Modal panel
             VBox panel = new VBox();
             panel.setMaxWidth(maxWidth);
-            TailwindFX.apply(panel, "bg-white", "rounded-xl", "shadow-xl");
+            TwStyle.applyStatic(panel, "bg-white", "rounded-xl", "shadow-xl");
             panel.setStyle("-fx-background-radius: 16px; -fx-padding: 24;");
             panel.getChildren().add(content);
 
@@ -310,7 +313,7 @@ public final class ComponentFactory {
          */
         public VBox show(Pane root, Node content) {
             VBox drawer = new VBox();
-            TailwindFX.apply(drawer, "bg-white", "shadow-xl");
+            TwStyle.applyStatic(drawer, "bg-white", "shadow-xl");
 
             switch (side) {
                 case LEFT  -> {
@@ -320,9 +323,7 @@ public final class ComponentFactory {
                     root.getChildren().add(drawer);
                     if (animated) {
                         drawer.setTranslateX(-size);
-                        TailwindFX.transition(drawer, (int) durationMs,
-                            new javafx.animation.KeyValue(drawer.translateXProperty(), 0,
-                                javafx.animation.Interpolator.EASE_OUT)).play();
+                        FxAnimation.slideInLeft(drawer, (int) durationMs).play();
                     }
                 }
                 case RIGHT -> {
@@ -333,9 +334,7 @@ public final class ComponentFactory {
                     root.getChildren().add(drawer);
                     if (animated) {
                         drawer.setTranslateX(size);
-                        TailwindFX.transition(drawer, (int) durationMs,
-                            new javafx.animation.KeyValue(drawer.translateXProperty(), 0,
-                                javafx.animation.Interpolator.EASE_OUT)).play();
+                        FxAnimation.slideInRight(drawer, (int) durationMs).play();
                     }
                 }
                 case BOTTOM -> {
@@ -346,9 +345,7 @@ public final class ComponentFactory {
                     root.getChildren().add(drawer);
                     if (animated) {
                         drawer.setTranslateY(size);
-                        TailwindFX.transition(drawer, (int) durationMs,
-                            new javafx.animation.KeyValue(drawer.translateYProperty(), 0,
-                                javafx.animation.Interpolator.EASE_OUT)).play();
+                        FxAnimation.slideInBottom(drawer, (int) durationMs).play();
                     }
                 }
                 case TOP -> {
@@ -358,9 +355,7 @@ public final class ComponentFactory {
                     root.getChildren().add(drawer);
                     if (animated) {
                         drawer.setTranslateY(-size);
-                        TailwindFX.transition(drawer, (int) durationMs,
-                            new javafx.animation.KeyValue(drawer.translateYProperty(), 0,
-                                javafx.animation.Interpolator.EASE_OUT)).play();
+                        FxAnimation.slideInTop(drawer, (int) durationMs).play();
                     }
                 }
             }
@@ -407,7 +402,8 @@ public final class ComponentFactory {
                 + borderStyle
             );
             // BoxBlur for the glass effect
-            TailwindFX.backdropBlur(pane, blur);
+            BoxBlur blurEffect = new BoxBlur(blur, blur, 1);
+            pane.setEffect(blurEffect);
             return pane;
         }
     }
