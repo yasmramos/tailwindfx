@@ -25,6 +25,186 @@ public final class TwLayout {
     private TwLayout() {}
     
     /**
+     * Apply layout classes (flex, grid, gap) with automatic container migration if needed.
+     * @param node the node to apply layout to
+     * @param tokens the layout tokens (flex, grid, gap-*, etc.)
+     */
+    public static void apply(Node node, String... tokens) {
+        if (tokens == null || tokens.length == 0) return;
+        
+        // Parse tokens to determine layout type
+        for (String token : tokens) {
+            if (token == null || token.isBlank()) continue;
+            
+            // Handle flex container
+            if (token.equals("flex")) {
+                migrateToFlexContainer(node);
+            } else if (token.equals("grid")) {
+                migrateToGridContainer(node);
+            } else if (token.startsWith("gap-")) {
+                // Gap is handled by the container
+                Pane parent = getEffectiveParent(node);
+                if (parent != null) {
+                    applyGapStyle(parent, token);
+                }
+            } else if (token.startsWith("flex-") || token.equals("grow") || token.equals("shrink")) {
+                // Flex item properties - applied to children
+                Pane parent = getEffectiveParent(node);
+                if (parent != null) {
+                    applyFlexItemStyle(node, parent, token);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Migrates a node's parent to FxFlexPane if needed.
+     */
+    private static void migrateToFlexContainer(Node node) {
+        javafx.scene.Parent currentParent = node.getParent();
+        if (currentParent instanceof FxFlexPane) {
+            // Already a flex container, no migration needed
+            return;
+        }
+        
+        if (currentParent instanceof Pane pane) {
+            // Use FxLayout builder to migrate
+            FxFlexPane flexPane = FxFlexPane.row();
+            migrateContent(pane, flexPane);
+        }
+    }
+    
+    /**
+     * Migrates a node's parent to FxGridPane if needed.
+     */
+    private static void migrateToGridContainer(Node node) {
+        javafx.scene.Parent currentParent = node.getParent();
+        if (currentParent instanceof FxGridPane) {
+            // Already a grid container, no migration needed
+            return;
+        }
+        
+        if (currentParent instanceof Pane pane) {
+            // Use FxLayout builder to migrate
+            FxGridPane gridPane = FxGridPane.create().build();
+            migrateContent(pane, gridPane);
+        }
+    }
+    
+    /**
+     * Migrates content from source pane to target pane.
+     */
+    private static void migrateContent(Pane source, Pane target) {
+        if (source == null || target == null) return;
+        
+        javafx.scene.Parent grandParent = source.getParent();
+        int index = -1;
+        
+        if (grandParent instanceof javafx.scene.layout.Pane gp) {
+            index = gp.getChildren().indexOf(source);
+        }
+        
+        // Copy children
+        java.util.List<javafx.scene.Node> children = new java.util.ArrayList<>(source.getChildren());
+        target.getChildren().addAll(children);
+        source.getChildren().clear();
+        
+        // Replace source with target in grandparent
+        if (grandParent instanceof javafx.scene.layout.Pane gp && index >= 0) {
+            gp.getChildren().remove(source);
+            gp.getChildren().add(index, target);
+        }
+    }
+    
+    /**
+     * Gets the effective parent pane.
+     */
+    private static Pane getEffectiveParent(Node node) {
+        javafx.scene.Parent parent = node.getParent();
+        if (parent instanceof Pane) {
+            return (Pane) parent;
+        }
+        return null;
+    }
+    
+    /**
+     * Applies gap style to a container.
+     */
+    private static void applyGapStyle(Pane parent, String token) {
+        int value = parseTailwindValue(token);
+        double px = value * 4.0;
+        
+        if (parent instanceof FxFlexPane flexPane) {
+            if (token.startsWith("gap-x-")) {
+                flexPane.gapX(px);
+            } else if (token.startsWith("gap-y-")) {
+                flexPane.gapY(px);
+            } else {
+                flexPane.gap(px);
+            }
+        } else if (parent instanceof FxGridPane gridPane) {
+            if (token.startsWith("gap-x-")) {
+                gridPane.gapX(px);
+            } else if (token.startsWith("gap-y-")) {
+                gridPane.gapY(px);
+            } else {
+                gridPane.gap(px);
+            }
+        }
+        // Add more container types as needed
+    }
+    
+    /**
+     * Applies flex item style to a node.
+     */
+    private static void applyFlexItemStyle(Node node, Pane parent, String token) {
+        if (parent instanceof FxFlexPane flexPane) {
+            if (token.equals("grow") || token.equals("flex-1")) {
+                FxFlexPane.setGrow(node, 1);
+            } else if (token.equals("shrink") || token.equals("flex-none")) {
+                FxFlexPane.setShrink(node, 0);
+            } else if (token.equals("flex-auto")) {
+                FxFlexPane.setGrow(node, 1);
+                FxFlexPane.setShrink(node, 1);
+            } else if (token.startsWith("flex-")) {
+                try {
+                    String value = token.substring(5);
+                    if (value.startsWith("[") && value.endsWith("]")) {
+                        value = value.substring(1, value.length() - 1);
+                    }
+                    double flexValue = Double.parseDouble(value);
+                    FxFlexPane.setGrow(node, flexValue);
+                } catch (NumberFormatException e) {
+                    // Ignore invalid values
+                }
+            }
+        }
+        // Add more container types as needed
+    }
+    
+    /**
+     * Parses numeric value from Tailwind token.
+     */
+    private static int parseTailwindValue(String token) {
+        if (token.contains("[")) {
+            int start = token.indexOf('[') + 1;
+            int end = token.indexOf(']');
+            String value = token.substring(start, end);
+            if (value.contains("px")) {
+                return (int) Double.parseDouble(value.replace("px", ""));
+            }
+            return Integer.parseInt(value);
+        }
+        
+        String numPart = token.substring(token.lastIndexOf('-') + 1);
+        try {
+            return Integer.parseInt(numPart);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+    
+    /**
      * Get layout builder for a container.
      * @param container the pane container
      * @return FxLayout builder
