@@ -6,9 +6,9 @@ import io.github.yasmramos.tailwindfx.style.StyleMerger;
 import io.github.yasmramos.tailwindfx.style.StylePerf;
 import io.github.yasmramos.tailwindfx.style.Styles;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
-import io.github.yasmramos.tailwindfx.layout.FxLayout;
-import io.github.yasmramos.tailwindfx.components.FxFlexPane;
-import io.github.yasmramos.tailwindfx.components.FxGridPane;
+import io.github.yasmramos.tailwindfx.layout.TwLayoutHelper;
+import io.github.yasmramos.tailwindfx.components.TwFlexPane;
+import io.github.yasmramos.tailwindfx.components.TwGridPane;
 
 import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
@@ -161,7 +161,7 @@ public final class TwStyle {
     }
     
     /**
-     * Gets the effective parent pane, handling special cases like FxFlexPane.
+     * Gets the effective parent pane, handling special cases like TwFlexPane.
      */
     private static javafx.scene.layout.Pane getEffectiveParent(Node node) {
         javafx.scene.Parent parent = node.getParent();
@@ -241,12 +241,12 @@ public final class TwStyle {
     }
     
     /**
-     * Delegates flex application to FxFlexPane or Styles.java methods.
+     * Delegates flex application to TwFlexPane or Styles.java methods.
      */
     private static void applyFlexStyleViaStyles(Node node, javafx.scene.layout.Pane parent, String token) {
-        // Prioritize FxFlexPane if parent is FxFlexPane
-        if (parent instanceof io.github.yasmramos.tailwindfx.components.FxFlexPane flexPane) {
-            applyFlexForFxFlexPane(node, token);
+        // Prioritize TwFlexPane if parent is TwFlexPane
+        if (parent instanceof io.github.yasmramos.tailwindfx.components.TwFlexPane flexPane) {
+            applyFlexForTwFlexPane(node, token);
             return;
         }
         
@@ -292,19 +292,19 @@ public final class TwStyle {
     }
     
     /**
-     * Applies flex styles specifically for FxFlexPane container.
+     * Applies flex styles specifically for TwFlexPane container.
      */
-    private static void applyFlexForFxFlexPane(Node node, String token) {
+    private static void applyFlexForTwFlexPane(Node node, String token) {
         if (token.equals("grow") || token.equals("flex-1")) {
-            io.github.yasmramos.tailwindfx.components.FxFlexPane.setGrow(node, 1);
+            io.github.yasmramos.tailwindfx.components.TwFlexPane.setGrow(node, 1);
         } else if (token.equals("shrink") || token.equals("flex-none")) {
-            io.github.yasmramos.tailwindfx.components.FxFlexPane.setShrink(node, 0);
+            io.github.yasmramos.tailwindfx.components.TwFlexPane.setShrink(node, 0);
         } else if (token.equals("flex-auto")) {
-            io.github.yasmramos.tailwindfx.components.FxFlexPane.setGrow(node, 1);
-            io.github.yasmramos.tailwindfx.components.FxFlexPane.setShrink(node, 1);
+            io.github.yasmramos.tailwindfx.components.TwFlexPane.setGrow(node, 1);
+            io.github.yasmramos.tailwindfx.components.TwFlexPane.setShrink(node, 1);
         } else if (token.equals("flex-initial")) {
-            io.github.yasmramos.tailwindfx.components.FxFlexPane.setGrow(node, 0);
-            io.github.yasmramos.tailwindfx.components.FxFlexPane.setShrink(node, 1);
+            io.github.yasmramos.tailwindfx.components.TwFlexPane.setGrow(node, 0);
+            io.github.yasmramos.tailwindfx.components.TwFlexPane.setShrink(node, 1);
         } else if (token.startsWith("flex-")) {
             // Handle arbitrary flex values like flex-[2]
             try {
@@ -313,7 +313,7 @@ public final class TwStyle {
                     value = value.substring(1, value.length() - 1);
                 }
                 double flexValue = Double.parseDouble(value);
-                io.github.yasmramos.tailwindfx.components.FxFlexPane.setGrow(node, flexValue);
+                io.github.yasmramos.tailwindfx.components.TwFlexPane.setGrow(node, flexValue);
             } catch (NumberFormatException e) {
                 // Ignore invalid flex values
             }
@@ -343,8 +343,8 @@ public final class TwStyle {
             px = value * 4.0;
         }
         
-        // Prioritize FxFlexPane if parent is FxFlexPane
-        if (parent instanceof io.github.yasmramos.tailwindfx.components.FxFlexPane flexPane) {
+        // Prioritize TwFlexPane if parent is TwFlexPane
+        if (parent instanceof io.github.yasmramos.tailwindfx.components.TwFlexPane flexPane) {
             if (token.startsWith("gap-x-")) {
                 flexPane.gapX(px);
             } else if (token.startsWith("gap-y-")) {
@@ -355,8 +355,8 @@ public final class TwStyle {
             return;
         }
         
-        // Prioritize FxGridPane if parent is FxGridPane
-        if (parent instanceof io.github.yasmramos.tailwindfx.components.FxGridPane gridPane) {
+        // Prioritize TwGridPane if parent is TwGridPane
+        if (parent instanceof io.github.yasmramos.tailwindfx.components.TwGridPane gridPane) {
             if (token.startsWith("gap-x-")) {
                 gridPane.gapX(px);
             } else if (token.startsWith("gap-y-")) {

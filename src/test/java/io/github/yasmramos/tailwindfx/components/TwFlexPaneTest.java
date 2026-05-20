@@ -1,6 +1,6 @@
 package io.github.yasmramos.tailwindfx.components;
 
-import io.github.yasmramos.tailwindfx.components.FxFlexPane;
+import io.github.yasmramos.tailwindfx.components.TwFlexPane;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
@@ -8,12 +8,12 @@ import javafx.scene.layout.Region;
 import java.util.List;
 
 /**
- * Unit tests for {@link FxFlexPane} layout engine.
+ * Unit tests for {@link TwFlexPane} layout engine.
  *
  * <p>
  * Pure Java — no JavaFX Application Thread needed. Tests invoke
- * {@link FxFlexPane#layoutChildren()} indirectly via
- * {@link FxFlexPane#resize(double, double)} then read child positions.
+ * {@link TwFlexPane#layoutChildren()} indirectly via
+ * {@link TwFlexPane#resize(double, double)} then read child positions.
  *
  * <p>
  * Run with any test framework. Each method is self-contained and prints
@@ -21,12 +21,12 @@ import java.util.List;
  *
  * <pre>
  * // Run all tests:
- * FxFlexPaneTest.runAll();
+ * TwFlexPaneTest.runAll();
  * </pre>
  */
-public final class FxFlexPaneTest {
+public final class TwFlexPaneTest {
 
-    private FxFlexPaneTest() {
+    private TwFlexPaneTest() {
     }
 
     // =========================================================================
@@ -66,7 +66,7 @@ public final class FxFlexPaneTest {
 
         for (String test : tests) {
             try {
-                java.lang.reflect.Method m = FxFlexPaneTest.class.getMethod(test);
+                java.lang.reflect.Method m = TwFlexPaneTest.class.getMethod(test);
                 m.invoke(null);
                 System.out.printf("  ✅ %-35s PASS%n", test);
                 passed++;
@@ -99,7 +99,7 @@ public final class FxFlexPaneTest {
      * Lays out a flex pane at the given size, then returns the children in
      * their post-layout positions.
      */
-    static List<Node> layout(FxFlexPane pane, double w, double h) {
+    static List<Node> layout(TwFlexPane pane, double w, double h) {
         pane.resize(w, h);
         pane.layout(); // triggers layoutChildren()
         return pane.getChildren();
@@ -121,7 +121,7 @@ public final class FxFlexPaneTest {
     // Row basic
     // =========================================================================
     public static void testRowLayoutBasic() {
-        FxFlexPane p = FxFlexPane.row().gap(0);
+        TwFlexPane p = TwFlexPane.row().gap(0);
         Region a = box(50, 30), b = box(80, 30);
         p.getChildren().addAll(a, b);
         layout(p, 200, 50);
@@ -130,7 +130,7 @@ public final class FxFlexPaneTest {
     }
 
     public static void testColumnLayoutBasic() {
-        FxFlexPane p = FxFlexPane.col().gap(0);
+        TwFlexPane p = TwFlexPane.col().gap(0);
         Region a = box(50, 30), b = box(50, 40);
         p.getChildren().addAll(a, b);
         layout(p, 100, 200);
@@ -139,7 +139,7 @@ public final class FxFlexPaneTest {
     }
 
     public static void testSingleChild() {
-        FxFlexPane p = FxFlexPane.row();
+        TwFlexPane p = TwFlexPane.row();
         Region a = box(60, 40);
         p.getChildren().add(a);
         layout(p, 200, 100);
@@ -148,7 +148,7 @@ public final class FxFlexPaneTest {
     }
 
     public static void testEmptyContainer() {
-        FxFlexPane p = FxFlexPane.row();
+        TwFlexPane p = TwFlexPane.row();
         layout(p, 200, 100); // should not throw
     }
 
@@ -156,7 +156,7 @@ public final class FxFlexPaneTest {
     // Justify-content
     // =========================================================================
     public static void testJustifyStart() {
-        FxFlexPane p = FxFlexPane.row().justify(FxFlexPane.Justify.START).gap(0);
+        TwFlexPane p = TwFlexPane.row().justify(TwFlexPane.Justify.START).gap(0);
         Region a = box(50, 30), b = box(50, 30);
         p.getChildren().addAll(a, b);
         layout(p, 200, 50);
@@ -165,7 +165,7 @@ public final class FxFlexPaneTest {
     }
 
     public static void testJustifyCenter() {
-        FxFlexPane p = FxFlexPane.row().justify(FxFlexPane.Justify.CENTER).gap(0);
+        TwFlexPane p = TwFlexPane.row().justify(TwFlexPane.Justify.CENTER).gap(0);
         Region a = box(50, 30), b = box(50, 30);
         p.getChildren().addAll(a, b);
         layout(p, 200, 50);
@@ -175,7 +175,7 @@ public final class FxFlexPaneTest {
     }
 
     public static void testJustifyEnd() {
-        FxFlexPane p = FxFlexPane.row().justify(FxFlexPane.Justify.END).gap(0);
+        TwFlexPane p = TwFlexPane.row().justify(TwFlexPane.Justify.END).gap(0);
         Region a = box(50, 30), b = box(50, 30);
         p.getChildren().addAll(a, b);
         layout(p, 200, 50);
@@ -185,7 +185,7 @@ public final class FxFlexPaneTest {
     }
 
     public static void testJustifyBetween() {
-        FxFlexPane p = FxFlexPane.row().justify(FxFlexPane.Justify.BETWEEN).gap(0);
+        TwFlexPane p = TwFlexPane.row().justify(TwFlexPane.Justify.BETWEEN).gap(0);
         Region a = box(50, 30), b = box(50, 30);
         p.getChildren().addAll(a, b);
         layout(p, 200, 50);
@@ -195,7 +195,7 @@ public final class FxFlexPaneTest {
     }
 
     public static void testJustifyAround() {
-        FxFlexPane p = FxFlexPane.row().justify(FxFlexPane.Justify.AROUND).gap(0);
+        TwFlexPane p = TwFlexPane.row().justify(TwFlexPane.Justify.AROUND).gap(0);
         Region a = box(50, 30), b = box(50, 30);
         p.getChildren().addAll(a, b);
         layout(p, 200, 50);
@@ -205,7 +205,7 @@ public final class FxFlexPaneTest {
     }
 
     public static void testJustifyEvenly() {
-        FxFlexPane p = FxFlexPane.row().justify(FxFlexPane.Justify.EVENLY).gap(0);
+        TwFlexPane p = TwFlexPane.row().justify(TwFlexPane.Justify.EVENLY).gap(0);
         Region a = box(50, 30), b = box(50, 30);
         p.getChildren().addAll(a, b);
         layout(p, 200, 50);
@@ -218,7 +218,7 @@ public final class FxFlexPaneTest {
     // Align-items
     // =========================================================================
     public static void testAlignStart() {
-        FxFlexPane p = FxFlexPane.row().align(FxFlexPane.Align.START).gap(0);
+        TwFlexPane p = TwFlexPane.row().align(TwFlexPane.Align.START).gap(0);
         Region a = box(50, 20);
         p.getChildren().add(a);
         layout(p, 200, 100);
@@ -227,7 +227,7 @@ public final class FxFlexPaneTest {
     }
 
     public static void testAlignCenter() {
-        FxFlexPane p = FxFlexPane.row().align(FxFlexPane.Align.CENTER).gap(0);
+        TwFlexPane p = TwFlexPane.row().align(TwFlexPane.Align.CENTER).gap(0);
         Region a = box(50, 20);
         p.getChildren().add(a);
         layout(p, 200, 100);
@@ -236,7 +236,7 @@ public final class FxFlexPaneTest {
     }
 
     public static void testAlignEnd() {
-        FxFlexPane p = FxFlexPane.row().align(FxFlexPane.Align.END).gap(0);
+        TwFlexPane p = TwFlexPane.row().align(TwFlexPane.Align.END).gap(0);
         Region a = box(50, 20);
         p.getChildren().add(a);
         layout(p, 200, 100);
@@ -244,7 +244,7 @@ public final class FxFlexPaneTest {
     }
 
     public static void testAlignStretch() {
-        FxFlexPane p = FxFlexPane.row().align(FxFlexPane.Align.STRETCH).gap(0);
+        TwFlexPane p = TwFlexPane.row().align(TwFlexPane.Align.STRETCH).gap(0);
         Region a = box(50, 20);
         p.getChildren().add(a);
         layout(p, 200, 100);
@@ -255,10 +255,10 @@ public final class FxFlexPaneTest {
     // Flex-grow
     // =========================================================================
     public static void testFlexGrow() {
-        FxFlexPane p = FxFlexPane.row().gap(0);
+        TwFlexPane p = TwFlexPane.row().gap(0);
         Region fixed = box(60, 30);
         Region grows = box(60, 30);
-        FxFlexPane.setGrow(grows, 1);
+        TwFlexPane.setGrow(grows, 1);
         p.getChildren().addAll(fixed, grows);
         layout(p, 200, 50);
         // free = 200 - 120 = 80; grows takes all 80
@@ -271,10 +271,10 @@ public final class FxFlexPaneTest {
     // Flex-shrink
     // =========================================================================
     public static void testFlexShrink() {
-        FxFlexPane p = FxFlexPane.row().gap(0);
+        TwFlexPane p = TwFlexPane.row().gap(0);
         Region a = box(150, 30); // shrink = 1 (default)
         Region b = box(150, 30); // shrink = 0 (fixed)
-        FxFlexPane.setShrink(b, 0);
+        TwFlexPane.setShrink(b, 0);
         p.getChildren().addAll(a, b);
         layout(p, 200, 50);
         // total pref = 300, overflow = 100
@@ -288,12 +288,12 @@ public final class FxFlexPaneTest {
     // Flex-basis
     // =========================================================================
     public static void testFlexBasisZero() {
-        FxFlexPane p = FxFlexPane.row().gap(0);
+        TwFlexPane p = TwFlexPane.row().gap(0);
         Region a = box(100, 30), b = box(100, 30);
-        FxFlexPane.setBasis(a, 0);
-        FxFlexPane.setGrow(a, 1);
-        FxFlexPane.setBasis(b, 0);
-        FxFlexPane.setGrow(b, 1);
+        TwFlexPane.setBasis(a, 0);
+        TwFlexPane.setGrow(a, 1);
+        TwFlexPane.setBasis(b, 0);
+        TwFlexPane.setGrow(b, 1);
         p.getChildren().addAll(a, b);
         layout(p, 200, 50);
         // basis 0 + equal grow → each gets 100
@@ -302,9 +302,9 @@ public final class FxFlexPaneTest {
     }
 
     public static void testFlexBasisFixed() {
-        FxFlexPane p = FxFlexPane.row().gap(0);
+        TwFlexPane p = TwFlexPane.row().gap(0);
         Region a = box(50, 30);
-        FxFlexPane.setBasis(a, 120); // override pref 50 with 120
+        TwFlexPane.setBasis(a, 120); // override pref 50 with 120
         p.getChildren().add(a);
         layout(p, 200, 50);
         assertEquals("a.width", 120, a.getWidth());
@@ -314,11 +314,11 @@ public final class FxFlexPaneTest {
     // Order
     // =========================================================================
     public static void testOrder() {
-        FxFlexPane p = FxFlexPane.row().justify(FxFlexPane.Justify.START).gap(0);
+        TwFlexPane p = TwFlexPane.row().justify(TwFlexPane.Justify.START).gap(0);
         Region first = box(50, 30);
         Region second = box(50, 30);
-        FxFlexPane.setOrder(first, 2);   // goes second visually
-        FxFlexPane.setOrder(second, 1);  // goes first visually
+        TwFlexPane.setOrder(first, 2);   // goes second visually
+        TwFlexPane.setOrder(second, 1);  // goes first visually
         p.getChildren().addAll(first, second);
         layout(p, 200, 50);
         // second (order=1) should be at x=0, first (order=2) at x=50
@@ -330,10 +330,10 @@ public final class FxFlexPaneTest {
     // Align-self
     // =========================================================================
     public static void testAlignSelf() {
-        FxFlexPane p = FxFlexPane.row().align(FxFlexPane.Align.START).gap(0);
+        TwFlexPane p = TwFlexPane.row().align(TwFlexPane.Align.START).gap(0);
         Region a = box(50, 20); // uses container align (START)
         Region b = box(50, 20);
-        FxFlexPane.setAlignSelf(b, FxFlexPane.Align.CENTER); // override
+        TwFlexPane.setAlignSelf(b, TwFlexPane.Align.CENTER); // override
         p.getChildren().addAll(a, b);
         layout(p, 200, 100);
         assertEquals("a.y", 0, a.getLayoutY());          // container START
@@ -344,7 +344,7 @@ public final class FxFlexPaneTest {
     // Gap
     // =========================================================================
     public static void testGapRow() {
-        FxFlexPane p = FxFlexPane.row().gap(10);
+        TwFlexPane p = TwFlexPane.row().gap(10);
         Region a = box(50, 30), b = box(50, 30);
         p.getChildren().addAll(a, b);
         layout(p, 200, 50);
@@ -352,7 +352,7 @@ public final class FxFlexPaneTest {
     }
 
     public static void testGapColumn() {
-        FxFlexPane p = FxFlexPane.col().gap(8);
+        TwFlexPane p = TwFlexPane.col().gap(8);
         Region a = box(50, 30), b = box(50, 30);
         p.getChildren().addAll(a, b);
         layout(p, 100, 200);
@@ -360,7 +360,7 @@ public final class FxFlexPaneTest {
     }
 
     public static void testGapXY() {
-        FxFlexPane p = FxFlexPane.row().gapX(12).gapY(6); // main=12, cross=6
+        TwFlexPane p = TwFlexPane.row().gapX(12).gapY(6); // main=12, cross=6
         Region a = box(50, 30), b = box(50, 30);
         p.getChildren().addAll(a, b);
         layout(p, 200, 50);
@@ -371,7 +371,7 @@ public final class FxFlexPaneTest {
     // Wrap
     // =========================================================================
     public static void testWrapRow() {
-        FxFlexPane p = FxFlexPane.row().wrap(true).gapX(0).gapY(0);
+        TwFlexPane p = TwFlexPane.row().wrap(true).gapX(0).gapY(0);
         Region a = box(80, 30), b = box(80, 30), c = box(80, 30);
         p.getChildren().addAll(a, b, c);
         layout(p, 150, 200); // only 2 fit per row (80+80=160 > 150 with gap)
@@ -385,9 +385,9 @@ public final class FxFlexPaneTest {
     // Padding
     // =========================================================================
     public static void testPadding() {
-        FxFlexPane p = FxFlexPane.row()
+        TwFlexPane p = TwFlexPane.row()
                 .padding(new Insets(10, 5, 10, 5))
-                .justify(FxFlexPane.Justify.START)
+                .justify(TwFlexPane.Justify.START)
                 .gap(0);
         Region a = box(50, 30);
         p.getChildren().add(a);

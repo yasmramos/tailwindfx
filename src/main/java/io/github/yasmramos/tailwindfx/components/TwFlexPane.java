@@ -13,7 +13,7 @@ import java.util.List;
 import javafx.scene.Parent;
 
 /**
- * FxFlexPane — a Flexbox-model layout container for JavaFX.
+ * TwFlexPane — a Flexbox-model layout container for JavaFX.
  *
  * <p>
  * Fills the gap between JavaFX's existing layout panes and the CSS flexbox
@@ -26,13 +26,13 @@ import javafx.scene.Parent;
  * <li>{@code VBox} — column only, no wrap.</li>
  * <li>{@code FlowPane} — wraps but has no justify-content or align-items.</li>
  * <li>{@code TilePane} — forces equal size on all children.</li>
- * <li><b>FxFlexPane</b> — direction, wrap, justify, align, gap — all at
+ * <li><b>TwFlexPane</b> — direction, wrap, justify, align, gap — all at
  * once.</li>
  * </ul>
  *
  * <h3>Usage</h3>
  * <pre>
- * FxFlexPane flex = new FxFlexPane();
+ * TwFlexPane flex = new TwFlexPane();
  * flex.setDirection(Direction.ROW);
  * flex.setWrap(true);
  * flex.setJustify(Justify.BETWEEN);
@@ -40,7 +40,7 @@ import javafx.scene.Parent;
  * flex.setGap(16);
  *
  * // Or fluent:
- * FxFlexPane flex = FxFlexPane.row()
+ * TwFlexPane flex = TwFlexPane.row()
  *     .wrap(true)
  *     .justify(Justify.BETWEEN)
  *     .align(Align.CENTER)
@@ -49,16 +49,16 @@ import javafx.scene.Parent;
  * // Responsive direction switch:
  * flex.setDirection(Direction.COL);   // on narrow screen
  * flex.setDirection(Direction.ROW);   // on wide screen
- * // FxFlexPane re-layouts immediately — no rebuild needed.
+ * // TwFlexPane re-layouts immediately — no rebuild needed.
  *
  * // Per-child flex-grow:
- * FxFlexPane.setGrow(child, 1);  // like flex-1
- * FxFlexPane.setGrow(child, 0);  // like flex-none (default)
+ * TwFlexPane.setGrow(child, 1);  // like flex-1
+ * TwFlexPane.setGrow(child, 0);  // like flex-none (default)
  * </pre>
  *
  * <h3>Integration with TailwindFX</h3>
  * <pre>
- * FxFlexPane flex = FxFlexPane.row().gap(16).justify(Justify.BETWEEN);
+ * TwFlexPane flex = TwFlexPane.row().gap(16).justify(Justify.BETWEEN);
  * TailwindFX.apply(flex, "p-4", "bg-white", "rounded-lg");
  *
  * // Responsive with ResponsiveNode:
@@ -70,7 +70,7 @@ import javafx.scene.Parent;
  * </pre>
  *
  */
-public class FxFlexPane extends Pane {
+public class TwFlexPane extends Pane {
 
     // =========================================================================
     // Enums
@@ -148,17 +148,17 @@ public class FxFlexPane extends Pane {
     // Static factory methods
     // =========================================================================
     /**
-     * Creates a row-direction FxFlexPane.
+     * Creates a row-direction TwFlexPane.
      */
-    public static FxFlexPane row() {
-        return new FxFlexPane();
+    public static TwFlexPane row() {
+        return new TwFlexPane();
     }
 
     /**
-     * Creates a column-direction FxFlexPane.
+     * Creates a column-direction TwFlexPane.
      */
-    public static FxFlexPane col() {
-        FxFlexPane f = new FxFlexPane();
+    public static TwFlexPane col() {
+        TwFlexPane f = new TwFlexPane();
         f.setDirection(Direction.COL);
         return f;
     }
@@ -169,7 +169,7 @@ public class FxFlexPane extends Pane {
     /**
      * Sets the main axis direction. Triggers layout.
      */
-    public FxFlexPane direction(Direction d) {
+    public TwFlexPane direction(Direction d) {
         setDirection(d);
         return this;
     }
@@ -177,7 +177,7 @@ public class FxFlexPane extends Pane {
     /**
      * Enables or disables wrapping. Triggers layout.
      */
-    public FxFlexPane wrap(boolean w) {
+    public TwFlexPane wrap(boolean w) {
         setWrap(w);
         return this;
     }
@@ -185,7 +185,7 @@ public class FxFlexPane extends Pane {
     /**
      * Sets justify-content distribution. Triggers layout.
      */
-    public FxFlexPane justify(Justify j) {
+    public TwFlexPane justify(Justify j) {
         setJustify(j);
         return this;
     }
@@ -193,7 +193,7 @@ public class FxFlexPane extends Pane {
     /**
      * Sets align-items. Triggers layout.
      */
-    public FxFlexPane align(Align a) {
+    public TwFlexPane align(Align a) {
         setAlign(a);
         return this;
     }
@@ -202,7 +202,7 @@ public class FxFlexPane extends Pane {
      * Sets align-content (multi-line alignment). Triggers layout.
      * Only applies when wrap=true and there are multiple lines.
      */
-    public FxFlexPane alignContent(AlignContent ac) {
+    public TwFlexPane alignContent(AlignContent ac) {
         setAlignContent(ac);
         return this;
     }
@@ -210,9 +210,9 @@ public class FxFlexPane extends Pane {
     /**
      * Sets uniform gap (both main and cross axes). Triggers layout.
      */
-    public FxFlexPane gap(double px) {
+    public TwFlexPane gap(double px) {
         if (px < 0) {
-            throw new IllegalArgumentException("FxFlexPane.gap: must be >= 0, got: " + px);
+            throw new IllegalArgumentException("TwFlexPane.gap: must be >= 0, got: " + px);
         }
         gapMain = px;
         gapCross = px;
@@ -223,7 +223,7 @@ public class FxFlexPane extends Pane {
     /**
      * Sets main-axis gap (row gap in row mode, column gap in column mode).
      */
-    public FxFlexPane gapX(double px) {
+    public TwFlexPane gapX(double px) {
         gapMain = px;
         requestLayout();
         return this;
@@ -232,7 +232,7 @@ public class FxFlexPane extends Pane {
     /**
      * Sets cross-axis gap.
      */
-    public FxFlexPane gapY(double px) {
+    public TwFlexPane gapY(double px) {
         gapCross = px;
         requestLayout();
         return this;
@@ -241,8 +241,8 @@ public class FxFlexPane extends Pane {
     /**
      * Sets padding around the flex container.
      */
-    public FxFlexPane padding(Insets p) {
-        Preconditions.requireNonNull(p, "FxFlexPane.padding", "insets");
+    public TwFlexPane padding(Insets p) {
+        Preconditions.requireNonNull(p, "TwFlexPane.padding", "insets");
         padding = p;
         setPadding(p);
         requestLayout();
@@ -252,7 +252,7 @@ public class FxFlexPane extends Pane {
     /**
      * Sets uniform padding.
      */
-    public FxFlexPane padding(double px) {
+    public TwFlexPane padding(double px) {
         return padding(new Insets(px));
     }
 
@@ -260,7 +260,7 @@ public class FxFlexPane extends Pane {
     // Standard setters
     // =========================================================================
     public void setDirection(Direction d) {
-        Preconditions.requireNonNull(d, "FxFlexPane.setDirection", "direction");
+        Preconditions.requireNonNull(d, "TwFlexPane.setDirection", "direction");
         direction = d;
         requestLayout();
     }
@@ -284,7 +284,7 @@ public class FxFlexPane extends Pane {
      * instant
      */
     public void setDirectionAnimated(Direction d, int durationMs) {
-        Preconditions.requireNonNull(d, "FxFlexPane.setDirectionAnimated", "direction");
+        Preconditions.requireNonNull(d, "TwFlexPane.setDirectionAnimated", "direction");
         if (durationMs <= 0 || d == direction) {
             setDirection(d);
             return;
@@ -311,19 +311,19 @@ public class FxFlexPane extends Pane {
     }
 
     public void setJustify(Justify j) {
-        Preconditions.requireNonNull(j, "FxFlexPane.setJustify", "justify");
+        Preconditions.requireNonNull(j, "TwFlexPane.setJustify", "justify");
         justify = j;
         requestLayout();
     }
 
     public void setAlign(Align a) {
-        Preconditions.requireNonNull(a, "FxFlexPane.setAlign", "align");
+        Preconditions.requireNonNull(a, "TwFlexPane.setAlign", "align");
         align = a;
         requestLayout();
     }
 
     public void setAlignContent(AlignContent ac) {
-        Preconditions.requireNonNull(ac, "FxFlexPane.setAlignContent", "alignContent");
+        Preconditions.requireNonNull(ac, "TwFlexPane.setAlignContent", "alignContent");
         alignContent = ac;
         requestLayout();
     }
@@ -375,7 +375,7 @@ public class FxFlexPane extends Pane {
      * Sets the grow factor for a child node (analogous to {@code flex-grow}).
      *
      * <p>
-     * May be called before or after adding the node to a {@link FxFlexPane}. If
+     * May be called before or after adding the node to a {@link TwFlexPane}. If
      * called before, a listener is installed to trigger layout as soon as the
      * node is added to its parent.
      *
@@ -383,13 +383,13 @@ public class FxFlexPane extends Pane {
      * @param factor grow factor (>= 0; default 0)
      */
     public static void setGrow(Node node, double factor) {
-        Preconditions.requireNonNull(node, "FxFlexPane.setGrow", "node");
+        Preconditions.requireNonNull(node, "TwFlexPane.setGrow", "node");
         if (factor < 0) {
             throw new IllegalArgumentException(
-                    "FxFlexPane.setGrow: factor must be >= 0, got: " + factor);
+                    "TwFlexPane.setGrow: factor must be >= 0, got: " + factor);
         }
         node.getProperties().put(GROW_KEY, factor);
-        if (node.getParent() instanceof FxFlexPane fp) {
+        if (node.getParent() instanceof TwFlexPane fp) {
             fp.requestLayout();
         } else {
             ensureLayoutOnParent(node);
@@ -407,11 +407,11 @@ public class FxFlexPane extends Pane {
     /**
      * Installs a one-shot {@code parentProperty} listener that calls
      * {@code requestLayout()} on the parent when the node is first added to a
-     * {@link FxFlexPane}. This ensures flex properties applied before a node is
+     * {@link TwFlexPane}. This ensures flex properties applied before a node is
      * added to its parent take effect immediately.
      *
      * <p>
-     * The listener removes itself after the first FxFlexPane parent is
+     * The listener removes itself after the first TwFlexPane parent is
      * detected, so it does not accumulate.
      */
     private static void ensureLayoutOnParent(Node node) {
@@ -423,7 +423,7 @@ public class FxFlexPane extends Pane {
         javafx.beans.value.ChangeListener<Parent> listener = new javafx.beans.value.ChangeListener<Parent>() {
             @Override
             public void changed(javafx.beans.value.ObservableValue<? extends Parent> obs, Parent oldP, Parent newP) {
-                if (newP instanceof FxFlexPane fp) {
+                if (newP instanceof TwFlexPane fp) {
                     fp.requestLayout();
                     // One-shot cleanup
                     node.parentProperty().removeListener(this);
@@ -449,13 +449,13 @@ public class FxFlexPane extends Pane {
      * @param factor shrink factor (>= 0; default 1)
      */
     public static void setShrink(Node node, double factor) {
-        Preconditions.requireNonNull(node, "FxFlexPane.setShrink", "node");
+        Preconditions.requireNonNull(node, "TwFlexPane.setShrink", "node");
         if (factor < 0) {
             throw new IllegalArgumentException(
-                    "FxFlexPane.setShrink: factor must be >= 0, got: " + factor);
+                    "TwFlexPane.setShrink: factor must be >= 0, got: " + factor);
         }
         node.getProperties().put(SHRINK_KEY, factor);
-        if (node.getParent() instanceof FxFlexPane fp) {
+        if (node.getParent() instanceof TwFlexPane fp) {
             fp.requestLayout();
         } else {
             ensureLayoutOnParent(node);
@@ -480,17 +480,17 @@ public class FxFlexPane extends Pane {
      * child before all order-0 items.
      *
      * <pre>
-     * FxFlexPane.setOrder(footer, 99);   // always last
-     * FxFlexPane.setOrder(header, -1);   // always first
+     * TwFlexPane.setOrder(footer, 99);   // always last
+     * TwFlexPane.setOrder(header, -1);   // always first
      * </pre>
      *
      * @param node the child node
      * @param order display order (default 0)
      */
     public static void setOrder(Node node, int order) {
-        Preconditions.requireNonNull(node, "FxFlexPane.setOrder", "node");
+        Preconditions.requireNonNull(node, "TwFlexPane.setOrder", "node");
         node.getProperties().put(ORDER_KEY, order);
-        if (node.getParent() instanceof FxFlexPane fp) {
+        if (node.getParent() instanceof TwFlexPane fp) {
             fp.requestLayout();
         } else {
             ensureLayoutOnParent(node);
@@ -515,7 +515,7 @@ public class FxFlexPane extends Pane {
      *
      * <pre>
      * flex.setAlign(Align.CENTER);            // default for all children
-     * FxFlexPane.setAlignSelf(specialBtn, Align.END);  // this one goes to end
+     * TwFlexPane.setAlignSelf(specialBtn, Align.END);  // this one goes to end
      * </pre>
      *
      * @param node the child node
@@ -523,13 +523,13 @@ public class FxFlexPane extends Pane {
      * inherit
      */
     public static void setAlignSelf(Node node, Align align) {
-        Preconditions.requireNonNull(node, "FxFlexPane.setAlignSelf", "node");
+        Preconditions.requireNonNull(node, "TwFlexPane.setAlignSelf", "node");
         if (align == null) {
             node.getProperties().remove(SELF_KEY);
         } else {
             node.getProperties().put(SELF_KEY, align);
         }
-        if (node.getParent() instanceof FxFlexPane fp) {
+        if (node.getParent() instanceof TwFlexPane fp) {
             fp.requestLayout();
         } else {
             ensureLayoutOnParent(node);
@@ -570,25 +570,25 @@ public class FxFlexPane extends Pane {
      *
      * <pre>
      * // flex: 1 1 0 (equal distribution from zero base)
-     * FxFlexPane.setBasis(child, 0);
-     * FxFlexPane.setGrow(child, 1);
+     * TwFlexPane.setBasis(child, 0);
+     * TwFlexPane.setGrow(child, 1);
      *
      * // flex: 0 0 200px (fixed 200px, no grow, no shrink)
-     * FxFlexPane.setBasis(child, 200);
-     * FxFlexPane.setShrink(child, 0);
+     * TwFlexPane.setBasis(child, 200);
+     * TwFlexPane.setShrink(child, 0);
      * </pre>
      *
      * @param node the child node
      * @param basis base size in px, or {@code -1} for auto
      */
     public static void setBasis(Node node, double basis) {
-        Preconditions.requireNonNull(node, "FxFlexPane.setBasis", "node");
+        Preconditions.requireNonNull(node, "TwFlexPane.setBasis", "node");
         if (basis < -1) {
             throw new IllegalArgumentException(
-                    "FxFlexPane.setBasis: basis must be >= -1 (use -1 for auto), got: " + basis);
+                    "TwFlexPane.setBasis: basis must be >= -1 (use -1 for auto), got: " + basis);
         }
         node.getProperties().put(BASIS_KEY, basis);
-        if (node.getParent() instanceof FxFlexPane fp) {
+        if (node.getParent() instanceof TwFlexPane fp) {
             fp.requestLayout();
         } else {
             ensureLayoutOnParent(node);
@@ -643,35 +643,65 @@ public class FxFlexPane extends Pane {
     }
 
     private void layoutRowNoWrap(List<Node> children, double w, double h, double ox, double oy) {
-        double totalPrefW = children.stream().mapToDouble(n -> prefW(n)).sum()
-                + gapMain * (children.size() - 1);
-        double totalGrow = children.stream().mapToDouble(FxFlexPane::getGrow).sum();
-        double totalShrink = children.stream().mapToDouble(FxFlexPane::getShrink).sum();
-        double overflow = totalPrefW - w;  // positive = too wide, need to shrink
-        double extra = Math.max(0, w - totalPrefW);  // positive = free space
+        int count = children.size();
+        if (count == 0) return;
 
-        double[] widths = new double[children.size()];
-        for (int i = 0; i < children.size(); i++) {
-            Node child = children.get(i);
-            double pref = prefW(child);
-            double grow = getGrow(child);
-            double shrink = getShrink(child);
-            if (extra > 0 && totalGrow > 0 && grow > 0) {
-                // Grow: distribute free space proportionally
-                widths[i] = pref + extra * (grow / totalGrow);
-            } else if (overflow > 0 && totalShrink > 0 && shrink > 0) {
-                // Shrink: reduce proportionally to shrink factor × pref width
-                double shrinkFactor = (shrink * pref)
-                        / children.stream().mapToDouble(n -> getShrink(n) * prefW(n)).sum();
-                widths[i] = Math.max(0, pref - overflow * shrinkFactor);
-            } else {
-                widths[i] = pref;
+        // OPTIMIZACIÓN CRÍTICA: Pre-calcular TODAS las sums fuera del bucle para O(N) real
+        double[] prefs = new double[count];
+        double totalPrefW = 0;
+        double totalGrowWeighted = 0;
+        double totalShrinkWeighted = 0;
+
+        for (int i = 0; i < count; i++) {
+            Node n = children.get(i);
+            double pref = prefW(n);
+            prefs[i] = pref;
+            totalPrefW += pref;
+            
+            double grow = getGrow(n);
+            double shrink = getShrink(n);
+            
+            if (grow > 0) totalGrowWeighted += grow * pref;
+            if (shrink > 0) totalShrinkWeighted += shrink * pref;
+        }
+        
+        totalPrefW += gapMain * (count - 1);
+        double overflow = totalPrefW - w;  // positive = too wide, need to shrink
+        double extra = Math.max(0, w - (totalPrefW - gapMain * (count - 1)));  // free space without gaps
+
+        double[] widths = new double[count];
+        if (extra > 0 && totalGrowWeighted > 0) {
+            // Grow: distribute free space proportionally to (grow × pref)
+            for (int i = 0; i < count; i++) {
+                double grow = getGrow(children.get(i));
+                if (grow > 0) {
+                    double factor = (grow * prefs[i]) / totalGrowWeighted;
+                    widths[i] = prefs[i] + extra * factor;
+                } else {
+                    widths[i] = prefs[i];
+                }
+            }
+        } else if (overflow > 0 && totalShrinkWeighted > 0) {
+            // Shrink: reduce proportionally to (shrink × pref) - CORREGIDO O(N)
+            for (int i = 0; i < count; i++) {
+                double shrink = getShrink(children.get(i));
+                if (shrink > 0) {
+                    double factor = (shrink * prefs[i]) / totalShrinkWeighted;
+                    widths[i] = Math.max(0, prefs[i] - overflow * factor);
+                } else {
+                    widths[i] = prefs[i];
+                }
+            }
+        } else {
+            // No grow/shrink needed or possible
+            for (int i = 0; i < count; i++) {
+                widths[i] = prefs[i];
             }
         }
 
         double[] xs = justifyPositions(widths, gapMain, w, justify);
 
-        for (int i = 0; i < children.size(); i++) {
+        for (int i = 0; i < count; i++) {
             Node c = children.get(i);
             double ch = alignedH(c, h, align);
             double cy = alignedY(c, h, ch, align, oy);
@@ -680,6 +710,7 @@ public class FxFlexPane extends Pane {
     }
 
     private void layoutRowWrap(List<Node> children, double w, double h, double ox, double oy) {
+        // CORRECCIÓN CRÍTICA: Implementar grow/shrink DENTRO de cada fila (faltaba en la versión original)
         // Group children into rows
         java.util.List<java.util.List<Node>> rows = new java.util.ArrayList<>();
         java.util.List<Node> currentRow = new java.util.ArrayList<>();
@@ -708,44 +739,141 @@ public class FxFlexPane extends Pane {
             totalRowsHeight += rowHeights[r];
         }
 
-        // CRITICAL FIX: Apply align-content to distribute extra vertical space between rows
-        double totalGapsHeight = gapCross * (rows.size() - 1);
-        double freeSpace = h - totalRowsHeight - totalGapsHeight;
+        // Apply align-content to distribute extra vertical space between rows
         double[] rowYPositions = alignContentPositions(rowHeights, gapCross, h, alignContent);
 
-        // Lay out each row
+        // Lay out each row WITH grow/shrink support
         for (int r = 0; r < rows.size(); r++) {
             java.util.List<Node> row = rows.get(r);
+            int count = row.size();
             double rowH = rowHeights[r];
             double curY = oy + rowYPositions[r];
             
-            double[] widths = row.stream().mapToDouble(this::prefW).toArray();
-            double[] xs = justifyPositions(widths, gapMain, w, justify);
-            for (int i = 0; i < row.size(); i++) {
+            // OPTIMIZACIÓN: Pre-calcular sums para O(N) real dentro de cada fila
+            double[] prefs = new double[count];
+            double totalPref = 0;
+            double totalGrowWeighted = 0;
+            double totalShrinkWeighted = 0;
+            
+            for(int i = 0; i < count; i++) {
+                Node n = row.get(i);
+                double p = prefW(n);
+                prefs[i] = p;
+                totalPref += p;
+                
+                double g = getGrow(n);
+                double s = getShrink(n);
+                if(g > 0) totalGrowWeighted += g * p;
+                if(s > 0) totalShrinkWeighted += s * p;
+            }
+            
+            double lineAvailable = w - (gapMain * (count - 1));
+            double overflow = totalPref - lineAvailable;
+            double[] finalWidths = new double[count];
+            
+            if (overflow <= 0) {
+                // Grow within the row
+                double extra = -overflow;
+                if (totalGrowWeighted > 0) {
+                    for(int i = 0; i < count; i++) {
+                        double g = getGrow(row.get(i));
+                        if(g > 0) {
+                            double factor = (g * prefs[i]) / totalGrowWeighted;
+                            finalWidths[i] = prefs[i] + extra * factor;
+                        } else {
+                            finalWidths[i] = prefs[i];
+                        }
+                    }
+                } else {
+                    System.arraycopy(prefs, 0, finalWidths, 0, count);
+                }
+            } else {
+                // Shrink within the row - CORRECCIÓN AÑADIDA
+                if (totalShrinkWeighted > 0) {
+                    for(int i = 0; i < count; i++) {
+                        double s = getShrink(row.get(i));
+                        if(s > 0) {
+                            double factor = (s * prefs[i]) / totalShrinkWeighted;
+                            finalWidths[i] = Math.max(0, prefs[i] - overflow * factor);
+                        } else {
+                            finalWidths[i] = prefs[i];
+                        }
+                    }
+                } else {
+                    System.arraycopy(prefs, 0, finalWidths, 0, count);
+                }
+            }
+            
+            double[] xs = justifyPositions(finalWidths, gapMain, w, justify);
+            for (int i = 0; i < count; i++) {
                 Node c = row.get(i);
                 double ch = alignedH(c, rowH, align);
                 double cy = alignedY(c, rowH, ch, align, curY);
-                c.resizeRelocate(ox + xs[i], cy, widths[i], ch);
+                c.resizeRelocate(ox + xs[i], cy, finalWidths[i], ch);
             }
         }
     }
 
     private void layoutCol(List<Node> children, double w, double h, double ox, double oy) {
-        double totalPrefH = children.stream().mapToDouble(n -> prefH(n)).sum()
-                + gapCross * (children.size() - 1);
-        double totalGrow = children.stream().mapToDouble(FxFlexPane::getGrow).sum();
-        double extra = Math.max(0, h - totalPrefH);
+        int count = children.size();
+        if (count == 0) return;
 
-        double[] heights = new double[children.size()];
-        for (int i = 0; i < children.size(); i++) {
-            double grow = getGrow(children.get(i));
-            heights[i] = prefH(children.get(i))
-                    + (totalGrow > 0 && grow > 0 ? extra * (grow / totalGrow) : 0);
+        // CORRECCIÓN CRÍTICA: Implementar shrink en columnas (faltaba en la versión original)
+        double[] prefs = new double[count];
+        double totalPrefH = 0;
+        double totalGrowWeighted = 0;
+        double totalShrinkWeighted = 0;
+
+        for (int i = 0; i < count; i++) {
+            Node n = children.get(i);
+            double pref = prefH(n);
+            prefs[i] = pref;
+            totalPrefH += pref;
+            
+            double grow = getGrow(n);
+            double shrink = getShrink(n);
+            
+            if (grow > 0) totalGrowWeighted += grow * pref;
+            if (shrink > 0) totalShrinkWeighted += shrink * pref;
+        }
+        
+        totalPrefH += gapCross * (count - 1);
+        double overflow = totalPrefH - h;  // positive = too tall, need to shrink
+        double extra = Math.max(0, h - (totalPrefH - gapCross * (count - 1)));  // free space
+
+        double[] heights = new double[count];
+        if (extra > 0 && totalGrowWeighted > 0) {
+            // Grow: distribute free space proportionally to (grow × pref)
+            for (int i = 0; i < count; i++) {
+                double grow = getGrow(children.get(i));
+                if (grow > 0) {
+                    double factor = (grow * prefs[i]) / totalGrowWeighted;
+                    heights[i] = prefs[i] + extra * factor;
+                } else {
+                    heights[i] = prefs[i];
+                }
+            }
+        } else if (overflow > 0 && totalShrinkWeighted > 0) {
+            // Shrink: reduce proportionally to (shrink × pref) - CORRECCIÓN AÑADIDA
+            for (int i = 0; i < count; i++) {
+                double shrink = getShrink(children.get(i));
+                if (shrink > 0) {
+                    double factor = (shrink * prefs[i]) / totalShrinkWeighted;
+                    heights[i] = Math.max(0, prefs[i] - overflow * factor);
+                } else {
+                    heights[i] = prefs[i];
+                }
+            }
+        } else {
+            // No grow/shrink needed or possible
+            for (int i = 0; i < count; i++) {
+                heights[i] = prefs[i];
+            }
         }
 
         double[] ys = justifyPositions(heights, gapCross, h, justify);
 
-        for (int i = 0; i < children.size(); i++) {
+        for (int i = 0; i < count; i++) {
             Node c = children.get(i);
             double cw = alignedW(c, w, align);
             double cx = alignedX(c, w, cw, align, ox);
