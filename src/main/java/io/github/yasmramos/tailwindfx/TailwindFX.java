@@ -5,7 +5,7 @@ import io.github.yasmramos.tailwindfx.responsive.ResponsiveNode;
 import io.github.yasmramos.tailwindfx.components.TwFlexPane;
 import io.github.yasmramos.tailwindfx.components.TwGridPane;
 import io.github.yasmramos.tailwindfx.style.StylePerf;
-import io.github.yasmramos.tailwindfx.animation.FxAnimation;
+import io.github.yasmramos.tailwindfx.animation.TwAnimation;
 import io.github.yasmramos.tailwindfx.theme.ThemeManager;
 import io.github.yasmramos.tailwindfx.theme.ThemeScopeManager;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;

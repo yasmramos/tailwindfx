@@ -1,7 +1,7 @@
 package io.github.yasmramos.tailwindfx.components;
 
 import io.github.yasmramos.tailwindfx.TailwindFX;
-import io.github.yasmramos.tailwindfx.animation.FxAnimation;
+import io.github.yasmramos.tailwindfx.animation.TwAnimation;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -190,7 +190,7 @@ public class TwCard extends VBox {
             }
 
             if (hoverable) {
-                FxAnimation.onHoverLift(card, -3);
+                TwAnimation.onHoverLift(card, -3);
             }
             return card;
         }

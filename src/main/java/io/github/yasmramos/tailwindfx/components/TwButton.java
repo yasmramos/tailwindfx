@@ -1,7 +1,7 @@
 package io.github.yasmramos.tailwindfx.components;
 
 import io.github.yasmramos.tailwindfx.TailwindFX;
-import io.github.yasmramos.tailwindfx.animation.FxAnimation;
+import io.github.yasmramos.tailwindfx.animation.TwAnimation;
 import javafx.scene.control.Button;
 
 /**
@@ -44,7 +44,7 @@ public final class TwButton {
             "btn-" + color,
             "btn-md"
         );
-        FxAnimation.onHoverLift(btn, -2);
+        TwAnimation.onHoverLift(btn, -2);
         return btn;
     }
 
@@ -71,7 +71,7 @@ public final class TwButton {
             "btn-" + color,
             "btn-md"
         );
-        FxAnimation.onHoverLift(btn, -1);
+        TwAnimation.onHoverLift(btn, -1);
         return btn;
     }
 
@@ -98,7 +98,7 @@ public final class TwButton {
             "btn-" + color,
             "btn-md"
         );
-        FxAnimation.onHoverLift(btn, -1);
+        TwAnimation.onHoverLift(btn, -1);
         return btn;
     }
 

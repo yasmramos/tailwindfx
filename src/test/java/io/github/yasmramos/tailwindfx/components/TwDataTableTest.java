@@ -1,6 +1,6 @@
 package io.github.yasmramos.tailwindfx.components;
 
-import io.github.yasmramos.tailwindfx.components.FxDataTable;
+import io.github.yasmramos.tailwindfx.components.TwDataTable;
 import javafx.application.Platform;
 import javafx.scene.control.TableView;
 
@@ -10,12 +10,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Tests for {@link FxDataTable} — builder, sorting, filtering, pagination,
+ * Tests for {@link TwDataTable} — builder, sorting, filtering, pagination,
  * search.
  */
-public final class FxDataTableTest {
+public final class TwDataTableTest {
 
-    private FxDataTableTest() {
+    private TwDataTableTest() {
     }
 
     private static int passed = 0, failed = 0;
@@ -96,7 +96,7 @@ public final class FxDataTableTest {
     public static boolean runAll() throws Exception {
         passed = 0;
         failed = 0;
-        System.out.println("\n── FxDataTable ──");
+        System.out.println("\n── TwDataTable ──");
 
         testBuilderGuards();
         testBasicBuild();
@@ -127,15 +127,15 @@ public final class FxDataTableTest {
     // ── Builder guards ────────────────────────────────────────────────────────
     static void testBuilderGuards() {
         throws_("pageSize(0) throws", IllegalArgumentException.class,
-                () -> FxDataTable.of(Person.class).pageSize(0));
+                () -> TwDataTable.of(Person.class).pageSize(0));
         throws_("pageSize(-1) throws", IllegalArgumentException.class,
-                () -> FxDataTable.of(Person.class).pageSize(-1));
+                () -> TwDataTable.of(Person.class).pageSize(-1));
     }
 
     static void testPageSizeGuard() throws Exception {
         runFx(() -> {
             // Build with minimum valid page size
-            FxDataTable<Person> t = FxDataTable.of(Person.class)
+            TwDataTable<Person> t = TwDataTable.of(Person.class)
                     .column("Name", Person::name)
                     .pageSize(1)
                     .build();
@@ -147,7 +147,7 @@ public final class FxDataTableTest {
     // ── Basic build ───────────────────────────────────────────────────────────
     static void testBasicBuild() throws Exception {
         runFx(() -> {
-            FxDataTable<Person> t = FxDataTable.of(Person.class)
+            TwDataTable<Person> t = TwDataTable.of(Person.class)
                     .column("Name", Person::name)
                     .column("Email", Person::email)
                     .column("Age", p -> String.valueOf(p.age()))
@@ -159,7 +159,7 @@ public final class FxDataTableTest {
 
     static void testColumnCount() throws Exception {
         runFx(() -> {
-            FxDataTable<Person> t = FxDataTable.of(Person.class)
+            TwDataTable<Person> t = TwDataTable.of(Person.class)
                     .column("Name", Person::name)
                     .column("Email", Person::email)
                     .build();
@@ -170,7 +170,7 @@ public final class FxDataTableTest {
     // ── Data operations ───────────────────────────────────────────────────────
     static void testSetItems() throws Exception {
         runFx(() -> {
-            FxDataTable<Person> t = buildBasic();
+            TwDataTable<Person> t = buildBasic();
             t.setItems(sampleData());
             eq("setItems: 5 rows", 5, t.totalSize());
         });
@@ -178,7 +178,7 @@ public final class FxDataTableTest {
 
     static void testClearItems() throws Exception {
         runFx(() -> {
-            FxDataTable<Person> t = buildBasic();
+            TwDataTable<Person> t = buildBasic();
             t.setItems(sampleData());
             t.setItems(List.of()); // clear
             eq("clearItems: 0 rows", 0, t.totalSize());
@@ -187,7 +187,7 @@ public final class FxDataTableTest {
 
     static void testAddItems() throws Exception {
         runFx(() -> {
-            FxDataTable<Person> t = buildBasic();
+            TwDataTable<Person> t = buildBasic();
             t.setItems(List.of(new Person("Alice", "a@x.com", 30)));
             t.addItems(List.of(new Person("Bob", "b@x.com", 25)));
             eq("addItems: 2 total", 2, t.totalSize());
@@ -196,7 +196,7 @@ public final class FxDataTableTest {
 
     static void testTotalSize() throws Exception {
         runFx(() -> {
-            FxDataTable<Person> t = buildBasic();
+            TwDataTable<Person> t = buildBasic();
             eq("empty: totalSize=0", 0, t.totalSize());
             t.setItems(sampleData());
             eq("after set: totalSize=5", 5, t.totalSize());
@@ -206,7 +206,7 @@ public final class FxDataTableTest {
     // ── Filter ────────────────────────────────────────────────────────────────
     static void testFilteredSize() throws Exception {
         runFx(() -> {
-            FxDataTable<Person> t = buildBasic();
+            TwDataTable<Person> t = buildBasic();
             t.setItems(sampleData());
             t.setFilter(p -> p.age() < 30);
             // Alice(30 excluded), Bob(25), Diana(28), Eve(22) = 3 under 30
@@ -216,7 +216,7 @@ public final class FxDataTableTest {
 
     static void testSetFilter() throws Exception {
         runFx(() -> {
-            FxDataTable<Person> t = buildBasic();
+            TwDataTable<Person> t = buildBasic();
             t.setItems(sampleData());
             t.setFilter(p -> p.name().startsWith("A"));
             eq("filter A: 1 result", 1, t.filteredSize());
@@ -227,7 +227,7 @@ public final class FxDataTableTest {
 
     static void testClearFilter() throws Exception {
         runFx(() -> {
-            FxDataTable<Person> t = buildBasic();
+            TwDataTable<Person> t = buildBasic();
             t.setItems(sampleData());
             t.setFilter(p -> false); // hide all
             eq("filter none: 0", 0, t.filteredSize());
@@ -239,7 +239,7 @@ public final class FxDataTableTest {
     // ── Pagination ────────────────────────────────────────────────────────────
     static void testPaginationPageCount() throws Exception {
         runFx(() -> {
-            FxDataTable<Person> t = FxDataTable.of(Person.class)
+            TwDataTable<Person> t = TwDataTable.of(Person.class)
                     .column("Name", Person::name)
                     .pageSize(2)
                     .build();
@@ -250,7 +250,7 @@ public final class FxDataTableTest {
 
     static void testPaginationGoToPage() throws Exception {
         runFx(() -> {
-            FxDataTable<Person> t = FxDataTable.of(Person.class)
+            TwDataTable<Person> t = TwDataTable.of(Person.class)
                     .column("Name", Person::name)
                     .pageSize(2)
                     .build();
@@ -267,7 +267,7 @@ public final class FxDataTableTest {
 
     static void testPaginationNextPrev() throws Exception {
         runFx(() -> {
-            FxDataTable<Person> t = FxDataTable.of(Person.class)
+            TwDataTable<Person> t = TwDataTable.of(Person.class)
                     .column("Name", Person::name)
                     .pageSize(2)
                     .build();
@@ -285,7 +285,7 @@ public final class FxDataTableTest {
     static void testPaginationGuards() throws Exception {
         runFx(() -> {
             // Non-paginated table: pageCount always 1, currentPage always 0
-            FxDataTable<Person> t = buildBasic();
+            TwDataTable<Person> t = buildBasic();
             t.setItems(sampleData());
             eq("non-paginated pageCount=1", 1, t.pageCount());
             eq("non-paginated currentPage=0", 0, t.currentPage());
@@ -297,7 +297,7 @@ public final class FxDataTableTest {
     // ── Searchable ────────────────────────────────────────────────────────────
     static void testSearchableContainer() throws Exception {
         runFx(() -> {
-            FxDataTable<Person> t = FxDataTable.of(Person.class)
+            TwDataTable<Person> t = TwDataTable.of(Person.class)
                     .column("Name", Person::name)
                     .column("Email", Person::email)
                     .searchable(true)
@@ -315,7 +315,7 @@ public final class FxDataTableTest {
     // ── Access ────────────────────────────────────────────────────────────────
     static void testTableViewAccess() throws Exception {
         runFx(() -> {
-            FxDataTable<Person> t = buildBasic();
+            TwDataTable<Person> t = buildBasic();
             TableView<Person> tv = t.tableView();
             check("tableView() non-null", tv != null);
             check("tableView instanceof TableView", tv instanceof TableView);
@@ -324,7 +324,7 @@ public final class FxDataTableTest {
 
     static void testContainerAccess() throws Exception {
         runFx(() -> {
-            FxDataTable<Person> t = buildBasic();
+            TwDataTable<Person> t = buildBasic();
             check("container() non-null", t.container() != null);
             check("container has table as child",
                     t.container().getChildren().contains(t.tableView()));
@@ -333,7 +333,7 @@ public final class FxDataTableTest {
 
     static void testSelectedItem() throws Exception {
         runFx(() -> {
-            FxDataTable<Person> t = buildBasic();
+            TwDataTable<Person> t = buildBasic();
             t.setItems(sampleData());
             check("no selection: null", t.selectedItem() == null);
             t.tableView().getSelectionModel().selectFirst();
@@ -343,7 +343,7 @@ public final class FxDataTableTest {
 
     static void testClearSelection() throws Exception {
         runFx(() -> {
-            FxDataTable<Person> t = buildBasic();
+            TwDataTable<Person> t = buildBasic();
             t.setItems(sampleData());
             t.tableView().getSelectionModel().selectFirst();
             check("before clear: selected", t.selectedItem() != null);
@@ -355,7 +355,7 @@ public final class FxDataTableTest {
     // ── Style classes ─────────────────────────────────────────────────────────
     static void testStyleClasses() throws Exception {
         runFx(() -> {
-            FxDataTable<Person> t = FxDataTable.of(Person.class)
+            TwDataTable<Person> t = TwDataTable.of(Person.class)
                     .column("Name", Person::name)
                     .style("table-striped", "table-hover")
                     .build();
@@ -369,8 +369,8 @@ public final class FxDataTableTest {
     }
 
     // ── Helper ────────────────────────────────────────────────────────────────
-    static FxDataTable<Person> buildBasic() {
-        return FxDataTable.of(Person.class)
+    static TwDataTable<Person> buildBasic() {
+        return TwDataTable.of(Person.class)
                 .column("Name", Person::name)
                 .column("Email", Person::email)
                 .column("Age", p -> String.valueOf(p.age()))
