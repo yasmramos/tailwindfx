@@ -143,6 +143,54 @@ public class TwFlexPane extends Pane {
      * {@code align-self})
      */
     private static final String SELF_KEY = "tailwindfx.flex.align-self";
+    
+    /**
+     * Internal cache to avoid repeated map lookups and autoboxing during layout.
+     * Uses WeakHashMap to prevent memory leaks.
+     */
+    private static final java.util.WeakHashMap<Node, FlexData> flexDataCache = new java.util.WeakHashMap<>();
+    
+    /**
+     * Helper class to hold flex properties without autoboxing overhead.
+     */
+    private static class FlexData {
+        double grow = 0.0;
+        double shrink = 1.0;
+        int order = 0;
+        Align selfAlign = null;
+        
+        void update(Node node) {
+            Object v = node.getProperties().get(GROW_KEY);
+            grow = v instanceof Number n ? n.doubleValue() : 0.0;
+            
+            v = node.getProperties().get(SHRINK_KEY);
+            shrink = v instanceof Number n ? n.doubleValue() : 1.0;
+            
+            v = node.getProperties().get(ORDER_KEY);
+            order = v instanceof Number n ? n.intValue() : 0;
+            
+            v = node.getProperties().get(SELF_KEY);
+            selfAlign = v instanceof Align a ? a : null;
+        }
+    }
+    
+    /**
+     * Gets cached flex data for a node, updating from properties if needed.
+     * This reduces autoboxing overhead in hot layout loops.
+     */
+    private static FlexData getFlexData(Node node) {
+        return flexDataCache.computeIfAbsent(node, k -> new FlexData());
+    }
+    
+    /**
+     * Invalidates cached flex data for a node when its properties change.
+     */
+    private static void invalidateFlexData(Node node) {
+        FlexData data = flexDataCache.get(node);
+        if (data != null) {
+            data.update(node);
+        }
+    }
 
     // =========================================================================
     // Static factory methods
@@ -389,6 +437,7 @@ public class TwFlexPane extends Pane {
                     "TwFlexPane.setGrow: factor must be >= 0, got: " + factor);
         }
         node.getProperties().put(GROW_KEY, factor);
+        invalidateFlexData(node); // Update cache
         if (node.getParent() instanceof TwFlexPane fp) {
             fp.requestLayout();
         } else {
@@ -455,6 +504,7 @@ public class TwFlexPane extends Pane {
                     "TwFlexPane.setShrink: factor must be >= 0, got: " + factor);
         }
         node.getProperties().put(SHRINK_KEY, factor);
+        invalidateFlexData(node); // Update cache
         if (node.getParent() instanceof TwFlexPane fp) {
             fp.requestLayout();
         } else {
@@ -490,6 +540,7 @@ public class TwFlexPane extends Pane {
     public static void setOrder(Node node, int order) {
         Preconditions.requireNonNull(node, "TwFlexPane.setOrder", "node");
         node.getProperties().put(ORDER_KEY, order);
+        invalidateFlexData(node); // Update cache
         if (node.getParent() instanceof TwFlexPane fp) {
             fp.requestLayout();
         } else {
@@ -529,6 +580,7 @@ public class TwFlexPane extends Pane {
         } else {
             node.getProperties().put(SELF_KEY, align);
         }
+        invalidateFlexData(node); // Update cache
         if (node.getParent() instanceof TwFlexPane fp) {
             fp.requestLayout();
         } else {
