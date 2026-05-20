@@ -26,7 +26,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- * FxDataTable — a styled, sortable, filterable data table for TailwindFX.
+ * TwDataTable — a styled, sortable, filterable data table for TailwindFX.
  *
  * <p>Wraps JavaFX's {@link TableView} with a declarative builder API,
  * built-in sorting, search filtering, pagination, and TailwindFX utility classes.
@@ -36,7 +36,7 @@ import java.util.function.Predicate;
  * // Basic table with column definitions:
  * record User(String name, String email, int age) {}
  *
- * FxDataTable&lt;User&gt; table = FxDataTable.of(User.class)
+ * TwDataTable&lt;User&gt; table = TwDataTable.of(User.class)
  *     .column("Name",  User::name)
  *     .column("Email", User::email)
  *     .column("Age",   u -> String.valueOf(u.age()))
@@ -65,7 +65,7 @@ import java.util.function.Predicate;
  *
  * @param <T> the data item type
  */
-public final class FxDataTable<T> {
+public final class TwDataTable<T> {
 
     // =========================================================================
     // Builder
@@ -117,7 +117,7 @@ public final class FxDataTable<T> {
         /** Enables pagination with the given page size. */
         public Builder<T> pageSize(int size) {
             if (size < 1) throw new IllegalArgumentException(
-                "FxDataTable.pageSize: must be >= 1, got: " + size);
+                "TwDataTable.pageSize: must be >= 1, got: " + size);
             this.paginated = true;
             this.pageSize  = size;
             return this;
@@ -139,9 +139,9 @@ public final class FxDataTable<T> {
             return this;
         }
 
-        /** Builds the {@link FxDataTable}. */
-        public FxDataTable<T> build() {
-            return new FxDataTable<>(this);
+        /** Builds the {@link TwDataTable}. */
+        public TwDataTable<T> build() {
+            return new TwDataTable<>(this);
         }
     }
 
@@ -173,7 +173,7 @@ public final class FxDataTable<T> {
     // Construction
     // =========================================================================
 
-    private FxDataTable(Builder<T> b) {
+    private TwDataTable(Builder<T> b) {
         this.paginated   = b.paginated;
         this.pageSize    = b.pageSize;
         this.filtered    = new FilteredList<>(source, p -> true);

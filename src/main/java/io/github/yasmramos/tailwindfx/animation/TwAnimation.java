@@ -13,23 +13,23 @@ import javafx.scene.Node;
 import javafx.util.Duration;
 
 /**
- * FxAnimation — Fluent wrapper for JavaFX animations.
+ * TwAnimation — Fluent wrapper for JavaFX animations.
  *
  * Provides a declarative API over Timeline + KeyFrame + Interpolator.
  * Zero javafx.animation imports in user code.
  *
  * Usage:
- *   FxAnimation.fadeIn(node).play();
- *   FxAnimation.fadeIn(node, 300).play();
- *   FxAnimation.slideUp(node).onFinished(e -> ...).play();
- *   FxAnimation.pulse(node).cycleCount(3).play();
- *   FxAnimation.onHoverScale(button, 1.05);
- *   FxAnimation.chain(
- *       FxAnimation.fadeIn(node),
- *       FxAnimation.slideUp(node, 200)
+ *   TwAnimation.fadeIn(node).play();
+ *   TwAnimation.fadeIn(node, 300).play();
+ *   TwAnimation.slideUp(node).onFinished(e -> ...).play();
+ *   TwAnimation.pulse(node).cycleCount(3).play();
+ *   TwAnimation.onHoverScale(button, 1.05);
+ *   TwAnimation.chain(
+ *       TwAnimation.fadeIn(node),
+ *       TwAnimation.slideUp(node, 200)
  *   ).play();
  */
-public final class FxAnimation {
+public final class TwAnimation {
 
     // Default durations (ms)
     public static final int FAST    = 150;
@@ -42,7 +42,7 @@ public final class FxAnimation {
     private String registeredSlot;
     private Interpolator ease = null;
 
-    public FxAnimation(Animation animation) {
+    public TwAnimation(Animation animation) {
         this.timeline = animation;
     }
 
@@ -57,12 +57,12 @@ public final class FxAnimation {
      * interpolation for a smooth entrance effect.
      *
      * @param node the node to animate (must not be null)
-     * @return a ready-to-play {@link FxAnimation} registered in slot {@code "enter"}
+     * @return a ready-to-play {@link TwAnimation} registered in slot {@code "enter"}
      * @see #fadeIn(Node, int)
      * @see #fadeIn(Node, int, Interpolator)
      * @throws IllegalArgumentException if node is null
      */
-    public static FxAnimation fadeIn(Node node) {
+    public static TwAnimation fadeIn(Node node) {
         return fadeIn(node, NORMAL);
     }
 
@@ -71,9 +71,9 @@ public final class FxAnimation {
      *
      * @param node       the node to animate (must not be null)
      * @param durationMs animation duration in milliseconds (must be > 0)
-     * @return a ready-to-play {@link FxAnimation} registered in slot {@code "enter"}
+     * @return a ready-to-play {@link TwAnimation} registered in slot {@code "enter"}
      */
-    public static FxAnimation fadeIn(Node node, int durationMs) {
+    public static TwAnimation fadeIn(Node node, int durationMs) {
         return fadeIn(node, durationMs, Interpolator.EASE_OUT);
     }
 
@@ -84,24 +84,24 @@ public final class FxAnimation {
      * interpolator for fine-grained control over acceleration/deceleration.
      *
      * <pre>
-     * FxAnimation.fadeIn(node, 300, Interpolator.EASE_IN).play();  // Ease in for 300ms
-     * FxAnimation.fadeIn(node, 200, Interpolator.LINEAR).play();   // Linear for 200ms
+     * TwAnimation.fadeIn(node, 300, Interpolator.EASE_IN).play();  // Ease in for 300ms
+     * TwAnimation.fadeIn(node, 200, Interpolator.LINEAR).play();   // Linear for 200ms
      * </pre>
      *
      * @param node       the node to animate (must not be null)
      * @param durationMs animation duration in milliseconds (must be > 0)
      * @param ease       the interpolation function (must not be null)
-     * @return a ready-to-play {@link FxAnimation} registered in slot {@code "enter"}
+     * @return a ready-to-play {@link TwAnimation} registered in slot {@code "enter"}
      * @throws IllegalArgumentException if node is null, ease is null or durationMs <= 0
      * @see #fadeIn(Node)
      * @see #fadeIn(Node, int)
      */
-    public static FxAnimation fadeIn(Node node, int durationMs, Interpolator ease) {
-        Preconditions.requireNode(node, "FxAnimation.fadeIn");
-        Preconditions.requirePositiveDuration(durationMs, "FxAnimation.fadeIn");
-        Preconditions.requireNonNull(ease, "FxAnimation.fadeIn", "ease");
+    public static TwAnimation fadeIn(Node node, int durationMs, Interpolator ease) {
+        Preconditions.requireNode(node, "TwAnimation.fadeIn");
+        Preconditions.requirePositiveDuration(durationMs, "TwAnimation.fadeIn");
+        Preconditions.requireNonNull(ease, "TwAnimation.fadeIn", "ease");
         node.setOpacity(0);
-        FxAnimation fxAnim = new FxAnimation(new Timeline(
+        TwAnimation fxAnim = new TwAnimation(new Timeline(
             new KeyFrame(Duration.ZERO,
                 new KeyValue(node.opacityProperty(), 0, ease)),
             new KeyFrame(Duration.millis(durationMs),
@@ -118,11 +118,11 @@ public final class FxAnimation {
      * up and fades to full opacity. Uses {@code EASE_OUT} interpolation.
      *
      * @param node the node to animate (must not be null)
-     * @return a ready-to-play {@link FxAnimation}
+     * @return a ready-to-play {@link TwAnimation}
      * @see #slideUp(Node, int)
      * @throws IllegalArgumentException if node is null
      */
-    public static FxAnimation slideUp(Node node) {
+    public static TwAnimation slideUp(Node node) {
         return slideUp(node, NORMAL);
     }
 
@@ -135,16 +135,16 @@ public final class FxAnimation {
      *
      * @param node       the node to animate (must not be null)
      * @param durationMs animation duration in milliseconds (must be > 0)
-     * @return a ready-to-play {@link FxAnimation}
+     * @return a ready-to-play {@link TwAnimation}
      * @see #slideUp(Node)
      * @throws IllegalArgumentException if node is null or durationMs <= 0
      */
-    public static FxAnimation slideUp(Node node, int durationMs) {
+    public static TwAnimation slideUp(Node node, int durationMs) {
         double originalY = node.getTranslateY();
         double startY = originalY + 20;
         node.setOpacity(0);
         node.setTranslateY(startY);
-        return new FxAnimation(new Timeline(
+        return new TwAnimation(new Timeline(
             new KeyFrame(Duration.ZERO,
                 new KeyValue(node.opacityProperty(),    0,       Interpolator.EASE_OUT),
                 new KeyValue(node.translateYProperty(), startY,  Interpolator.EASE_OUT)),
@@ -161,11 +161,11 @@ public final class FxAnimation {
      * down and fades to full opacity. Uses {@code EASE_OUT} interpolation.
      *
      * @param node the node to animate (must not be null)
-     * @return a ready-to-play {@link FxAnimation}
+     * @return a ready-to-play {@link TwAnimation}
      * @see #slideDown(Node, int)
      * @throws IllegalArgumentException if node is null
      */
-    public static FxAnimation slideDown(Node node) {
+    public static TwAnimation slideDown(Node node) {
         return slideDown(node, NORMAL);
     }
 
@@ -178,16 +178,16 @@ public final class FxAnimation {
      *
      * @param node       the node to animate (must not be null)
      * @param durationMs animation duration in milliseconds (must be > 0)
-     * @return a ready-to-play {@link FxAnimation}
+     * @return a ready-to-play {@link TwAnimation}
      * @see #slideDown(Node)
      * @throws IllegalArgumentException if node is null or durationMs <= 0
      */
-    public static FxAnimation slideDown(Node node, int durationMs) {
+    public static TwAnimation slideDown(Node node, int durationMs) {
         double originalY = node.getTranslateY();
         double startY = originalY - 20;
         node.setOpacity(0);
         node.setTranslateY(startY);
-        return new FxAnimation(new Timeline(
+        return new TwAnimation(new Timeline(
             new KeyFrame(Duration.ZERO,
                 new KeyValue(node.opacityProperty(),    0,      Interpolator.EASE_OUT),
                 new KeyValue(node.translateYProperty(), startY, Interpolator.EASE_OUT)),
@@ -204,11 +204,11 @@ public final class FxAnimation {
      * to full opacity. Uses {@code EASE_OUT} interpolation.
      *
      * @param node the node to animate (must not be null)
-     * @return a ready-to-play {@link FxAnimation}
+     * @return a ready-to-play {@link TwAnimation}
      * @see #slideRight(Node, int)
      * @throws IllegalArgumentException if node is null
      */
-    public static FxAnimation slideRight(Node node) { return slideRight(node, NORMAL); }
+    public static TwAnimation slideRight(Node node) { return slideRight(node, NORMAL); }
     
     /**
      * Slides a node from left to right while fading in with specified duration.
@@ -218,14 +218,14 @@ public final class FxAnimation {
      *
      * @param node       the node to animate (must not be null)
      * @param durationMs animation duration in milliseconds (must be > 0)
-     * @return a ready-to-play {@link FxAnimation}
+     * @return a ready-to-play {@link TwAnimation}
      * @see #slideRight(Node)
      * @throws IllegalArgumentException if node is null or durationMs <= 0
      */
-    public static FxAnimation slideRight(Node node, int durationMs) {
+    public static TwAnimation slideRight(Node node, int durationMs) {
         double startX = node.getTranslateX() - 24;
         node.setOpacity(0); node.setTranslateX(startX);
-        return new FxAnimation(new Timeline(
+        return new TwAnimation(new Timeline(
             new KeyFrame(Duration.ZERO,
                 new KeyValue(node.opacityProperty(),    0,      Interpolator.EASE_OUT),
                 new KeyValue(node.translateXProperty(), startX, Interpolator.EASE_OUT)),
@@ -242,10 +242,10 @@ public final class FxAnimation {
      * to full opacity. Uses {@code EASE_OUT} interpolation.
      *
      * @param node the node to animate (must not be null)
-     * @return a ready-to-play {@link FxAnimation}
+     * @return a ready-to-play {@link TwAnimation}
      * @throws IllegalArgumentException if node is null
      */
-    public static FxAnimation slideLeft(Node node) { return slideInLeft(node, NORMAL); }
+    public static TwAnimation slideLeft(Node node) { return slideInLeft(node, NORMAL); }
     
     /**
      * Slides a node in from the left with specified duration.
@@ -255,13 +255,13 @@ public final class FxAnimation {
      *
      * @param node       the node to animate (must not be null)
      * @param durationMs animation duration in milliseconds (must be > 0)
-     * @return a ready-to-play {@link FxAnimation}
+     * @return a ready-to-play {@link TwAnimation}
      * @throws IllegalArgumentException if node is null or durationMs <= 0
      */
-    public static FxAnimation slideInLeft(Node node, int durationMs) {
+    public static TwAnimation slideInLeft(Node node, int durationMs) {
         double startX = -node.getLayoutBounds().getWidth();
         node.setOpacity(0); node.setTranslateX(startX);
-        return new FxAnimation(new Timeline(
+        return new TwAnimation(new Timeline(
             new KeyFrame(Duration.ZERO,
                 new KeyValue(node.opacityProperty(),    0,      Interpolator.EASE_OUT),
                 new KeyValue(node.translateXProperty(), startX, Interpolator.EASE_OUT)),
@@ -279,13 +279,13 @@ public final class FxAnimation {
      *
      * @param node       the node to animate (must not be null)
      * @param durationMs animation duration in milliseconds (must be > 0)
-     * @return a ready-to-play {@link FxAnimation}
+     * @return a ready-to-play {@link TwAnimation}
      * @throws IllegalArgumentException if node is null or durationMs <= 0
      */
-    public static FxAnimation slideInRight(Node node, int durationMs) {
+    public static TwAnimation slideInRight(Node node, int durationMs) {
         double startX = node.getLayoutBounds().getWidth();
         node.setOpacity(0); node.setTranslateX(startX);
-        return new FxAnimation(new Timeline(
+        return new TwAnimation(new Timeline(
             new KeyFrame(Duration.ZERO,
                 new KeyValue(node.opacityProperty(),    0,      Interpolator.EASE_OUT),
                 new KeyValue(node.translateXProperty(), startX, Interpolator.EASE_OUT)),
@@ -303,13 +303,13 @@ public final class FxAnimation {
      *
      * @param node       the node to animate (must not be null)
      * @param durationMs animation duration in milliseconds (must be > 0)
-     * @return a ready-to-play {@link FxAnimation}
+     * @return a ready-to-play {@link TwAnimation}
      * @throws IllegalArgumentException if node is null or durationMs <= 0
      */
-    public static FxAnimation slideInBottom(Node node, int durationMs) {
+    public static TwAnimation slideInBottom(Node node, int durationMs) {
         double startY = node.getLayoutBounds().getHeight();
         node.setOpacity(0); node.setTranslateY(startY);
-        return new FxAnimation(new Timeline(
+        return new TwAnimation(new Timeline(
             new KeyFrame(Duration.ZERO,
                 new KeyValue(node.opacityProperty(),    0,      Interpolator.EASE_OUT),
                 new KeyValue(node.translateYProperty(), startY, Interpolator.EASE_OUT)),
@@ -327,13 +327,13 @@ public final class FxAnimation {
      *
      * @param node       the node to animate (must not be null)
      * @param durationMs animation duration in milliseconds (must be > 0)
-     * @return a ready-to-play {@link FxAnimation}
+     * @return a ready-to-play {@link TwAnimation}
      * @throws IllegalArgumentException if node is null or durationMs <= 0
      */
-    public static FxAnimation slideInTop(Node node, int durationMs) {
+    public static TwAnimation slideInTop(Node node, int durationMs) {
         double startY = -node.getLayoutBounds().getHeight();
         node.setOpacity(0); node.setTranslateY(startY);
-        return new FxAnimation(new Timeline(
+        return new TwAnimation(new Timeline(
             new KeyFrame(Duration.ZERO,
                 new KeyValue(node.opacityProperty(),    0,      Interpolator.EASE_OUT),
                 new KeyValue(node.translateYProperty(), startY, Interpolator.EASE_OUT)),
@@ -350,12 +350,12 @@ public final class FxAnimation {
      * The node starts at 85% scale with opacity 0.
      *
      * @param node the node to animate (must not be null)
-     * @return a ready-to-play {@link FxAnimation}
+     * @return a ready-to-play {@link TwAnimation}
      * @see #scaleIn(Node, int)
      * @see #scaleIn(Node, int, Interpolator)
      * @throws IllegalArgumentException if node is null
      */
-    public static FxAnimation scaleIn(Node node) { return scaleIn(node, NORMAL); }
+    public static TwAnimation scaleIn(Node node) { return scaleIn(node, NORMAL); }
     
     /**
      * Scales a node up from 0.85 to 1.0 while fading in with specified duration.
@@ -365,12 +365,12 @@ public final class FxAnimation {
      *
      * @param node       the node to animate (must not be null)
      * @param durationMs animation duration in milliseconds (must be > 0)
-     * @return a ready-to-play {@link FxAnimation}
+     * @return a ready-to-play {@link TwAnimation}
      * @see #scaleIn(Node)
      * @see #scaleIn(Node, int, Interpolator)
      * @throws IllegalArgumentException if node is null or durationMs <= 0
      */
-    public static FxAnimation scaleIn(Node node, int durationMs) {
+    public static TwAnimation scaleIn(Node node, int durationMs) {
         return scaleIn(node, durationMs, Interpolator.EASE_OUT);
     }
     
@@ -383,16 +383,16 @@ public final class FxAnimation {
      * @param node       the node to animate (must not be null)
      * @param durationMs animation duration in milliseconds (must be > 0)
      * @param ease       the interpolation function (must not be null)
-     * @return a ready-to-play {@link FxAnimation}
+     * @return a ready-to-play {@link TwAnimation}
      * @see #scaleIn(Node)
      * @see #scaleIn(Node, int)
      * @throws IllegalArgumentException if node is null, ease is null or durationMs <= 0
      */
-    public static FxAnimation scaleIn(Node node, int durationMs, Interpolator ease) {
-        Preconditions.requireNode(node, "FxAnimation.scaleIn");
-        Preconditions.requireNonNull(ease, "FxAnimation.scaleIn", "ease");
+    public static TwAnimation scaleIn(Node node, int durationMs, Interpolator ease) {
+        Preconditions.requireNode(node, "TwAnimation.scaleIn");
+        Preconditions.requireNonNull(ease, "TwAnimation.scaleIn", "ease");
         node.setOpacity(0); node.setScaleX(0.85); node.setScaleY(0.85);
-        FxAnimation fxAnim = new FxAnimation(new Timeline(
+        TwAnimation fxAnim = new TwAnimation(new Timeline(
             new KeyFrame(Duration.ZERO,
                 new KeyValue(node.opacityProperty(), 0,    ease),
                 new KeyValue(node.scaleXProperty(),  0.85, ease),
@@ -416,11 +416,11 @@ public final class FxAnimation {
      * <p>Uses {@code EASE_IN} interpolation. Automatically registered in the {@code "exit"} slot.
      *
      * @param node the node to animate (must not be null)
-     * @return a ready-to-play {@link FxAnimation} registered in slot {@code "exit"}
+     * @return a ready-to-play {@link TwAnimation} registered in slot {@code "exit"}
      * @see #fadeOut(Node, int)
      * @throws IllegalArgumentException if node is null
      */
-    public static FxAnimation fadeOut(Node node) { return fadeOut(node, NORMAL); }
+    public static TwAnimation fadeOut(Node node) { return fadeOut(node, NORMAL); }
     
     /**
      * Fades a node out from its current opacity to 0 with specified duration.
@@ -430,14 +430,14 @@ public final class FxAnimation {
      *
      * @param node       the node to animate (must not be null)
      * @param durationMs animation duration in milliseconds (must be > 0)
-     * @return a ready-to-play {@link FxAnimation} registered in slot {@code "exit"}
+     * @return a ready-to-play {@link TwAnimation} registered in slot {@code "exit"}
      * @see #fadeOut(Node)
      * @throws IllegalArgumentException if node is null or durationMs <= 0 (calls requirePositiveDuration)
      */
-    public static FxAnimation fadeOut(Node node, int durationMs) {
-        Preconditions.requireNode(node, "FxAnimation.fadeOut");
-        Preconditions.requirePositiveDuration(durationMs, "FxAnimation.fadeOut");
-        return new FxAnimation(new Timeline(
+    public static TwAnimation fadeOut(Node node, int durationMs) {
+        Preconditions.requireNode(node, "TwAnimation.fadeOut");
+        Preconditions.requirePositiveDuration(durationMs, "TwAnimation.fadeOut");
+        return new TwAnimation(new Timeline(
             new KeyFrame(Duration.ZERO,        new KeyValue(node.opacityProperty(), node.getOpacity())),
             new KeyFrame(Duration.millis(durationMs), new KeyValue(node.opacityProperty(), 0, Interpolator.EASE_IN))
         )).register(node, "exit");
@@ -449,11 +449,11 @@ public final class FxAnimation {
      * <p>Creates a "pop-out" exit effect with {@code EASE_IN} interpolation.
      *
      * @param node the node to animate (must not be null)
-     * @return a ready-to-play {@link FxAnimation}
+     * @return a ready-to-play {@link TwAnimation}
      * @see #scaleOut(Node, int)
      * @throws IllegalArgumentException if node is null
      */
-    public static FxAnimation scaleOut(Node node) { return scaleOut(node, NORMAL); }
+    public static TwAnimation scaleOut(Node node) { return scaleOut(node, NORMAL); }
     
     /**
      * Scales a node down from 1.0 to 0.85 while fading out with specified duration.
@@ -463,12 +463,12 @@ public final class FxAnimation {
      *
      * @param node       the node to animate (must not be null)
      * @param durationMs animation duration in milliseconds (must be > 0)
-     * @return a ready-to-play {@link FxAnimation}
+     * @return a ready-to-play {@link TwAnimation}
      * @see #scaleOut(Node)
      * @throws IllegalArgumentException if node is null or durationMs <= 0
      */
-    public static FxAnimation scaleOut(Node node, int durationMs) {
-        return new FxAnimation(new Timeline(
+    public static TwAnimation scaleOut(Node node, int durationMs) {
+        return new TwAnimation(new Timeline(
             new KeyFrame(Duration.ZERO,
                 new KeyValue(node.opacityProperty(), 1,   Interpolator.EASE_IN),
                 new KeyValue(node.scaleXProperty(),  1.0, Interpolator.EASE_IN),
@@ -489,32 +489,32 @@ public final class FxAnimation {
      * 
      * <p>Useful for drawing attention to badges, notifications, or status indicators.
      * The animation cycles with period of 1 second (500ms fade out, 500ms fade in).
-     * Call {@link FxAnimation#cycleCount(int)} to limit the number of pulses.
+     * Call {@link TwAnimation#cycleCount(int)} to limit the number of pulses.
      *
      * @param node the node to animate (must not be null)
-     * @return a ready-to-play {@link FxAnimation} with infinite cycle count
+     * @return a ready-to-play {@link TwAnimation} with infinite cycle count
      * @throws IllegalArgumentException if node is null
      */
-    public static FxAnimation pulse(Node node) {
+    public static TwAnimation pulse(Node node) {
         Timeline tl = new Timeline(
             new KeyFrame(Duration.ZERO,         new KeyValue(node.opacityProperty(), 1.0)),
             new KeyFrame(Duration.millis(500),  new KeyValue(node.opacityProperty(), 0.6, Interpolator.EASE_BOTH)),
             new KeyFrame(Duration.millis(1000), new KeyValue(node.opacityProperty(), 1.0))
         );
         tl.setCycleCount(Animation.INDEFINITE);
-        return new FxAnimation(tl);
+        return new TwAnimation(tl);
     }
 
     /**
      * Shakes the node horizontally — useful for validation errors.
      *
      * @param node the node to shake (must not be null)
-     * @return a ready-to-play {@link FxAnimation} registered in slot {@code "attention"}
+     * @return a ready-to-play {@link TwAnimation} registered in slot {@code "attention"}
      */
-    public static FxAnimation shake(Node node) {
-        Preconditions.requireNode(node, "FxAnimation.shake");
+    public static TwAnimation shake(Node node) {
+        Preconditions.requireNode(node, "TwAnimation.shake");
         double x = node.getTranslateX();
-        return new FxAnimation(new Timeline(
+        return new TwAnimation(new Timeline(
             new KeyFrame(Duration.ZERO,        new KeyValue(node.translateXProperty(), x)),
             new KeyFrame(Duration.millis(60),  new KeyValue(node.translateXProperty(), x - 8, Interpolator.EASE_BOTH)),
             new KeyFrame(Duration.millis(120), new KeyValue(node.translateXProperty(), x + 8, Interpolator.EASE_BOTH)),
@@ -532,12 +532,12 @@ public final class FxAnimation {
      * The node bounces up and down with decreasing amplitude over 480 milliseconds.
      *
      * @param node the node to animate (must not be null)
-     * @return a ready-to-play {@link FxAnimation}
+     * @return a ready-to-play {@link TwAnimation}
      * @throws IllegalArgumentException if node is null
      */
-    public static FxAnimation bounce(Node node) {
+    public static TwAnimation bounce(Node node) {
         double y = node.getTranslateY();
-        return new FxAnimation(new Timeline(
+        return new TwAnimation(new Timeline(
             new KeyFrame(Duration.ZERO,        new KeyValue(node.translateYProperty(), y)),
             new KeyFrame(Duration.millis(100), new KeyValue(node.translateYProperty(), y - 12, Interpolator.EASE_OUT)),
             new KeyFrame(Duration.millis(200), new KeyValue(node.translateYProperty(), y,      Interpolator.EASE_IN)),
@@ -555,10 +555,10 @@ public final class FxAnimation {
      * The animation completes a full flash cycle in 800 milliseconds (4 toggles).
      *
      * @param node the node to animate (must not be null)
-     * @return a ready-to-play {@link FxAnimation}
+     * @return a ready-to-play {@link TwAnimation}
      * @throws IllegalArgumentException if node is null
      */
-    public static FxAnimation flash(Node node) {
+    public static TwAnimation flash(Node node) {
         Timeline tl = new Timeline(
             new KeyFrame(Duration.ZERO,        new KeyValue(node.opacityProperty(), 1.0)),
             new KeyFrame(Duration.millis(200), new KeyValue(node.opacityProperty(), 0.0)),
@@ -566,7 +566,7 @@ public final class FxAnimation {
             new KeyFrame(Duration.millis(600), new KeyValue(node.opacityProperty(), 0.0)),
             new KeyFrame(Duration.millis(800), new KeyValue(node.opacityProperty(), 1.0))
         );
-        return new FxAnimation(tl);
+        return new TwAnimation(tl);
     }
 
     // =========================================================================
@@ -580,11 +580,11 @@ public final class FxAnimation {
      * Uses default duration of 1000ms per full rotation with {@code LINEAR} interpolation.
      *
      * @param node the node to animate (must not be null)
-     * @return a ready-to-play {@link FxAnimation} with infinite cycle count
+     * @return a ready-to-play {@link TwAnimation} with infinite cycle count
      * @see #spin(Node, int)
      * @throws IllegalArgumentException if node is null
      */
-    public static FxAnimation spin(Node node) {
+    public static TwAnimation spin(Node node) {
         return spin(node, 1000);
     }
     
@@ -596,19 +596,19 @@ public final class FxAnimation {
      *
      * @param node       the node to animate (must not be null)
      * @param durationMs time for one full 360-degree rotation in milliseconds (must be > 0)
-     * @return a ready-to-play {@link FxAnimation} with infinite cycle count
+     * @return a ready-to-play {@link TwAnimation} with infinite cycle count
      * @see #spin(Node)
      * @throws IllegalArgumentException if node is null or durationMs <= 0
      */
-    public static FxAnimation spin(Node node, int durationMs) {
-        Preconditions.requireNode(node, "FxAnimation.spin");
-        Preconditions.requirePositiveDuration(durationMs, "FxAnimation.spin");
+    public static TwAnimation spin(Node node, int durationMs) {
+        Preconditions.requireNode(node, "TwAnimation.spin");
+        Preconditions.requirePositiveDuration(durationMs, "TwAnimation.spin");
         Timeline tl = new Timeline(
             new KeyFrame(Duration.ZERO,            new KeyValue(node.rotateProperty(), 0)),
             new KeyFrame(Duration.millis(durationMs), new KeyValue(node.rotateProperty(), 360, Interpolator.LINEAR))
         );
         tl.setCycleCount(Animation.INDEFINITE);
-        return new FxAnimation(tl);
+        return new TwAnimation(tl);
     }
 
     /**
@@ -619,17 +619,17 @@ public final class FxAnimation {
      * cycle, creating a calming breathing animation.
      *
      * @param node the node to animate (must not be null)
-     * @return a ready-to-play {@link FxAnimation} with infinite cycle count
+     * @return a ready-to-play {@link TwAnimation} with infinite cycle count
      * @throws IllegalArgumentException if node is null
      */
-    public static FxAnimation breathe(Node node) {
+    public static TwAnimation breathe(Node node) {
         Timeline tl = new Timeline(
             new KeyFrame(Duration.ZERO,            new KeyValue(node.scaleXProperty(), 1.0), new KeyValue(node.scaleYProperty(), 1.0)),
             new KeyFrame(Duration.millis(1000),    new KeyValue(node.scaleXProperty(), 1.06), new KeyValue(node.scaleYProperty(), 1.06), new KeyValue(node.opacityProperty(), 0.85)),
             new KeyFrame(Duration.millis(2000),    new KeyValue(node.scaleXProperty(), 1.0), new KeyValue(node.scaleYProperty(), 1.0), new KeyValue(node.opacityProperty(), 1.0))
         );
         tl.setCycleCount(Animation.INDEFINITE);
-        return new FxAnimation(tl);
+        return new TwAnimation(tl);
     }
 
     // =========================================================================
@@ -640,7 +640,7 @@ public final class FxAnimation {
      * Scales the node on hover — installs permanent mouse enter/exit listeners.
      *
      * <pre>
-     * FxAnimation.onHoverScale(button, 1.05); // 5% larger on hover
+     * TwAnimation.onHoverScale(button, 1.05); // 5% larger on hover
      * </pre>
      *
      * @param node        the node to add hover effect to (must not be null)
@@ -648,9 +648,9 @@ public final class FxAnimation {
      * @throws IllegalArgumentException if node is null or scaleFactor <= 0
      */
     public static void onHoverScale(Node node, double scaleFactor) {
-        Preconditions.requireNode(node, "FxAnimation.onHoverScale");
+        Preconditions.requireNode(node, "TwAnimation.onHoverScale");
         if (scaleFactor <= 0) {
-            throw new IllegalArgumentException("FxAnimation.onHoverScale: scaleFactor must be > 0");
+            throw new IllegalArgumentException("TwAnimation.onHoverScale: scaleFactor must be > 0");
         }
         final double baseScaleX = node.getScaleX();
         final double baseScaleY = node.getScaleY();
@@ -696,26 +696,26 @@ public final class FxAnimation {
      * choreographed entrance sequences or multi-step effects.
      * 
      * <pre>
-     * FxAnimation.chain(
-     *     FxAnimation.fadeIn(node),
-     *     FxAnimation.slideUp(node, 200)
+     * TwAnimation.chain(
+     *     TwAnimation.fadeIn(node),
+     *     TwAnimation.slideUp(node, 200)
      * ).play();
      * </pre>
      *
      * @param animations the animations to chain (must not be null or empty)
-     * @return a ready-to-play {@link FxAnimation} containing all animations in sequence
+     * @return a ready-to-play {@link TwAnimation} containing all animations in sequence
      * @throws IllegalArgumentException if animations is null or empty
-     * @see #parallel(FxAnimation...)
+     * @see #parallel(TwAnimation...)
      */
-    public static FxAnimation chain(FxAnimation... animations) {
+    public static TwAnimation chain(TwAnimation... animations) {
         if (animations == null || animations.length == 0) {
-            throw new IllegalArgumentException("FxAnimation.chain: al menos una animación requerida");
+            throw new IllegalArgumentException("TwAnimation.chain: al menos una animación requerida");
         }
         javafx.animation.SequentialTransition seq = new javafx.animation.SequentialTransition();
-        for (FxAnimation anim : animations) {
+        for (TwAnimation anim : animations) {
             seq.getChildren().add(anim.timeline);
         }
-        return new FxAnimation(seq);
+        return new TwAnimation(seq);
     }
 
     /**
@@ -726,19 +726,19 @@ public final class FxAnimation {
      * different nodes.
      *
      * @param animations the animations to play in parallel (must not be null or empty)
-     * @return a ready-to-play {@link FxAnimation} containing all animations in parallel
+     * @return a ready-to-play {@link TwAnimation} containing all animations in parallel
      * @throws IllegalArgumentException if animations is null or empty
-     * @see #chain(FxAnimation...)
+     * @see #chain(TwAnimation...)
      */
-    public static FxAnimation parallel(FxAnimation... animations) {
+    public static TwAnimation parallel(TwAnimation... animations) {
         if (animations == null || animations.length == 0) {
-            throw new IllegalArgumentException("FxAnimation.parallel: al menos una animación requerida");
+            throw new IllegalArgumentException("TwAnimation.parallel: al menos una animación requerida");
         }
         javafx.animation.ParallelTransition par = new javafx.animation.ParallelTransition();
-        for (FxAnimation anim : animations) {
+        for (TwAnimation anim : animations) {
             par.getChildren().add(anim.timeline);
         }
-        return new FxAnimation(par);
+        return new TwAnimation(par);
     }
 
     /**
@@ -747,21 +747,21 @@ public final class FxAnimation {
      * <p>Useful in animation chains to add delays between animations.
      * 
      * <pre>
-     * FxAnimation.chain(
-     *     FxAnimation.fadeIn(node1),
-     *     FxAnimation.pause(200),
-     *     FxAnimation.fadeIn(node2)
+     * TwAnimation.chain(
+     *     TwAnimation.fadeIn(node1),
+     *     TwAnimation.pause(200),
+     *     TwAnimation.fadeIn(node2)
      * ).play();
      * </pre>
      *
      * @param durationMs pause duration in milliseconds (must be > 0)
-     * @return a ready-to-play {@link FxAnimation}
+     * @return a ready-to-play {@link TwAnimation}
      * @throws IllegalArgumentException if durationMs <= 0
-     * @see #chain(FxAnimation...)
+     * @see #chain(TwAnimation...)
      */
-    public static FxAnimation pause(int durationMs) {
+    public static TwAnimation pause(int durationMs) {
         PauseTransition p = new PauseTransition(Duration.millis(durationMs));
-        return new FxAnimation(p);
+        return new TwAnimation(p);
     }
 
     // =========================================================================
@@ -778,7 +778,7 @@ public final class FxAnimation {
      * @return this animation for method chaining
      * @see #loop()
      */
-    public FxAnimation cycleCount(int count) {
+    public TwAnimation cycleCount(int count) {
         timeline.setCycleCount(count);
         return this;
     }
@@ -792,7 +792,7 @@ public final class FxAnimation {
      * @return this animation for method chaining
      * @see #cycleCount(int)
      */
-    public FxAnimation loop() {
+    public TwAnimation loop() {
         timeline.setCycleCount(Animation.INDEFINITE);
         return this;
     }
@@ -807,7 +807,7 @@ public final class FxAnimation {
      * @return this animation for method chaining
      * @throws IllegalArgumentException if rate <= 0
      */
-    public FxAnimation speed(double rate) {
+    public TwAnimation speed(double rate) {
         timeline.setRate(rate);
         return this;
     }
@@ -819,7 +819,7 @@ public final class FxAnimation {
      * @return this animation for method chaining
      * @throws IllegalArgumentException if handler is null
      */
-    public FxAnimation onFinished(javafx.event.EventHandler<javafx.event.ActionEvent> handler) {
+    public TwAnimation onFinished(javafx.event.EventHandler<javafx.event.ActionEvent> handler) {
         timeline.setOnFinished(handler);
         return this;
     }
@@ -833,7 +833,7 @@ public final class FxAnimation {
      *
      * @return this animation for method chaining
      */
-    public FxAnimation autoReverse() {
+    public TwAnimation autoReverse() {
         timeline.setAutoReverse(true);
         return this;
     }
@@ -862,7 +862,7 @@ public final class FxAnimation {
      * @throws IllegalArgumentException if node or slot is null/empty
      * @see AnimationRegistry
      */
-    public FxAnimation register(javafx.scene.Node node, String slot) {
+    public TwAnimation register(javafx.scene.Node node, String slot) {
         this.registeredNode = node;
         this.registeredSlot = slot;
         return this;
@@ -932,8 +932,8 @@ public final class FxAnimation {
      * @param interpolator the {@link Interpolator} to apply (must not be null)
      * @return this animation for chaining
      */
-    public FxAnimation withEase(Interpolator interpolator) {
-        Preconditions.requireNonNull(interpolator, "FxAnimation.withEase", "interpolator");
+    public TwAnimation withEase(Interpolator interpolator) {
+        Preconditions.requireNonNull(interpolator, "TwAnimation.withEase", "interpolator");
         this.ease = interpolator;
         return this;
     }
@@ -947,7 +947,7 @@ public final class FxAnimation {
      * @see #easeOut()
      * @see #easeBoth()
      */
-    public FxAnimation easeIn()    { return withEase(Interpolator.EASE_IN); }
+    public TwAnimation easeIn()    { return withEase(Interpolator.EASE_IN); }
     
     /**
      * Applies {@code EASE_OUT} interpolation — decelerates at the end.
@@ -959,7 +959,7 @@ public final class FxAnimation {
      * @see #easeIn()
      * @see #easeBoth()
      */
-    public FxAnimation easeOut()   { return withEase(Interpolator.EASE_OUT); }
+    public TwAnimation easeOut()   { return withEase(Interpolator.EASE_OUT); }
     
     /**
      * Applies {@code EASE_IN_OUT} interpolation — decelerates at both ends.
@@ -970,7 +970,7 @@ public final class FxAnimation {
      * @see #easeIn()
      * @see #easeOut()
      */
-    public FxAnimation easeBoth()  { return withEase(Interpolator.EASE_BOTH); }
+    public TwAnimation easeBoth()  { return withEase(Interpolator.EASE_BOTH); }
     
     /**
      * Applies {@code LINEAR} interpolation — constant speed throughout.
@@ -981,12 +981,12 @@ public final class FxAnimation {
      * @see #easeIn()
      * @see #easeOut()
      */
-    public FxAnimation linear()    { return withEase(Interpolator.LINEAR); }
+    public TwAnimation linear()    { return withEase(Interpolator.LINEAR); }
 
     /**
      * Returns the underlying JavaFX {@link Animation} for advanced configuration.
      * 
-     * <p>Use this for direct access to features not exposed by FxAnimation's fluent API.
+     * <p>Use this for direct access to features not exposed by TwAnimation's fluent API.
      * Most users should use the fluent API methods instead.
      *
      * @return the underlying Timeline or Transition
@@ -1045,7 +1045,7 @@ public final class FxAnimation {
      * be stacked on the same node. Remove all effects with {@link #removeHoverEffects(Node)}.
      * 
      * <pre>
-     * FxAnimation.onHoverDim(button, 0.7);  // 70% opacity on hover
+     * TwAnimation.onHoverDim(button, 0.7);  // 70% opacity on hover
      * </pre>
      *
      * @param node            the node to add dim effect to (must not be null)

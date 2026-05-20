@@ -1,7 +1,7 @@
 package tailwindfx.examples;
 
 import io.github.yasmramos.tailwindfx.TailwindFX;
-import io.github.yasmramos.tailwindfx.animation.FxAnimation;
+import io.github.yasmramos.tailwindfx.animation.TwAnimation;
 import javafx.animation.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -333,7 +333,7 @@ public class DashboardComponents {
         card.setCursor(javafx.scene.Cursor.HAND);
         card.setOnMouseEntered(e -> {
             card.setEffect(new DropShadow(15, Color.rgb(0, 0, 0, 0.15)));
-            FxAnimation.onHoverScale(card, 1.02);
+            TwAnimation.onHoverScale(card, 1.02);
         });
         card.setOnMouseExited(e -> {
             card.setEffect(new DropShadow(4, Color.rgb(0, 0, 0, 0.1)));
