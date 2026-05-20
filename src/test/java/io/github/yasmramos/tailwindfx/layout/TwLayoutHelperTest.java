@@ -1,11 +1,11 @@
 package io.github.yasmramos.tailwindfx.layout;
 
-import io.github.yasmramos.tailwindfx.components.FxFlexPane;
-import io.github.yasmramos.tailwindfx.components.FxFlexPane;
-import io.github.yasmramos.tailwindfx.components.FxGridPane;
-import io.github.yasmramos.tailwindfx.components.FxGridPane;
+import io.github.yasmramos.tailwindfx.components.TwFlexPane;
+import io.github.yasmramos.tailwindfx.components.TwFlexPane;
+import io.github.yasmramos.tailwindfx.components.TwGridPane;
+import io.github.yasmramos.tailwindfx.components.TwGridPane;
 import io.github.yasmramos.tailwindfx.TailwindFX;
-import io.github.yasmramos.tailwindfx.layout.FxLayout;
+import io.github.yasmramos.tailwindfx.layout.TwLayoutHelper;
 import javafx.application.Platform;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.ColumnConstraints;
@@ -24,11 +24,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Tests for {@link FxLayout} — builder, type switching, constraints, TilePane.
+ * Tests for {@link TwLayoutHelper} — builder, type switching, constraints, TilePane.
  */
-public final class FxLayoutTest {
+public final class TwLayoutHelperTest {
 
-    private FxLayoutTest() {}
+    private TwLayoutHelperTest() {}
 
     private static int passed = 0, failed = 0;
     static void ok(String l)  { System.out.printf("  ✅ %s%n", l); passed++; }
@@ -48,7 +48,7 @@ public final class FxLayoutTest {
 
     public static boolean runAll() throws Exception {
         passed = 0; failed = 0;
-        System.out.println("\n── FxLayout ──");
+        System.out.println("\n── TwLayoutHelper ──");
 
         testRowCreatesHBox();
         testColCreatesVBox();
@@ -148,7 +148,7 @@ public final class FxLayoutTest {
     }
 
     static void testNullPaneThrows() {
-        throws_("FxLayout(null)", IllegalArgumentException.class,
+        throws_("TwLayoutHelper(null)", IllegalArgumentException.class,
             () -> TailwindFX.layout(null));
     }
 
@@ -203,36 +203,36 @@ public final class FxLayoutTest {
 
     static void testFlexType() throws Exception {
         runFx(() -> {
-            FxFlexPane fp = new FxFlexPane();
+            TwFlexPane fp = new TwFlexPane();
             Pane result = TailwindFX.layout(fp).flex()
-                .justify(FxFlexPane.Justify.BETWEEN)
-                .alignItems(FxFlexPane.Align.CENTER)
+                .justify(TwFlexPane.Justify.BETWEEN)
+                .alignItems(TwFlexPane.Align.CENTER)
                 .wrap(true).gap(16).build();
-            check("flex() → FxFlexPane", result instanceof FxFlexPane);
-            FxFlexPane built = (FxFlexPane) result;
-            check("justify=BETWEEN",  built.getJustify()    == FxFlexPane.Justify.BETWEEN);
-            check("align=CENTER",     built.getAlign()      == FxFlexPane.Align.CENTER);
+            check("flex() → TwFlexPane", result instanceof TwFlexPane);
+            TwFlexPane built = (TwFlexPane) result;
+            check("justify=BETWEEN",  built.getJustify()    == TwFlexPane.Justify.BETWEEN);
+            check("align=CENTER",     built.getAlign()      == TwFlexPane.Align.CENTER);
             check("wrap=true",        built.isWrap());
         });
     }
 
     static void testFlexGridType() throws Exception {
         runFx(() -> {
-            FxGridPane fg = FxGridPane.create().build();
+            TwGridPane fg = TwGridPane.create().build();
             Pane result = TailwindFX.layout(fg).flexGrid()
                 .areas("header header",
                        "sidebar main",
                        "footer footer")
                 .gap(8).build();
-            check("flexGrid() → FxGridPane", result instanceof FxGridPane);
+            check("flexGrid() → TwGridPane", result instanceof TwGridPane);
         });
     }
 
     static void testFlexOnNewPane() throws Exception {
         runFx(() -> {
-            // If container is NOT already FxFlexPane, layout() migrates it
+            // If container is NOT already TwFlexPane, layout() migrates it
             Region r1 = new Region(), r2 = new Region();
-            FxFlexPane source = new FxFlexPane();
+            TwFlexPane source = new TwFlexPane();
             source.getChildren().addAll(r1, r2);
             Pane result = TailwindFX.layout(source).flex().gap(12).build();
             check("children preserved", result.getChildren().containsAll(java.util.List.of(r1, r2)));
@@ -241,11 +241,11 @@ public final class FxLayoutTest {
 
     static void testFlexColDirection() throws Exception {
         runFx(() -> {
-            FxFlexPane fp = new FxFlexPane();
+            TwFlexPane fp = new TwFlexPane();
             // col() sets Direction.COL; flex() sets Direction.ROW
-            // Using col() on FxFlexPane via FxLayout
+            // Using col() on TwFlexPane via TwLayoutHelper
             Pane result = TailwindFX.layout(fp).flex().build();
-            check("flex() direction ROW", ((FxFlexPane)result).getDirection() == FxFlexPane.Direction.ROW);
+            check("flex() direction ROW", ((TwFlexPane)result).getDirection() == TwFlexPane.Direction.ROW);
         });
     }
 
@@ -325,8 +325,8 @@ public final class FxLayoutTest {
             HBox box = new HBox();
             // Switching to VBox → migration → listener fires
             TailwindFX.layout(box).col()
-                .onTransition(new FxLayout.LayoutTransitionListener() {
-                    public void onLayoutChanging(Pane src, FxLayout.LayoutType t) {
+                .onTransition(new TwLayoutHelper.LayoutTransitionListener() {
+                    public void onLayoutChanging(Pane src, TwLayoutHelper.LayoutType t) {
                         changingFired.set(true);
                     }
                     public void onLayoutChanged(Pane result) {
@@ -341,8 +341,8 @@ public final class FxLayoutTest {
             java.util.concurrent.atomic.AtomicBoolean noFire = new java.util.concurrent.atomic.AtomicBoolean(false);
             HBox same = new HBox();
             TailwindFX.layout(same).row()
-                .onTransition(new FxLayout.LayoutTransitionListener() {
-                    public void onLayoutChanging(Pane s, FxLayout.LayoutType t) { noFire.set(true); }
+                .onTransition(new TwLayoutHelper.LayoutTransitionListener() {
+                    public void onLayoutChanging(Pane s, TwLayoutHelper.LayoutType t) { noFire.set(true); }
                     public void onLayoutChanged(Pane r) { noFire.set(true); }
                 })
                 .build();
@@ -388,16 +388,16 @@ public final class FxLayoutTest {
             // hgrow
             HBox hbox = new HBox();
             hbox.getChildren().add(n);
-            FxLayout.hgrow(n);
+            TwLayoutHelper.hgrow(n);
             check("hgrow=ALWAYS", HBox.getHgrow(n) == Priority.ALWAYS);
 
             // spacer
-            Region spacer = FxLayout.spacer();
+            Region spacer = TwLayoutHelper.spacer();
             check("spacer not null",    spacer != null);
             check("spacer maxW=MAX",    spacer.getMaxWidth() == Double.MAX_VALUE);
 
             // spacer(size)
-            Region sized = FxLayout.spacer(20);
+            Region sized = TwLayoutHelper.spacer(20);
             check("spacer(20) min=20",  sized.getMinWidth() == 20);
         });
     }

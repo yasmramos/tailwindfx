@@ -1,8 +1,8 @@
 package io.github.yasmramos.tailwindfx;
 
-import io.github.yasmramos.tailwindfx.components.FxFlexPane;
-import io.github.yasmramos.tailwindfx.components.FxGridPane;
-import io.github.yasmramos.tailwindfx.layout.FxLayout;
+import io.github.yasmramos.tailwindfx.components.TwFlexPane;
+import io.github.yasmramos.tailwindfx.components.TwGridPane;
+import io.github.yasmramos.tailwindfx.layout.TwLayoutHelper;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 
@@ -58,35 +58,35 @@ public final class TwLayout {
     }
     
     /**
-     * Migrates a node's parent to FxFlexPane if needed.
+     * Migrates a node's parent to TwFlexPane if needed.
      */
     private static void migrateToFlexContainer(Node node) {
         javafx.scene.Parent currentParent = node.getParent();
-        if (currentParent instanceof FxFlexPane) {
+        if (currentParent instanceof TwFlexPane) {
             // Already a flex container, no migration needed
             return;
         }
         
         if (currentParent instanceof Pane pane) {
-            // Use FxLayout builder to migrate
-            FxFlexPane flexPane = FxFlexPane.row();
+            // Use TwLayoutHelper builder to migrate
+            TwFlexPane flexPane = TwFlexPane.row();
             migrateContent(pane, flexPane);
         }
     }
     
     /**
-     * Migrates a node's parent to FxGridPane if needed.
+     * Migrates a node's parent to TwGridPane if needed.
      */
     private static void migrateToGridContainer(Node node) {
         javafx.scene.Parent currentParent = node.getParent();
-        if (currentParent instanceof FxGridPane) {
+        if (currentParent instanceof TwGridPane) {
             // Already a grid container, no migration needed
             return;
         }
         
         if (currentParent instanceof Pane pane) {
-            // Use FxLayout builder to migrate
-            FxGridPane gridPane = FxGridPane.create().build();
+            // Use TwLayoutHelper builder to migrate
+            TwGridPane gridPane = TwGridPane.create().build();
             migrateContent(pane, gridPane);
         }
     }
@@ -134,7 +134,7 @@ public final class TwLayout {
         int value = parseTailwindValue(token);
         double px = value * 4.0;
         
-        if (parent instanceof FxFlexPane flexPane) {
+        if (parent instanceof TwFlexPane flexPane) {
             if (token.startsWith("gap-x-")) {
                 flexPane.gapX(px);
             } else if (token.startsWith("gap-y-")) {
@@ -142,7 +142,7 @@ public final class TwLayout {
             } else {
                 flexPane.gap(px);
             }
-        } else if (parent instanceof FxGridPane gridPane) {
+        } else if (parent instanceof TwGridPane gridPane) {
             if (token.startsWith("gap-x-")) {
                 gridPane.gapX(px);
             } else if (token.startsWith("gap-y-")) {
@@ -158,14 +158,14 @@ public final class TwLayout {
      * Applies flex item style to a node.
      */
     private static void applyFlexItemStyle(Node node, Pane parent, String token) {
-        if (parent instanceof FxFlexPane flexPane) {
+        if (parent instanceof TwFlexPane flexPane) {
             if (token.equals("grow") || token.equals("flex-1")) {
-                FxFlexPane.setGrow(node, 1);
+                TwFlexPane.setGrow(node, 1);
             } else if (token.equals("shrink") || token.equals("flex-none")) {
-                FxFlexPane.setShrink(node, 0);
+                TwFlexPane.setShrink(node, 0);
             } else if (token.equals("flex-auto")) {
-                FxFlexPane.setGrow(node, 1);
-                FxFlexPane.setShrink(node, 1);
+                TwFlexPane.setGrow(node, 1);
+                TwFlexPane.setShrink(node, 1);
             } else if (token.startsWith("flex-")) {
                 try {
                     String value = token.substring(5);
@@ -173,7 +173,7 @@ public final class TwLayout {
                         value = value.substring(1, value.length() - 1);
                     }
                     double flexValue = Double.parseDouble(value);
-                    FxFlexPane.setGrow(node, flexValue);
+                    TwFlexPane.setGrow(node, flexValue);
                 } catch (NumberFormatException e) {
                     // Ignore invalid values
                 }
@@ -207,42 +207,42 @@ public final class TwLayout {
     /**
      * Get layout builder for a container.
      * @param container the pane container
-     * @return FxLayout builder
+     * @return TwLayoutHelper builder
      */
-    public static FxLayout of(Pane container) {
-        return FxLayout.of(container);
+    public static TwLayoutHelper of(Pane container) {
+        return TwLayoutHelper.of(container);
     }
     
     /**
      * Create a horizontal flex pane (row direction).
-     * @return new FxFlexPane with ROW direction
+     * @return new TwFlexPane with ROW direction
      */
-    public static FxFlexPane flexRow() {
-        return FxFlexPane.row();
+    public static TwFlexPane flexRow() {
+        return TwFlexPane.row();
     }
     
     /**
      * Create a vertical flex pane (column direction).
-     * @return new FxFlexPane with COL direction
+     * @return new TwFlexPane with COL direction
      */
-    public static FxFlexPane flexCol() {
-        return FxFlexPane.col();
+    public static TwFlexPane flexCol() {
+        return TwFlexPane.col();
     }
     
     /**
      * Create a grid pane builder.
-     * @return FxGridPane.Builder to configure and build
+     * @return TwGridPane.Builder to configure and build
      */
-    public static FxGridPane.Builder grid() {
-        return FxGridPane.create();
+    public static TwGridPane.Builder grid() {
+        return TwGridPane.create();
     }
     
     /**
      * Create a grid pane with default gap.
-     * @return new FxGridPane instance
+     * @return new TwGridPane instance
      */
-    public static FxGridPane gridBuild() {
-        return FxGridPane.create().build();
+    public static TwGridPane gridBuild() {
+        return TwGridPane.create().build();
     }
     
     /**

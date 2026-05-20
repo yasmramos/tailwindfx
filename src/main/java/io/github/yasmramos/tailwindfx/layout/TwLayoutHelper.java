@@ -1,7 +1,7 @@
 package io.github.yasmramos.tailwindfx.layout;
 
-import io.github.yasmramos.tailwindfx.components.FxFlexPane;
-import io.github.yasmramos.tailwindfx.components.FxGridPane;
+import io.github.yasmramos.tailwindfx.components.TwFlexPane;
+import io.github.yasmramos.tailwindfx.components.TwGridPane;
 import io.github.yasmramos.tailwindfx.core.Preconditions;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * FxLayout v2 — Layout Engine inteligente de TailwindFX.
+ * TwLayoutHelper v2 — Layout Engine inteligente de TailwindFX.
  *
  * Principios:
  *   1. MUTACIÓN INTELIGENTE: si el Pane source ya es el tipo correcto,
@@ -51,7 +51,7 @@ import java.util.Map;
  *   TailwindFX.layout(pane).flowRow().gap(8).build();
  *
  * Responsive switch (seguro — no recrea el Pane):
- *   FxLayout lyt = TailwindFX.layout(container).gap(12);
+ *   TwLayoutHelper lyt = TailwindFX.layout(container).gap(12);
  *   stage.widthProperty().addListener((o, old, w) -> {
  *       if (w.doubleValue() < 768) lyt.col().build();
  *       else                       lyt.row().build();
@@ -62,7 +62,7 @@ import java.util.Map;
  *       .anchorFill(content, 0, 0, 0, 0)
  *       .build();
  */
-public final class FxLayout {
+public final class TwLayoutHelper {
 
     public enum LayoutType { ROW, COL, STACK, GRID, FLOW_ROW, FLOW_COL, ANCHOR, TILE, FLEX, FLEX_GRID }
 
@@ -74,20 +74,20 @@ public final class FxLayout {
     // ── Thread safety ──────────────────────────────────────────────────────────
     /**
      * Asserts that the current thread is the JavaFX Application Thread.
-     * All FxLayout operations must run on the FX thread because they modify
+     * All TwLayoutHelper operations must run on the FX thread because they modify
      * the live scene graph.
      */
     private static void checkFxThread() {
         if (!javafx.application.Platform.isFxApplicationThread()) {
             throw new IllegalStateException(
-                "FxLayout must be used on the JavaFX Application Thread. "
+                "TwLayoutHelper must be used on the JavaFX Application Thread. "
                 + "Use Platform.runLater() to schedule layout changes from background threads.");
         }
     }
 
-    // ── FxFlexPane / FxGridPane properties ─────────────────────────────────────
-    private FxFlexPane.Justify   flexJustify  = FxFlexPane.Justify.START;
-    private FxFlexPane.Align     flexAlign    = FxFlexPane.Align.START;
+    // ── TwFlexPane / TwGridPane properties ─────────────────────────────────────
+    private TwFlexPane.Justify   flexJustify  = TwFlexPane.Justify.START;
+    private TwFlexPane.Align     flexAlign    = TwFlexPane.Align.START;
     private boolean              flexWrap     = false;
     private String[]             gridAreas    = null;
     private int                  gridCols2    = 3;
@@ -105,49 +105,49 @@ public final class FxLayout {
     private double       prefW = -1, prefH = -1;
     private final Map<Node, double[]> anchors = new LinkedHashMap<>();
 
-    public FxLayout(Pane source) { this.source = Preconditions.requireNonNull(source, "FxLayout", "pane"); }
-    public static FxLayout of(Pane container) { return new FxLayout(container); }
+    public TwLayoutHelper(Pane source) { this.source = Preconditions.requireNonNull(source, "TwLayoutHelper", "pane"); }
+    public static TwLayoutHelper of(Pane container) { return new TwLayoutHelper(container); }
 
     // =========================================================================
     // Tipo de layout
     // =========================================================================
 
-    public FxLayout row()          { type = LayoutType.ROW;      return this; }
-    public FxLayout col()          { type = LayoutType.COL;      return this; }
-    public FxLayout stack()        { type = LayoutType.STACK;    return this; }
-    public FxLayout grid(int cols) { type = LayoutType.GRID; gridCols = Preconditions.requireSpan(cols, "FxLayout.grid"); return this; }
-    public FxLayout grid()         { type = LayoutType.GRID; gridCols = -1;   return this; }
-    public FxLayout flowRow()      { type = LayoutType.FLOW_ROW; return this; }
-    public FxLayout flowCol()      { type = LayoutType.FLOW_COL; return this; }
+    public TwLayoutHelper row()          { type = LayoutType.ROW;      return this; }
+    public TwLayoutHelper col()          { type = LayoutType.COL;      return this; }
+    public TwLayoutHelper stack()        { type = LayoutType.STACK;    return this; }
+    public TwLayoutHelper grid(int cols) { type = LayoutType.GRID; gridCols = Preconditions.requireSpan(cols, "TwLayoutHelper.grid"); return this; }
+    public TwLayoutHelper grid()         { type = LayoutType.GRID; gridCols = -1;   return this; }
+    public TwLayoutHelper flowRow()      { type = LayoutType.FLOW_ROW; return this; }
+    public TwLayoutHelper flowCol()      { type = LayoutType.FLOW_COL; return this; }
     /** TilePane — cuadrícula de tiles de tamaño uniforme. */
-    public FxLayout tile()         { type = LayoutType.TILE;     return this; }
-    public FxLayout anchor()       { type = LayoutType.ANCHOR;   return this; }
+    public TwLayoutHelper tile()         { type = LayoutType.TILE;     return this; }
+    public TwLayoutHelper anchor()       { type = LayoutType.ANCHOR;   return this; }
 
-    // ── FxFlexPane builder ────────────────────────────────────────────────────
+    // ── TwFlexPane builder ────────────────────────────────────────────────────
 
     /**
-     * Switches to {@link FxFlexPane} mode.
-     * The container must be an {@link FxFlexPane} or will be converted on {@link #build()}.
+     * Switches to {@link TwFlexPane} mode.
+     * The container must be an {@link TwFlexPane} or will be converted on {@link #build()}.
      *
      * <pre>
-     * FxFlexPane cards = (FxFlexPane) TailwindFX.layout(flexPane)
-     *     .flex().wrap(true).justify(FxFlexPane.Justify.BETWEEN).gap(16).build();
+     * TwFlexPane cards = (TwFlexPane) TailwindFX.layout(flexPane)
+     *     .flex().wrap(true).justify(TwFlexPane.Justify.BETWEEN).gap(16).build();
      * </pre>
      */
-    public FxLayout flex()         { type = LayoutType.FLEX;      return this; }
+    public TwLayoutHelper flex()         { type = LayoutType.FLEX;      return this; }
 
     /**
-     * Switches to {@link FxGridPane} (grid-template-areas) mode.
+     * Switches to {@link TwGridPane} (grid-template-areas) mode.
      * Use {@link #areas(String...)} to define the grid.
      *
      * <pre>
-     * FxGridPane page = (FxGridPane) TailwindFX.layout(new FxGridPane())
+     * TwGridPane page = (TwGridPane) TailwindFX.layout(new TwGridPane())
      *     .flexGrid()
      *     .areas("header header", "sidebar main", "footer footer")
      *     .gap(12).build();
      * </pre>
      */
-    public FxLayout flexGrid()     { type = LayoutType.FLEX_GRID; return this; }
+    public TwLayoutHelper flexGrid()     { type = LayoutType.FLEX_GRID; return this; }
 
     /**
      * Sets the justify-content for a flex container.
@@ -155,7 +155,7 @@ public final class FxLayout {
      *
      * @param justify the justify-content value
      */
-    public FxLayout justify(FxFlexPane.Justify justify) {
+    public TwLayoutHelper justify(TwFlexPane.Justify justify) {
         this.flexJustify = justify; return this;
     }
 
@@ -165,7 +165,7 @@ public final class FxLayout {
      *
      * @param align the align-items value
      */
-    public FxLayout alignItems(FxFlexPane.Align align) {
+    public TwLayoutHelper alignItems(TwFlexPane.Align align) {
         this.flexAlign = align; return this;
     }
 
@@ -175,10 +175,10 @@ public final class FxLayout {
      *
      * @param wrap {@code true} to enable wrapping
      */
-    public FxLayout wrap(boolean wrap) { this.flexWrap = wrap; return this; }
+    public TwLayoutHelper wrap(boolean wrap) { this.flexWrap = wrap; return this; }
 
     /**
-     * Defines grid-template-areas for a {@link FxGridPane}.
+     * Defines grid-template-areas for a {@link TwGridPane}.
      * Only applies when type is {@link LayoutType#FLEX_GRID}.
      *
      * <pre>
@@ -189,34 +189,34 @@ public final class FxLayout {
      *
      * @param rows each string defines one row of named areas
      */
-    public FxLayout areas(String... rows) {
+    public TwLayoutHelper areas(String... rows) {
         this.gridAreas = rows;
         return this;
     }
 
     /**
-     * Sets the number of columns for {@link FxGridPane} auto-flow or masonry mode.
+     * Sets the number of columns for {@link TwGridPane} auto-flow or masonry mode.
      * Only applies when type is {@link LayoutType#FLEX_GRID}.
      *
      * @param cols number of columns
      */
-    public FxLayout cols(int cols) { this.gridCols2 = cols; return this; }
+    public TwLayoutHelper cols(int cols) { this.gridCols2 = cols; return this; }
 
     // =========================================================================
     // Spacing
     // =========================================================================
 
-    public FxLayout gap(double v)  { gap     = v; return this; }
-    public FxLayout hgap(double v) { hgapVal = v; return this; }
-    public FxLayout vgap(double v) { vgapVal = v; return this; }
+    public TwLayoutHelper gap(double v)  { gap     = v; return this; }
+    public TwLayoutHelper hgap(double v) { hgapVal = v; return this; }
+    public TwLayoutHelper vgap(double v) { vgapVal = v; return this; }
 
     // =========================================================================
     // Padding
     // =========================================================================
 
-    public FxLayout padding(double all)                             { padding = new Insets(all);             return this; }
-    public FxLayout padding(double tb, double lr)                   { padding = new Insets(tb, lr, tb, lr);  return this; }
-    public FxLayout padding(double t, double r, double b, double l) { padding = new Insets(t, r, b, l); return this; }
+    public TwLayoutHelper padding(double all)                             { padding = new Insets(all);             return this; }
+    public TwLayoutHelper padding(double tb, double lr)                   { padding = new Insets(tb, lr, tb, lr);  return this; }
+    public TwLayoutHelper padding(double t, double r, double b, double l) { padding = new Insets(t, r, b, l); return this; }
 
     /**
      * Sets padding from a CSS-like shorthand string (values in px, no unit suffix needed).
@@ -234,8 +234,8 @@ public final class FxLayout {
      *
      * @param shorthand space-separated px values (1, 2, or 4 values)
      */
-    public FxLayout padding(String shorthand) {
-        Preconditions.requireNonBlank(shorthand, "FxLayout.padding", "shorthand");
+    public TwLayoutHelper padding(String shorthand) {
+        Preconditions.requireNonBlank(shorthand, "TwLayoutHelper.padding", "shorthand");
         String[] parts = shorthand.trim().split("\s+");
         padding = switch (parts.length) {
             case 1 -> new Insets(parsePx(parts[0]));
@@ -244,7 +244,7 @@ public final class FxLayout {
             case 4 -> new Insets(parsePx(parts[0]), parsePx(parts[1]),
                                   parsePx(parts[2]), parsePx(parts[3]));
             default -> throw new IllegalArgumentException(
-                "FxLayout.padding: expected 1, 2, or 4 values, got: " + parts.length);
+                "TwLayoutHelper.padding: expected 1, 2, or 4 values, got: " + parts.length);
         };
         return this;
     }
@@ -252,7 +252,7 @@ public final class FxLayout {
     private static double parsePx(String s) {
         try { return Double.parseDouble(s.replace("px", "").trim()); }
         catch (NumberFormatException e) {
-            throw new IllegalArgumentException("FxLayout.padding: invalid value '" + s + "'");
+            throw new IllegalArgumentException("TwLayoutHelper.padding: invalid value '" + s + "'");
         }
     }
 
@@ -260,57 +260,57 @@ public final class FxLayout {
     // Alineación
     // =========================================================================
 
-    public FxLayout center()       { alignment = Pos.CENTER;        return this; }
-    public FxLayout centerLeft()   { alignment = Pos.CENTER_LEFT;   return this; }
-    public FxLayout centerRight()  { alignment = Pos.CENTER_RIGHT;  return this; }
-    public FxLayout topLeft()      { alignment = Pos.TOP_LEFT;      return this; }
-    public FxLayout topCenter()    { alignment = Pos.TOP_CENTER;    return this; }
-    public FxLayout topRight()     { alignment = Pos.TOP_RIGHT;     return this; }
-    public FxLayout bottomLeft()   { alignment = Pos.BOTTOM_LEFT;   return this; }
-    public FxLayout bottomCenter() { alignment = Pos.BOTTOM_CENTER; return this; }
-    public FxLayout bottomRight()  { alignment = Pos.BOTTOM_RIGHT;  return this; }
+    public TwLayoutHelper center()       { alignment = Pos.CENTER;        return this; }
+    public TwLayoutHelper centerLeft()   { alignment = Pos.CENTER_LEFT;   return this; }
+    public TwLayoutHelper centerRight()  { alignment = Pos.CENTER_RIGHT;  return this; }
+    public TwLayoutHelper topLeft()      { alignment = Pos.TOP_LEFT;      return this; }
+    public TwLayoutHelper topCenter()    { alignment = Pos.TOP_CENTER;    return this; }
+    public TwLayoutHelper topRight()     { alignment = Pos.TOP_RIGHT;     return this; }
+    public TwLayoutHelper bottomLeft()   { alignment = Pos.BOTTOM_LEFT;   return this; }
+    public TwLayoutHelper bottomCenter() { alignment = Pos.BOTTOM_CENTER; return this; }
+    public TwLayoutHelper bottomRight()  { alignment = Pos.BOTTOM_RIGHT;  return this; }
 
     // aliases semánticos
-    public FxLayout justifyCenter()  { return center(); }
-    public FxLayout justifyStart()   { return topLeft(); }
-    public FxLayout itemsCenter()    { return centerLeft(); }
-    public FxLayout placeCenter()    { return center(); }
+    public TwLayoutHelper justifyCenter()  { return center(); }
+    public TwLayoutHelper justifyStart()   { return topLeft(); }
+    public TwLayoutHelper itemsCenter()    { return centerLeft(); }
+    public TwLayoutHelper placeCenter()    { return center(); }
 
     // =========================================================================
     // Crecimiento y tamaño
     // =========================================================================
 
-    public FxLayout grow()               { growAll = true; return this; }
-    public FxLayout fillWidth()          { fillW   = true; return this; }
-    public FxLayout fillHeight()         { fillH   = true; return this; }
-    public FxLayout fill()               { fillW   = true; fillH = true; return this; }
-    public FxLayout prefWidth(double w)  { prefW   = w;    return this; }
-    public FxLayout prefHeight(double h) { prefH   = h;    return this; }
-    public FxLayout minWidth(double w)   { minW    = w;    return this; }
-    public FxLayout minHeight(double h)  { minH    = h;    return this; }
-    public FxLayout maxWidth(double w)   { maxW    = w;    return this; }
-    public FxLayout maxHeight(double h)  { maxH    = h;    return this; }
+    public TwLayoutHelper grow()               { growAll = true; return this; }
+    public TwLayoutHelper fillWidth()          { fillW   = true; return this; }
+    public TwLayoutHelper fillHeight()         { fillH   = true; return this; }
+    public TwLayoutHelper fill()               { fillW   = true; fillH = true; return this; }
+    public TwLayoutHelper prefWidth(double w)  { prefW   = w;    return this; }
+    public TwLayoutHelper prefHeight(double h) { prefH   = h;    return this; }
+    public TwLayoutHelper minWidth(double w)   { minW    = w;    return this; }
+    public TwLayoutHelper minHeight(double h)  { minH    = h;    return this; }
+    public TwLayoutHelper maxWidth(double w)   { maxW    = w;    return this; }
+    public TwLayoutHelper maxHeight(double h)  { maxH    = h;    return this; }
 
     // =========================================================================
     // AnchorPane constraints (fluent, para uso con .anchor())
     // =========================================================================
 
     /** Ancla un nodo a todos los lados con el mismo valor */
-    public FxLayout anchorAll(Node n, double v)                              { anchors.put(n, new double[]{v, v, v, v}); return this; }
+    public TwLayoutHelper anchorAll(Node n, double v)                              { anchors.put(n, new double[]{v, v, v, v}); return this; }
     /** Ancla a los 4 lados: top, right, bottom, left */
-    public FxLayout anchorFill(Node n, double t, double r, double b, double l) { anchors.put(n, new double[]{t, r, b, l}); return this; }
+    public TwLayoutHelper anchorFill(Node n, double t, double r, double b, double l) { anchors.put(n, new double[]{t, r, b, l}); return this; }
 
-    public FxLayout anchorTop(Node n, double v)    { return setEdge(n, 0, v); }
-    public FxLayout anchorRight(Node n, double v)  { return setEdge(n, 1, v); }
-    public FxLayout anchorBottom(Node n, double v) { return setEdge(n, 2, v); }
-    public FxLayout anchorLeft(Node n, double v)   { return setEdge(n, 3, v); }
+    public TwLayoutHelper anchorTop(Node n, double v)    { return setEdge(n, 0, v); }
+    public TwLayoutHelper anchorRight(Node n, double v)  { return setEdge(n, 1, v); }
+    public TwLayoutHelper anchorBottom(Node n, double v) { return setEdge(n, 2, v); }
+    public TwLayoutHelper anchorLeft(Node n, double v)   { return setEdge(n, 3, v); }
 
     /** Ancla horizontal (left + right) → nodo llena el ancho disponible */
-    public FxLayout anchorH(Node n, double left, double right) { return setEdge(n, 3, left).setEdge(n, 1, right); }
+    public TwLayoutHelper anchorH(Node n, double left, double right) { return setEdge(n, 3, left).setEdge(n, 1, right); }
     /** Ancla vertical  (top + bottom) → nodo llena el alto disponible  */
-    public FxLayout anchorV(Node n, double top, double bottom)  { return setEdge(n, 0, top).setEdge(n, 2, bottom); }
+    public TwLayoutHelper anchorV(Node n, double top, double bottom)  { return setEdge(n, 0, top).setEdge(n, 2, bottom); }
 
-    private FxLayout setEdge(Node n, int i, double v) {
+    private TwLayoutHelper setEdge(Node n, int i, double v) {
         anchors.computeIfAbsent(n, k -> new double[]{-1,-1,-1,-1})[i] = v;
         return this;
     }
@@ -329,10 +329,10 @@ public final class FxLayout {
      *
      * <pre>
      * TailwindFX.layout(pane).row().gap(12).debug().build();
-     * // Output: [FxLayout] ROW  source=HBox  children=3  migrate=false
+     * // Output: [TwLayoutHelper] ROW  source=HBox  children=3  migrate=false
      * </pre>
      */
-    public FxLayout debug() { this.debugMode = true; return this; }
+    public TwLayoutHelper debug() { this.debugMode = true; return this; }
 
     // =========================================================================
     // Transition listener
@@ -365,8 +365,8 @@ public final class FxLayout {
      *
      * <pre>
      * TailwindFX.layout(pane).col()
-     *     .onTransition(new FxLayout.LayoutTransitionListener() {
-     *         public void onLayoutChanging(Pane src, FxLayout.LayoutType t) {
+     *     .onTransition(new TwLayoutHelper.LayoutTransitionListener() {
+     *         public void onLayoutChanging(Pane src, TwLayoutHelper.LayoutType t) {
      *             FxAnimation.fadeOut(src, 150).play();
      *         }
      *         public void onLayoutChanged(Pane result) {
@@ -378,7 +378,7 @@ public final class FxLayout {
      *
      * @param listener the transition listener, or {@code null} to clear
      */
-    public FxLayout onTransition(LayoutTransitionListener listener) {
+    public TwLayoutHelper onTransition(LayoutTransitionListener listener) {
         this.transitionListener = listener;
         return this;
     }
@@ -398,7 +398,7 @@ public final class FxLayout {
         boolean migrate = mustMigrate();
 
         if (debugMode) {
-            System.out.printf("[FxLayout] %-12s source=%-16s children=%-4d migrate=%s%n",
+            System.out.printf("[TwLayoutHelper] %-12s source=%-16s children=%-4d migrate=%s%n",
                 type, source.getClass().getSimpleName(),
                 source.getChildren().size(), migrate);
         }
@@ -450,21 +450,21 @@ public final class FxLayout {
     private void validate() {
         if (type == LayoutType.GRID && gridCols == -1 && source.getChildren().isEmpty()) {
             Preconditions.LOG.warning(
-                "FxLayout.build: GRID type with 0 children and no column count — "
+                "TwLayoutHelper.build: GRID type with 0 children and no column count — "
                 + "grid will be empty. Call grid(n) to set column count.");
         }
         if (type == LayoutType.FLEX_GRID && gridAreas == null && gridCols2 <= 0) {
             Preconditions.LOG.warning(
-                "FxLayout.build: FLEX_GRID with no areas() and cols <= 0 — "
+                "TwLayoutHelper.build: FLEX_GRID with no areas() and cols <= 0 — "
                 + "use .areas(...) or .cols(n) to define the grid layout.");
         }
         if (gap < 0) {
-            Preconditions.LOG.warning(() -> "FxLayout.build: gap=" + gap + " is negative — did you mean margin?");
+            Preconditions.LOG.warning(() -> "TwLayoutHelper.build: gap=" + gap + " is negative — did you mean margin?");
         }
         if (type == LayoutType.ANCHOR && anchors.isEmpty()
                 && !(source instanceof javafx.scene.layout.AnchorPane)) {
             Preconditions.LOG.fine(
-                "FxLayout.build: ANCHOR type but no anchor constraints defined — "
+                "TwLayoutHelper.build: ANCHOR type but no anchor constraints defined — "
                 + "use anchorTop/Right/Bottom/Left() to position children.");
         }
     }
@@ -478,8 +478,8 @@ public final class FxLayout {
             case FLOW_ROW, FLOW_COL -> !(source instanceof FlowPane);
             case TILE               -> !(source instanceof TilePane);
             case ANCHOR             -> !(source instanceof AnchorPane);
-            case FLEX               -> !(source instanceof FxFlexPane);
-            case FLEX_GRID          -> !(source instanceof FxGridPane);
+            case FLEX               -> !(source instanceof TwFlexPane);
+            case FLEX_GRID          -> !(source instanceof TwGridPane);
         };
     }
 
@@ -494,8 +494,8 @@ public final class FxLayout {
             case FLOW_COL -> new FlowPane(Orientation.VERTICAL);
             case ANCHOR   -> new AnchorPane();
             case TILE      -> new TilePane();
-            case FLEX      -> new FxFlexPane();
-            case FLEX_GRID -> FxGridPane.create().build();
+            case FLEX      -> new TwFlexPane();
+            case FLEX_GRID -> TwGridPane.create().build();
         };
         restore(target, snaps);
         return target;
@@ -612,14 +612,14 @@ public final class FxLayout {
         } else if (p instanceof AnchorPane ap) {
             if (hasPad) ap.setPadding(padding);
             anchors.forEach((n, cc) -> applyAnchor(n, cc));
-        } else if (p instanceof FxFlexPane fp) {
-            fp.setDirection(FxFlexPane.Direction.ROW);
+        } else if (p instanceof TwFlexPane fp) {
+            fp.setDirection(TwFlexPane.Direction.ROW);
             fp.setJustify(flexJustify);
             fp.setAlign(flexAlign);
             fp.setWrap(flexWrap);
             fp.gap(gap);
             if (hasPad) fp.padding(padding);
-        } else if (p instanceof FxGridPane fg) {
+        } else if (p instanceof TwGridPane fg) {
             if (gridAreas != null) {
                 fg.areas(gridAreas);
             } else {

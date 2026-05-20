@@ -130,12 +130,12 @@ public final class TailwindFXMetrics {
     /** Records an animation start. */
     public void recordAnimationPlay() { if (enabled) animationPlays.incrementAndGet(); }
 
-    // Layout pass timing (FxFlexPane)
+    // Layout pass timing (TwFlexPane)
     private final AtomicLong layoutPasses   = new AtomicLong();
     private final AtomicLong totalLayoutNs  = new AtomicLong();
 
     /**
-     * Records a layout pass from {@link FxFlexPane#layoutChildren}.
+     * Records a layout pass from {@link TwFlexPane#layoutChildren}.
      *
      * @param durationNs duration of the layout pass in nanoseconds
      */
@@ -145,11 +145,11 @@ public final class TailwindFXMetrics {
         totalLayoutNs.addAndGet(durationNs);
     }
 
-    /** Total number of FxFlexPane layout passes since last reset. */
+    /** Total number of TwFlexPane layout passes since last reset. */
     public long layoutPasses() { return layoutPasses.get(); }
 
     /**
-     * Average FxFlexPane layout time in nanoseconds.
+     * Average TwFlexPane layout time in nanoseconds.
      * Returns {@code 0} if no layout passes have been recorded.
      */
     public long avgLayoutNs() {
@@ -444,7 +444,7 @@ public final class TailwindFXMetrics {
      * <ul>
      *   <li><b>Low JIT cache hit ratio</b> (&lt;50% after 100+ lookups) — possible token explosion</li>
      *   <li><b>High conflict resolution rate</b> (&gt;30% of apply calls) — excessive class churn</li>
-     *   <li><b>Slow layout passes</b> (&gt;2ms average) — FxFlexPane/FxGridPane overload</li>
+     *   <li><b>Slow layout passes</b> (&gt;2ms average) — TwFlexPane/TwGridPane overload</li>
      *   <li><b>Slow JIT compilation</b> (&gt;1ms average) — complex token patterns</li>
      *   <li><b>Metrics not enabled</b> — no data collected yet</li>
      * </ul>
@@ -476,7 +476,7 @@ public final class TailwindFXMetrics {
 
         if (layoutPasses() >= 10 && avgLayoutNs() > 2_000_000) {
             issues.add(new HealthIssue("WARN",
-                String.format("Slow FxFlexPane/FxGridPane layout: avg %.2f ms over %d passes",
+                String.format("Slow TwFlexPane/TwGridPane layout: avg %.2f ms over %d passes",
                     avgLayoutNs() / 1_000_000.0, layoutPasses()),
                 "Reduce children count or avoid frequent direction/flow changes"));
         }
