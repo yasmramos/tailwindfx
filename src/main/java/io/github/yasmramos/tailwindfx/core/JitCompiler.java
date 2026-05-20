@@ -1303,7 +1303,7 @@ public final class JitCompiler {
         // Ej: aspect-[16/9] -> "-fx-aspect-ratio-16-9"
         String sanitized = val.replaceAll("[^a-zA-Z0-9]", "-");
         LOG.warning("TailwindFX JIT: aspect-ratio '" + val 
-            + "' no tiene equivalente CSS - usar FxLayout.setAspectRatio(node, ratio) en Java");
+            + "' no tiene equivalente CSS - usar TwLayoutHelper.setAspectRatio(node, ratio) en Java");
         return null; // CompileResult.cssClass se encargará del fallback
     }
 }
