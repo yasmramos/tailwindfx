@@ -367,10 +367,10 @@ public final class TwLayoutHelper {
      * TailwindFX.layout(pane).col()
      *     .onTransition(new TwLayoutHelper.LayoutTransitionListener() {
      *         public void onLayoutChanging(Pane src, TwLayoutHelper.LayoutType t) {
-     *             FxAnimation.fadeOut(src, 150).play();
+     *             TwAnimation.fadeOut(src, 150).play();
      *         }
      *         public void onLayoutChanged(Pane result) {
-     *             FxAnimation.fadeIn(result, 150).play();
+     *             TwAnimation.fadeIn(result, 150).play();
      *         }
      *     })
      *     .build();

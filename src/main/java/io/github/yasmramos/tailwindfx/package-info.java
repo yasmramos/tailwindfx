@@ -27,12 +27,12 @@
  *     .wrap(true).justify(TwFlexPane.Justify.BETWEEN).gap(16);
  *
  * // 7. Data table:
- * FxDataTable&lt;User&gt; table = TailwindFX.dataTable(User.class)
+ * TwDataTable&lt;User&gt; table = TailwindFX.dataTable(User.class)
  *     .column("Name", User::name).searchable(true).pageSize(20).build();
  *
  * // 8. Animations:
- * FxAnimation.fadeIn(node).play();
- * FxAnimation.onHoverScale(button, 1.05);
+ * TwAnimation.fadeIn(node).play();
+ * TwAnimation.onHoverScale(button, 1.05);
  * </pre>
  *
  * <h2>Class overview</h2>
@@ -43,9 +43,9 @@
  *   <tr><td>{@link tailwindfx.TwFlexPane}</td><td>Flexbox layout container</td></tr>
  *   <tr><td>{@link tailwindfx.TwGridPane}</td><td>Grid-template-areas layout</td></tr>
  *   <tr><td>{@link tailwindfx.TwLayoutHelper}</td><td>Builder for HBox/VBox/GridPane/etc.</td></tr>
- *   <tr><td>{@link tailwindfx.FxDataTable}</td><td>Sortable/filterable/paginated table</td></tr>
+ *   <tr><td>{@link tailwindfx.TwDataTable}</td><td>Sortable/filterable/paginated table</td></tr>
  *   <tr><td>{@link tailwindfx.ComponentFactory}</td><td>High-level component builders</td></tr>
- *   <tr><td>{@link tailwindfx.FxAnimation}</td><td>Animations + hover effects</td></tr>
+ *   <tr><td>{@link tailwindfx.TwAnimation}</td><td>Animations + hover effects</td></tr>
  *   <tr><td>{@link tailwindfx.ResponsiveNode}</td><td>Per-node responsive rules</td></tr>
  *   <tr><td>{@link tailwindfx.BreakpointManager}</td><td>Scene-level breakpoint detection</td></tr>
  *   <tr><td>{@link tailwindfx.ThemeManager}</td><td>Theme presets + persistence</td></tr>
