@@ -25,12 +25,12 @@ import java.util.stream.Collectors;
 import javafx.animation.Interpolator;
 
 /**
- * FxVirtualFlow — Contenedor virtualizado de alto rendimiento con selección,
+ * TwVirtualFlow — Contenedor virtualizado de alto rendimiento con selección,
  * drag & drop y scroll animado configurable.
  *
  * @param <T> Tipo de dato de los items
  */
-public class FxVirtualFlow<T> extends Region {
+public class TwVirtualFlow<T> extends Region {
 
     // =========================================================================
     // Enums & Constants
@@ -87,7 +87,7 @@ public class FxVirtualFlow<T> extends Region {
     // =========================================================================
     // Constructor
     // =========================================================================
-    public FxVirtualFlow() {
+    public TwVirtualFlow() {
         // Setup container
         dropIndicator.getStyleClass().add("fx-virtualflow-drop-indicator");
         dropIndicator.setStyle("-fx-background-color: #3b82f6; -fx-pref-height: 2;");
@@ -506,28 +506,28 @@ public class FxVirtualFlow<T> extends Region {
     // =========================================================================
     // Fluent API
     // =========================================================================
-    public FxVirtualFlow<T> items(ObservableList<T> i) { setItems(i); return this; }
-    public FxVirtualFlow<T> cellFactory(Function<T, Node> f) { setCellFactory(f); return this; }
-    public FxVirtualFlow<T> cellHeight(double h) { setCellHeight(h); return this; }
-    public FxVirtualFlow<T> cellWidth(double w) { setCellWidth(w); return this; }
-    public FxVirtualFlow<T> cellSizeProvider(Function<T, Double> p) { setCellSizeProvider(p); return this; }
-    public FxVirtualFlow<T> orientation(Orientation o) { setOrientation(o); return this; }
-    public FxVirtualFlow<T> viewportPadding(Insets p) { setViewportPadding(p); return this; }
-    public FxVirtualFlow<T> viewportPadding(double px) { return viewportPadding(new Insets(px)); }
-    public FxVirtualFlow<T> selectionMode(SelectionMode m) { setSelectionMode(m); return this; }
-    public FxVirtualFlow<T> scrollInterpolator(Interpolator i) { scrollInterpolator.set(i); return this; }
-    public FxVirtualFlow<T> outerPadding(Insets p) { setPadding(p); return this; }
-    public FxVirtualFlow<T> outerPadding(double px) { return outerPadding(new Insets(px)); }
+    public TwVirtualFlow<T> items(ObservableList<T> i) { setItems(i); return this; }
+    public TwVirtualFlow<T> cellFactory(Function<T, Node> f) { setCellFactory(f); return this; }
+    public TwVirtualFlow<T> cellHeight(double h) { setCellHeight(h); return this; }
+    public TwVirtualFlow<T> cellWidth(double w) { setCellWidth(w); return this; }
+    public TwVirtualFlow<T> cellSizeProvider(Function<T, Double> p) { setCellSizeProvider(p); return this; }
+    public TwVirtualFlow<T> orientation(Orientation o) { setOrientation(o); return this; }
+    public TwVirtualFlow<T> viewportPadding(Insets p) { setViewportPadding(p); return this; }
+    public TwVirtualFlow<T> viewportPadding(double px) { return viewportPadding(new Insets(px)); }
+    public TwVirtualFlow<T> selectionMode(SelectionMode m) { setSelectionMode(m); return this; }
+    public TwVirtualFlow<T> scrollInterpolator(Interpolator i) { scrollInterpolator.set(i); return this; }
+    public TwVirtualFlow<T> outerPadding(Insets p) { setPadding(p); return this; }
+    public TwVirtualFlow<T> outerPadding(double px) { return outerPadding(new Insets(px)); }
 
-    public FxVirtualFlow<T> onSelect(Consumer<Integer> h) { setOnSelect(h); return this; }
-    public FxVirtualFlow<T> onDoubleClick(Consumer<Integer> h) { setOnDoubleClick(h); return this; }
-    public FxVirtualFlow<T> onItemReorder(BiConsumer<Integer, Integer> h) { setOnItemReorder(h); return this; }
-    public FxVirtualFlow<T> onSelectionChange(Consumer<List<T>> h) { setOnSelectionChange(h); return this; }
+    public TwVirtualFlow<T> onSelect(Consumer<Integer> h) { setOnSelect(h); return this; }
+    public TwVirtualFlow<T> onDoubleClick(Consumer<Integer> h) { setOnDoubleClick(h); return this; }
+    public TwVirtualFlow<T> onItemReorder(BiConsumer<Integer, Integer> h) { setOnItemReorder(h); return this; }
+    public TwVirtualFlow<T> onSelectionChange(Consumer<List<T>> h) { setOnSelectionChange(h); return this; }
 
     /**
      * Wrapper TailwindFX seguro (fallback a CSS si no está en classpath)
      */
-    public FxVirtualFlow<T> withTailwindStyling(Function<T, Node> base, String... classes) {
+    public TwVirtualFlow<T> withTailwindStyling(Function<T, Node> base, String... classes) {
         Objects.requireNonNull(base);
         return cellFactory(item -> {
             Node n = base.apply(item);

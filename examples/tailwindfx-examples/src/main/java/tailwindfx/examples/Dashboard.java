@@ -2,7 +2,7 @@ package tailwindfx.examples;
 
 import io.github.yasmramos.tailwindfx.TailwindFX;
 import io.github.yasmramos.tailwindfx.components.ComponentFactory;
-import io.github.yasmramos.tailwindfx.components.FxDataTable;
+import io.github.yasmramos.tailwindfx.components.TwDataTable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -934,8 +934,8 @@ public class Dashboard {
 
         header.getChildren().addAll(title, spacer, searchField, filterBtn, exportBtn);
 
-        // Sample data table using FxDataTable
-        FxDataTable<Order> table = FxDataTable.of(Order.class)
+        // Sample data table using TwDataTable
+        TwDataTable<Order> table = TwDataTable.of(Order.class)
             .column("Order ID", Order::getOrderId)
             .column("Customer", Order::getCustomer)
             .column("Product", Order::getProduct)

@@ -1,6 +1,6 @@
 package io.github.yasmramos.tailwindfx.style;
 
-import io.github.yasmramos.tailwindfx.animation.FxAnimation;
+import io.github.yasmramos.tailwindfx.animation.TwAnimation;
 import io.github.yasmramos.tailwindfx.core.Preconditions;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -1113,7 +1113,7 @@ public final class Styles {
      *
      * // Or force it in tests:
      * Styles.setReducedMotion(true);
-     * if (Styles.shouldAnimate()) FxAnimation.fadeIn(node).play();
+     * if (Styles.shouldAnimate()) TwAnimation.fadeIn(node).play();
      * </pre>
      *
      * @param reduced {@code true} to suppress animations
@@ -1137,12 +1137,12 @@ public final class Styles {
      * If reduced, the final state is applied instantly.
      *
      * <pre>
-     * Styles.playIfMotionOk(FxAnimation.fadeIn(node, 300));
+     * Styles.playIfMotionOk(TwAnimation.fadeIn(node, 300));
      * </pre>
      *
      * @param animation the animation to conditionally play
      */
-    public static void playIfMotionOk(FxAnimation animation) {
+    public static void playIfMotionOk(TwAnimation animation) {
         Preconditions.requireNonNull(animation, "Styles.playIfMotionOk", "animation");
         if (shouldAnimate()) {
             animation.play();

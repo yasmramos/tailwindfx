@@ -1,6 +1,6 @@
 package io.github.yasmramos.tailwindfx.core;
 
-import io.github.yasmramos.tailwindfx.animation.FxAnimation;
+import io.github.yasmramos.tailwindfx.animation.TwAnimation;
 import java.util.logging.Logger;
 
 /**
@@ -171,7 +171,7 @@ public final class Preconditions {
 
     /** Warns if an animation is applied to a node that already has one in the same slot */
     public static void warnAnimationOverride(javafx.scene.Node node, String slot, String method) {
-        if (FxAnimation.AnimationRegistry.isActive(node, slot)) {
+        if (TwAnimation.AnimationRegistry.isActive(node, slot)) {
             LOG.warning(String.format(
                 "%s: replacing active animation in slot '%s' on node %s - previous animation will be stopped",
                 method, slot, node
