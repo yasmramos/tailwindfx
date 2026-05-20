@@ -125,6 +125,11 @@ public final class TailwindFX {
         return FxLayout.of(container);
     }
 
+    /** Apply layout classes (flex, grid, gap) with automatic container migration if needed. */
+    public static void layout(Node node, String... tokens) {
+        TwLayout.apply(node, tokens);
+    }
+
     /** Create a horizontal flex pane. */
     public static FxFlexPane flexRow() {
         return FxFlexPane.row();
