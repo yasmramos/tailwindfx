@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * FxGridPane — a declarative, Tailwind-style grid container for JavaFX.
+ * TwGridPane — a declarative, Tailwind-style grid container for JavaFX.
  *
  * <p>
  * Wraps {@link GridPane} with a fluent API covering features that neither plain
@@ -37,19 +37,19 @@ import java.util.Map;
  * <li><b>Masonry-like layout</b> — {@link #masonry(int)}: auto-flow column mode
  * with items placed in the shortest column.</li>
  * <li><b>gap semantics</b> — {@link #gap(double)}, {@link #gapX(double)},
- *       {@link #gapY(double)}: consistent with FxFlexPane.</li>
+ *       {@link #gapY(double)}: consistent with TwFlexPane.</li>
  * </ul>
  *
  * <h3>Usage</h3>
  * <pre>
  * // 3-column auto-flow grid:
- * FxGridPane grid = FxGridPane.create()
+ * TwGridPane grid = TwGridPane.create()
  *     .cols(3).gap(16).autoFlow(AutoFlow.ROW)
  *     .build();
  * grid.getChildren().addAll(card1, card2, card3, card4);
  *
  * // Template areas:
- * FxGridPane page = FxGridPane.create()
+ * TwGridPane page = TwGridPane.create()
  *     .areas("header header",
  *            "sidebar main",
  *            "footer footer")
@@ -60,15 +60,15 @@ import java.util.Map;
  * page.placeIn(footer,  "footer");
  *
  * // Masonry (shortest-column placement):
- * FxGridPane pins = FxGridPane.create().masonry(3).gap(12).build();
+ * TwGridPane pins = TwGridPane.create().masonry(3).gap(12).build();
  * pins.getChildren().addAll(pin1, pin2, pin3, pin4, pin5);
  *
  * // Per-child span:
- * FxGridPane.setColSpan(wideCard, 2);
- * FxGridPane.setRowSpan(tallCard, 2);
+ * TwGridPane.setColSpan(wideCard, 2);
+ * TwGridPane.setRowSpan(tallCard, 2);
  * </pre>
  */
-public final class FxGridPane extends Pane {
+public final class TwGridPane extends Pane {
 
     // =========================================================================
     // Enums
@@ -88,30 +88,30 @@ public final class FxGridPane extends Pane {
     // Builder
     // =========================================================================
     /**
-     * Returns a new builder for FxGridPane.
+     * Returns a new builder for TwGridPane.
      */
     public static Builder create() {
         return new Builder();
     }
 
     /**
-     * Creates a FxGridPane with the specified gap (convenience method).
+     * Creates a TwGridPane with the specified gap (convenience method).
      * 
      * @param gapPx the gap in pixels for both horizontal and vertical
-     * @return a new FxGridPane instance
+     * @return a new TwGridPane instance
      */
-    public static FxGridPane create(double gapPx) {
+    public static TwGridPane create(double gapPx) {
         return new Builder().gap(gapPx).build();
     }
 
     /**
-     * Creates a FxGridPane with separate horizontal and vertical gaps (convenience method).
+     * Creates a TwGridPane with separate horizontal and vertical gaps (convenience method).
      * 
      * @param gapXpx horizontal gap in pixels
      * @param gapYpx vertical gap in pixels
-     * @return a new FxGridPane instance
+     * @return a new TwGridPane instance
      */
-    public static FxGridPane create(double gapXpx, double gapYpx) {
+    public static TwGridPane create(double gapXpx, double gapYpx) {
         return new Builder().gapX(gapXpx).gapY(gapYpx).build();
     }
 
@@ -128,7 +128,7 @@ public final class FxGridPane extends Pane {
 
         public Builder cols(int c) {
             if (c < 1) {
-                throw new IllegalArgumentException("FxGridPane.cols: must be >= 1");
+                throw new IllegalArgumentException("TwGridPane.cols: must be >= 1");
             }
             this.cols = c;
             return this;
@@ -136,7 +136,7 @@ public final class FxGridPane extends Pane {
 
         public Builder rows(int r) {
             if (r < 0) {
-                throw new IllegalArgumentException("FxGridPane.rows: must be >= 0");
+                throw new IllegalArgumentException("TwGridPane.rows: must be >= 0");
             }
             this.rows = r;
             return this;
@@ -184,8 +184,8 @@ public final class FxGridPane extends Pane {
             return this;
         }
 
-        public FxGridPane build() {
-            return new FxGridPane(this);
+        public TwGridPane build() {
+            return new TwGridPane(this);
         }
     }
 
@@ -211,7 +211,7 @@ public final class FxGridPane extends Pane {
     // =========================================================================
     // Construction
     // =========================================================================
-    private FxGridPane(Builder b) {
+    private TwGridPane(Builder b) {
         this.cols = b.cols;
         this.rows = b.rows;
         this.gapX = b.gapX;
@@ -282,7 +282,7 @@ public final class FxGridPane extends Pane {
      * @param templates row strings (e.g.
      * {@code "header header"}, {@code "sidebar main"})
      */
-    public FxGridPane areas(String... templates) {
+    public TwGridPane areas(String... templates) {
         parseAreaTemplates(templates);
         requestLayout();
         return this;
@@ -295,12 +295,12 @@ public final class FxGridPane extends Pane {
      * @param area the area name as defined in {@link #areas(String...)}
      * @throws IllegalArgumentException if the area name is unknown
      */
-    public FxGridPane placeIn(Node node, String area) {
-        Preconditions.requireNonNull(node, "FxGridPane.placeIn", "node");
-        Preconditions.requireNonBlank(area, "FxGridPane.placeIn", "area");
+    public TwGridPane placeIn(Node node, String area) {
+        Preconditions.requireNonNull(node, "TwGridPane.placeIn", "node");
+        Preconditions.requireNonBlank(area, "TwGridPane.placeIn", "area");
         if (!areaMap.containsKey(area)) {
             throw new IllegalArgumentException(
-                    "FxGridPane.placeIn: unknown area '" + area + "'. Defined areas: " + areaMap.keySet());
+                    "TwGridPane.placeIn: unknown area '" + area + "'. Defined areas: " + areaMap.keySet());
         }
         node.getProperties().put(AREA_KEY, area);
         if (!getChildren().contains(node)) {
@@ -321,7 +321,7 @@ public final class FxGridPane extends Pane {
      * @param rowIndex the row index
      */
     public void add(Node child, int colIndex, int rowIndex) {
-        Preconditions.requireNonNull(child, "FxGridPane.add", "child");
+        Preconditions.requireNonNull(child, "TwGridPane.add", "child");
         GridPane.setConstraints(child, colIndex, rowIndex);
         getChildren().add(child);
         requestLayout();
@@ -337,7 +337,7 @@ public final class FxGridPane extends Pane {
      * @param rowspan the row span
      */
     public void add(Node child, int colIndex, int rowIndex, int colspan, int rowspan) {
-        Preconditions.requireNonNull(child, "FxGridPane.add", "child");
+        Preconditions.requireNonNull(child, "TwGridPane.add", "child");
         GridPane.setConstraints(child, colIndex, rowIndex, colspan, rowspan, HPos.LEFT, VPos.TOP);
         getChildren().add(child);
         requestLayout();
@@ -353,7 +353,7 @@ public final class FxGridPane extends Pane {
      * @param vgrow vertical growth priority
      */
     public void add(Node child, int colIndex, int rowIndex, Priority hgrow, Priority vgrow) {
-        Preconditions.requireNonNull(child, "FxGridPane.add", "child");
+        Preconditions.requireNonNull(child, "TwGridPane.add", "child");
         GridPane.setConstraints(child, colIndex, rowIndex);
         GridPane.setHgrow(child, hgrow);
         GridPane.setVgrow(child, vgrow);
@@ -375,7 +375,7 @@ public final class FxGridPane extends Pane {
             throw new IllegalArgumentException("setColSpan: span must be >= 1");
         }
         node.getProperties().put(COL_SPAN_KEY, span);
-        if (node.getParent() instanceof FxGridPane gp) {
+        if (node.getParent() instanceof TwGridPane gp) {
             gp.requestLayout();
         }
     }
@@ -391,7 +391,7 @@ public final class FxGridPane extends Pane {
             throw new IllegalArgumentException("setRowSpan: span must be >= 1");
         }
         node.getProperties().put(ROW_SPAN_KEY, span);
-        if (node.getParent() instanceof FxGridPane gp) {
+        if (node.getParent() instanceof TwGridPane gp) {
             gp.requestLayout();
         }
     }
@@ -409,32 +409,32 @@ public final class FxGridPane extends Pane {
     // =========================================================================
     // Runtime mutators
     // =========================================================================
-    public FxGridPane cols(int c) {
+    public TwGridPane cols(int c) {
         this.cols = c;
         requestLayout();
         return this;
     }
 
-    public FxGridPane gap(double px) {
+    public TwGridPane gap(double px) {
         gapX = px;
         gapY = px;
         requestLayout();
         return this;
     }
 
-    public FxGridPane gapX(double px) {
+    public TwGridPane gapX(double px) {
         this.gapX = px;
         requestLayout();
         return this;
     }
 
-    public FxGridPane gapY(double px) {
+    public TwGridPane gapY(double px) {
         this.gapY = px;
         requestLayout();
         return this;
     }
 
-    public FxGridPane autoFlow(AutoFlow af) {
+    public TwGridPane autoFlow(AutoFlow af) {
         this.autoFlow = af;
         requestLayout();
         return this;
@@ -444,7 +444,7 @@ public final class FxGridPane extends Pane {
      * Sets padding after construction (analogous to {@code .p-N}). Triggers
      * layout pass.
      */
-    public FxGridPane padding(double px) {
+    public TwGridPane padding(double px) {
         this.padding = new Insets(px);
         requestLayout();
         return this;
@@ -453,8 +453,8 @@ public final class FxGridPane extends Pane {
     /**
      * Sets padding with Insets after construction. Triggers layout pass.
      */
-    public FxGridPane padding(Insets p) {
-        this.padding = Preconditions.requireNonNull(p, "FxGridPane.padding", "padding");
+    public TwGridPane padding(Insets p) {
+        this.padding = Preconditions.requireNonNull(p, "TwGridPane.padding", "padding");
         requestLayout();
         return this;
     }
@@ -462,7 +462,7 @@ public final class FxGridPane extends Pane {
     /**
      * Sets horizontal padding (left/right).
      */
-    public FxGridPane paddingX(double px) {
+    public TwGridPane paddingX(double px) {
         this.padding = new Insets(padding.getTop(), px, padding.getBottom(), px);
         requestLayout();
         return this;
@@ -471,7 +471,7 @@ public final class FxGridPane extends Pane {
     /**
      * Sets vertical padding (top/bottom).
      */
-    public FxGridPane paddingY(double px) {
+    public TwGridPane paddingY(double px) {
         this.padding = new Insets(px, padding.getRight(), px, padding.getLeft());
         requestLayout();
         return this;

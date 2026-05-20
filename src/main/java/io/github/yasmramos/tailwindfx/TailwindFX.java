@@ -2,14 +2,14 @@ package io.github.yasmramos.tailwindfx;
 
 import io.github.yasmramos.tailwindfx.breakpoint.BreakpointManager;
 import io.github.yasmramos.tailwindfx.responsive.ResponsiveNode;
-import io.github.yasmramos.tailwindfx.components.FxFlexPane;
-import io.github.yasmramos.tailwindfx.components.FxGridPane;
+import io.github.yasmramos.tailwindfx.components.TwFlexPane;
+import io.github.yasmramos.tailwindfx.components.TwGridPane;
 import io.github.yasmramos.tailwindfx.style.StylePerf;
 import io.github.yasmramos.tailwindfx.animation.FxAnimation;
 import io.github.yasmramos.tailwindfx.theme.ThemeManager;
 import io.github.yasmramos.tailwindfx.theme.ThemeScopeManager;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
-import io.github.yasmramos.tailwindfx.layout.FxLayout;
+import io.github.yasmramos.tailwindfx.layout.TwLayoutHelper;
 
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -121,8 +121,8 @@ public final class TailwindFX {
     // =========================================================================
 
     /** Get layout builder for a container. */
-    public static FxLayout layout(Pane container) {
-        return FxLayout.of(container);
+    public static TwLayoutHelper layout(Pane container) {
+        return TwLayoutHelper.of(container);
     }
 
     /** Apply layout classes (flex, grid, gap) with automatic container migration if needed. */
@@ -131,13 +131,13 @@ public final class TailwindFX {
     }
 
     /** Create a horizontal flex pane. */
-    public static FxFlexPane flexRow() {
-        return FxFlexPane.row();
+    public static TwFlexPane flexRow() {
+        return TwFlexPane.row();
     }
 
     /** Create a grid pane. */
-    public static FxGridPane grid() {
-        return FxGridPane.create().build();
+    public static TwGridPane grid() {
+        return TwGridPane.create().build();
     }
 
     // =========================================================================

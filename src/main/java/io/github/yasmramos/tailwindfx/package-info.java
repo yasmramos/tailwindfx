@@ -23,8 +23,8 @@
  * TailwindFX.scope(pane).preset("blue").apply();
  *
  * // 6. Flex layout:
- * FxFlexPane row = TailwindFX.flexRow()
- *     .wrap(true).justify(FxFlexPane.Justify.BETWEEN).gap(16);
+ * TwFlexPane row = TailwindFX.flexRow()
+ *     .wrap(true).justify(TwFlexPane.Justify.BETWEEN).gap(16);
  *
  * // 7. Data table:
  * FxDataTable&lt;User&gt; table = TailwindFX.dataTable(User.class)
@@ -40,9 +40,9 @@
  *   <tr><th>Class</th><th>Purpose</th></tr>
  *   <tr><td>{@link tailwindfx.TailwindFX}</td><td>Main entry point — all public APIs</td></tr>
  *   <tr><td>{@link tailwindfx.Styles}</td><td>Java APIs for CSS-unsupported features</td></tr>
- *   <tr><td>{@link tailwindfx.FxFlexPane}</td><td>Flexbox layout container</td></tr>
- *   <tr><td>{@link tailwindfx.FxGridPane}</td><td>Grid-template-areas layout</td></tr>
- *   <tr><td>{@link tailwindfx.FxLayout}</td><td>Builder for HBox/VBox/GridPane/etc.</td></tr>
+ *   <tr><td>{@link tailwindfx.TwFlexPane}</td><td>Flexbox layout container</td></tr>
+ *   <tr><td>{@link tailwindfx.TwGridPane}</td><td>Grid-template-areas layout</td></tr>
+ *   <tr><td>{@link tailwindfx.TwLayoutHelper}</td><td>Builder for HBox/VBox/GridPane/etc.</td></tr>
  *   <tr><td>{@link tailwindfx.FxDataTable}</td><td>Sortable/filterable/paginated table</td></tr>
  *   <tr><td>{@link tailwindfx.ComponentFactory}</td><td>High-level component builders</td></tr>
  *   <tr><td>{@link tailwindfx.FxAnimation}</td><td>Animations + hover effects</td></tr>

@@ -1,6 +1,6 @@
 package io.github.yasmramos.tailwindfx;
 
-import io.github.yasmramos.tailwindfx.components.FxFlexPane;
+import io.github.yasmramos.tailwindfx.components.TwFlexPane;
 import io.github.yasmramos.tailwindfx.responsive.ResponsiveNode;
 import io.github.yasmramos.tailwindfx.TwResponsive;
 import javafx.application.Platform;
@@ -353,18 +353,18 @@ public final class TailwindFXIntegrationTest {
         });
     }
 
-    // ── FxFlexPane factories ───────────────────────────────────────────────
+    // ── TwFlexPane factories ───────────────────────────────────────────────
     static void testFlexRowFactory() throws Exception {
         runFx(() -> {
-            FxFlexPane flex = TailwindFX.flexRow();
-            check("flexRow direction=ROW", flex.getDirection() == FxFlexPane.Direction.ROW);
+            TwFlexPane flex = TailwindFX.flexRow();
+            check("flexRow direction=ROW", flex.getDirection() == TwFlexPane.Direction.ROW);
         });
     }
 
     static void testFlexColFactory() throws Exception {
         runFx(() -> {
-            FxFlexPane flex = TwLayout.flexCol();
-            check("flexCol direction=COL", flex.getDirection() == FxFlexPane.Direction.COL);
+            TwFlexPane flex = TwLayout.flexCol();
+            check("flexCol direction=COL", flex.getDirection() == TwFlexPane.Direction.COL);
         });
     }
 
