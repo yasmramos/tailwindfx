@@ -2,8 +2,8 @@ package io.github.yasmramos.tailwindfx;
 
 import io.github.yasmramos.tailwindfx.breakpoint.BreakpointManager;
 import io.github.yasmramos.tailwindfx.responsive.ResponsiveNode;
-import io.github.yasmramos.tailwindfx.components.TwFlexPane;
-import io.github.yasmramos.tailwindfx.components.TwGridPane;
+import io.github.yasmramos.tailwindfx.layout.TwFlexPane;
+import io.github.yasmramos.tailwindfx.layout.TwGridPane;
 import io.github.yasmramos.tailwindfx.style.StylePerf;
 import io.github.yasmramos.tailwindfx.animation.TwAnimation;
 import io.github.yasmramos.tailwindfx.theme.ThemeManager;
