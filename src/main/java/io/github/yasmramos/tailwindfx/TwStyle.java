@@ -7,8 +7,8 @@ import io.github.yasmramos.tailwindfx.style.StylePerf;
 import io.github.yasmramos.tailwindfx.style.Styles;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
 import io.github.yasmramos.tailwindfx.layout.TwLayoutHelper;
-import io.github.yasmramos.tailwindfx.components.TwFlexPane;
-import io.github.yasmramos.tailwindfx.components.TwGridPane;
+import io.github.yasmramos.tailwindfx.layout.TwFlexPane;
+import io.github.yasmramos.tailwindfx.layout.TwGridPane;
 
 import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
@@ -245,7 +245,7 @@ public final class TwStyle {
      */
     private static void applyFlexStyleViaStyles(Node node, javafx.scene.layout.Pane parent, String token) {
         // Prioritize TwFlexPane if parent is TwFlexPane
-        if (parent instanceof io.github.yasmramos.tailwindfx.components.TwFlexPane flexPane) {
+        if (parent instanceof io.github.yasmramos.tailwindfx.layout.TwFlexPane flexPane) {
             applyFlexForTwFlexPane(node, token);
             return;
         }
@@ -296,15 +296,15 @@ public final class TwStyle {
      */
     private static void applyFlexForTwFlexPane(Node node, String token) {
         if (token.equals("grow") || token.equals("flex-1")) {
-            io.github.yasmramos.tailwindfx.components.TwFlexPane.setGrow(node, 1);
+            io.github.yasmramos.tailwindfx.layout.TwFlexPane.setGrow(node, 1);
         } else if (token.equals("shrink") || token.equals("flex-none")) {
-            io.github.yasmramos.tailwindfx.components.TwFlexPane.setShrink(node, 0);
+            io.github.yasmramos.tailwindfx.layout.TwFlexPane.setShrink(node, 0);
         } else if (token.equals("flex-auto")) {
-            io.github.yasmramos.tailwindfx.components.TwFlexPane.setGrow(node, 1);
-            io.github.yasmramos.tailwindfx.components.TwFlexPane.setShrink(node, 1);
+            io.github.yasmramos.tailwindfx.layout.TwFlexPane.setGrow(node, 1);
+            io.github.yasmramos.tailwindfx.layout.TwFlexPane.setShrink(node, 1);
         } else if (token.equals("flex-initial")) {
-            io.github.yasmramos.tailwindfx.components.TwFlexPane.setGrow(node, 0);
-            io.github.yasmramos.tailwindfx.components.TwFlexPane.setShrink(node, 1);
+            io.github.yasmramos.tailwindfx.layout.TwFlexPane.setGrow(node, 0);
+            io.github.yasmramos.tailwindfx.layout.TwFlexPane.setShrink(node, 1);
         } else if (token.startsWith("flex-")) {
             // Handle arbitrary flex values like flex-[2]
             try {
@@ -313,7 +313,7 @@ public final class TwStyle {
                     value = value.substring(1, value.length() - 1);
                 }
                 double flexValue = Double.parseDouble(value);
-                io.github.yasmramos.tailwindfx.components.TwFlexPane.setGrow(node, flexValue);
+                io.github.yasmramos.tailwindfx.layout.TwFlexPane.setGrow(node, flexValue);
             } catch (NumberFormatException e) {
                 // Ignore invalid flex values
             }
@@ -344,7 +344,7 @@ public final class TwStyle {
         }
         
         // Prioritize TwFlexPane if parent is TwFlexPane
-        if (parent instanceof io.github.yasmramos.tailwindfx.components.TwFlexPane flexPane) {
+        if (parent instanceof io.github.yasmramos.tailwindfx.layout.TwFlexPane flexPane) {
             if (token.startsWith("gap-x-")) {
                 flexPane.gapX(px);
             } else if (token.startsWith("gap-y-")) {
@@ -356,7 +356,7 @@ public final class TwStyle {
         }
         
         // Prioritize TwGridPane if parent is TwGridPane
-        if (parent instanceof io.github.yasmramos.tailwindfx.components.TwGridPane gridPane) {
+        if (parent instanceof io.github.yasmramos.tailwindfx.layout.TwGridPane gridPane) {
             if (token.startsWith("gap-x-")) {
                 gridPane.gapX(px);
             } else if (token.startsWith("gap-y-")) {
