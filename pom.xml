@@ -147,8 +147,7 @@
                             <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
                         </configuration>
                     </execution>
-                    <!-- Coverage check disabled - tests pass, coverage will improve over time -->
-                    <!--
+                    <!-- Coverage check to ensure minimum test coverage -->
                     <execution>
                         <id>jacoco-check</id>
                         <goals>
@@ -175,7 +174,6 @@
                             </rules>
                         </configuration>
                     </execution>
-                    -->
                 </executions>
             </plugin>
 
