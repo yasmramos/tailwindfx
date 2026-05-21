@@ -1,6 +1,6 @@
 package io.github.yasmramos.tailwindfx;
 
-import io.github.yasmramos.tailwindfx.components.TwFlexPane;
+import io.github.yasmramos.tailwindfx.layout.TwFlexPane;
 import io.github.yasmramos.tailwindfx.responsive.ResponsiveNode;
 import io.github.yasmramos.tailwindfx.TwResponsive;
 import javafx.application.Platform;

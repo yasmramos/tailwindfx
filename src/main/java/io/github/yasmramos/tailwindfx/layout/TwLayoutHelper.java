@@ -1,7 +1,7 @@
 package io.github.yasmramos.tailwindfx.layout;
 
-import io.github.yasmramos.tailwindfx.components.TwFlexPane;
-import io.github.yasmramos.tailwindfx.components.TwGridPane;
+import io.github.yasmramos.tailwindfx.layout.TwFlexPane;
+import io.github.yasmramos.tailwindfx.layout.TwGridPane;
 import io.github.yasmramos.tailwindfx.core.Preconditions;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
