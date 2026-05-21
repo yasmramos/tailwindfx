@@ -1,6 +1,6 @@
 package io.github.yasmramos.tailwindfx.components;
 
-import io.github.yasmramos.tailwindfx.components.TwFlexPane;
+import io.github.yasmramos.tailwindfx.layout.TwFlexPane;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
