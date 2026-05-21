@@ -32,87 +32,68 @@ public final class TwLayout {
     public static void apply(Node node, String... tokens) {
         if (tokens == null || tokens.length == 0) return;
         
-        // Parse tokens to determine layout type
+        Pane parent = getEffectiveParent(node);
+        if (parent == null) return;
+        
+        // Use TwLayoutHelper for consistent layout management
+        TwLayoutHelper helper = TwLayoutHelper.of(parent);
+        
         for (String token : tokens) {
             if (token == null || token.isBlank()) continue;
             
-            // Handle flex container
             if (token.equals("flex")) {
-                migrateToFlexContainer(node);
+                helper.flex().build();
             } else if (token.equals("grid")) {
-                migrateToGridContainer(node);
+                helper.flexGrid().build();
             } else if (token.startsWith("gap-")) {
-                // Gap is handled by the container
-                Pane parent = getEffectiveParent(node);
-                if (parent != null) {
-                    applyGapStyle(parent, token);
-                }
+                applyGap(helper, token);
             } else if (token.startsWith("flex-") || token.equals("grow") || token.equals("shrink")) {
-                // Flex item properties - applied to children
-                Pane parent = getEffectiveParent(node);
-                if (parent != null) {
-                    applyFlexItemStyle(node, parent, token);
-                }
+                applyFlexItem(node, token);
             }
         }
     }
     
     /**
-     * Migrates a node's parent to TwFlexPane if needed.
+     * Applies gap style using TwLayoutHelper.
      */
-    private static void migrateToFlexContainer(Node node) {
-        javafx.scene.Parent currentParent = node.getParent();
-        if (currentParent instanceof TwFlexPane) {
-            // Already a flex container, no migration needed
-            return;
-        }
+    private static void applyGap(TwLayoutHelper helper, String token) {
+        int value = parseTailwindValue(token);
+        double px = value * 4.0;
         
-        if (currentParent instanceof Pane pane) {
-            // Use TwLayoutHelper builder to migrate
-            TwFlexPane flexPane = TwFlexPane.row();
-            migrateContent(pane, flexPane);
+        if (token.startsWith("gap-x-")) {
+            helper.hgap(px).build();
+        } else if (token.startsWith("gap-y-")) {
+            helper.vgap(px).build();
+        } else {
+            helper.gap(px).build();
         }
     }
     
     /**
-     * Migrates a node's parent to TwGridPane if needed.
+     * Applies flex item style to a node.
      */
-    private static void migrateToGridContainer(Node node) {
-        javafx.scene.Parent currentParent = node.getParent();
-        if (currentParent instanceof TwGridPane) {
-            // Already a grid container, no migration needed
-            return;
-        }
+    private static void applyFlexItem(Node node, String token) {
+        Pane parent = getEffectiveParent(node);
+        if (!(parent instanceof TwFlexPane)) return;
         
-        if (currentParent instanceof Pane pane) {
-            // Use TwLayoutHelper builder to migrate
-            TwGridPane gridPane = TwGridPane.create().build();
-            migrateContent(pane, gridPane);
-        }
-    }
-    
-    /**
-     * Migrates content from source pane to target pane.
-     */
-    private static void migrateContent(Pane source, Pane target) {
-        if (source == null || target == null) return;
-        
-        javafx.scene.Parent grandParent = source.getParent();
-        int index = -1;
-        
-        if (grandParent instanceof javafx.scene.layout.Pane gp) {
-            index = gp.getChildren().indexOf(source);
-        }
-        
-        // Copy children
-        java.util.List<javafx.scene.Node> children = new java.util.ArrayList<>(source.getChildren());
-        target.getChildren().addAll(children);
-        source.getChildren().clear();
-        
-        // Replace source with target in grandparent
-        if (grandParent instanceof javafx.scene.layout.Pane gp && index >= 0) {
-            gp.getChildren().remove(source);
-            gp.getChildren().add(index, target);
+        if (token.equals("grow") || token.equals("flex-1")) {
+            TwFlexPane.setGrow(node, 1);
+        } else if (token.equals("shrink") || token.equals("flex-none")) {
+            TwFlexPane.setShrink(node, 0);
+        } else if (token.equals("flex-auto")) {
+            TwFlexPane.setGrow(node, 1);
+            TwFlexPane.setShrink(node, 1);
+        } else if (token.startsWith("flex-")) {
+            try {
+                String value = token.substring(5);
+                if (value.startsWith("[") && value.endsWith("]")) {
+                    value = value.substring(1, value.length() - 1);
+                }
+                double flexValue = Double.parseDouble(value);
+                TwFlexPane.setGrow(node, flexValue);
+            } catch (NumberFormatException e) {
+                // Ignore invalid values
+            }
         }
     }
     
@@ -125,61 +106,6 @@ public final class TwLayout {
             return (Pane) parent;
         }
         return null;
-    }
-    
-    /**
-     * Applies gap style to a container.
-     */
-    private static void applyGapStyle(Pane parent, String token) {
-        int value = parseTailwindValue(token);
-        double px = value * 4.0;
-        
-        if (parent instanceof TwFlexPane flexPane) {
-            if (token.startsWith("gap-x-")) {
-                flexPane.gapX(px);
-            } else if (token.startsWith("gap-y-")) {
-                flexPane.gapY(px);
-            } else {
-                flexPane.gap(px);
-            }
-        } else if (parent instanceof TwGridPane gridPane) {
-            if (token.startsWith("gap-x-")) {
-                gridPane.gapX(px);
-            } else if (token.startsWith("gap-y-")) {
-                gridPane.gapY(px);
-            } else {
-                gridPane.gap(px);
-            }
-        }
-        // Add more container types as needed
-    }
-    
-    /**
-     * Applies flex item style to a node.
-     */
-    private static void applyFlexItemStyle(Node node, Pane parent, String token) {
-        if (parent instanceof TwFlexPane flexPane) {
-            if (token.equals("grow") || token.equals("flex-1")) {
-                TwFlexPane.setGrow(node, 1);
-            } else if (token.equals("shrink") || token.equals("flex-none")) {
-                TwFlexPane.setShrink(node, 0);
-            } else if (token.equals("flex-auto")) {
-                TwFlexPane.setGrow(node, 1);
-                TwFlexPane.setShrink(node, 1);
-            } else if (token.startsWith("flex-")) {
-                try {
-                    String value = token.substring(5);
-                    if (value.startsWith("[") && value.endsWith("]")) {
-                        value = value.substring(1, value.length() - 1);
-                    }
-                    double flexValue = Double.parseDouble(value);
-                    TwFlexPane.setGrow(node, flexValue);
-                } catch (NumberFormatException e) {
-                    // Ignore invalid values
-                }
-            }
-        }
-        // Add more container types as needed
     }
     
     /**
