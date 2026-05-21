@@ -1,4 +1,4 @@
-package io.github.yasmramos.tailwindfx.components;
+package io.github.yasmramos.tailwindfx.layout;
 
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
 import io.github.yasmramos.tailwindfx.core.Preconditions;
