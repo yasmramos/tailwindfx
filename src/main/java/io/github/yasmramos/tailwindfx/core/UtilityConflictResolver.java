@@ -31,17 +31,17 @@ public final class UtilityConflictResolver {
     private UtilityConflictResolver() {}
 
     // =========================================================================
-    // Mapa de categorías — prefijo de clase → categoría de conflicto
-    // Clases de la misma categoría se excluyen mutuamente.
+    // Category map — class prefix → conflict category
+    // Classes in the same category are mutually exclusive.
     // =========================================================================
 
-    // Mapa inverso: prefijo → nombre de categoría
+    // Reverse map: prefix → category name
     private static final Map<String, String> PREFIX_TO_CATEGORY = new LinkedHashMap<>(128);
-    // Mapa de categoría → todos los prefijos en esa categoría (para búsqueda inversa)
+    // Map of category → all prefixes in that category (for reverse lookup)
     private static final Map<String, List<String>> CATEGORY_TO_PREFIXES = new LinkedHashMap<>(64);
 
     static {
-        // Cada entrada: categoría → prefijos que pertenecen a ella
+        // Each entry: category → prefixes belonging to it
         Map<String, String[]> definitions = new LinkedHashMap<>();
 
         // Sizing
@@ -70,7 +70,7 @@ public final class UtilityConflictResolver {
             "text-cyan-","text-sky-","text-blue-","text-indigo-","text-violet-","text-purple-",
             "text-fuchsia-","text-pink-","text-rose-","text-white","text-black","text-transparent"});
 
-        // Tipografía
+        // Typography
         definitions.put("font-size",   new String[]{"text-xs","text-sm","text-base","text-lg","text-xl",
             "text-2xl","text-3xl","text-4xl","text-5xl","text-6xl","text-7xl","text-8xl","text-9xl"});
         definitions.put("font-weight", new String[]{"font-thin","font-extralight","font-light",
@@ -84,7 +84,7 @@ public final class UtilityConflictResolver {
         definitions.put("whitespace",  new String[]{"whitespace-normal","whitespace-nowrap",
             "whitespace-pre","whitespace-pre-wrap","whitespace-pre-line","text-wrap","text-nowrap"});
 
-        // Bordes
+        // Borders
         definitions.put("border-width",  new String[]{"border-0","border","border-2","border-4","border-8"});
         definitions.put("border-color",  new String[]{"border-slate-","border-gray-","border-red-","border-orange-",
             "border-amber-","border-yellow-","border-lime-","border-green-","border-emerald-","border-teal-",
@@ -95,7 +95,7 @@ public final class UtilityConflictResolver {
         definitions.put("border-radius", new String[]{"rounded-none","rounded-sm","rounded","rounded-md",
             "rounded-lg","rounded-xl","rounded-2xl","rounded-3xl","rounded-full"});
 
-        // Sombras y efectos
+        // Shadows and effects
         definitions.put("shadow",   new String[]{"shadow-none","shadow-sm","shadow","shadow-md",
             "shadow-lg","shadow-xl","shadow-2xl","shadow-",
             "drop-shadow-none","drop-shadow-sm","drop-shadow","drop-shadow-md",
@@ -109,7 +109,7 @@ public final class UtilityConflictResolver {
         definitions.put("translate-x", new String[]{"translate-x-","-translate-x-"});
         definitions.put("translate-y", new String[]{"translate-y-","-translate-y-"});
 
-        // Visibilidad
+        // Visibility
         definitions.put("visibility", new String[]{"visible","invisible","hidden-node"});
         definitions.put("cursor",     new String[]{"cursor-"});
 
@@ -118,7 +118,7 @@ public final class UtilityConflictResolver {
         // and applying a specific axis removes the shorthand.
         definitions.put("gap", new String[]{"gap-", "gap-x-", "gap-y-"});
 
-        // Alineación
+        // Alignment
         definitions.put("alignment", new String[]{"items-start","items-center","items-end","items-stretch",
             "items-baseline","justify-start","justify-center","justify-end","justify-between",
             "justify-around","justify-evenly","content-start","content-center","content-end"});
@@ -162,15 +162,15 @@ public final class UtilityConflictResolver {
     }
 
     // =========================================================================
-    // Cache de categorías por nodo — evita re-escanear styleClass completa
+    // Category cache per node — avoids re-scanning complete styleClass
     // =========================================================================
 
     /**
-     * Clave usada en Node.getProperties() para el cache de categorías activas.
-     * El cache mapea: nombre_categoría → clase_CSS_actualmente_activa_en_esa_categoría
+     * Key used in Node.getProperties() for caching active categories.
+     * The cache maps: category_name → CSS_class_currently_active_in_that_category
      *
-     * Beneficio: apply() en dashboards con cientos de nodos no re-escanea
-     * el styleClass list completo — usa el cache O(1) en lugar de O(n).
+     * Benefit: apply() on dashboards with hundreds of nodes does not re-scan
+     * the complete styleClass list — uses O(1) cache instead of O(n).
      */
     private static final String CACHE_KEY = "tailwindfx.category.cache";
 
@@ -301,14 +301,14 @@ public final class UtilityConflictResolver {
     }
 
     // =========================================================================
-    // API pública
+    // Public API
     // =========================================================================
 
     /**
-     * Aplica una utility class al nodo, eliminando clases previas del mismo tipo.
-     * Usa cache O(1) por nodo para máximo rendimiento en dashboards grandes.
+     * Applies a utility class to the node, removing previous classes of the same type.
+     * Uses O(1) cache per node for maximum performance on large dashboards.
      *
-     * apply(node, "w-8") cuando el nodo ya tiene "w-4" → elimina "w-4" y agrega "w-8".
+     * apply(node, "w-8") when node already has "w-4" → removes "w-4" and adds "w-8".
      */
     public static void apply(Node node, String cssClass) {
         Preconditions.requireNode(node, "UtilityConflictResolver.apply");
@@ -444,7 +444,7 @@ public final class UtilityConflictResolver {
         return best;
     }
 
-    /** Elimina todas las clases del nodo que pertenecen a una categoría */
+    /** Removes all classes from the node that belong to a category */
     private static void removeCategory(Node node, String category, String except) {
         List<String> prefixes = CATEGORY_TO_PREFIXES.getOrDefault(category, List.of());
         node.getStyleClass().removeIf(cls ->
@@ -453,7 +453,7 @@ public final class UtilityConflictResolver {
         );
     }
 
-    /** Si una clase coincide con un prefijo (exacto o como inicio) */
+    /** If a class matches a prefix (exact or as start) */
     private static boolean matchesPrefix(String cssClass, String prefix) {
         if (!prefix.endsWith("-")) return cssClass.equals(prefix);
         return cssClass.startsWith(prefix);

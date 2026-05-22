@@ -27,7 +27,7 @@ public class VariantParser {
         "default", "target", "open"
     );
     
-    // Variantes lógicas (logical variants)
+    // Logical variants
     private static final Set<String> LOGICAL_VARIANTS = Set.of(
         "first", "last", "only", "odd", "even",
         "first-of-type", "last-of-type", "only-of-type",
@@ -147,31 +147,31 @@ public class VariantParser {
             int colonPos = token.indexOf(':', pos);
             
             if (colonPos == -1) {
-                // No hay más ':', el resto es la utilidad
+                // No more ':', the rest is the utility
                 break;
             }
             
-            // Extraer la parte antes del ':'
+            // Extract the part before ':'
             String potentialVariant = token.substring(pos, colonPos);
             
-            // Verificar si es una variante válida o una variante arbitraria
+            // Check if it's a valid variant or an arbitrary variant
             if (isValidVariant(potentialVariant)) {
                 variants.add(potentialVariant);
                 pos = colonPos + 1;
             } else {
-                // No es una variante válida, parar aquí
+                // Not a valid variant, stop here
                 break;
             }
         }
         
-        // El resto del token es la utilidad
+        // The rest of the token is the utility
         String utility = (pos < token.length()) ? token.substring(pos) : "";
         
         return new VariantResult(variants, utility);
     }
     
     /**
-     * Verifica si una cadena es una variante válida.
+     * Checks if a string is a valid variant.
      */
     private static boolean isValidVariant(String variant) {
         if (variant == null || variant.isEmpty()) {
@@ -225,7 +225,7 @@ public class VariantParser {
     }
     
     /**
-     * Verifica si un token tiene una variante específica.
+     * Checks if a token has a specific variant.
      */
     public static boolean hasVariant(String token, String variantName) {
         VariantResult result = parse(token);

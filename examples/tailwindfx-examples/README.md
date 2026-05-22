@@ -89,5 +89,5 @@ tailwindfx-examples/
 
 ## More Information
 
-- Library Documentation: [../tailwindfx/src/main/resources/tailwindfx/MODULOS.md](../tailwindfx/src/main/resources/tailwindfx/MODULOS.md)
+- Library Documentation: [../tailwindfx/src/main/resources/tailwindfx/MODULES.md](../tailwindfx/src/main/resources/tailwindfx/MODULES.md)
 - Library README: [../tailwindfx/README.md](../tailwindfx/README.md)
