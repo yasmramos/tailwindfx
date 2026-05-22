@@ -238,7 +238,7 @@ public final class TwLayout {
   }
 
   // =========================================================================
-  // Inner Builder class (formerly TwLayoutHelper)
+  // Inner Builder class
   // =========================================================================
 
   public enum LayoutType {
