@@ -2,6 +2,7 @@
  * TailwindFX — Utility-first UI framework for JavaFX, v4.3.
  *
  * <h2>Quick start</h2>
+ *
  * <pre>
  * // 1. Install in your Application.start():
  * TailwindFX.install(scene);          // loads tailwindfx.css
@@ -36,6 +37,7 @@
  * </pre>
  *
  * <h2>Class overview</h2>
+ *
  * <table>
  *   <tr><th>Class</th><th>Purpose</th></tr>
  *   <tr><td>{@link tailwindfx.TailwindFX}</td><td>Main entry point — all public APIs</td></tr>
