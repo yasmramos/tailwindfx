@@ -18,9 +18,7 @@ import java.util.regex.Pattern;
  */
 public final class StyleToken {
 
-    // =========================================================================
     // Regex patterns
-    // =========================================================================
 
     // Arbitrario: prefijo-[valor]  (el valor puede contener #, %, (, ), -, espacio)
     private static final Pattern ARBITRARY =
@@ -38,9 +36,7 @@ public final class StyleToken {
     private static final Pattern NAMED =
         Pattern.compile("^(-?)([a-z][a-z-]*)-([a-z0-9]+)$");
 
-    // =========================================================================
     // Campos del token parseado
-    // =========================================================================
 
     public enum Kind { SCALE, COLOR_SHADE, ARBITRARY, NAMED, UNKNOWN }
 
@@ -56,9 +52,7 @@ public final class StyleToken {
     public final String  subPrefix;    // "x", "y", "t", "r", "b", "l" de px-4, pt-2
     public final Kind    kind;
 
-    // =========================================================================
     // Factory — parse un string en un StyleToken
-    // =========================================================================
 
     public static StyleToken parse(String raw) {
         if (raw == null || raw.isBlank()) return unknown(raw);
@@ -134,9 +128,7 @@ public final class StyleToken {
         return unknown(raw);
     }
 
-    // =========================================================================
     // Constructor privado
-    // =========================================================================
 
     private StyleToken(String raw, boolean negative, String prefix, String subPrefix,
                        String colorName, Integer shade, Integer alpha,
@@ -159,9 +151,7 @@ public final class StyleToken {
             null, null, null, null, null, null, Kind.UNKNOWN);
     }
 
-    // =========================================================================
     // Helpers
-    // =========================================================================
 
     /** Valor numérico del scale, aplicando signo negativo si aplica */
     public int signedScale() {
@@ -181,9 +171,7 @@ public final class StyleToken {
         return "StyleToken{" + kind + ", raw=" + raw + "}";
     }
 
-    // =========================================================================
     // Internos
-    // =========================================================================
 
     private static final java.util.Set<String> COLOR_NAMES = java.util.Set.of(
         "slate", "gray", "zinc", "neutral", "stone",

@@ -99,9 +99,7 @@ import java.util.concurrent.Callable;
  */
 public final class TwI18n {
 
-    // =========================================================================
     // Global state
-    // =========================================================================
     private static String baseName = "messages";
     private static final ObjectProperty<Locale> currentLocale = 
         new SimpleObjectProperty<>(Locale.getDefault());
@@ -127,9 +125,7 @@ public final class TwI18n {
 
     private TwI18n() {} // Utility class
 
-    // =========================================================================
     // Configuration
-    // =========================================================================
 
     /**
      * Sets the base name for ResourceBundle lookup.
@@ -175,9 +171,7 @@ public final class TwI18n {
         return currentLocale;
     }
 
-    // =========================================================================
     // Direct translation
-    // =========================================================================
 
     /**
      * Gets a translated string for the given key in the current locale.
@@ -227,9 +221,7 @@ public final class TwI18n {
         }
     }
 
-    // =========================================================================
     // Binding API
-    // =========================================================================
 
     /**
      * Creates a StringBinding that updates when the locale changes.
@@ -366,9 +358,7 @@ public final class TwI18n {
         pane.textProperty().bind(binding);
     }
 
-    // =========================================================================
     // Cleanup
-    // =========================================================================
 
     /**
      * Unbinds all active string bindings.
@@ -387,9 +377,7 @@ public final class TwI18n {
         bundleCache.clear();
     }
 
-    // =========================================================================
     // Internal helpers
-    // =========================================================================
 
     private static ResourceBundle getOrLoadBundle(Locale locale) {
         return bundleCache.computeIfAbsent(locale, loc -> {

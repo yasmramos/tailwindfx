@@ -108,9 +108,7 @@ public final class TwLayoutHelper {
     public TwLayoutHelper(Pane source) { this.source = Preconditions.requireNonNull(source, "TwLayoutHelper", "pane"); }
     public static TwLayoutHelper of(Pane container) { return new TwLayoutHelper(container); }
 
-    // =========================================================================
     // Tipo de layout
-    // =========================================================================
 
     public TwLayoutHelper row()          { type = LayoutType.ROW;      return this; }
     public TwLayoutHelper col()          { type = LayoutType.COL;      return this; }
@@ -202,17 +200,13 @@ public final class TwLayoutHelper {
      */
     public TwLayoutHelper cols(int cols) { this.gridCols2 = cols; return this; }
 
-    // =========================================================================
     // Spacing
-    // =========================================================================
 
     public TwLayoutHelper gap(double v)  { gap     = v; return this; }
     public TwLayoutHelper hgap(double v) { hgapVal = v; return this; }
     public TwLayoutHelper vgap(double v) { vgapVal = v; return this; }
 
-    // =========================================================================
     // Padding
-    // =========================================================================
 
     public TwLayoutHelper padding(double all)                             { padding = new Insets(all);             return this; }
     public TwLayoutHelper padding(double tb, double lr)                   { padding = new Insets(tb, lr, tb, lr);  return this; }
@@ -256,9 +250,7 @@ public final class TwLayoutHelper {
         }
     }
 
-    // =========================================================================
     // Alignment
-    // =========================================================================
 
     public TwLayoutHelper center()       { alignment = Pos.CENTER;        return this; }
     public TwLayoutHelper centerLeft()   { alignment = Pos.CENTER_LEFT;   return this; }
@@ -276,9 +268,7 @@ public final class TwLayoutHelper {
     public TwLayoutHelper itemsCenter()    { return centerLeft(); }
     public TwLayoutHelper placeCenter()    { return center(); }
 
-    // =========================================================================
     // Growth and sizing
-    // =========================================================================
 
     public TwLayoutHelper grow()               { growAll = true; return this; }
     public TwLayoutHelper fillWidth()          { fillW   = true; return this; }
@@ -291,9 +281,7 @@ public final class TwLayoutHelper {
     public TwLayoutHelper maxWidth(double w)   { maxW    = w;    return this; }
     public TwLayoutHelper maxHeight(double h)  { maxH    = h;    return this; }
 
-    // =========================================================================
     // AnchorPane constraints (fluent, para uso con .anchor())
-    // =========================================================================
 
     /** Ancla un nodo a todos los lados con el mismo valor */
     public TwLayoutHelper anchorAll(Node n, double v)                              { anchors.put(n, new double[]{v, v, v, v}); return this; }
@@ -315,13 +303,9 @@ public final class TwLayoutHelper {
         return this;
     }
 
-    // =========================================================================
     // build() / reconfigure()
-    // =========================================================================
 
-    // =========================================================================
     // Debug mode
-    // =========================================================================
 
     /**
      * Enables debug logging for this layout operation.
@@ -334,9 +318,7 @@ public final class TwLayoutHelper {
      */
     public TwLayoutHelper debug() { this.debugMode = true; return this; }
 
-    // =========================================================================
     // Transition listener
-    // =========================================================================
 
     /**
      * Callback fired before and after a layout type change.
@@ -435,13 +417,9 @@ public final class TwLayoutHelper {
         applySize(source);
     }
 
-    // =========================================================================
     // Internos
-    // =========================================================================
 
-    // =========================================================================
     // Validation
-    // =========================================================================
 
     /**
      * Validates the current configuration for logical consistency.
@@ -691,9 +669,7 @@ public final class TwLayoutHelper {
         return 4;
     }
 
-    // =========================================================================
     // Static helpers
-    // =========================================================================
 
     public static void hgrow(Node n) { HBox.setHgrow(n, Priority.ALWAYS); }
     public static void vgrow(Node n) { VBox.setVgrow(n, Priority.ALWAYS); }

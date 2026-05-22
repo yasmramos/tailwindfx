@@ -46,9 +46,7 @@ public final class TwAnimation {
         this.timeline = animation;
     }
 
-    // =========================================================================
     // ENTRY ANIMATIONS — Fade, Slide, Scale
-    // =========================================================================
 
     /**
      * Fades a node in from opacity 0 to 1 with default {@link #NORMAL} duration.
@@ -406,9 +404,7 @@ public final class TwAnimation {
         return fxAnim;
     }
 
-    // =========================================================================
     // EXIT ANIMATIONS — Fade Out, Scale Out
-    // =========================================================================
 
     /**
      * Fades a node out from its current opacity to 0 with default {@link #NORMAL} duration.
@@ -480,9 +476,7 @@ public final class TwAnimation {
         ));
     }
 
-    // =========================================================================
     // ATTENTION ANIMATIONS — Pulse, Shake, Bounce, Flash
-    // =========================================================================
 
     /**
      * Pulses a node by fading its opacity in and out indefinitely.
@@ -569,9 +563,7 @@ public final class TwAnimation {
         return new TwAnimation(tl);
     }
 
-    // =========================================================================
     // LOOP ANIMATIONS — Spin, Breathe (Infinite Cycles)
-    // =========================================================================
 
     /**
      * Continuously rotates a node indefinitely.
@@ -632,9 +624,7 @@ public final class TwAnimation {
         return new TwAnimation(tl);
     }
 
-    // =========================================================================
     // HOVER effects — se instalan como listeners permanentes
-    // =========================================================================
 
     /**
      * Scales the node on hover — installs permanent mouse enter/exit listeners.
@@ -685,9 +675,7 @@ public final class TwAnimation {
         tl.play();
     }
 
-    // =========================================================================
     // COMPOSITION UTILITIES — Chain, Parallel, Pause
-    // =========================================================================
 
     /**
      * Chains multiple animations to execute sequentially, one after another.
@@ -764,9 +752,7 @@ public final class TwAnimation {
         return new TwAnimation(p);
     }
 
-    // =========================================================================
     // FLUENT API METHODS — Configure animation behavior
-    // =========================================================================
 
     /**
      * Sets the number of times this animation repeats.
@@ -993,9 +979,7 @@ public final class TwAnimation {
      */
     public Animation raw() { return timeline; }
 
-    // =========================================================================
     // Hover effects (onHoverLift, onHoverDim, removeHoverEffects)
-    // =========================================================================
 
     /**
      * Lifts a node up slightly on hover (default 4 pixels).
@@ -1113,9 +1097,7 @@ public final class TwAnimation {
         handlers.add(exit);
     }
 
-    // =========================================================================
     // Inner classes moved from AnimationUtil
-    // =========================================================================
 
     /**
      * AnimationRegistry — Manages active animations per node to prevent memory leaks.

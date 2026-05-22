@@ -30,9 +30,7 @@ public final class StyleMerger {
     private static final Pattern PROP_PATTERN
             = Pattern.compile("(-fx-[a-z-]+)\\s*:\\s*([^;]+);?");
 
-    // =========================================================================
     // Public API
-    // =========================================================================
     /**
      * Aplica tokens JIT a un nodo. Procesa las CSS classes fallback y el inline
      * style merged.
@@ -84,9 +82,7 @@ public final class StyleMerger {
         applyJit(node, tokens);
     }
 
-    // =========================================================================
     // Merge de inline styles
-    // =========================================================================
     /**
      * Mergea dos bloques de inline style. Las propiedades del bloque 'incoming'
      * sobreescriben las del 'existing'. Las propiedades en 'existing' que no
@@ -112,9 +108,7 @@ public final class StyleMerger {
         return buildStyle(props);
     }
 
-    // =========================================================================
     // Parse y build de inline style string
-    // =========================================================================
     /**
      * Parsea "-fx-padding: 16px; -fx-opacity: 0.5;" → {"fx-padding":"16px",
      * ...}

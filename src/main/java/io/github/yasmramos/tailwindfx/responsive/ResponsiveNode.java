@@ -57,9 +57,7 @@ import java.util.function.Consumer;
  */
 public final class ResponsiveNode {
 
-    // =========================================================================
     // Factory
-    // =========================================================================
 
     /**
      * Creates a responsive rule builder for the given node.
@@ -72,9 +70,7 @@ public final class ResponsiveNode {
         return new Builder(node);
     }
 
-    // =========================================================================
     // Builder
-    // =========================================================================
 
     public static final class Builder {
 
@@ -152,9 +148,7 @@ public final class ResponsiveNode {
         }
     }
 
-    // =========================================================================
     // Live instance
-    // =========================================================================
 
     private final Node          node;
     private final TreeMap<Integer, String[]> rules;
@@ -228,9 +222,7 @@ public final class ResponsiveNode {
      */
     public void refresh() { applyForWidth(scene.getWidth()); }
 
-    // =========================================================================
     // Core logic
-    // =========================================================================
 
     private void applyForWidth(double width) {
         // Find the highest breakpoint whose minWidth <= current width

@@ -16,9 +16,7 @@ public final class ColorPalette {
 
     private ColorPalette() {}
 
-    // =========================================================================
     // Public API
-    // =========================================================================
 
     /**
      * Devuelve el hex de un color: resolve("blue", 500) → "#3b82f6"
@@ -73,9 +71,7 @@ public final class ColorPalette {
         return PALETTE.containsKey(colorName + "-" + shade);
     }
 
-    // =========================================================================
     // Validación y normalización de colores hexadecimales arbitrarios
-    // =========================================================================
 
     /**
      * Verifica si un string es un color hex CSS válido.
@@ -109,9 +105,7 @@ public final class ColorPalette {
         return hexToRgb(n);
     }
 
-    // =========================================================================
     // Conversión hex → RGB
-    // =========================================================================
 
     private static String hexToRgb(String hex) {
         String h = hex.startsWith("#") ? hex.substring(1) : hex;
@@ -121,9 +115,7 @@ public final class ColorPalette {
         return r + "," + g + "," + b;
     }
 
-    // =========================================================================
     // Paleta completa Tailwind (mismos valores que en tailwindfx.css)
-    // =========================================================================
 
     private static final Map<String, String> PALETTE = new HashMap<>(600);
 
