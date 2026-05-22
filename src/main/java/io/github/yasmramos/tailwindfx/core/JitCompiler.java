@@ -19,13 +19,13 @@ import java.util.regex.Pattern;
  * "-fx-pref-width: 320px;" Entrada: "-translate-x-4" → "-fx-translate-x:
  * -16px;"
  *
- * Cache: los tokens compilados se guardan en un ConcurrentHashMap sin bloqueo
- * global. Compilar "p-4" 1000 veces cuesta igual que compilarlo 1 vez.
+ * Cache: compiled tokens are stored in a lock-free ConcurrentHashMap.
+ * Compiling "p-4" 1000 times costs the same as compiling it once.
  *
- * Tokens desconocidos — heurística inteligente: Si el token parece un utility
- * JIT (tiene números, /, [) → WARN en consola Si parece una CSS class
- * intencional (btn-primary, card) → silencioso, se agrega como class Modo
- * debug: JitCompiler.setDebug(true) → log de TODOS los tokens
+ * Unknown tokens — smart heuristic: If the token looks like a JIT utility
+ * (has numbers, /, [) → WARN in console If it looks like an intentional CSS class
+ * (btn-primary, card) → silent, added as class Debug mode:
+ * JitCompiler.setDebug(true) → log ALL tokens
  */
 public final class JitCompiler {
 
@@ -318,7 +318,7 @@ public final class JitCompiler {
     }
 
     /**
-     * Compila múltiples tokens y devuelve el inline style combinado y la lista
+     * Compiles multiple tokens and returns the combined inline style and the list
      * de CSS classes a agregar.
      */
     public static BatchResult compileBatch(String... tokens) {
@@ -421,7 +421,7 @@ public final class JitCompiler {
                         || t.startsWith("to-") || t.startsWith("bg-gradient-");
                 if (requiresJitCompilation(t) && !isGradientRelated) {
                     LOG.warning("TailwindFX JIT: token desconocido '" + t
-                            + "' (parece utility JIT pero no se reconoció)");
+                            + "' (looks like a JIT utility but was not recognized)");
                 } else if (DEBUG) {
                     LOG.info("TailwindFX JIT: '" + t + "' → CSS class (fallback al stylesheet)");
                 }
@@ -475,7 +475,7 @@ public final class JitCompiler {
         
         // Validate that we have at least one valid color - fail explicitly if not
         if (from == null && to == null) {
-            LOG.warning("TailwindFX JIT: gradiente sin colores válidos (se requieren from-* o to-*)");
+            LOG.warning("TailwindFX JIT: gradient without valid colors (from-* or to-* required)");
             return null;
         }
         
@@ -506,7 +506,7 @@ public final class JitCompiler {
     }
 
     /**
-     * Limpia el cache (útil en tests o al cambiar tema)
+     * Clears the cache (useful in tests or when changing theme)
      */
     /**
      * Clears the JIT compilation cache. Call when the application's utility
@@ -520,7 +520,7 @@ public final class JitCompiler {
     }
 
     /**
-     * Tamaño actual del cache
+     * Current cache size
      */
     public static int cacheSize() {
         return CACHE.size();
@@ -1267,14 +1267,14 @@ public final class JitCompiler {
     }
 
     /**
-     * Construye un drop shadow con color específico.
+     * Builds a drop shadow with a specific color.
      */
     private static String buildColoredDropShadow(String color) {
         return prop("-fx-effect", "dropshadow(gaussian," + color + ",12,0,0,4)");
     }
 
     /**
-     * Construye un text shadow con color específico.
+     * Builds a text shadow with a specific color.
      */
     private static String buildColoredTextShadow(String color) {
         return prop("-fx-effect", "dropshadow(gaussian," + color + ",4,0,0,1)");

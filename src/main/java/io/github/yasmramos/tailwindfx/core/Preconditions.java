@@ -4,11 +4,11 @@ import io.github.yasmramos.tailwindfx.animation.TwAnimation;
 import java.util.logging.Logger;
 
 /**
- * Preconditions — Validación centralizada para TailwindFX.
- * Tres niveles:
- * 1. requireNonNull()  → IllegalArgumentException (fallo inmediato)
- * 2. requireValid()    → IllegalArgumentException (valor fuera de rango)
- * 3. warnIf()          → LOG WARNING (válido pero sospechoso)
+ * Preconditions — Centralized validation for TailwindFX.
+ * Three levels:
+ * 1. requireNonNull()  → IllegalArgumentException (immediate failure)
+ * 2. requireValid()    → IllegalArgumentException (out of range value)
+ * 3. warnIf()          → LOG WARNING (valid but suspicious)
  */
 public final class Preconditions {
 
