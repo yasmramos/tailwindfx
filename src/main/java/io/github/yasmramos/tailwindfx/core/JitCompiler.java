@@ -220,12 +220,12 @@ public final class JitCompiler {
     }
 
     // =========================================================================
-    // Resultado de compilación
+    // Compilation result
     // =========================================================================
     public record CompileResult(
-            String inlineStyle, // propiedades -fx-* listas para setStyle()
-            String cssClass, // clase CSS a agregar via getStyleClass() (puede ser null)
-            boolean isKnown // false si fue un token desconocido
+            String inlineStyle, // -fx-* properties ready for setStyle()
+            String cssClass, // CSS class to add via getStyleClass() (may be null)
+            boolean isKnown // false if it was an unknown token
             ) {
 
         public static CompileResult inline(String style) {
@@ -250,11 +250,11 @@ public final class JitCompiler {
     }
 
     // =========================================================================
-    // API pública
+    // Public API
     // =========================================================================
     /**
-     * Compila un token único. Usa cache lock-free: compilar el mismo token N veces cuesta
-     * lo mismo que 1. Lecturas sin bloqueo, escrituras con putIfAtomic para thread-safety.
+     * Compiles a single token. Uses lock-free cache: compiling the same token N times costs
+     * the same as 1. Lock-free reads, atomic writes with putIfAtomic for thread-safety.
      */
     public static CompileResult compile(String token) {
         if (token == null) {
@@ -414,9 +414,9 @@ public final class JitCompiler {
                 cssClasses.add(result.cssClass());
             }
             if (!result.isKnown()) {
-                // Heurística: si parece un token JIT (valores arbitrarios) → warn
-                // Si parece una CSS class intencional (btn-primary) → silencioso
-                // Excepciones: tokens de gradientes no reconocidos → silenciosos
+                // Heuristic: if it looks like a JIT token (arbitrary values) → warn
+                // If it looks like an intentional CSS class (btn-primary) → silent
+                // Exceptions: unrecognized gradient tokens → silent
                 boolean isGradientRelated = t.startsWith("from-") || t.startsWith("via-") 
                         || t.startsWith("to-") || t.startsWith("bg-gradient-");
                 if (requiresJitCompilation(t) && !isGradientRelated) {
@@ -527,7 +527,7 @@ public final class JitCompiler {
     }
 
     // =========================================================================
-    // Compilación principal
+    // Main compilation
     // =========================================================================
     private static CompileResult doCompile(String raw) {
         StyleToken t = StyleToken.parse(raw);
@@ -575,7 +575,7 @@ public final class JitCompiler {
                 };
             case "m" ->
                 switch (nullSafe(t.subPrefix)) {
-                    // JavaFX no tiene margin CSS real — usamos translate como aproximación visual
+                    // JavaFX has no real CSS margin — we use translate as visual approximation
                     case "t" ->
                         prop("-fx-translate-y", "%.0fpx".formatted(signedUnit));
                     case "b" ->
@@ -585,7 +585,7 @@ public final class JitCompiler {
                     case "r" ->
                         prop("-fx-translate-x", "%.0fpx".formatted(-signedUnit));
                     default ->
-                        "";  // m-4 sin dirección: sin equivalente directo
+                        "";  // m-4 without direction: no direct equivalent
                 };
             case "w" ->
                 prop("-fx-pref-width", "%.0fpx".formatted(unit));
@@ -714,7 +714,7 @@ public final class JitCompiler {
     private static CompileResult compileArbitrary(StyleToken t) {
         String val = t.arbitraryVal.trim();
 
-        // Normalizar: "45deg" → "45" para rotación
+        // Normalize: "45deg" → "45" for rotation
         String style = switch (t.prefix) {
             case "p" ->
                 switch (nullSafe(t.subPrefix)) {
@@ -1206,9 +1206,9 @@ public final class JitCompiler {
         if (val == null || val.isBlank()) {
             return null;
         }
-        // _ → espacio (convención Tailwind para espacios en valores arbitrarios)
+        // _ → space (Tailwind convention for spaces in arbitrary values)
         String expanded = val.replace("_", " ");
-        // Reemplazar tokens de colores de paleta: blue-500 → #3b82f6
+        // Replace palette color tokens: blue-500 → #3b82f6
         java.util.regex.Matcher m = java.util.regex.Pattern
                 .compile("([a-z]+-)(\\d{2,3})").matcher(expanded);
         StringBuffer sb = new StringBuffer();
@@ -1224,30 +1224,30 @@ public final class JitCompiler {
         }
         m.appendTail(sb);
         String processed = sb.toString();
-        // Si ya contiene "to " o directivas CSS, wrappear directamente
+        // If it already contains "to " or CSS directives, wrap directly
         return prop("-fx-background-color", "linear-gradient(" + processed + ")");
     }
 
     /**
-     * Intenta parsear un shadow arbitrario tipo "0_4px_6px_rgba(0,0,0,0.1)"
-     * (Tailwind usa _ como separador de espacios en valores arbitrarios)
+     * Attempts to parse an arbitrary shadow like "0_4px_6px_rgba(0,0,0,0.1)"
+     * (Tailwind uses _ as space separator in arbitrary values)
      */
     private static String parseShadowArbitrary(String val) {
-        // Reemplazar _ por espacio (convención de Tailwind para valores con espacios)
+        // Replace _ with space (Tailwind convention for values with spaces)
         String expanded = val.replace("_", " ");
-        // JavaFX dropshadow no acepta el formato CSS estándar de box-shadow directamente
-        // Intentamos parsear el formato: [offset-x] [offset-y] [blur] [spread] [color]
+        // JavaFX dropshadow does not accept standard CSS box-shadow format directly
+        // Attempt to parse format: [offset-x] [offset-y] [blur] [spread] [color]
         if (expanded.startsWith("rgba") || expanded.startsWith("rgb") || expanded.startsWith("#")) {
-            // Solo color proporcionado - usamos defaults razonables
+            // Only color provided - use reasonable defaults
             return prop("-fx-effect", "dropshadow(gaussian," + expanded + ",8,0,0,2)");
         }
-        // Intentar parsear formato completo "0 4px 6px -1px rgba(...)"
-        // Pattern simplificado: extraer color al final
+        // Try to parse full format "0 4px 6px -1px rgba(...)"
+        // Simplified pattern: extract color at end
         java.util.regex.Pattern colorPattern = java.util.regex.Pattern.compile("(rgba?\\([^)]+\\)|#[0-9a-fA-F]{3,8})$");
         java.util.regex.Matcher matcher = colorPattern.matcher(expanded);
         if (matcher.find()) {
             String color = matcher.group(1);
-            // Extraer valores numéricos (simplificado - solo primer valor como blur)
+            // Extract numeric values (simplified - only first value as blur)
             java.util.regex.Pattern numPattern = java.util.regex.Pattern.compile("^(\\d+(?:\\.\\d+)?)(?:px)?");
             java.util.regex.Matcher numMatcher = numPattern.matcher(expanded);
             if (numMatcher.find()) {
@@ -1260,9 +1260,9 @@ public final class JitCompiler {
                 }
             }
         }
-        // No pudimos parsear - fallar explícitamente con warning
-        LOG.warning("TailwindFX JIT: shadow arbitrario no soportado '" + val 
-            + "' (formato complejo requiere API Java)");
+        // Could not parse - fail explicitly with warning
+        LOG.warning("TailwindFX JIT: unsupported arbitrary shadow '" + val 
+            + "' (complex format requires Java API)");
         return null;
     }
 
@@ -1303,7 +1303,7 @@ public final class JitCompiler {
         // Ej: aspect-[16/9] -> "-fx-aspect-ratio-16-9"
         String sanitized = val.replaceAll("[^a-zA-Z0-9]", "-");
         LOG.warning("TailwindFX JIT: aspect-ratio '" + val 
-            + "' no tiene equivalente CSS - usar TwLayoutHelper.setAspectRatio(node, ratio) en Java");
-        return null; // CompileResult.cssClass se encargará del fallback
+            + "' has no CSS equivalent - use TwLayoutHelper.setAspectRatio(node, ratio) in Java");
+        return null; // CompileResult.cssClass will handle the fallback
     }
 }

@@ -709,7 +709,7 @@ public final class TwAnimation {
      */
     public static TwAnimation chain(TwAnimation... animations) {
         if (animations == null || animations.length == 0) {
-            throw new IllegalArgumentException("TwAnimation.chain: al menos una animación requerida");
+            throw new IllegalArgumentException("TwAnimation.chain: at least one animation required");
         }
         javafx.animation.SequentialTransition seq = new javafx.animation.SequentialTransition();
         for (TwAnimation anim : animations) {
@@ -732,7 +732,7 @@ public final class TwAnimation {
      */
     public static TwAnimation parallel(TwAnimation... animations) {
         if (animations == null || animations.length == 0) {
-            throw new IllegalArgumentException("TwAnimation.parallel: al menos una animación requerida");
+            throw new IllegalArgumentException("TwAnimation.parallel: at least one animation required");
         }
         javafx.animation.ParallelTransition par = new javafx.animation.ParallelTransition();
         for (TwAnimation anim : animations) {

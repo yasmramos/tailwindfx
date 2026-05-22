@@ -24,12 +24,12 @@ public class TWTitledPane extends TitledPane {
     }
 
     private void initTailwindClasses() {
-        // Esta clase identifica al item dentro del accordion
+        // This class identifies the item within the accordion
         getStyleClass().add("collapse-item");
         
-        // Nota: En JavaFX no podemos añadir clases directamente al nodo interno 
-        // del header o content sin manipular la Skin. 
-        // La estrategia recomendada es usar selectores CSS descendentes.
-        // Ver archivo CSS abajo.
+        // Note: In JavaFX we cannot add classes directly to the internal node 
+        // of the header or content without manipulating the Skin. 
+        // The recommended strategy is to use descendant CSS selectors.
+        // See CSS file below.
     }
 }

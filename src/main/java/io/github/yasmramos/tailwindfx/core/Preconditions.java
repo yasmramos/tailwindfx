@@ -12,12 +12,12 @@ import java.util.logging.Logger;
  */
 public final class Preconditions {
 
-    // Logger público para uso en toda la librería
+    // Public logger for use throughout the library
     public static final Logger LOG = Logger.getLogger(Preconditions.class.getName());
     
-    // Límites razonables para validaciones numéricas
+    // Reasonable limits for numeric validations
     private static final int MAX_SPAN = 1000;
-    private static final int MAX_DURATION_MS = 600_000; // 10 minutos
+    private static final int MAX_DURATION_MS = 600_000; // 10 minutes
     private static final double MAX_SCALE = 100.0;
     private static final double MAX_SPEED = 100.0;
 

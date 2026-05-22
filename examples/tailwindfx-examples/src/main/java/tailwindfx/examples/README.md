@@ -165,6 +165,6 @@ Coming soon:
 
 ## Support
 
-- Documentation: [MODULOS.md](../tailwindfx/MODULOS.md)
+- Documentation: [MODULES.md](../tailwindfx/MODULES.md)
 - Main README: [../../README.md](../../README.md)
 - Issues: https://github.com/yasmramos/tailwindfx/issues

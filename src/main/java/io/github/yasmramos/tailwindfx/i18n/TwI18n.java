@@ -51,7 +51,7 @@ import java.util.concurrent.Callable;
  * //      button.cancel=Cancel
  * //      
  * //    messages_es.properties:
- * //      app.title=Mi Aplicación
+ * //      app.title=Mi Aplicacion
  * //      button.save=Guardar
  * //      button.cancel=Cancelar
  *

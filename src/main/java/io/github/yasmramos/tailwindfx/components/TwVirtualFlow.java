@@ -25,10 +25,10 @@ import java.util.stream.Collectors;
 import javafx.animation.Interpolator;
 
 /**
- * TwVirtualFlow — Contenedor virtualizado de alto rendimiento con selección,
- * drag & drop y scroll animado configurable.
+ * TwVirtualFlow — High-performance virtualized container with selection,
+ * drag & drop, and configurable animated scrolling.
  *
- * @param <T> Tipo de dato de los items
+ * @param <T> Data type of the items
  */
 public class TwVirtualFlow<T> extends Region {
 
@@ -67,12 +67,12 @@ public class TwVirtualFlow<T> extends Region {
     private int dragSourceIndex = -1;
     private int dragTargetIndex = -1;
     
-    // Cache de tamaños
+    // Size cache
     private double[] prefixSums = new double[0];
     private int prefixSumsLength = 0;
     private boolean sizeCacheDirty = true;
     
-    // Animación & Posición
+    // Animation & Position
     private Timeline scrollAnimation;
     private double scrollPosition = 0;
     private int firstVisibleIndex = 0;
@@ -525,7 +525,7 @@ public class TwVirtualFlow<T> extends Region {
     public TwVirtualFlow<T> onSelectionChange(Consumer<List<T>> h) { setOnSelectionChange(h); return this; }
 
     /**
-     * Wrapper TailwindFX seguro (fallback a CSS si no está en classpath)
+     * Safe TailwindFX wrapper (fallback to CSS if not in classpath)
      */
     public TwVirtualFlow<T> withTailwindStyling(Function<T, Node> base, String... classes) {
         Objects.requireNonNull(base);
