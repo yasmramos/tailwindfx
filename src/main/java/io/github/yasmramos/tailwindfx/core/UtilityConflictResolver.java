@@ -30,10 +30,8 @@ public final class UtilityConflictResolver {
 
     private UtilityConflictResolver() {}
 
-    // =========================================================================
     // Category map — class prefix → conflict category
     // Classes in the same category are mutually exclusive.
-    // =========================================================================
 
     // Reverse map: prefix → category name
     private static final Map<String, String> PREFIX_TO_CATEGORY = new LinkedHashMap<>(128);
@@ -161,9 +159,7 @@ public final class UtilityConflictResolver {
         }
     }
 
-    // =========================================================================
     // Category cache per node — avoids re-scanning complete styleClass
-    // =========================================================================
 
     /**
      * Key used in Node.getProperties() for caching active categories.
@@ -300,9 +296,7 @@ public final class UtilityConflictResolver {
         node.getProperties().put(KEY, Boolean.TRUE);
     }
 
-    // =========================================================================
     // Public API
-    // =========================================================================
 
     /**
      * Applies a utility class to the node, removing previous classes of the same type.
@@ -389,9 +383,7 @@ public final class UtilityConflictResolver {
             .toList();
     }
 
-    // =========================================================================
     // Internos
-    // =========================================================================
 
     // Breakpoint prefixes supported by TailwindFX responsive engine
     private static final java.util.regex.Pattern BP_PREFIX =

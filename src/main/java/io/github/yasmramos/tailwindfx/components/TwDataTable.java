@@ -67,9 +67,7 @@ import java.util.function.Predicate;
  */
 public final class TwDataTable<T> {
 
-    // =========================================================================
     // Builder
-    // =========================================================================
 
     /** Creates a new builder for type {@code T}. */
     public static <T> Builder<T> of(Class<T> type) {
@@ -145,15 +143,11 @@ public final class TwDataTable<T> {
         }
     }
 
-    // =========================================================================
     // Column definition
-    // =========================================================================
 
     private record ColDef<T>(String header, Function<T, String> value, boolean sortable) {}
 
-    // =========================================================================
     // State
-    // =========================================================================
 
     private final ObservableList<T>  source    = FXCollections.observableArrayList();
     private final FilteredList<T>    filtered;
@@ -169,9 +163,7 @@ public final class TwDataTable<T> {
     // Search
     private final TextField searchField;
 
-    // =========================================================================
     // Construction
-    // =========================================================================
 
     private TwDataTable(Builder<T> b) {
         this.paginated   = b.paginated;
@@ -186,9 +178,7 @@ public final class TwDataTable<T> {
         this.container = buildContainer(b);
     }
 
-    // =========================================================================
     // Public API
-    // =========================================================================
 
     /**
      * Sets the data items displayed in the table.
@@ -282,9 +272,7 @@ public final class TwDataTable<T> {
         return (int) Math.ceil((double) filtered.size() / pageSize);
     }
 
-    // =========================================================================
     // Internal construction
-    // =========================================================================
 
     private void buildColumns(List<ColDef<T>> defs) {
         for (ColDef<T> def : defs) {

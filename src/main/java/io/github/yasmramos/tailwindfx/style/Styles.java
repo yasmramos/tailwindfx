@@ -47,10 +47,8 @@ public final class Styles {
 
     private Styles() {}
 
-    // =========================================================================
     // GRIDPANE — col-span-*, row-span-*
     // Corresponde a: grid-column: span N / grid-row: span N en CSS web
-    // =========================================================================
 
     /**
      * Sets the column span of a node in a {@link GridPane} (equivalent to {@code .col-span-N}).
@@ -110,9 +108,7 @@ public final class Styles {
     public static <T extends Node> T rowSpan4(T node)  { return rowSpan(node, 4); }
     public static <T extends Node> T rowSpan6(T node)  { return rowSpan(node, 6); }
 
-    // =========================================================================
     // GRIDPANE — posición explícita col-start-*, row-start-*
-    // =========================================================================
 
     /**
      * Positions a node at a specific cell in a {@link GridPane}.
@@ -143,10 +139,8 @@ public final class Styles {
         return node;
     }
 
-    // =========================================================================
     // GROW/SHRINK — flex-1, flex-grow, flex-shrink, flex-none
     // Corresponde a: flex-grow, flex-shrink en CSS web
-    // =========================================================================
 
     /** .flex-1 / .grow — crece para llenar espacio horizontal (HBox) */
     public static <T extends Node> T flex1(T node) {
@@ -197,11 +191,9 @@ public final class Styles {
         return node;
     }
 
-    // =========================================================================
     // MARGIN — mx-*, my-*, mt-*, mr-*, mb-*, ml-*
     // Corresponde a: margin en CSS web
     // NOTA: JavaFX no tiene margin CSS. Se usa setMargin() en el contenedor.
-    // =========================================================================
 
     /**
      * IMPORTANTE — orden de llamada con métodos de margen.
@@ -323,10 +315,8 @@ public final class Styles {
         return node;
     }
 
-    // =========================================================================
     // MARGIN WithParent — añaden el nodo Y aplican el margen en un solo paso
     // Eliminan el problema del orden de llamada descrito en el javadoc de margin.
-    // =========================================================================
 
     /**
      * Añade {@code node} a {@code parent} y aplica margen en todos los lados.
@@ -409,11 +399,9 @@ public final class Styles {
         }
     }
 
-    // =========================================================================
     // Z-ORDER — z-0, z-10, z-20, z-30, z-40, z-50, z-auto
     // Corresponde a: z-index en CSS web
     // NOTA: En JavaFX, viewOrder más BAJO = más adelante (al revés que z-index)
-    // =========================================================================
 
     /**
      * .z-{value} — controla el orden de pintado del nodo.
@@ -446,10 +434,8 @@ public final class Styles {
         return node;
     }
 
-    // =========================================================================
     // SELF ALIGNMENT — self-start, self-center, self-end, self-stretch
     // Corresponde a: align-self en CSS web (GridPane)
-    // =========================================================================
 
     public static <T extends Node> T selfStart(T node) {
         GridPane.setValignment(node, VPos.TOP);
@@ -471,10 +457,8 @@ public final class Styles {
         return node;
     }
 
-    // =========================================================================
     // JUSTIFY SELF — justify-self-start, justify-self-center, justify-self-end
     // Corresponde a: justify-self en CSS web (GridPane)
-    // =========================================================================
 
     public static <T extends Node> T justifySelfStart(T node) {
         GridPane.setHalignment(node, HPos.LEFT);
@@ -491,11 +475,9 @@ public final class Styles {
         return node;
     }
 
-    // =========================================================================
     // COLORADJUST FILTERS — grayscale, brightness, contrast, saturate,
     //                        hueRotate, invert, sepia
     // Corresponde a: filter: grayscale(), brightness(), etc. en CSS web
-    // =========================================================================
 
     /** .grayscale — elimina el color del nodo */
     public static <T extends Node> T grayscale(T node) {
@@ -582,10 +564,8 @@ public final class Styles {
         return node;
     }
 
-    // =========================================================================
     // SKEW — skew-x-*, skew-y-*
     // Corresponde a: transform: skewX(), skewY() en CSS web
-    // =========================================================================
 
     /**
      * .skew-x-{degrees} — inclina el nodo en el eje X
@@ -619,10 +599,8 @@ public final class Styles {
     public static <T extends Node> T skewY6(T node)  { return skewY(node, 6); }
     public static <T extends Node> T skewY12(T node) { return skewY(node, 12); }
 
-    // =========================================================================
     // IMAGEVIEW — object-fit, object-position, object-cover, object-contain
     // Corresponde a: object-fit, object-position en CSS web
-    // =========================================================================
 
     /** .object-cover — fills the area by cropping if necessary */
     public static ImageView objectCover(ImageView iv) {
@@ -682,9 +660,7 @@ public final class Styles {
         return iv;
     }
 
-    // =========================================================================
     // NODE VISIBILITY — hidden, visible, managed
-    // =========================================================================
 
     /** .hidden — oculta el nodo pero mantiene su espacio en el layout */
     public static <T extends Node> T invisible(T node) {
@@ -710,9 +686,7 @@ public final class Styles {
         return node;
     }
 
-    // =========================================================================
     // INTERNOS
-    // =========================================================================
 
     private static void applyOrMergeColorAdjust(Node node, double brightness, double saturation,
                                                   double contrast, double hue) {
@@ -732,9 +706,7 @@ public final class Styles {
             node.getTransforms().add(new Shear(kx, ky));
         }
     }
-    // =========================================================================
     // TEXT-SHADOW — Java API (DropShadow on Text child of Label/Text node)
-    // =========================================================================
 
     /**
      * Applies a text shadow to a {@link javafx.scene.text.Text} or
@@ -815,9 +787,7 @@ public final class Styles {
             node.setEffect(null);
     }
 
-    // =========================================================================
     // COLORED DROP-SHADOW — arbitrary color dropshadow
-    // =========================================================================
 
     /**
      * Applies a colored drop shadow (analogous to Tailwind v4.1's
@@ -861,9 +831,7 @@ public final class Styles {
     /** Removes drop shadow effect from node. */
     public static void dropShadowNone(Node node) { filterNone(node); }
 
-    // =========================================================================
     // MASK / CLIP UTILITIES
-    // =========================================================================
 
     /**
      * Clips a node to a rectangle with optional corner rounding
@@ -964,9 +932,7 @@ public final class Styles {
         node.setClip(null);
     }
 
-    // =========================================================================
     // SVG HELPERS — fill-current, stroke-current
-    // =========================================================================
 
     /**
      * Sets the fill color of a {@link javafx.scene.shape.Shape} node
@@ -1018,9 +984,7 @@ public final class Styles {
         shape.setStrokeWidth(width);
     }
 
-    // =========================================================================
     // 3D TRANSFORMS (JavaFX Rotate/Translate on 3 axes)
-    // =========================================================================
 
     /**
      * Rotates a node around the X axis (analogous to CSS {@code rotateX(deg)}).
@@ -1094,9 +1058,7 @@ public final class Styles {
         node.setTranslateZ(0);
     }
 
-    // =========================================================================
     // MOTION-REDUCE — respect prefers-reduced-motion
-    // =========================================================================
 
     /** System property key for reduced motion preference. */
     private static final String REDUCED_MOTION_KEY = "tailwindfx.motion.reduced";
@@ -1152,9 +1114,7 @@ public final class Styles {
         }
     }
 
-    // =========================================================================
     // GLASSMORPHISM / NEUMORPHISM PRESETS
-    // =========================================================================
 
     /**
      * Applies a glassmorphism effect to a node.

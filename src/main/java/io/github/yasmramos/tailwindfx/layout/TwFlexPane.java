@@ -72,9 +72,7 @@ import javafx.scene.Parent;
  */
 public class TwFlexPane extends Pane {
 
-    // =========================================================================
     // Enums
-    // =========================================================================
     /**
      * Main axis direction (analogous to {@code flex-direction}).
      */
@@ -114,9 +112,7 @@ public class TwFlexPane extends Pane {
         STRETCH   // lines stretch to fill available space
     }
 
-    // =========================================================================
     // Properties
-    // =========================================================================
     private Direction direction = Direction.ROW;
     private boolean wrap = false;
     private Justify justify = Justify.START;
@@ -192,9 +188,7 @@ public class TwFlexPane extends Pane {
         }
     }
 
-    // =========================================================================
     // Static factory methods
-    // =========================================================================
     /**
      * Creates a row-direction TwFlexPane.
      */
@@ -211,9 +205,7 @@ public class TwFlexPane extends Pane {
         return f;
     }
 
-    // =========================================================================
     // Fluent setters (return this for chaining)
-    // =========================================================================
     /**
      * Sets the main axis direction. Triggers layout.
      */
@@ -304,9 +296,7 @@ public class TwFlexPane extends Pane {
         return padding(new Insets(px));
     }
 
-    // =========================================================================
     // Standard setters
-    // =========================================================================
     public void setDirection(Direction d) {
         Preconditions.requireNonNull(d, "TwFlexPane.setDirection", "direction");
         direction = d;
@@ -408,9 +398,7 @@ public class TwFlexPane extends Pane {
         return gapCross;
     }
 
-    // =========================================================================
     // Per-child flex-grow
-    // =========================================================================
     /**
      * Sets the grow factor for a child node (analogous to {@code flex-grow}). A
      * grow factor of 1 means the child takes available space; 0 (default) means
@@ -659,9 +647,7 @@ public class TwFlexPane extends Pane {
         return v instanceof Number n ? n.doubleValue() : -1.0;
     }
 
-    // =========================================================================
     // Layout engine
-    // =========================================================================
     @Override
     protected void layoutChildren() {
         long t0 = System.nanoTime();
@@ -933,9 +919,7 @@ public class TwFlexPane extends Pane {
         }
     }
 
-    // =========================================================================
     // Layout math helpers
-    // =========================================================================
     /**
      * Computes starting positions for items along one axis given
      * justify-content.

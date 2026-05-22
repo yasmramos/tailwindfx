@@ -32,10 +32,8 @@ public final class JitCompiler {
     private static final Logger LOG = Logger.getLogger("TailwindFX.JIT");
 
     // Cache global: token raw → resultado compilado
-    // =========================================================================
     // Lock-free LRU cache with bounded size — prevents unbounded growth in long-running apps
     // Uses ConcurrentHashMap for thread-safe access without global locking
-    // =========================================================================
     /**
      * Maximum number of compiled tokens to keep in the cache.
      */
@@ -219,9 +217,7 @@ public final class JitCompiler {
     private JitCompiler() {
     }
 
-    // =========================================================================
     // Compilation result
-    // =========================================================================
     public record CompileResult(
             String inlineStyle, // -fx-* properties ready for setStyle()
             String cssClass, // CSS class to add via getStyleClass() (may be null)
@@ -249,9 +245,7 @@ public final class JitCompiler {
         }
     }
 
-    // =========================================================================
     // Public API
-    // =========================================================================
     /**
      * Compiles a single token. Uses lock-free cache: compiling the same token N times costs
      * the same as 1. Lock-free reads, atomic writes with putIfAtomic for thread-safety.
@@ -526,9 +520,7 @@ public final class JitCompiler {
         return CACHE.size();
     }
 
-    // =========================================================================
     // Main compilation
-    // =========================================================================
     private static CompileResult doCompile(String raw) {
         StyleToken t = StyleToken.parse(raw);
 
@@ -546,9 +538,7 @@ public final class JitCompiler {
         };
     }
 
-    // =========================================================================
     // Scale: p-4, w-12, gap-8, opacity-75, rotate-45, -translate-x-4
-    // =========================================================================
     private static CompileResult compileScale(StyleToken t) {
         int n = t.scale;
         int s = t.signedScale();       // con signo negativo si aplica
@@ -650,9 +640,7 @@ public final class JitCompiler {
         return CompileResult.inline(style);
     }
 
-    // =========================================================================
     // Color: bg-blue-500, text-gray-900/50, border-red-300
-    // =========================================================================
     private static CompileResult compileColor(StyleToken t) {
         // Clamp alpha to [0, 100] — warn on out-of-range, but produce valid output
         Double alpha = null;
@@ -708,9 +696,7 @@ public final class JitCompiler {
         return CompileResult.inline(style);
     }
 
-    // =========================================================================
     // Arbitrario: p-[13px], bg-[#ff6600], w-[320px], rotate-[45deg], opacity-[0.65]
-    // =========================================================================
     private static CompileResult compileArbitrary(StyleToken t) {
         String val = t.arbitraryVal.trim();
 
@@ -839,9 +825,7 @@ public final class JitCompiler {
         return CompileResult.inline(style);
     }
 
-    // =========================================================================
     // Named: text-sm, rounded-lg, font-bold, italic, underline, truncate
-    // =========================================================================
     private static CompileResult compileNamed(StyleToken t) {
         String style = switch (t.prefix + "-" + t.namedValue) {
             // Font size
@@ -1151,9 +1135,7 @@ public final class JitCompiler {
         return CompileResult.inline(style);
     }
 
-    // =========================================================================
     // Helpers internos
-    // =========================================================================
     /**
      * Construye una propiedad CSS: "-fx-padding: 16px;"
      */

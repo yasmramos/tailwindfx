@@ -63,9 +63,7 @@ public final class StylePerf {
 
     private StylePerf() {}
 
-    // =========================================================================
     // StyleDiff
-    // =========================================================================
 
     private static final String DIFF_KEY = "tailwindfx.style.hash";
 
@@ -122,9 +120,7 @@ public final class StylePerf {
         return v instanceof Integer i ? i : null;
     }
 
-    // =========================================================================
     // BatchApply
-    // =========================================================================
 
     /**
      * Whether a batch is currently accumulating (used on FX thread only).
@@ -186,9 +182,7 @@ public final class StylePerf {
      */
     public static boolean isBatchActive() { return batchActive; }
 
-    // =========================================================================
     // Auto-batch threshold
-    // =========================================================================
 
     /**
      * Minimum number of nodes that triggers automatic batch mode when
@@ -229,9 +223,7 @@ public final class StylePerf {
         pendingOps.clear();
     }
 
-    // =========================================================================
     // Async batch — for non-FX-thread callers
-    // =========================================================================
 
     /**
      * Thread-safe variant of {@link #batch}: enqueues work on the FX thread
@@ -254,9 +246,7 @@ public final class StylePerf {
         Platform.runLater(() -> batch(work));
     }
 
-    // =========================================================================
     // Benchmark helper
-    // =========================================================================
 
     /**
      * Measures the wall-clock time (in milliseconds) to apply utilities to
@@ -289,9 +279,7 @@ public final class StylePerf {
         return (System.nanoTime() - t0) / 1_000_000.0;
     }
 
-    // =========================================================================
     // Helpers
-    // =========================================================================
 
     private static int computeHash(String[] classes) {
         // Order-independent hash: sort to normalize "p-4 w-8" == "w-8 p-4"

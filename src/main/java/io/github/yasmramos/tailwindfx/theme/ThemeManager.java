@@ -41,9 +41,7 @@ import java.util.Map;
  */
 public final class ThemeManager {
 
-    // =========================================================================
     // Temas predefinidos
-    // =========================================================================
     private record ThemeVars(
             String base, String innerBg, String bg,
             String accent, String focus, String faintFocus, String defaultBtn) {
@@ -76,9 +74,7 @@ public final class ThemeManager {
         return new ArrayList<>(PRESETS.keySet());
     }
 
-    // =========================================================================
     // Builder state
-    // =========================================================================
     private final Scene scene;
     private final Node scopeNode; // null = applies to scene root
     private final Map<String, String> vars = new LinkedHashMap<>();
@@ -89,9 +85,7 @@ public final class ThemeManager {
         this.scopeNode = scopeNode;
     }
 
-    // =========================================================================
     // Factories
-    // =========================================================================
     /**
      * Applies to the entire Scene root
      */
@@ -106,9 +100,7 @@ public final class ThemeManager {
         return new ThemeManager(null, node);
     }
 
-    // =========================================================================
     // Builder — preset
-    // =========================================================================
     /**
      * Applies a predefined theme
      */
@@ -135,9 +127,7 @@ public final class ThemeManager {
         return preset("light");
     }
 
-    // =========================================================================
     // Builder — variables individuales
-    // =========================================================================
     public ThemeManager base(String color) {
         Preconditions.requireNonBlank(color, "ThemeManager.base", "color");
         vars.put("-fx-base", color);
@@ -189,9 +179,7 @@ public final class ThemeManager {
         return this;
     }
 
-    // =========================================================================
     // apply() — injects the theme
-    // =========================================================================
     /**
      * Applies the theme to the Scene root (or to scopeNode if scope() was used).
      * 
@@ -275,9 +263,7 @@ public final class ThemeManager {
         }
     }
 
-    // =========================================================================
     // Convenience static methods
-    // =========================================================================
     /**
      * Toggles dark ↔ light
      */
@@ -314,9 +300,7 @@ public final class ThemeManager {
         forScene(scene).preset(themes.get(next)).apply();
     }
 
-    // =========================================================================
     // Internal methods
-    // =========================================================================
     private Node resolveTarget() {
         if (scopeNode != null) {
             return scopeNode;
@@ -364,10 +348,8 @@ public final class ThemeManager {
         }
     }
 
-    // =========================================================================
     // THEME PERSISTENCE — java.util.prefs.Preferences
     // Themes are saved in OS preferences and survive across sessions.
-    // =========================================================================
     /**
      * Saves the current theme of the scene to user preferences.
      *
@@ -464,9 +446,7 @@ public final class ThemeManager {
         }
     }
 
-    // =========================================================================
     // CRITICAL FIX: Force style refresh helpers
-    // =========================================================================
 
     /**
      * Forces a complete style refresh on a node and all its descendants.

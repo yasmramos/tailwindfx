@@ -34,10 +34,6 @@ import javafx.stage.Stage;
 public final class TailwindFX {
     private TailwindFX() {}
 
-    // =========================================================================
-    // Style Operations
-    // =========================================================================
-
     /** Apply utility classes and JIT tokens to a node. */
     public static void apply(Node node, String... tokens) {
         TwStyle.apply(node, tokens);
@@ -57,10 +53,6 @@ public final class TailwindFX {
     public static void toggle(Node node, String cssClass) {
         TwStyle.toggle(node, cssClass);
     }
-
-    // =========================================================================
-    // Installation Operations
-    // =========================================================================
 
     /** Install all CSS stylesheets. */
     public static void install(Scene scene) {
@@ -107,18 +99,10 @@ public final class TailwindFX {
         TwInstall.installEssentials(scene);
     }
 
-    // =========================================================================
-    // Theme Operations
-    // =========================================================================
-
     /** Get theme manager for a scene. */
     public static ThemeManager theme(Scene scene) {
         return ThemeManager.forScene(scene);
     }
-
-    // =========================================================================
-    // Layout Operations
-    // =========================================================================
 
     /** Get layout builder for a container. */
     public static TwLayoutHelper layout(Pane container) {
@@ -140,36 +124,20 @@ public final class TailwindFX {
         return TwGridPane.create().build();
     }
 
-    // =========================================================================
-    // Responsive Operations
-    // =========================================================================
-
     /** Install responsive support on a Stage. */
     public static ResponsiveNode responsive(Stage stage) {
         return ResponsiveNode.on(stage.getScene().getRoot()).install(stage.getScene());
     }
-
-    // =========================================================================
-    // Batch Operations
-    // =========================================================================
 
     /** Execute style operations in batch mode. */
     public static void batch(Runnable action) {
         StylePerf.batch(action);
     }
 
-    // =========================================================================
-    // Metrics Operations
-    // =========================================================================
-
     /** Get metrics instance. */
     public static TailwindFXMetrics metrics() {
         return TailwindFXMetrics.instance();
     }
-
-    // =========================================================================
-    // Configuration Operations
-    // =========================================================================
 
     /** Get current unit size. */
     public static double unit() {

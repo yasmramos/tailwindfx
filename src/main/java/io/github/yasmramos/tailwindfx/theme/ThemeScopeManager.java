@@ -48,9 +48,7 @@ public final class ThemeScopeManager {
 
     private ThemeScopeManager() {}
 
-    // =========================================================================
     // Builder
-    // =========================================================================
 
     /**
      * Starts the configuration of a scope for a specific Pane.
@@ -113,9 +111,7 @@ public final class ThemeScopeManager {
         }
     }
 
-    // =========================================================================
     // Builder interno
-    // =========================================================================
 
     public static final class ScopeBuilder {
 
@@ -221,9 +217,7 @@ public final class ThemeScopeManager {
         }
     }
 
-    // =========================================================================
     // Nested scope support
-    // =========================================================================
 
     /**
      * Finds the closest ancestor {@link Pane} that has a theme scope applied.
@@ -299,9 +293,7 @@ public final class ThemeScopeManager {
         javafx.application.Platform.runLater(() -> pane.setStyle(style));
     }
 
-    // =========================================================================
     // Internos
-    // =========================================================================
 
     private static final Set<String> THEME_VARS = Set.of(
         "-fx-base", "-fx-background", "-fx-control-inner-background",

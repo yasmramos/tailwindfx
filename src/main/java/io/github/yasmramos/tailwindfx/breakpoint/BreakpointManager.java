@@ -60,9 +60,7 @@ public final class BreakpointManager {
     // Cache of BreakpointManager instances per Stage
     private static final ConcurrentHashMap<Stage, BreakpointManager> instances = new ConcurrentHashMap<>();
 
-    // =========================================================================
     // Breakpoints
-    // =========================================================================
 
     public enum Breakpoint {
         XS(0,    null),
@@ -88,9 +86,7 @@ public final class BreakpointManager {
         }
     }
 
-    // =========================================================================
     // BP — shorthand alias for Breakpoint (allows BreakpointManager.BP.MD)
-    // =========================================================================
 
     /**
      * Shorthand alias for {@link Breakpoint} — allows the concise form
@@ -110,9 +106,7 @@ public final class BreakpointManager {
         private BP() {}
     }
 
-    // =========================================================================
     // Builder for custom breakpoints
-    // =========================================================================
 
     public static final class CustomBuilder {
         private final List<CustomBreakpoint> bps = new ArrayList<>();
@@ -144,9 +138,7 @@ public final class BreakpointManager {
         return instances.computeIfAbsent(stage, s -> new BreakpointManager(s, null));
     }
 
-    // =========================================================================
     // State
-    // =========================================================================
 
     private final Stage  stage;
     private final List<CustomBreakpoint>     customBps;
@@ -167,9 +159,7 @@ public final class BreakpointManager {
     // Property for reactive breakpoint changes (Publisher pattern)
     private final ObjectProperty<Breakpoint> activeBreakpoint;
 
-    // =========================================================================
     // Construction
-    // =========================================================================
 
     private BreakpointManager(Stage stage, List<CustomBreakpoint> custom) {
         this.stage     = Preconditions.requireNonNull(stage, "BreakpointManager", "stage");
@@ -184,9 +174,7 @@ public final class BreakpointManager {
         return new BreakpointManager(stage, null);
     }
 
-    // =========================================================================
     // Public API
-    // =========================================================================
 
     /**
      * Registers a callback that executes when crossing a breakpoint
@@ -257,9 +245,7 @@ public final class BreakpointManager {
         instances.remove(stage);
     }
 
-    // =========================================================================
     // Internal
-    // =========================================================================
 
     private void attachWidthListener() {
         widthListener = (obs, old, newVal) -> update(newVal.doubleValue());

@@ -70,9 +70,7 @@ import java.util.Map;
  */
 public final class TwGridPane extends Pane {
 
-    // =========================================================================
     // Enums
-    // =========================================================================
     /**
      * Auto-flow direction for automatically placed children (analogous to CSS
      * {@code grid-auto-flow}).
@@ -84,9 +82,7 @@ public final class TwGridPane extends Pane {
         COL_DENSE     // column flow with dense packing
     }
 
-    // =========================================================================
     // Builder
-    // =========================================================================
     /**
      * Returns a new builder for TwGridPane.
      */
@@ -189,9 +185,7 @@ public final class TwGridPane extends Pane {
         }
     }
 
-    // =========================================================================
     // State
-    // =========================================================================
     private int cols;
     private int rows;
     private double gapX;
@@ -208,9 +202,7 @@ public final class TwGridPane extends Pane {
     private static final String ROW_SPAN_KEY = "tailwindfx.grid.row-span";
     private static final String AREA_KEY = "tailwindfx.grid.area";
 
-    // =========================================================================
     // Construction
-    // =========================================================================
     private TwGridPane(Builder b) {
         this.cols = b.cols;
         this.rows = b.rows;
@@ -225,9 +217,7 @@ public final class TwGridPane extends Pane {
         getChildren().addListener((javafx.collections.ListChangeListener<Node>) c -> requestLayout());
     }
 
-    // =========================================================================
     // Template areas
-    // =========================================================================
     /**
      * Parses area template strings and builds the area map. Each string is a
      * row; each word is a cell name. Consecutive identical names in the same
@@ -310,9 +300,7 @@ public final class TwGridPane extends Pane {
         return this;
     }
 
-    // =========================================================================
     // Convenience methods for adding nodes (mimics GridPane API)
-    // =========================================================================
     /**
      * Adds a node at the specified column and row position.
      *
@@ -361,9 +349,7 @@ public final class TwGridPane extends Pane {
         requestLayout();
     }
 
-    // =========================================================================
     // Per-child span
-    // =========================================================================
     /**
      * Sets the column span for a child (analogous to {@code .col-span-N}).
      *
@@ -406,9 +392,7 @@ public final class TwGridPane extends Pane {
         return v instanceof Integer i ? i : 1;
     }
 
-    // =========================================================================
     // Runtime mutators
-    // =========================================================================
     public TwGridPane cols(int c) {
         this.cols = c;
         requestLayout();
@@ -512,9 +496,7 @@ public final class TwGridPane extends Pane {
         return autoFlow;
     }
 
-    // =========================================================================
     // Column and Row constraints support
-    // =========================================================================
     private final javafx.collections.ObservableList<ColumnConstraints> columnConstraints
             = javafx.collections.FXCollections.observableArrayList();
 
@@ -535,9 +517,7 @@ public final class TwGridPane extends Pane {
         return rowConstraints;
     }
 
-    // =========================================================================
     // Layout engine
-    // =========================================================================
     @Override
     protected void layoutChildren() {
         long t0 = System.nanoTime();
@@ -706,9 +686,7 @@ public final class TwGridPane extends Pane {
         }
     }
 
-    // =========================================================================
     // Size computation
-    // =========================================================================
     private double computeMaxCellHeight(List<Node> children) {
         return children.stream().mapToDouble(n -> n instanceof Region r ? r.prefHeight(-1) : n.prefHeight(-1))
                 .max().orElse(48);

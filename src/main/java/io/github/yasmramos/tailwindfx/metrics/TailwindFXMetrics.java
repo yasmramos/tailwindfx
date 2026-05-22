@@ -40,9 +40,7 @@ public final class TailwindFXMetrics {
 
     private TailwindFXMetrics() {}
 
-    // =========================================================================
     // State
-    // =========================================================================
 
     private volatile boolean enabled = true;
     private final long startTime = System.currentTimeMillis();
@@ -72,9 +70,7 @@ public final class TailwindFXMetrics {
     private final ConcurrentHashMap<String, AtomicLong> conflictsByCategory =
         new ConcurrentHashMap<>();
 
-    // =========================================================================
     // Record methods — called internally by TailwindFX components
-    // =========================================================================
 
     /** Records a JIT cache hit. */
     public void recordCacheHit()   { if (enabled) jitCacheHits.incrementAndGet(); }
@@ -157,9 +153,7 @@ public final class TailwindFXMetrics {
         return count == 0 ? 0 : totalLayoutNs.get() / count;
     }
 
-    // =========================================================================
     // Read methods
-    // =========================================================================
 
     /** Total JIT cache hits since last reset. */
     public long cacheHits()   { return jitCacheHits.get(); }
@@ -216,9 +210,7 @@ public final class TailwindFXMetrics {
     /** Uptime in milliseconds since metrics were created. */
     public long uptimeMs() { return System.currentTimeMillis() - startTime; }
 
-    // =========================================================================
     // Control
-    // =========================================================================
 
     /**
      * Enables or disables metric collection. Disabled by default.
@@ -231,9 +223,7 @@ public final class TailwindFXMetrics {
     /** Returns whether metric collection is currently enabled. */
     public boolean isEnabled() { return enabled; }
 
-    // =========================================================================
     // Metric alerts
-    // =========================================================================
 
     /** Alert callback registered via {@link #onAlert}. */
     @FunctionalInterface
@@ -348,9 +338,7 @@ public final class TailwindFXMetrics {
         totalLayoutNs.set(0);
     }
 
-    // =========================================================================
     // Report
-    // =========================================================================
 
     /**
      * Returns a formatted human-readable report of all metrics.
@@ -420,9 +408,7 @@ public final class TailwindFXMetrics {
     @Override
     public String toString() { return report(); }
 
-    // =========================================================================
     // Health alerts
-    // =========================================================================
 
     /**
      * A health issue detected from current metrics.

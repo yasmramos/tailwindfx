@@ -32,14 +32,10 @@ import javafx.animation.Interpolator;
  */
 public class TwVirtualFlow<T> extends Region {
 
-    // =========================================================================
     // Enums & Constants
-    // =========================================================================
     public enum SelectionMode { NONE, SINGLE, MULTIPLE }
 
-    // =========================================================================
     // State & Cache
-    // =========================================================================
     private final ObservableList<T> items = FXCollections.observableArrayList();
     private Function<T, Node> cellFactory = item -> {
         var label = new javafx.scene.control.Label(String.valueOf(item));
@@ -84,9 +80,7 @@ public class TwVirtualFlow<T> extends Region {
     private BiConsumer<Integer, Integer> onItemReorder;
     private Consumer<List<T>> onSelectionChange;
 
-    // =========================================================================
     // Constructor
-    // =========================================================================
     public TwVirtualFlow() {
         // Setup container
         dropIndicator.getStyleClass().add("fx-virtualflow-drop-indicator");
@@ -118,9 +112,7 @@ public class TwVirtualFlow<T> extends Region {
         heightProperty().addListener((obs, o, n) -> updateVisibleCells());
         viewportPadding.addListener((obs, o, n) -> { requestLayout(); updateVisibleCells(); });
         
-        // =========================================================================
         // EVENT DELEGATION (Container-level)
-        // =========================================================================
         cellContainer.setOnMousePressed(e -> handleSelection(e));
         cellContainer.setOnMouseClicked(e -> { if (e.getClickCount() == 2) handleDoubleClick(e); });
         
@@ -134,9 +126,7 @@ public class TwVirtualFlow<T> extends Region {
         updateScrollBar();
     }
 
-    // =========================================================================
     // Public API - Core
-    // =========================================================================
     public void setItems(ObservableList<T> items) {
         Objects.requireNonNull(items, "items cannot be null");
         this.items.setAll(items);
@@ -193,9 +183,7 @@ public class TwVirtualFlow<T> extends Region {
     public Insets getViewportPadding() { return viewportPadding.get(); }
     public ObjectProperty<Insets> viewportPaddingProperty() { return viewportPadding; }
 
-    // =========================================================================
     // Public API - Selection
-    // =========================================================================
     public void setSelectionMode(SelectionMode mode) {
         selectionMode.set(mode);
         if (mode == SelectionMode.NONE) selectedIndices.clear();
@@ -223,9 +211,7 @@ public class TwVirtualFlow<T> extends Region {
         if (onSelectionChange != null) onSelectionChange.accept(getSelectedItems());
     }
 
-    // =========================================================================
     // Public API - Scrolling & Animation
-    // =========================================================================
     public void scrollToIndex(int index) { scrollToIndex(index, Duration.ZERO); }
     
     public void scrollToIndex(int index, Duration duration) {
@@ -245,17 +231,13 @@ public class TwVirtualFlow<T> extends Region {
     public int getLastVisibleIndex() { return lastVisibleIndex; }
     public double getScrollPosition() { return scrollPosition; }
 
-    // =========================================================================
     // Public API - Callbacks
-    // =========================================================================
     public void setOnSelect(Consumer<Integer> handler) { this.onSelect = handler; }
     public void setOnDoubleClick(Consumer<Integer> handler) { this.onDoubleClick = handler; }
     public void setOnItemReorder(BiConsumer<Integer, Integer> handler) { this.onItemReorder = handler; }
     public void setOnSelectionChange(Consumer<List<T>> handler) { this.onSelectionChange = handler; }
 
-    // =========================================================================
     // Layout
-    // =========================================================================
     @Override
     protected void layoutChildren() {
         double w = getWidth(), h = getHeight();
@@ -278,9 +260,7 @@ public class TwVirtualFlow<T> extends Region {
     @Override protected double computeMinWidth(double h) { return orientation == Orientation.VERTICAL ? 100 : 200; }
     @Override protected double computeMinHeight(double w) { return orientation == Orientation.VERTICAL ? 100 : 50; }
 
-    // =========================================================================
     // Internal Logic - Size Cache & Binary Search
-    // =========================================================================
     private void ensureSizeCache() {
         if (!sizeCacheDirty) return;
         sizeCacheDirty = false;
@@ -316,9 +296,7 @@ public class TwVirtualFlow<T> extends Region {
         return Math.max(0, Math.min(low, items.size() - 1));
     }
 
-    // =========================================================================
     // Internal Logic - Scroll & Cells
-    // =========================================================================
     private void updateScrollBar() {
         if (items.isEmpty()) {
             scrollBar.setMin(0); scrollBar.setMax(0); scrollBar.setValue(0);
@@ -418,9 +396,7 @@ public class TwVirtualFlow<T> extends Region {
         }
     }
 
-    // =========================================================================
     // Internal Logic - Event Delegation
-    // =========================================================================
     private int getIndexAtMouseEvent(MouseEvent e) {
         double local = orientation == Orientation.VERTICAL ? e.getY() : e.getX();
         return findCellIndexForPosition(local + scrollPosition);
@@ -503,9 +479,7 @@ public class TwVirtualFlow<T> extends Region {
         dragSourceIndex = -1;
     }
 
-    // =========================================================================
     // Fluent API
-    // =========================================================================
     public TwVirtualFlow<T> items(ObservableList<T> i) { setItems(i); return this; }
     public TwVirtualFlow<T> cellFactory(Function<T, Node> f) { setCellFactory(f); return this; }
     public TwVirtualFlow<T> cellHeight(double h) { setCellHeight(h); return this; }

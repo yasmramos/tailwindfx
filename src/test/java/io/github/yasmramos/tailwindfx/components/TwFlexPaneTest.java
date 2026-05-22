@@ -29,9 +29,7 @@ public final class TwFlexPaneTest {
     private TwFlexPaneTest() {
     }
 
-    // =========================================================================
     // Test runner
-    // =========================================================================
     /**
      * Runs all tests and prints a summary. Returns true if all passed.
      */
@@ -82,9 +80,7 @@ public final class TwFlexPaneTest {
         return failed == 0;
     }
 
-    // =========================================================================
     // Helpers
-    // =========================================================================
     /**
      * Creates a Region with fixed pref size (the simplest test child).
      */
@@ -117,9 +113,7 @@ public final class TwFlexPaneTest {
         }
     }
 
-    // =========================================================================
     // Row basic
-    // =========================================================================
     public static void testRowLayoutBasic() {
         TwFlexPane p = TwFlexPane.row().gap(0);
         Region a = box(50, 30), b = box(80, 30);
@@ -152,9 +146,7 @@ public final class TwFlexPaneTest {
         layout(p, 200, 100); // should not throw
     }
 
-    // =========================================================================
     // Justify-content
-    // =========================================================================
     public static void testJustifyStart() {
         TwFlexPane p = TwFlexPane.row().justify(TwFlexPane.Justify.START).gap(0);
         Region a = box(50, 30), b = box(50, 30);
@@ -214,9 +206,7 @@ public final class TwFlexPaneTest {
         assertEquals("b.x", 117, b.getLayoutX());
     }
 
-    // =========================================================================
     // Align-items
-    // =========================================================================
     public static void testAlignStart() {
         TwFlexPane p = TwFlexPane.row().align(TwFlexPane.Align.START).gap(0);
         Region a = box(50, 20);
@@ -251,9 +241,7 @@ public final class TwFlexPaneTest {
         assertEquals("a.height", 100, a.getHeight());
     }
 
-    // =========================================================================
     // Flex-grow
-    // =========================================================================
     public static void testFlexGrow() {
         TwFlexPane p = TwFlexPane.row().gap(0);
         Region fixed = box(60, 30);
@@ -267,9 +255,7 @@ public final class TwFlexPaneTest {
         assertEquals("grows.x", 60, grows.getLayoutX());
     }
 
-    // =========================================================================
     // Flex-shrink
-    // =========================================================================
     public static void testFlexShrink() {
         TwFlexPane p = TwFlexPane.row().gap(0);
         Region a = box(150, 30); // shrink = 1 (default)
@@ -284,9 +270,7 @@ public final class TwFlexPaneTest {
         assertEquals("a.width", 50, a.getWidth());
     }
 
-    // =========================================================================
     // Flex-basis
-    // =========================================================================
     public static void testFlexBasisZero() {
         TwFlexPane p = TwFlexPane.row().gap(0);
         Region a = box(100, 30), b = box(100, 30);
@@ -310,9 +294,7 @@ public final class TwFlexPaneTest {
         assertEquals("a.width", 120, a.getWidth());
     }
 
-    // =========================================================================
     // Order
-    // =========================================================================
     public static void testOrder() {
         TwFlexPane p = TwFlexPane.row().justify(TwFlexPane.Justify.START).gap(0);
         Region first = box(50, 30);
@@ -326,9 +308,7 @@ public final class TwFlexPaneTest {
         assertEquals("first.x", 50, first.getLayoutX());
     }
 
-    // =========================================================================
     // Align-self
-    // =========================================================================
     public static void testAlignSelf() {
         TwFlexPane p = TwFlexPane.row().align(TwFlexPane.Align.START).gap(0);
         Region a = box(50, 20); // uses container align (START)
@@ -340,9 +320,7 @@ public final class TwFlexPaneTest {
         assertEquals("b.y", 40, b.getLayoutY());          // self CENTER: (100-20)/2=40
     }
 
-    // =========================================================================
     // Gap
-    // =========================================================================
     public static void testGapRow() {
         TwFlexPane p = TwFlexPane.row().gap(10);
         Region a = box(50, 30), b = box(50, 30);
@@ -367,9 +345,7 @@ public final class TwFlexPaneTest {
         assertEquals("b.x", 62, b.getLayoutX()); // 50 + 12
     }
 
-    // =========================================================================
     // Wrap
-    // =========================================================================
     public static void testWrapRow() {
         TwFlexPane p = TwFlexPane.row().wrap(true).gapX(0).gapY(0);
         Region a = box(80, 30), b = box(80, 30), c = box(80, 30);
@@ -381,9 +357,7 @@ public final class TwFlexPaneTest {
         assertEquals("c.y", 30, c.getLayoutY()); // second row at y=30
     }
 
-    // =========================================================================
     // Padding
-    // =========================================================================
     public static void testPadding() {
         TwFlexPane p = TwFlexPane.row()
                 .padding(new Insets(10, 5, 10, 5))
