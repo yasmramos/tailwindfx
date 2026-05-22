@@ -119,7 +119,7 @@ public final class TwLayoutHelper {
     public TwLayoutHelper grid()         { type = LayoutType.GRID; gridCols = -1;   return this; }
     public TwLayoutHelper flowRow()      { type = LayoutType.FLOW_ROW; return this; }
     public TwLayoutHelper flowCol()      { type = LayoutType.FLOW_COL; return this; }
-    /** TilePane — cuadrícula de tiles de tamaño uniforme. */
+    /** TilePane — grid of uniform-sized tiles. */
     public TwLayoutHelper tile()         { type = LayoutType.TILE;     return this; }
     public TwLayoutHelper anchor()       { type = LayoutType.ANCHOR;   return this; }
 
@@ -257,7 +257,7 @@ public final class TwLayoutHelper {
     }
 
     // =========================================================================
-    // Alineación
+    // Alignment
     // =========================================================================
 
     public TwLayoutHelper center()       { alignment = Pos.CENTER;        return this; }
@@ -270,14 +270,14 @@ public final class TwLayoutHelper {
     public TwLayoutHelper bottomCenter() { alignment = Pos.BOTTOM_CENTER; return this; }
     public TwLayoutHelper bottomRight()  { alignment = Pos.BOTTOM_RIGHT;  return this; }
 
-    // aliases semánticos
+    // semantic aliases
     public TwLayoutHelper justifyCenter()  { return center(); }
     public TwLayoutHelper justifyStart()   { return topLeft(); }
     public TwLayoutHelper itemsCenter()    { return centerLeft(); }
     public TwLayoutHelper placeCenter()    { return center(); }
 
     // =========================================================================
-    // Crecimiento y tamaño
+    // Growth and sizing
     // =========================================================================
 
     public TwLayoutHelper grow()               { growAll = true; return this; }
@@ -384,9 +384,9 @@ public final class TwLayoutHelper {
     }
 
         /**
-     * Aplica la configuración. Si el source ya es el tipo correcto,
-     * solo reconfigura propiedades (no recrea nada).
-     * Si el tipo cambió, migra hijos + constraints a un Pane nuevo.
+     * Applies the configuration. If the source is already the correct type,
+     * it only reconfigures properties (does not recreate anything).
+     * If the type changed, migrates children + constraints to a new Pane.
      */
     public Pane build() {
         checkFxThread();
@@ -692,7 +692,7 @@ public final class TwLayoutHelper {
     }
 
     // =========================================================================
-    // Helpers estáticos
+    // Static helpers
     // =========================================================================
 
     public static void hgrow(Node n) { HBox.setHgrow(n, Priority.ALWAYS); }
@@ -709,7 +709,7 @@ public final class TwLayoutHelper {
         HBox.setMargin(n, i); VBox.setMargin(n, i);
     }
 
-    /** Spacer flexible — empuja elementos al otro extremo */
+    /** Flexible spacer — pushes elements to the opposite end */
     public static Region spacer() {
         Region r = new Region();
         HBox.setHgrow(r, Priority.ALWAYS);
@@ -717,7 +717,7 @@ public final class TwLayoutHelper {
         return r;
     }
 
-    /** Spacer de tamaño fijo */
+    /** Fixed-size spacer */
     public static Region spacer(double size) {
         Region r = new Region();
         r.setMinWidth(size);  r.setPrefWidth(size);

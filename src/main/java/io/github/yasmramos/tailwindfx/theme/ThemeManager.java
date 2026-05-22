@@ -18,23 +18,23 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ThemeManager v2 — Motor de temas de TailwindFX.
+ * ThemeManager v2 — TailwindFX theme engine.
  *
- * Características: 1. VARIABLES MODENA: sobreescribe -fx-base, -fx-accent, etc.
- * en el root. Modena propaga automáticamente a TODOS los controles hijos.
+ * Features: 1. MODENA VARIABLES: overrides -fx-base, -fx-accent, etc.
+ * in the root. Modena automatically propagates to ALL child controls.
  *
- * 2. TEMAS PREDEFINIDOS: light, dark, blue, green, purple, rose, slate.
+ * 2. PREDEFINED THEMES: light, dark, blue, green, purple, rose, slate.
  *
- * 3. HERENCIA DE TEMAS: tema base + override parcial.
+ * 3. THEME INHERITANCE: base theme + partial override.
  * ThemeManager.theme(scene).preset("dark").accent("#f97316").apply();
  *
- * 4. SCOPES: aplicar un tema solo a un subárbol de nodos.
+ * 4. SCOPES: apply a theme only to a subtree of nodes.
  * ThemeManager.scope(myPanel).preset("dark").applyTo(myPanel);
  *
- * 5. TRANSICIÓN ANIMADA (opcional):
+ * 5. ANIMATED TRANSITION (optional):
  * ThemeManager.theme(scene).dark().animated(300).apply();
  *
- * Uso básico: TailwindFX.theme(scene).dark().apply();
+ * Basic usage: TailwindFX.theme(scene).dark().apply();
  * TailwindFX.theme(scene).preset("blue").apply();
  * TailwindFX.theme(scene).base("#1e293b").accent("#3b82f6").apply();
  * ThemeManager.toggle(scene);
@@ -77,10 +77,10 @@ public final class ThemeManager {
     }
 
     // =========================================================================
-    // Estado del builder
+    // Builder state
     // =========================================================================
     private final Scene scene;
-    private final Node scopeNode; // null = aplica al root de la scene
+    private final Node scopeNode; // null = applies to scene root
     private final Map<String, String> vars = new LinkedHashMap<>();
     private long animDurationMs = 0;
 
@@ -93,14 +93,14 @@ public final class ThemeManager {
     // Factories
     // =========================================================================
     /**
-     * Aplica al root completo de la Scene
+     * Applies to the entire Scene root
      */
     public static ThemeManager forScene(Scene scene) {
         return new ThemeManager(scene, null);
     }
 
     /**
-     * Aplica solo al nodo indicado y su subárbol
+     * Applies only to the specified node and its subtree
      */
     public static ThemeManager scope(Node node) {
         return new ThemeManager(null, node);
@@ -110,14 +110,14 @@ public final class ThemeManager {
     // Builder — preset
     // =========================================================================
     /**
-     * Aplica un tema predefinido
+     * Applies a predefined theme
      */
     public ThemeManager preset(String name) {
         Preconditions.requireNonBlank(name, "ThemeManager.preset", "name");
         ThemeVars t = PRESETS.get(name.toLowerCase());
         if (t == null) {
             throw new IllegalArgumentException(
-                    "ThemeManager.preset: tema '" + name + "' no existe. Disponibles: " + PRESETS.keySet());
+                    "ThemeManager.preset: theme '" + name + "' does not exist. Available: " + PRESETS.keySet());
         }
         return base(t.base()).innerBackground(t.innerBg()).background(t.bg())
                 .accent(t.accent()).focus(t.focus())
@@ -125,7 +125,7 @@ public final class ThemeManager {
     }
 
     /**
-     * Alias rápidos
+     * Quick aliases
      */
     public ThemeManager dark() {
         return preset("dark");
@@ -182,7 +182,7 @@ public final class ThemeManager {
     }
 
     /**
-     * Activa transición animada al aplicar el tema. durationMs = milisegundos
+     * Enables animated transition when applying the theme. durationMs = milliseconds
      */
     public ThemeManager animated(long durationMs) {
         animDurationMs = durationMs;
@@ -190,10 +190,10 @@ public final class ThemeManager {
     }
 
     // =========================================================================
-    // apply() — inyecta el tema
+    // apply() — injects the theme
     // =========================================================================
     /**
-     * Aplica el tema al root de la Scene (o al scopeNode si se usó scope()).
+     * Applies the theme to the Scene root (or to scopeNode if scope() was used).
      * 
      * <ul>
      * <li>Forces style refresh on ALL descendant nodes</li>
@@ -204,7 +204,7 @@ public final class ThemeManager {
     public void apply() {
         if (vars.isEmpty()) {
             Preconditions.LOG.warning(
-                    "ThemeManager.apply: ninguna variable definida — usa preset() o base()/accent() antes de apply()");
+                    "ThemeManager.apply: no variables defined — use preset() or base()/accent() before apply()");
             return;
         }
 
@@ -276,10 +276,10 @@ public final class ThemeManager {
     }
 
     // =========================================================================
-    // Estáticos de conveniencia
+    // Convenience static methods
     // =========================================================================
     /**
-     * Alterna dark ↔ light
+     * Toggles dark ↔ light
      */
     public static void toggle(Scene scene) {
         if (isDark(scene)) {
@@ -290,19 +290,19 @@ public final class ThemeManager {
     }
 
     /**
-     * ¿El tema actual es dark?
+     * Is the current theme dark?
      */
     public static boolean isDark(Scene scene) {
         return scene.getRoot().getStyleClass().contains("dark");
     }
 
     /**
-     * Cicla por los temas predefinidos en orden
+     * Cycles through predefined themes in order
      */
     public static void cyclePreset(Scene scene) {
         List<String> themes = availableThemes();
         String style = scene.getRoot().getStyle();
-        // Buscar qué tema está activo por comparación de color base
+        // Find which theme is active by comparing base color
         int next = 0;
         for (int i = 0; i < themes.size(); i++) {
             ThemeVars t = PRESETS.get(themes.get(i));
@@ -315,7 +315,7 @@ public final class ThemeManager {
     }
 
     // =========================================================================
-    // Internos
+    // Internal methods
     // =========================================================================
     private Node resolveTarget() {
         if (scopeNode != null) {
@@ -336,7 +336,7 @@ public final class ThemeManager {
     }
 
     private void applyAnimated(Node target, String newStyle) {
-        // Animación de opacidad para hacer la transición suave
+        // Opacity animation for smooth transition
         Timeline tl = new Timeline(
                 new KeyFrame(Duration.ZERO,
                         new KeyValue(target.opacityProperty(), 1.0, Interpolator.EASE_BOTH)),
@@ -365,19 +365,18 @@ public final class ThemeManager {
     }
 
     // =========================================================================
-    // PERSISTENCIA DE TEMAS — java.util.prefs.Preferences
-    // Los temas se guardan en las preferencias del SO y sobreviven entre sesiones.
+    // THEME PERSISTENCE — java.util.prefs.Preferences
+    // Themes are saved in OS preferences and survive across sessions.
     // =========================================================================
     /**
-     * Guarda el tema actual de la escena en las preferencias del usuario.
+     * Saves the current theme of the scene to user preferences.
      *
      * <pre>
      * ThemeManager.saveTheme(scene, "myapp.mainWindow");
      * </pre>
      *
-     * @param scene Scene cuyo tema guardar
-     * @param key   clave única (ej: "myapp.theme"). Se recomienda usar el nombre
-     *              de la app.
+     * @param scene Scene whose theme to save
+     * @param key   unique key (e.g., "myapp.theme"). It is recommended to use the app name.
      */
     public static void saveTheme(Scene scene, String key) {
         Preconditions.requireNonNull(scene, "ThemeManager.saveTheme", "scene");
@@ -398,7 +397,7 @@ public final class ThemeManager {
     }
 
     /**
-     * Restaura un tema guardado previamente con {@link #saveTheme}.
+     * Restores a previously saved theme with {@link #saveTheme}.
      * 
      * <pre>
      * boolean loaded = ThemeManager.loadTheme(scene, "myapp.mainWindow");
@@ -406,9 +405,9 @@ public final class ThemeManager {
      *     ThemeManager.of(scene).preset("dark").apply(); // fallback
      * </pre>
      *
-     * @param scene Scene a la que aplicar el tema
-     * @param key   clave usada en {@link #saveTheme}
-     * @return {@code true} si se encontró y aplicó el tema guardado
+     * @param scene Scene to apply the theme to
+     * @param key   key used in {@link #saveTheme}
+     * @return {@code true} if the saved theme was found and applied
      */
     public static boolean loadTheme(Scene scene, String key) {
         Preconditions.requireNonNull(scene, "ThemeManager.loadTheme", "scene");
