@@ -27,30 +27,30 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * TwLayoutHelper v2 — Layout Engine inteligente de TailwindFX.
+ * TwLayoutHelper v2 — Intelligent Layout Engine for TailwindFX.
  *
- * Principios:
- *   1. MUTACIÓN INTELIGENTE: si el Pane source ya es el tipo correcto,
- *      nunca se recrea. Solo se reconfiguran propiedades. Crítico para
- *      llamar desde listeners de breakpoint sin rehacer el árbol.
+ * Principles:
+ *   1. INTELLIGENT MUTATION: if the source Pane is already the correct type,
+ *      it is never recreated. Only properties are reconfigured. Critical for
+ *      calling from breakpoint listeners without rebuilding the tree.
  *
- *   2. MIGRACIÓN DE CONSTRAINTS: al cambiar de Pane, las constraints
- *      (hgrow, vgrow, margin, gridCol/Row) de los hijos se preservan.
+ *   2. CONSTRAINTS MIGRATION: when switching Panes, child constraints
+ *      (hgrow, vgrow, margin, gridCol/Row) are preserved.
  *
- *   3. RESPONSIVE SWITCH: reutilizar el mismo builder con .row()/.col()
- *      y llamar build() de nuevo es seguro y eficiente.
+ *   3. RESPONSIVE SWITCH: reusing the same builder with .row()/.col()
+ *      and calling build() again is safe and efficient.
  *
  *   4. ANCHORPANE FLUENT: anchorAll / anchorFill / anchorTop/Right/Bottom/Left
  *
- *   5. AUTO GRID COLS: si no se especifican columnas, se calculan
- *      automáticamente según el número de hijos.
+ *   5. AUTO GRID COLS: if no columns are specified, they are calculated
+ *      automatically based on the number of children.
  *
- * Uso básico:
+ * Basic usage:
  *   TailwindFX.layout(pane).row().gap(12).center().build();
  *   TailwindFX.layout(pane).grid(3).hgap(16).vgap(16).build();
  *   TailwindFX.layout(pane).flowRow().gap(8).build();
  *
- * Responsive switch (seguro — no recrea el Pane):
+ * Responsive switch (safe — does not recreate the Pane):
  *   TwLayoutHelper lyt = TailwindFX.layout(container).gap(12);
  *   stage.widthProperty().addListener((o, old, w) -> {
  *       if (w.doubleValue() < 768) lyt.col().build();

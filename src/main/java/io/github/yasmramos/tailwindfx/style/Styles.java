@@ -68,7 +68,7 @@ public final class Styles {
         return node;
     }
 
-    /** .col-span-full — ocupa todas las columnas del GridPane */
+    /** .col-span-full — spans all columns of the GridPane */
     public static <T extends Node> T colSpanFull(T node) {
         Preconditions.requireNode(node, "Styles.colSpanFull");
         GridPane.setColumnSpan(node, GridPane.REMAINING);
@@ -91,7 +91,7 @@ public final class Styles {
         return node;
     }
 
-    /** .row-span-full — ocupa todas las filas del GridPane */
+    /** .row-span-full — spans all rows of the GridPane */
     public static <T extends Node> T rowSpanFull(T node) {
         Preconditions.requireNode(node, "Styles.rowSpanFull");
         GridPane.setRowSpan(node, GridPane.REMAINING);
@@ -624,7 +624,7 @@ public final class Styles {
     // Corresponde a: object-fit, object-position en CSS web
     // =========================================================================
 
-    /** .object-cover — rellena el área recortando si es necesario */
+    /** .object-cover — fills the area by cropping if necessary */
     public static ImageView objectCover(ImageView iv) {
         Preconditions.requireNonNull(iv, "Styles.objectCover", "imageView");
         iv.setPreserveRatio(false);

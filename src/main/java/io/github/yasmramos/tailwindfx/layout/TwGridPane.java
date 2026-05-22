@@ -477,7 +477,7 @@ public final class TwGridPane extends Pane {
         return this;
     }
 
-// Getter opcional (útil para debugging o bindings)
+    // Optional getter (useful for debugging or bindings)
     public Insets getInternalPadding() {
         return padding;
     }

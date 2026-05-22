@@ -698,7 +698,7 @@ public class TwFlexPane extends Pane {
         int count = children.size();
         if (count == 0) return;
 
-        // OPTIMIZACIÓN CRÍTICA: Pre-calcular TODAS las sums fuera del bucle para O(N) real
+        // CRITICAL OPTIMIZATION: Pre-calculate ALL sums outside the loop for real O(N)
         double[] prefs = new double[count];
         double totalPrefW = 0;
         double totalGrowWeighted = 0;
@@ -762,7 +762,7 @@ public class TwFlexPane extends Pane {
     }
 
     private void layoutRowWrap(List<Node> children, double w, double h, double ox, double oy) {
-        // CORRECCIÓN CRÍTICA: Implementar grow/shrink DENTRO de cada fila (faltaba en la versión original)
+        // CRITICAL FIX: Implement grow/shrink WITHIN each row (missing in original version)
         // Group children into rows
         java.util.List<java.util.List<Node>> rows = new java.util.ArrayList<>();
         java.util.List<Node> currentRow = new java.util.ArrayList<>();
@@ -801,7 +801,7 @@ public class TwFlexPane extends Pane {
             double rowH = rowHeights[r];
             double curY = oy + rowYPositions[r];
             
-            // OPTIMIZACIÓN: Pre-calcular sums para O(N) real dentro de cada fila
+            // OPTIMIZATION: Pre-calculate sums for real O(N) within each row
             double[] prefs = new double[count];
             double totalPref = 0;
             double totalGrowWeighted = 0;
@@ -840,7 +840,7 @@ public class TwFlexPane extends Pane {
                     System.arraycopy(prefs, 0, finalWidths, 0, count);
                 }
             } else {
-                // Shrink within the row - CORRECCIÓN AÑADIDA
+                // Shrink within the row - FIX ADDED
                 if (totalShrinkWeighted > 0) {
                     for(int i = 0; i < count; i++) {
                         double s = getShrink(row.get(i));
@@ -870,7 +870,7 @@ public class TwFlexPane extends Pane {
         int count = children.size();
         if (count == 0) return;
 
-        // CORRECCIÓN CRÍTICA: Implementar shrink en columnas (faltaba en la versión original)
+        // CRITICAL FIX: Implement shrink in columns (missing in original version)
         double[] prefs = new double[count];
         double totalPrefH = 0;
         double totalGrowWeighted = 0;
@@ -906,7 +906,7 @@ public class TwFlexPane extends Pane {
                 }
             }
         } else if (overflow > 0 && totalShrinkWeighted > 0) {
-            // Shrink: reduce proportionally to (shrink × pref) - CORRECCIÓN AÑADIDA
+            // Shrink: reduce proportionally to (shrink × pref) - FIX ADDED
             for (int i = 0; i < count; i++) {
                 double shrink = getShrink(children.get(i));
                 if (shrink > 0) {
