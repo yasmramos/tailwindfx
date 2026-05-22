@@ -24,9 +24,7 @@ import java.util.*;
  */
 public class DashboardComponents {
 
-    // =========================================================================
     // Interactive Line Chart with Canvas
-    // =========================================================================
 
     public static VBox createLineChart(String title, List<ChartData> datasets, List<String> labels) {
         VBox container = new VBox(16);
@@ -192,9 +190,7 @@ public class DashboardComponents {
         return selector;
     }
 
-    // =========================================================================
     // Pie/Donut Chart
-    // =========================================================================
 
     public static VBox createPieChart(String title, List<PieSlice> slices) {
         VBox container = new VBox(16);
@@ -289,9 +285,7 @@ public class DashboardComponents {
         gc.fillText(totalText, centerX - textWidth / 2, centerY + 6);
     }
 
-    // =========================================================================
     // Sparkline (Mini inline chart for stats)
-    // =========================================================================
 
     public static HBox createStatCardWithSparkline(String title, String value, String change,
                                                     boolean isPositive, List<Double> data, Color color) {
@@ -383,9 +377,7 @@ public class DashboardComponents {
         gc.stroke();
     }
 
-    // =========================================================================
     // Toast Notification System
-    // =========================================================================
 
     private static VBox toastContainer;
     private static final List<Timeline> activeToasts = new ArrayList<>();
@@ -490,9 +482,7 @@ public class DashboardComponents {
         SUCCESS, ERROR, WARNING, INFO
     }
 
-    // =========================================================================
     // Modal Dialog
-    // =========================================================================
 
     public static StackPane createModalOverlay(Node content) {
         StackPane modal = new StackPane();
@@ -566,9 +556,7 @@ public class DashboardComponents {
         return dialog;
     }
 
-    // =========================================================================
     // Calendar Widget
-    // =========================================================================
 
     public static VBox createCalendarWidget() {
         VBox container = new VBox(16);
@@ -691,9 +679,7 @@ public class DashboardComponents {
         return item;
     }
 
-    // =========================================================================
     // Skeleton Loading States
-    // =========================================================================
 
     public static VBox createSkeletonCard() {
         VBox card = new VBox(16);
@@ -780,9 +766,7 @@ public class DashboardComponents {
         timeline.play();
     }
 
-    // =========================================================================
     // Data Models
-    // =========================================================================
 
     public static class ChartData {
         public String label;

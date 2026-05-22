@@ -106,9 +106,7 @@ public class Dashboard {
         return content;
     }
 
-    // =========================================================================
     // Sidebar (Enhanced with better UX)
-    // =========================================================================
 
     private static VBox createSidebar() {
         VBox sidebar = new VBox(0);
@@ -290,9 +288,7 @@ public class Dashboard {
         }
     }
 
-    // =========================================================================
     // Top Bar (Enhanced)
-    // =========================================================================
 
     private static HBox createTopBar() {
         HBox topBar = new HBox(24);
@@ -737,9 +733,7 @@ public class Dashboard {
         return item;
     }
 
-    // =========================================================================
     // Welcome Banner
-    // =========================================================================
 
     private static HBox createWelcomeBanner() {
         HBox banner = new HBox(24);
@@ -781,9 +775,7 @@ public class Dashboard {
         return banner;
     }
 
-    // =========================================================================
     // Enhanced Stats Row with Sparklines
-    // =========================================================================
 
     private static HBox createEnhancedStatsRow() {
         HBox stats = new HBox(20);
@@ -810,9 +802,7 @@ public class Dashboard {
         return stats;
     }
 
-    // =========================================================================
     // Line Chart Section
-    // =========================================================================
 
     private static VBox createLineChartSection() {
         List<String> labels = Arrays.asList("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul");
@@ -833,9 +823,7 @@ public class Dashboard {
         return chart;
     }
 
-    // =========================================================================
     // Activity Feed
-    // =========================================================================
 
     private static VBox createActivityFeed() {
         VBox section = new VBox(16);
@@ -898,9 +886,7 @@ public class Dashboard {
         return item;
     }
 
-    // =========================================================================
     // Enhanced Data Table
-    // =========================================================================
 
     private static VBox createEnhancedDataTable() {
         VBox section = new VBox(20);
@@ -985,9 +971,7 @@ public class Dashboard {
         public String getDate() { return date; }
     }
 
-    // =========================================================================
     // Demo Controls
-    // =========================================================================
 
     private static VBox createDemoControls() {
         VBox section = new VBox(20);
