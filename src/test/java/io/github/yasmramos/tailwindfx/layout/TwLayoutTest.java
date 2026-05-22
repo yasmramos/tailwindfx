@@ -1,6 +1,6 @@
 package io.github.yasmramos.tailwindfx.layout;
 
-import io.github.yasmramos.tailwindfx.TailwindFX;
+import io.github.yasmramos.tailwindfx.TwLayout;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -17,10 +17,10 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 
-/** Tests for {@link TwLayoutHelper} — builder, type switching, constraints, TilePane. */
-public final class TwLayoutHelperTest {
+/** Tests for {@link TwLayout} — builder, type switching, constraints, TilePane. */
+public final class TwLayoutTest {
 
-  private TwLayoutHelperTest() {}
+  private TwLayoutTest() {}
 
   private static int passed = 0, failed = 0;
 
@@ -106,7 +106,7 @@ public final class TwLayoutHelperTest {
     runFx(
         () -> {
           HBox box = new HBox();
-          Pane result = TailwindFX.layout(box).row().build();
+          Pane result = TwLayout.of(box).row().build();
           check("row → HBox", result instanceof HBox);
         });
   }
@@ -115,7 +115,7 @@ public final class TwLayoutHelperTest {
     runFx(
         () -> {
           VBox box = new VBox();
-          Pane result = TailwindFX.layout(box).col().build();
+          Pane result = TwLayout.of(box).col().build();
           check("col → VBox", result instanceof VBox);
         });
   }
@@ -124,7 +124,7 @@ public final class TwLayoutHelperTest {
     runFx(
         () -> {
           StackPane sp = new StackPane();
-          Pane result = TailwindFX.layout(sp).stack().build();
+          Pane result = TwLayout.of(sp).stack().build();
           check("stack → StackPane", result instanceof StackPane);
         });
   }
@@ -133,7 +133,7 @@ public final class TwLayoutHelperTest {
     runFx(
         () -> {
           GridPane gp = new GridPane();
-          Pane result = TailwindFX.layout(gp).grid(3).build();
+          Pane result = TwLayout.of(gp).grid(3).build();
           check("grid → GridPane", result instanceof GridPane);
         });
   }
@@ -142,7 +142,7 @@ public final class TwLayoutHelperTest {
     runFx(
         () -> {
           FlowPane fp = new FlowPane();
-          Pane result = TailwindFX.layout(fp).flowRow().build();
+          Pane result = TwLayout.of(fp).flowRow().build();
           check("flowRow → FlowPane", result instanceof FlowPane);
         });
   }
@@ -151,7 +151,7 @@ public final class TwLayoutHelperTest {
     runFx(
         () -> {
           FlowPane fp = new FlowPane();
-          Pane result = TailwindFX.layout(fp).flowCol().build();
+          Pane result = TwLayout.of(fp).flowCol().build();
           check(
               "flowCol → FlowPane with VERTICAL",
               result instanceof FlowPane f
@@ -163,7 +163,7 @@ public final class TwLayoutHelperTest {
     runFx(
         () -> {
           TilePane tp = new TilePane();
-          Pane result = TailwindFX.layout(tp).tile().build();
+          Pane result = TwLayout.of(tp).tile().build();
           check("tile → TilePane", result instanceof TilePane);
         });
   }
@@ -172,13 +172,13 @@ public final class TwLayoutHelperTest {
     runFx(
         () -> {
           AnchorPane ap = new AnchorPane();
-          Pane result = TailwindFX.layout(ap).anchor().build();
+          Pane result = TwLayout.of(ap).anchor().build();
           check("anchor → AnchorPane", result instanceof AnchorPane);
         });
   }
 
   static void testNullPaneThrows() {
-    throws_("TwLayoutHelper(null)", IllegalArgumentException.class, () -> TailwindFX.layout(null));
+    throws_("TwLayoutHelper(null)", IllegalArgumentException.class, () -> TwLayout.of(null));
   }
 
   static void testGridColsGuard() throws Exception {
@@ -187,7 +187,7 @@ public final class TwLayoutHelperTest {
           throws_(
               "grid(0) throws",
               IllegalArgumentException.class,
-              () -> TailwindFX.layout(new GridPane()).grid(0).build());
+              () -> TwLayout.of(new GridPane()).grid(0).build());
         });
   }
 
@@ -196,7 +196,7 @@ public final class TwLayoutHelperTest {
         () -> {
           // Negative gap logs a warning but does NOT throw
           try {
-            TailwindFX.layout(new HBox()).row().gap(-4).build();
+            TwLayout.of(new HBox()).row().gap(-4).build();
             ok("gap(-4) no throw (warns)");
           } catch (Exception e) {
             fail("gap(-4) should not throw", e.getMessage());
@@ -208,7 +208,7 @@ public final class TwLayoutHelperTest {
     runFx(
         () -> {
           HBox source = new HBox();
-          Pane built = TailwindFX.layout(source).row().gap(8).center().build();
+          Pane built = TwLayout.of(source).row().gap(8).center().build();
           check("build returns HBox", built instanceof HBox);
           check("build same instance", built == source);
         });
@@ -219,7 +219,7 @@ public final class TwLayoutHelperTest {
         () -> {
           HBox box = new HBox();
           // reconfigure on same type — should not recreate
-          TailwindFX.layout(box).row().gap(16).reconfigure();
+          TwLayout.of(box).row().gap(16).reconfigure();
           check("reconfigure preserves type", box instanceof HBox);
         });
   }
@@ -231,7 +231,7 @@ public final class TwLayoutHelperTest {
           Region child = new Region();
           box.getChildren().add(child);
           // Switching to VBox preserves children
-          Pane switched = TailwindFX.layout(box).col().build();
+          Pane switched = TwLayout.of(box).col().build();
           check("children preserved after switch", switched.getChildren().contains(child));
         });
   }
@@ -241,7 +241,7 @@ public final class TwLayoutHelperTest {
         () -> {
           TwFlexPane fp = new TwFlexPane();
           Pane result =
-              TailwindFX.layout(fp)
+              TwLayout.of(fp)
                   .flex()
                   .justify(TwFlexPane.Justify.BETWEEN)
                   .alignItems(TwFlexPane.Align.CENTER)
@@ -261,7 +261,7 @@ public final class TwLayoutHelperTest {
         () -> {
           TwGridPane fg = TwGridPane.create().build();
           Pane result =
-              TailwindFX.layout(fg)
+              TwLayout.of(fg)
                   .flexGrid()
                   .areas("header header", "sidebar main", "footer footer")
                   .gap(8)
@@ -277,7 +277,7 @@ public final class TwLayoutHelperTest {
           Region r1 = new Region(), r2 = new Region();
           TwFlexPane source = new TwFlexPane();
           source.getChildren().addAll(r1, r2);
-          Pane result = TailwindFX.layout(source).flex().gap(12).build();
+          Pane result = TwLayout.of(source).flex().gap(12).build();
           check("children preserved", result.getChildren().containsAll(java.util.List.of(r1, r2)));
         });
   }
@@ -288,7 +288,7 @@ public final class TwLayoutHelperTest {
           TwFlexPane fp = new TwFlexPane();
           // col() sets Direction.COL; flex() sets Direction.ROW
           // Using col() on TwFlexPane via TwLayoutHelper
-          Pane result = TailwindFX.layout(fp).flex().build();
+          Pane result = TwLayout.of(fp).flex().build();
           check(
               "flex() direction ROW",
               ((TwFlexPane) result).getDirection() == TwFlexPane.Direction.ROW);
@@ -301,7 +301,7 @@ public final class TwLayoutHelperTest {
           // GRID with 0 children and no cols — should not throw, just warn
           GridPane gp = new GridPane();
           try {
-            TailwindFX.layout(gp).grid().build();
+            TwLayout.of(gp).grid().build();
             ok("validate GRID/0-children: no throw");
           } catch (Exception e) {
             fail("validate GRID/0-children: unexpected throw", e.getMessage());
@@ -314,7 +314,7 @@ public final class TwLayoutHelperTest {
         () -> {
           HBox box = new HBox();
           // debug() should not change behavior, only log to stdout
-          Pane result = TailwindFX.layout(box).row().gap(8).debug().build();
+          Pane result = TwLayout.of(box).row().gap(8).debug().build();
           check("debug() still returns correct type", result instanceof HBox);
         });
   }
@@ -327,7 +327,7 @@ public final class TwLayoutHelperTest {
         new Thread(
             () -> {
               try {
-                TailwindFX.layout(new HBox()).row().build();
+                TwLayout.of(new HBox()).row().build();
               } catch (IllegalStateException e) {
                 threw.set(true);
               }
@@ -345,19 +345,19 @@ public final class TwLayoutHelperTest {
         () -> {
           // "16" → uniform
           HBox box = new HBox();
-          TailwindFX.layout(box).row().padding("16").build();
+          TwLayout.of(box).row().padding("16").build();
           check("padding('16') top=16", box.getPadding().getTop() == 16);
           check("padding('16') right=16", box.getPadding().getRight() == 16);
 
           // "8 16" → vertical/horizontal
           VBox vbox = new VBox();
-          TailwindFX.layout(vbox).col().padding("8 16").build();
+          TwLayout.of(vbox).col().padding("8 16").build();
           check("padding('8 16') top=8", vbox.getPadding().getTop() == 8);
           check("padding('8 16') right=16", vbox.getPadding().getRight() == 16);
 
           // "4 8 12 16" → individual
           HBox box3 = new HBox();
-          TailwindFX.layout(box3).row().padding("4 8 12 16").build();
+          TwLayout.of(box3).row().padding("4 8 12 16").build();
           check("padding('4 8 12 16') top=4", box3.getPadding().getTop() == 4);
           check("padding('4 8 12 16') right=8", box3.getPadding().getRight() == 8);
           check("padding('4 8 12 16') bottom=12", box3.getPadding().getBottom() == 12);
@@ -367,13 +367,13 @@ public final class TwLayoutHelperTest {
           throws_(
               "padding('bad') throws",
               IllegalArgumentException.class,
-              () -> TailwindFX.layout(new HBox()).row().padding("bad").build());
+              () -> TwLayout.of(new HBox()).row().padding("bad").build());
 
           // wrong count throws
           throws_(
               "padding('1 2 3') throws",
               IllegalArgumentException.class,
-              () -> TailwindFX.layout(new HBox()).row().padding("1 2 3").build());
+              () -> TwLayout.of(new HBox()).row().padding("1 2 3").build());
         });
   }
 
@@ -386,11 +386,11 @@ public final class TwLayoutHelperTest {
         () -> {
           HBox box = new HBox();
           // Switching to VBox → migration → listener fires
-          TailwindFX.layout(box)
+          TwLayout.of(box)
               .col()
               .onTransition(
-                  new TwLayoutHelper.LayoutTransitionListener() {
-                    public void onLayoutChanging(Pane src, TwLayoutHelper.LayoutType t) {
+                  new TwLayout.Builder.LayoutTransitionListener() {
+                    public void onLayoutChanging(Pane src, TwLayout.LayoutType t) {
                       changingFired.set(true);
                     }
 
@@ -406,11 +406,11 @@ public final class TwLayoutHelperTest {
           java.util.concurrent.atomic.AtomicBoolean noFire =
               new java.util.concurrent.atomic.AtomicBoolean(false);
           HBox same = new HBox();
-          TailwindFX.layout(same)
+          TwLayout.of(same)
               .row()
               .onTransition(
-                  new TwLayoutHelper.LayoutTransitionListener() {
-                    public void onLayoutChanging(Pane s, TwLayoutHelper.LayoutType t) {
+                  new TwLayout.Builder.LayoutTransitionListener() {
+                    public void onLayoutChanging(Pane s, TwLayout.LayoutType t) {
                       noFire.set(true);
                     }
 
@@ -431,7 +431,7 @@ public final class TwLayoutHelperTest {
           ColumnConstraints manual = new ColumnConstraints(200);
           gp.getColumnConstraints().add(manual);
           // layout(grid(3)) should NOT overwrite it
-          TailwindFX.layout(gp).grid(3).build();
+          TwLayout.of(gp).grid(3).build();
           check(
               "manual constraint preserved",
               gp.getColumnConstraints().size() == 1
@@ -449,7 +449,7 @@ public final class TwLayoutHelperTest {
           original.getChildren().add(child);
 
           // Migrate to a new AnchorPane — edges should be preserved
-          Pane result = TailwindFX.layout(original).anchor().build();
+          Pane result = TwLayout.of(original).anchor().build();
           // same instance (no migration since already AnchorPane)
           check("anchor preserved same pane", result == original);
           check(
@@ -465,16 +465,16 @@ public final class TwLayoutHelperTest {
           // hgrow
           HBox hbox = new HBox();
           hbox.getChildren().add(n);
-          TwLayoutHelper.hgrow(n);
+          TwLayout.hgrow(n);
           check("hgrow=ALWAYS", HBox.getHgrow(n) == Priority.ALWAYS);
 
           // spacer
-          Region spacer = TwLayoutHelper.spacer();
+          Region spacer = TwLayout.spacer();
           check("spacer not null", spacer != null);
           check("spacer maxW=MAX", spacer.getMaxWidth() == Double.MAX_VALUE);
 
           // spacer(size)
-          Region sized = TwLayoutHelper.spacer(20);
+          Region sized = TwLayout.spacer(20);
           check("spacer(20) min=20", sized.getMinWidth() == 20);
         });
   }
