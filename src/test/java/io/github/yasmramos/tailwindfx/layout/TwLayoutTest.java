@@ -1,8 +1,17 @@
 package io.github.yasmramos.tailwindfx.layout;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import io.github.yasmramos.tailwindfx.TwLayout;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import javafx.scene.layout.AnchorPane;
@@ -16,40 +25,19 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.testfx.framework.junit5.ApplicationTest;
 
 /** Tests for {@link TwLayout} — builder, type switching, constraints, TilePane. */
-public final class TwLayoutTest {
+class TwLayoutTest extends ApplicationTest {
 
-  private TwLayoutTest() {}
-
-  private static int passed = 0, failed = 0;
-
-  static void ok(String l) {
-    System.out.printf("  ✅ %s%n", l);
-    passed++;
+  @BeforeAll
+  static void setupSuite() {
+    // Ensure TestFX toolkit is initialized before any tests run
   }
 
-  static void fail(String l, String m) {
-    System.out.printf("  ❌ %s — %s%n", l, m);
-    failed++;
-  }
-
-  static void check(String l, boolean v) {
-    if (v) ok(l);
-    else fail(l, "false");
-  }
-
-  static void throws_(String l, Class<? extends Throwable> t, Runnable r) {
-    try {
-      r.run();
-      fail(l, "no throw");
-    } catch (Throwable e) {
-      if (t.isInstance(e)) ok(l);
-      else fail(l, e.getClass().getSimpleName());
-    }
-  }
-
-  static void runFx(Runnable w) throws Exception {
+  private void runFx(Runnable w) throws Exception {
     CountDownLatch latch = new CountDownLatch(1);
     AtomicReference<Throwable> err = new AtomicReference<>();
     Platform.runLater(
@@ -66,165 +54,139 @@ public final class TwLayoutTest {
     if (err.get() != null) throw new RuntimeException(err.get());
   }
 
-  public static boolean runAll() throws Exception {
-    passed = 0;
-    failed = 0;
-    System.out.println("\n── TwLayout API ──");
-
-    testRowCreatesHBox();
-    testColCreatesVBox();
-    testStackCreatesStackPane();
-    testGridCreatesGridPane();
-    testFlowRowCreatesFlowPane();
-    testFlowColCreatesFlowPane();
-    testTileCreatesTilePane();
-    testAnchorCreatesAnchorPane();
-    testNullPaneThrows();
-    testGridColsGuard();
-    testGapNegativeWarns();
-    testBuild();
-    testReconfigure();
-    testLayoutSwitchPreservesChildren();
-    testFlexType();
-    testFlexGridType();
-    testFlexOnNewPane();
-    testFlexColDirection();
-    testValidationWarns();
-    testDebugMode();
-    testThreadCheck();
-    testPaddingShorthand();
-    testTransitionListener();
-    testApplyGridColsNoOverwrite();
-    testSnapRestoresAnchorEdges();
-    testStaticHelpers();
-
-    System.out.printf("  %d passed, %d failed%n", passed, failed);
-    return failed == 0;
-  }
-
-  static void testRowCreatesHBox() throws Exception {
+  @Test
+  void testRowCreatesHBox() throws Exception {
     runFx(
         () -> {
           HBox box = new HBox();
           Pane result = TwLayout.of(box).row().build();
-          check("row → HBox", result instanceof HBox);
+          assertTrue(result instanceof HBox, "row → HBox");
         });
   }
 
-  static void testColCreatesVBox() throws Exception {
+  @Test
+  void testColCreatesVBox() throws Exception {
     runFx(
         () -> {
           VBox box = new VBox();
           Pane result = TwLayout.of(box).col().build();
-          check("col → VBox", result instanceof VBox);
+          assertTrue(result instanceof VBox, "col → VBox");
         });
   }
 
-  static void testStackCreatesStackPane() throws Exception {
+  @Test
+  void testStackCreatesStackPane() throws Exception {
     runFx(
         () -> {
           StackPane sp = new StackPane();
           Pane result = TwLayout.of(sp).stack().build();
-          check("stack → StackPane", result instanceof StackPane);
+          assertTrue(result instanceof StackPane, "stack → StackPane");
         });
   }
 
-  static void testGridCreatesGridPane() throws Exception {
+  @Test
+  void testGridCreatesGridPane() throws Exception {
     runFx(
         () -> {
           GridPane gp = new GridPane();
           Pane result = TwLayout.of(gp).grid(3).build();
-          check("grid → GridPane", result instanceof GridPane);
+          assertTrue(result instanceof GridPane, "grid → GridPane");
         });
   }
 
-  static void testFlowRowCreatesFlowPane() throws Exception {
+  @Test
+  void testFlowRowCreatesFlowPane() throws Exception {
     runFx(
         () -> {
           FlowPane fp = new FlowPane();
           Pane result = TwLayout.of(fp).flowRow().build();
-          check("flowRow → FlowPane", result instanceof FlowPane);
+          assertTrue(result instanceof FlowPane, "flowRow → FlowPane");
         });
   }
 
-  static void testFlowColCreatesFlowPane() throws Exception {
+  @Test
+  void testFlowColCreatesFlowPane() throws Exception {
     runFx(
         () -> {
           FlowPane fp = new FlowPane();
           Pane result = TwLayout.of(fp).flowCol().build();
-          check(
-              "flowCol → FlowPane with VERTICAL",
+          assertTrue(
               result instanceof FlowPane f
-                  && f.getOrientation() == javafx.geometry.Orientation.VERTICAL);
+                  && f.getOrientation() == javafx.geometry.Orientation.VERTICAL,
+              "flowCol → FlowPane with VERTICAL");
         });
   }
 
-  static void testTileCreatesTilePane() throws Exception {
+  @Test
+  void testTileCreatesTilePane() throws Exception {
     runFx(
         () -> {
           TilePane tp = new TilePane();
           Pane result = TwLayout.of(tp).tile().build();
-          check("tile → TilePane", result instanceof TilePane);
+          assertTrue(result instanceof TilePane, "tile → TilePane");
         });
   }
 
-  static void testAnchorCreatesAnchorPane() throws Exception {
+  @Test
+  void testAnchorCreatesAnchorPane() throws Exception {
     runFx(
         () -> {
           AnchorPane ap = new AnchorPane();
           Pane result = TwLayout.of(ap).anchor().build();
-          check("anchor → AnchorPane", result instanceof AnchorPane);
+          assertTrue(result instanceof AnchorPane, "anchor → AnchorPane");
         });
   }
 
-  static void testNullPaneThrows() {
-    throws_("TwLayout(null)", IllegalArgumentException.class, () -> TwLayout.of(null));
+  @Test
+  void testNullPaneThrows() {
+    assertThrows(IllegalArgumentException.class, () -> TwLayout.of(null), "TwLayout(null)");
   }
 
-  static void testGridColsGuard() throws Exception {
+  @Test
+  void testGridColsGuard() throws Exception {
     runFx(
         () -> {
-          throws_(
-              "grid(0) throws",
+          assertThrows(
               IllegalArgumentException.class,
-              () -> TwLayout.of(new GridPane()).grid(0).build());
+              () -> TwLayout.of(new GridPane()).grid(0).build(),
+              "grid(0) throws");
         });
   }
 
-  static void testGapNegativeWarns() throws Exception {
+  @Test
+  void testGapNegativeWarns() throws Exception {
     runFx(
         () -> {
           // Negative gap logs a warning but does NOT throw
-          try {
-            TwLayout.of(new HBox()).row().gap(-4).build();
-            ok("gap(-4) no throw (warns)");
-          } catch (Exception e) {
-            fail("gap(-4) should not throw", e.getMessage());
-          }
+          TwLayout.of(new HBox()).row().gap(-4).build();
+          // If we reach here, no exception was thrown (as expected)
         });
   }
 
-  static void testBuild() throws Exception {
+  @Test
+  void testBuild() throws Exception {
     runFx(
         () -> {
           HBox source = new HBox();
           Pane built = TwLayout.of(source).row().gap(8).center().build();
-          check("build returns HBox", built instanceof HBox);
-          check("build same instance", built == source);
+          assertTrue(built instanceof HBox, "build returns HBox");
+          assertSame(source, built, "build same instance");
         });
   }
 
-  static void testReconfigure() throws Exception {
+  @Test
+  void testReconfigure() throws Exception {
     runFx(
         () -> {
           HBox box = new HBox();
           // reconfigure on same type — should not recreate
           TwLayout.of(box).row().gap(16).reconfigure();
-          check("reconfigure preserves type", box instanceof HBox);
+          assertTrue(box instanceof HBox, "reconfigure preserves type");
         });
   }
 
-  static void testLayoutSwitchPreservesChildren() throws Exception {
+  @Test
+  void testLayoutSwitchPreservesChildren() throws Exception {
     runFx(
         () -> {
           HBox box = new HBox();
@@ -232,11 +194,13 @@ public final class TwLayoutTest {
           box.getChildren().add(child);
           // Switching to VBox preserves children
           Pane switched = TwLayout.of(box).col().build();
-          check("children preserved after switch", switched.getChildren().contains(child));
+          assertTrue(
+              switched.getChildren().contains(child), "children preserved after switch");
         });
   }
 
-  static void testFlexType() throws Exception {
+  @Test
+  void testFlexType() throws Exception {
     runFx(
         () -> {
           TwFlexPane fp = new TwFlexPane();
@@ -248,15 +212,16 @@ public final class TwLayoutTest {
                   .wrap(true)
                   .gap(16)
                   .build();
-          check("flex() → TwFlexPane", result instanceof TwFlexPane);
+          assertTrue(result instanceof TwFlexPane, "flex() → TwFlexPane");
           TwFlexPane built = (TwFlexPane) result;
-          check("justify=BETWEEN", built.getJustify() == TwFlexPane.Justify.BETWEEN);
-          check("align=CENTER", built.getAlign() == TwFlexPane.Align.CENTER);
-          check("wrap=true", built.isWrap());
+          assertEquals(TwFlexPane.Justify.BETWEEN, built.getJustify(), "justify=BETWEEN");
+          assertEquals(TwFlexPane.Align.CENTER, built.getAlign(), "align=CENTER");
+          assertTrue(built.isWrap(), "wrap=true");
         });
   }
 
-  static void testFlexGridType() throws Exception {
+  @Test
+  void testFlexGridType() throws Exception {
     runFx(
         () -> {
           TwGridPane fg = TwGridPane.create().build();
@@ -266,11 +231,12 @@ public final class TwLayoutTest {
                   .areas("header header", "sidebar main", "footer footer")
                   .gap(8)
                   .build();
-          check("flexGrid() → TwGridPane", result instanceof TwGridPane);
+          assertTrue(result instanceof TwGridPane, "flexGrid() → TwGridPane");
         });
   }
 
-  static void testFlexOnNewPane() throws Exception {
+  @Test
+  void testFlexOnNewPane() throws Exception {
     runFx(
         () -> {
           // If container is NOT already TwFlexPane, layout() migrates it
@@ -278,51 +244,52 @@ public final class TwLayoutTest {
           TwFlexPane source = new TwFlexPane();
           source.getChildren().addAll(r1, r2);
           Pane result = TwLayout.of(source).flex().gap(12).build();
-          check("children preserved", result.getChildren().containsAll(java.util.List.of(r1, r2)));
+          assertTrue(
+              result.getChildren().containsAll(List.of(r1, r2)), "children preserved");
         });
   }
 
-  static void testFlexColDirection() throws Exception {
+  @Test
+  void testFlexColDirection() throws Exception {
     runFx(
         () -> {
           TwFlexPane fp = new TwFlexPane();
           // col() sets Direction.COL; flex() sets Direction.ROW
           // Using col() on TwFlexPane via TwLayout API
           Pane result = TwLayout.of(fp).flex().build();
-          check(
-              "flex() direction ROW",
-              ((TwFlexPane) result).getDirection() == TwFlexPane.Direction.ROW);
+          assertEquals(
+              TwFlexPane.Direction.ROW,
+              ((TwFlexPane) result).getDirection(),
+              "flex() direction ROW");
         });
   }
 
-  static void testValidationWarns() throws Exception {
+  @Test
+  void testValidationWarns() throws Exception {
     runFx(
         () -> {
           // GRID with 0 children and no cols — should not throw, just warn
           GridPane gp = new GridPane();
-          try {
-            TwLayout.of(gp).grid().build();
-            ok("validate GRID/0-children: no throw");
-          } catch (Exception e) {
-            fail("validate GRID/0-children: unexpected throw", e.getMessage());
-          }
+          TwLayout.of(gp).grid().build();
+          // If we reach here, no exception was thrown (as expected)
         });
   }
 
-  static void testDebugMode() throws Exception {
+  @Test
+  void testDebugMode() throws Exception {
     runFx(
         () -> {
           HBox box = new HBox();
           // debug() should not change behavior, only log to stdout
           Pane result = TwLayout.of(box).row().gap(8).debug().build();
-          check("debug() still returns correct type", result instanceof HBox);
+          assertTrue(result instanceof HBox, "debug() still returns correct type");
         });
   }
 
-  static void testThreadCheck() {
+  @Test
+  void testThreadCheck() throws Exception {
     // Calling build() off FX thread must throw
-    java.util.concurrent.atomic.AtomicBoolean threw =
-        new java.util.concurrent.atomic.AtomicBoolean(false);
+    AtomicBoolean threw = new AtomicBoolean(false);
     Thread t =
         new Thread(
             () -> {
@@ -333,55 +300,52 @@ public final class TwLayoutTest {
               }
             });
     t.start();
-    try {
-      t.join(2000);
-    } catch (InterruptedException ignored) {
-    }
-    check("build() off FX thread throws ISE", threw.get());
+    t.join(2000);
+    assertTrue(threw.get(), "build() off FX thread throws ISE");
   }
 
-  static void testPaddingShorthand() throws Exception {
+  @Test
+  void testPaddingShorthand() throws Exception {
     runFx(
         () -> {
           // "16" → uniform
           HBox box = new HBox();
           TwLayout.of(box).row().padding("16").build();
-          check("padding('16') top=16", box.getPadding().getTop() == 16);
-          check("padding('16') right=16", box.getPadding().getRight() == 16);
+          assertEquals(16, box.getPadding().getTop(), "padding('16') top=16");
+          assertEquals(16, box.getPadding().getRight(), "padding('16') right=16");
 
           // "8 16" → vertical/horizontal
           VBox vbox = new VBox();
           TwLayout.of(vbox).col().padding("8 16").build();
-          check("padding('8 16') top=8", vbox.getPadding().getTop() == 8);
-          check("padding('8 16') right=16", vbox.getPadding().getRight() == 16);
+          assertEquals(8, vbox.getPadding().getTop(), "padding('8 16') top=8");
+          assertEquals(16, vbox.getPadding().getRight(), "padding('8 16') right=16");
 
           // "4 8 12 16" → individual
           HBox box3 = new HBox();
           TwLayout.of(box3).row().padding("4 8 12 16").build();
-          check("padding('4 8 12 16') top=4", box3.getPadding().getTop() == 4);
-          check("padding('4 8 12 16') right=8", box3.getPadding().getRight() == 8);
-          check("padding('4 8 12 16') bottom=12", box3.getPadding().getBottom() == 12);
-          check("padding('4 8 12 16') left=16", box3.getPadding().getLeft() == 16);
+          assertEquals(4, box3.getPadding().getTop(), "padding('4 8 12 16') top=4");
+          assertEquals(8, box3.getPadding().getRight(), "padding('4 8 12 16') right=8");
+          assertEquals(12, box3.getPadding().getBottom(), "padding('4 8 12 16') bottom=12");
+          assertEquals(16, box3.getPadding().getLeft(), "padding('4 8 12 16') left=16");
 
           // invalid value throws
-          throws_(
-              "padding('bad') throws",
+          assertThrows(
               IllegalArgumentException.class,
-              () -> TwLayout.of(new HBox()).row().padding("bad").build());
+              () -> TwLayout.of(new HBox()).row().padding("bad").build(),
+              "padding('bad') throws");
 
           // wrong count throws
-          throws_(
-              "padding('1 2 3') throws",
+          assertThrows(
               IllegalArgumentException.class,
-              () -> TwLayout.of(new HBox()).row().padding("1 2 3").build());
+              () -> TwLayout.of(new HBox()).row().padding("1 2 3").build(),
+              "padding('1 2 3') throws");
         });
   }
 
-  static void testTransitionListener() throws Exception {
-    java.util.concurrent.atomic.AtomicBoolean changingFired =
-        new java.util.concurrent.atomic.AtomicBoolean(false);
-    java.util.concurrent.atomic.AtomicBoolean changedFired =
-        new java.util.concurrent.atomic.AtomicBoolean(false);
+  @Test
+  void testTransitionListener() throws Exception {
+    AtomicBoolean changingFired = new AtomicBoolean(false);
+    AtomicBoolean changedFired = new AtomicBoolean(false);
     runFx(
         () -> {
           HBox box = new HBox();
@@ -399,12 +363,11 @@ public final class TwLayoutTest {
                     }
                   })
               .build();
-          check("onLayoutChanging fired", changingFired.get());
-          check("onLayoutChanged fired", changedFired.get());
+          assertTrue(changingFired.get(), "onLayoutChanging fired");
+          assertTrue(changedFired.get(), "onLayoutChanged fired");
 
           // No migration (same type) → listener NOT fired
-          java.util.concurrent.atomic.AtomicBoolean noFire =
-              new java.util.concurrent.atomic.AtomicBoolean(false);
+          AtomicBoolean noFire = new AtomicBoolean(false);
           HBox same = new HBox();
           TwLayout.of(same)
               .row()
@@ -419,11 +382,12 @@ public final class TwLayoutTest {
                     }
                   })
               .build();
-          check("no migration → listener not fired", !noFire.get());
+          assertFalse(noFire.get(), "no migration → listener not fired");
         });
   }
 
-  static void testApplyGridColsNoOverwrite() throws Exception {
+  @Test
+  void testApplyGridColsNoOverwrite() throws Exception {
     runFx(
         () -> {
           GridPane gp = new GridPane();
@@ -432,14 +396,19 @@ public final class TwLayoutTest {
           gp.getColumnConstraints().add(manual);
           // layout(grid(3)) should NOT overwrite it
           TwLayout.of(gp).grid(3).build();
-          check(
-              "manual constraint preserved",
-              gp.getColumnConstraints().size() == 1
-                  && gp.getColumnConstraints().get(0).getPrefWidth() == 200);
+          assertEquals(
+              1,
+              gp.getColumnConstraints().size(),
+              "manual constraint preserved - size");
+          assertEquals(
+              200,
+              gp.getColumnConstraints().get(0).getPrefWidth(),
+              "manual constraint preserved - width");
         });
   }
 
-  static void testSnapRestoresAnchorEdges() throws Exception {
+  @Test
+  void testSnapRestoresAnchorEdges() throws Exception {
     runFx(
         () -> {
           AnchorPane original = new AnchorPane();
@@ -451,14 +420,14 @@ public final class TwLayoutTest {
           // Migrate to a new AnchorPane — edges should be preserved
           Pane result = TwLayout.of(original).anchor().build();
           // same instance (no migration since already AnchorPane)
-          check("anchor preserved same pane", result == original);
-          check(
-              "top anchor preserved",
-              AnchorPane.getTopAnchor(child) != null && AnchorPane.getTopAnchor(child) == 10.0);
+          assertSame(original, result, "anchor preserved same pane");
+          assertNotNull(AnchorPane.getTopAnchor(child), "top anchor preserved - not null");
+          assertEquals(10.0, AnchorPane.getTopAnchor(child), "top anchor preserved - value");
         });
   }
 
-  static void testStaticHelpers() throws Exception {
+  @Test
+  void testStaticHelpers() throws Exception {
     runFx(
         () -> {
           Region n = new Region();
@@ -466,16 +435,16 @@ public final class TwLayoutTest {
           HBox hbox = new HBox();
           hbox.getChildren().add(n);
           TwLayout.hgrow(n);
-          check("hgrow=ALWAYS", HBox.getHgrow(n) == Priority.ALWAYS);
+          assertEquals(Priority.ALWAYS, HBox.getHgrow(n), "hgrow=ALWAYS");
 
           // spacer
           Region spacer = TwLayout.spacer();
-          check("spacer not null", spacer != null);
-          check("spacer maxW=MAX", spacer.getMaxWidth() == Double.MAX_VALUE);
+          assertNotNull(spacer, "spacer not null");
+          assertEquals(Priority.ALWAYS, HBox.getHgrow(spacer), "spacer hgrow=ALWAYS");
 
           // spacer(size)
           Region sized = TwLayout.spacer(20);
-          check("spacer(20) min=20", sized.getMinWidth() == 20);
+          assertEquals(20, sized.getMinWidth(), "spacer(20) min=20");
         });
   }
 }
