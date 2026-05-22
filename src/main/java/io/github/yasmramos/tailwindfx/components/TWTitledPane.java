@@ -3,33 +3,31 @@ package io.github.yasmramos.tailwindfx.components;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.Region;
 
-/**
- * TitledPane personalizado para inyectar clases de Tailwind en sus partes internas.
- */
+/** TitledPane personalizado para inyectar clases de Tailwind en sus partes internas. */
 public class TWTitledPane extends TitledPane {
 
-    public TWTitledPane() {
-        super();
-        initTailwindClasses();
-    }
+  public TWTitledPane() {
+    super();
+    initTailwindClasses();
+  }
 
-    public TWTitledPane(String title) {
-        this.setText(title);
-        initTailwindClasses();
-    }
+  public TWTitledPane(String title) {
+    this.setText(title);
+    initTailwindClasses();
+  }
 
-    public TWTitledPane(String title, Region content) {
-        super(title, content);
-        initTailwindClasses();
-    }
+  public TWTitledPane(String title, Region content) {
+    super(title, content);
+    initTailwindClasses();
+  }
 
-    private void initTailwindClasses() {
-        // Esta clase identifica al item dentro del accordion
-        getStyleClass().add("collapse-item");
-        
-        // Nota: En JavaFX no podemos añadir clases directamente al nodo interno 
-        // del header o content sin manipular la Skin. 
-        // La estrategia recomendada es usar selectores CSS descendentes.
-        // Ver archivo CSS abajo.
-    }
+  private void initTailwindClasses() {
+    // This class identifies the item within the accordion
+    getStyleClass().add("collapse-item");
+
+    // Note: In JavaFX we cannot add classes directly to the internal node
+    // of the header or content without manipulating the Skin.
+    // The recommended strategy is to use descendant CSS selectors.
+    // See CSS file below.
+  }
 }
