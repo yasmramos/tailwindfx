@@ -94,7 +94,7 @@ public final class ThemeScopeManager {
     }
 
     /**
-     * Copia el scope de un Pane a otro (útil para modales que deben heredar el tema de su origen).
+     * Copies the scope from one Pane to another (useful for modals that must inherit the theme from their origin).
      */
     public static void copyScope(Pane source, Pane target) {
         if (source.getStyle() == null || source.getStyle().isBlank()) return;

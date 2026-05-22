@@ -31,7 +31,7 @@ public final class StyleMerger {
             = Pattern.compile("(-fx-[a-z-]+)\\s*:\\s*([^;]+);?");
 
     // =========================================================================
-    // API pública
+    // Public API
     // =========================================================================
     /**
      * Aplica tokens JIT a un nodo. Procesa las CSS classes fallback y el inline
