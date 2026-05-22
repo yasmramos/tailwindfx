@@ -17,31 +17,31 @@ import java.util.Set;
  * Problema: ThemeManager es global (afecta toda la Scene).
  * Para apps enterprise con secciones de tema diferente en la misma pantalla:
  *   - Panel de admin: dark
- *   - Formulario embebido: light  
+ *   - Embedded form: light  
  *   - Sidebar: custom accent
  *
- * Solución: aplicar variables Modena como inline style en cualquier Pane,
- * que JavaFX propaga a todos sus hijos (cascada CSS local).
+ * Solution: apply Modena variables as inline style on any Pane,
+ * which JavaFX propagates to all its children (local CSS cascade).
  *
- * Uso:
- *   // Toda la escena en dark
+ * Usage:
+ *   // Entire scene in dark
  *   TailwindFX.theme(scene).dark().apply();
  *
- *   // Solo el panel de alertas con acento rojo
+ *   // Only the alerts panel with red accent
  *   ThemeScopeManager.scope(alertPanel)
  *       .accent("#ef4444")
  *       .focus("#f87171")
  *       .apply();
  *
- *   // Override parcial — solo cambia el fondo de un drawer
+ *   // Partial override — only changes the background of a drawer
  *   ThemeScopeManager.scope(drawer)
  *       .base("#1e293b")
  *       .apply();
  *
- *   // Limpiar scope de un nodo (hereda del padre)
+ *   // Clear scope from a node (inherits from parent)
  *   ThemeScopeManager.clearScope(drawer);
  *
- *   // Leer qué scope tiene un nodo
+ *   // Read what scope a node has
  *   Optional<String> base = ThemeScopeManager.getVar(myPane, "-fx-base");
  */
 public final class ThemeScopeManager {
@@ -53,9 +53,9 @@ public final class ThemeScopeManager {
     // =========================================================================
 
     /**
-     * Inicia la configuración de un scope para un Pane específico.
+     * Starts the configuration of a scope for a specific Pane.
      *
-     * TailwindFX también expone esto como:
+     * TailwindFX also exposes this as:
      *   TailwindFX.scope(pane).dark().apply();
      */
     public static ScopeBuilder scope(Pane pane) {
@@ -63,10 +63,10 @@ public final class ThemeScopeManager {
     }
 
     /**
-     * Elimina el scope de un Pane (hereda el tema del padre).
+     * Removes the scope from a Pane (inherits theme from parent).
      */
     public static void clearScope(Pane pane) {
-        // Eliminar solo las variables de tema del inline style, preservar el resto
+        // Remove only theme variables from inline style, preserve the rest
         String current = pane.getStyle();
         if (current == null || current.isBlank()) return;
         Map<String, String> props = StyleMerger.parseStyle(current);
@@ -77,8 +77,8 @@ public final class ThemeScopeManager {
     }
 
     /**
-     * Lee el valor de una variable de tema en el scope de un Pane.
-     * Devuelve vacío si el Pane no tiene scope propio para esa variable.
+     * Reads the value of a theme variable in a Pane's scope.
+     * Returns empty if the Pane does not have its own scope for that variable.
      */
     public static Optional<String> getVar(Pane pane, String variable) {
         if (pane.getStyle() == null) return Optional.empty();

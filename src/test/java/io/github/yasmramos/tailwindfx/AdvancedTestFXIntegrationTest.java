@@ -253,7 +253,7 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
 
             moveTo(label); // Cambiar moveMouseTo por moveTo
             // Give time for hover event to process
-            sleep(100); // Pequeña pausa para que se procese el evento
+            sleep(100); // Small pause to allow event processing
 
             assertTrue(hovered.get(), "Hover should be triggered");
         }
