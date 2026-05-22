@@ -58,4 +58,12 @@ public final class TwConfig {
     public static void debug(boolean enabled) {
         DEBUG_MODE = enabled;
     }
+    
+    /**
+     * Reset configuration to default values (useful for testing).
+     */
+    public static void reset() {
+        UNIT_SIZE = 4.0;
+        DEBUG_MODE = false;
+    }
 }
