@@ -8,23 +8,23 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * UtilityConflictResolver — Resuelve conflictos entre utility classes del mismo tipo.
+ * UtilityConflictResolver — Resolves conflicts between utility classes of the same type.
  *
- * Problema: apply(node,"w-4") + apply(node,"w-8") deja ambas clases en styleClass.
- * La que "gana" depende del orden en el CSS, no de cuál se aplicó último.
+ * Problem: apply(node,"w-4") + apply(node,"w-8") leaves both classes in styleClass.
+ * The "winner" depends on CSS order, not which one was applied last.
  *
- * Solución: antes de agregar una clase nueva, detectar si pertenece a una categoría
- * conocida y eliminar las clases anteriores de esa misma categoría.
+ * Solution: before adding a new class, detect if it belongs to a known category
+ * and remove previous classes from that same category.
  *
- * Resultado:
+ * Result:
  *   apply(node, "w-4")  → [w-4]
- *   apply(node, "w-8")  → [w-8]          ← w-4 eliminada
+ *   apply(node, "w-8")  → [w-8]          ← w-4 removed
  *   apply(node, "p-2")  → [w-8, p-2]
- *   apply(node, "px-4") → [w-8, p-2, px-4]  ← px no conflicta con p
+ *   apply(node, "px-4") → [w-8, p-2, px-4]  ← px does not conflict with p
  *
- * Nota: solo resuelve conflictos de CSS classes (apply/remove).
- * Los inline styles JIT (jit()) se gestionan por StyleMerger que ya
- * sobrescribe por propiedad, sin necesidad de este resolver.
+ * Note: only resolves CSS class conflicts (apply/remove).
+ * JIT inline styles (jit()) are managed by StyleMerger which already
+ * overwrites by property, without need for this resolver.
  */
 public final class UtilityConflictResolver {
 
@@ -57,14 +57,14 @@ public final class UtilityConflictResolver {
         // and applying a specific side removes the shorthand.
         definitions.put("padding", new String[]{"p-", "px-", "py-", "pt-", "pr-", "pb-", "pl-"});
 
-        // Colores de fondo
+        // Background colors
         definitions.put("bg-gradient", new String[]{"bg-gradient-to-r","bg-gradient-to-l","bg-gradient-to-t","bg-gradient-to-b","bg-gradient-to-tr","bg-gradient-to-tl","bg-gradient-to-br","bg-gradient-to-bl"});
         definitions.put("bg-color", new String[]{"bg-slate-","bg-gray-","bg-red-","bg-orange-","bg-amber-",
             "bg-yellow-","bg-lime-","bg-green-","bg-emerald-","bg-teal-","bg-cyan-","bg-sky-",
             "bg-blue-","bg-indigo-","bg-violet-","bg-purple-","bg-fuchsia-","bg-pink-","bg-rose-",
             "bg-white","bg-black","bg-transparent"});
 
-        // Color de texto
+        // Text color
         definitions.put("text-color", new String[]{"text-slate-","text-gray-","text-red-","text-orange-",
             "text-amber-","text-yellow-","text-lime-","text-green-","text-emerald-","text-teal-",
             "text-cyan-","text-sky-","text-blue-","text-indigo-","text-violet-","text-purple-",
@@ -336,8 +336,8 @@ public final class UtilityConflictResolver {
     }
 
     /**
-     * Aplica múltiples classes, resolviendo conflictos para cada una.
-     * Acepta varargs o strings con espacios.
+     * Applies multiple classes, resolving conflicts for each one.
+     * Accepts varargs or strings with spaces.
      */
     public static void applyAll(Node node, String... classes) {
         for (String c : classes) {
@@ -349,20 +349,20 @@ public final class UtilityConflictResolver {
     }
 
     /**
-     * Reemplaza la clase de una categoría, independientemente de qué clase
-     * de esa categoría esté actualmente aplicada.
+     * Replaces the class in a category, regardless of which class
+     * from that category is currently applied.
      *
-     * replaceCategory(node, "w-12") elimina cualquier w-* y pone w-12.
+     * replaceCategory(node, "w-12") removes any w-* and applies w-12.
      */
     public static void replaceCategory(Node node, String newClass) {
-        apply(node, newClass); // apply ya hace esto
+        apply(node, newClass); // apply already does this
     }
 
     /**
-     * Elimina todas las clases de la categoría a la que pertenece cssClass.
-     * Invalida el cache para esa categoría.
+     * Removes all classes from the category to which cssClass belongs.
+     * Invalidates the cache for that category.
      *
-     * removeCategory(node, "w-4") elimina todos los w-* del nodo.
+     * removeCategory(node, "w-4") removes all w-* from the node.
      */
     public static void removeCategory(Node node, String cssClass) {
         String category = findCategory(cssClass);
@@ -373,14 +373,14 @@ public final class UtilityConflictResolver {
     }
 
     /**
-     * Devuelve la categoría de conflicto de una clase, o null si no está mapeada.
+     * Returns the conflict category of a class, or null if not mapped.
      */
     public static String categoryOf(String cssClass) {
         return findCategory(cssClass);
     }
 
     /**
-     * Lista las clases del nodo que pertenecen a una categoría dada.
+     * Lists the node's classes that belong to a given category.
      */
     public static List<String> classesInCategory(Node node, String category) {
         List<String> prefixes = CATEGORY_TO_PREFIXES.getOrDefault(category, List.of());
