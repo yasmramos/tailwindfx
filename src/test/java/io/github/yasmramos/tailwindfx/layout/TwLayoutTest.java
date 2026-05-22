@@ -69,7 +69,7 @@ public final class TwLayoutTest {
   public static boolean runAll() throws Exception {
     passed = 0;
     failed = 0;
-    System.out.println("\n── TwLayoutHelper ──");
+    System.out.println("\n── TwLayout API ──");
 
     testRowCreatesHBox();
     testColCreatesVBox();
@@ -178,7 +178,7 @@ public final class TwLayoutTest {
   }
 
   static void testNullPaneThrows() {
-    throws_("TwLayoutHelper(null)", IllegalArgumentException.class, () -> TwLayout.of(null));
+    throws_("TwLayout(null)", IllegalArgumentException.class, () -> TwLayout.of(null));
   }
 
   static void testGridColsGuard() throws Exception {
@@ -287,7 +287,7 @@ public final class TwLayoutTest {
         () -> {
           TwFlexPane fp = new TwFlexPane();
           // col() sets Direction.COL; flex() sets Direction.ROW
-          // Using col() on TwFlexPane via TwLayoutHelper
+          // Using col() on TwFlexPane via TwLayout API
           Pane result = TwLayout.of(fp).flex().build();
           check(
               "flex() direction ROW",
