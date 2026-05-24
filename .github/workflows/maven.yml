@@ -37,3 +37,23 @@ jobs:
       with:
         name: test-results
         path: target/surefire-reports/
+
+    - name: Parse test results and create badge endpoint
+      run: |
+        PASSED=$(grep -o 'Tests run: [0-9]*' target/surefire-reports/*.txt | head -1 | grep -o '[0-9]*' || echo "0")
+        cat > badge-data.json << EOF
+        {
+          "schemaVersion": 1,
+          "label": "tests",
+          "message": "${PASSED} passing",
+          "color": "brightgreen"
+        }
+        EOF
+
+    - name: Deploy badge endpoint to GitHub Gist
+      uses: andymckay/gist-action@v2
+      with:
+        gist_id: badge-endpoint
+        gist_token: ${{ secrets.GIST_TOKEN }}
+        files: |
+          test-results.json:badge-data.json
