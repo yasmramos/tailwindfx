@@ -29,20 +29,22 @@ import javafx.scene.layout.VBox;
  * TwLayout — Unified Layout Engine for TailwindFX.
  *
  * <p>Principles:
+ *
  * <ol>
- *   <li><strong>INTELLIGENT MUTATION:</strong> if the source Pane is already the correct type, it is
- *       never recreated. Only properties are reconfigured. Critical for calling from breakpoint
- *       listeners without rebuilding the tree.</li>
+ *   <li><strong>INTELLIGENT MUTATION:</strong> if the source Pane is already the correct type, it
+ *       is never recreated. Only properties are reconfigured. Critical for calling from breakpoint
+ *       listeners without rebuilding the tree.
  *   <li><strong>CONSTRAINTS MIGRATION:</strong> when switching Panes, child constraints (hgrow,
- *       vgrow, margin, gridCol/Row) are preserved.</li>
+ *       vgrow, margin, gridCol/Row) are preserved.
  *   <li><strong>RESPONSIVE SWITCH:</strong> reusing the same builder with .row()/.col() and calling
- *       build() again is safe and efficient.</li>
- *   <li><strong>ANCHORPANE FLUENT:</strong> anchorAll / anchorFill / anchorTop/Right/Bottom/Left</li>
+ *       build() again is safe and efficient.
+ *   <li><strong>ANCHORPANE FLUENT:</strong> anchorAll / anchorFill / anchorTop/Right/Bottom/Left
  *   <li><strong>AUTO GRID COLS:</strong> if no columns are specified, they are calculated
- *       automatically based on the number of children.</li>
+ *       automatically based on the number of children.
  * </ol>
  *
  * <p>Basic usage:
+ *
  * <pre>
  *   TwLayout.of(pane).row().gap(12).center().build();
  *   TwLayout.of(pane).grid(3).hgap(16).vgap(16).build();
@@ -50,6 +52,7 @@ import javafx.scene.layout.VBox;
  * </pre>
  *
  * <p>Responsive switch (safe — does not recreate the Pane):
+ *
  * <pre>
  *   var lyt = TwLayout.of(container).gap(12);
  *   stage.widthProperty().addListener((o, old, w) -> {
@@ -59,6 +62,7 @@ import javafx.scene.layout.VBox;
  * </pre>
  *
  * <p>AnchorPane:
+ *
  * <pre>
  *   TwLayout.of(root).anchor()
  *     .anchorFill(content, 0, 0, 0, 0)
