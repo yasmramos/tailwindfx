@@ -2,7 +2,6 @@ package io.github.yasmramos.tailwindfx;
 
 import io.github.yasmramos.tailwindfx.layout.TwFlexPane;
 import io.github.yasmramos.tailwindfx.layout.TwGridPane;
-import io.github.yasmramos.tailwindfx.layout.TwLayoutHelper;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
 import io.github.yasmramos.tailwindfx.responsive.ResponsiveNode;
 import io.github.yasmramos.tailwindfx.style.StylePerf;
@@ -102,8 +101,8 @@ public final class TailwindFX {
   }
 
   /** Get layout builder for a container. */
-  public static TwLayoutHelper layout(Pane container) {
-    return TwLayoutHelper.of(container);
+  public static TwLayout.Builder layout(Pane container) {
+    return TwLayout.of(container);
   }
 
   /** Apply layout classes (flex, grid, gap) with automatic container migration if needed. */

@@ -44,7 +44,7 @@
  *   <tr><td>{@link tailwindfx.Styles}</td><td>Java APIs for CSS-unsupported features</td></tr>
  *   <tr><td>{@link tailwindfx.TwFlexPane}</td><td>Flexbox layout container</td></tr>
  *   <tr><td>{@link tailwindfx.TwGridPane}</td><td>Grid-template-areas layout</td></tr>
- *   <tr><td>{@link tailwindfx.TwLayoutHelper}</td><td>Builder for HBox/VBox/GridPane/etc.</td></tr>
+ *   <tr><td>{@link tailwindfx.TwLayout}</td><td>Unified layout engine with fluent builder</td></tr>
  *   <tr><td>{@link tailwindfx.TwDataTable}</td><td>Sortable/filterable/paginated table</td></tr>
  *   <tr><td>{@link tailwindfx.ComponentFactory}</td><td>High-level component builders</td></tr>
  *   <tr><td>{@link tailwindfx.TwAnimation}</td><td>Animations + hover effects</td></tr>
