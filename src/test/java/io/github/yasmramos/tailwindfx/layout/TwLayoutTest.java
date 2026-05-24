@@ -194,8 +194,7 @@ class TwLayoutTest extends ApplicationTest {
           box.getChildren().add(child);
           // Switching to VBox preserves children
           Pane switched = TwLayout.of(box).col().build();
-          assertTrue(
-              switched.getChildren().contains(child), "children preserved after switch");
+          assertTrue(switched.getChildren().contains(child), "children preserved after switch");
         });
   }
 
@@ -244,8 +243,7 @@ class TwLayoutTest extends ApplicationTest {
           TwFlexPane source = new TwFlexPane();
           source.getChildren().addAll(r1, r2);
           Pane result = TwLayout.of(source).flex().gap(12).build();
-          assertTrue(
-              result.getChildren().containsAll(List.of(r1, r2)), "children preserved");
+          assertTrue(result.getChildren().containsAll(List.of(r1, r2)), "children preserved");
         });
   }
 
@@ -396,10 +394,7 @@ class TwLayoutTest extends ApplicationTest {
           gp.getColumnConstraints().add(manual);
           // layout(grid(3)) should NOT overwrite it
           TwLayout.of(gp).grid(3).build();
-          assertEquals(
-              1,
-              gp.getColumnConstraints().size(),
-              "manual constraint preserved - size");
+          assertEquals(1, gp.getColumnConstraints().size(), "manual constraint preserved - size");
           assertEquals(
               200,
               gp.getColumnConstraints().get(0).getPrefWidth(),
