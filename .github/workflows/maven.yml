@@ -28,3 +28,12 @@ jobs:
       
     - name: Run tests with headless JavaFX
       run: xvfb-run -a mvn test -Dtestfx.headless=true -Dtestfx.robot=glass -Dtestfx.setup.timeout=2500 -Dglass.platform=monocle -Dmonocle.platform=headless
+    
+    - name: Generate test report
+      run: mvn surefire-report:report
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: target/surefire-reports/

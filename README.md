@@ -4,8 +4,8 @@
 
 [![Java](https://img.shields.io/badge/Java-17%2B-blue)](https://openjdk.org/projects/jdk/17/)
 [![JavaFX](https://img.shields.io/badge/JavaFX-17%2B-green)](https://openjfx.io/)
-[![Build](https://img.shields.io/github/actions/workflow/status/yasmramos/TailwindFX/maven.yml?branch=develop&label=build)](https://github.com/yasmramos/TailwindFX/actions)
-[![Tests](https://img.shields.io/badge/tests-238%20passing-brightgreen)](https://github.com/yasmramos/TailwindFX/actions)
+[![Build](https://img.shields.io/github/actions/workflow/status/yasmramos/TailwindFX/maven.yml?branch=develop&label=build)](https://github.com/yasmramos/TailwindFX/actions/workflows/maven.yml)
+[![Tests](https://img.shields.io/github/actions/workflow/status/yasmramos/TailwindFX/maven.yml?branch=develop&label=tests&logo=github)](https://github.com/yasmramos/TailwindFX/actions/workflows/maven.yml)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
 ---
