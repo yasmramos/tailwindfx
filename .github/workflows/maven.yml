@@ -38,9 +38,11 @@ jobs:
         name: test-results
         path: target/surefire-reports/
 
-    - name: Parse test results and create badge endpoint
+    - name: Parse test results and create badge data
+      id: badge_data
       run: |
-        PASSED=$(grep -o 'Tests run: [0-9]*' target/surefire-reports/*.txt | head -1 | grep -o '[0-9]*' || echo "0")
+        PASSED=$(grep -o 'Tests run: [0-9]*' target/surefire-reports/*.txt 2>/dev/null | head -1 | grep -o '[0-9]*' || echo "0")
+        echo "PASSED=$PASSED" >> $GITHUB_OUTPUT
         cat > badge-data.json << EOF
         {
           "schemaVersion": 1,
@@ -50,10 +52,36 @@ jobs:
         }
         EOF
 
-    - name: Deploy badge endpoint to GitHub Gist
-      uses: andymckay/gist-action@v2
-      with:
-        gist_id: badge-endpoint
-        gist_token: ${{ secrets.GIST_TOKEN }}
-        files: |
-          test-results.json:badge-data.json
+    - name: Update GitHub Gist with test results
+      run: |
+        GIST_ID="${{ secrets.GIST_BADGE_ID }}"
+        if [ -z "$GIST_ID" ]; then
+          echo "Creating new gist..."
+          RESPONSE=$(curl -s -X POST \
+            -H "Authorization: token ${{ secrets.GIST_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/gists \
+            -d @badge-data.json)
+          GIST_ID=$(echo $RESPONSE | jq -r '.id')
+          echo "Created gist with ID: $GIST_ID"
+          echo "GIST_BADGE_ID=$GIST_ID" >> $GITHUB_ENV
+        else
+          echo "Updating existing gist..."
+          # Get the file ID from the gist
+          FILE_ID=$(curl -s -H "Authorization: token ${{ secrets.GIST_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/gists/$GIST_ID | jq -r '.files | to_entries[0].key')
+          
+          # Update the gist file
+          curl -s -X PATCH \
+            -H "Authorization: token ${{ secrets.GIST_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/gists/$GIST_ID \
+            -d "{
+              \"files\": {
+                \"$FILE_ID\": $(cat badge-data.json)
+              }
+            }"
+          echo "Updated gist: $GIST_ID"
+        fi
+        echo "Badge URL: https://gist.githubusercontent.com/${{ github.repository_owner }}/$GIST_ID/raw/test-results.json"
