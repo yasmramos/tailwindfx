@@ -1062,12 +1062,12 @@ public final class JitCompiler {
   private static String parseAspectRatioArbitrary(String val) {
     // aspect-ratio no tiene equivalente directo en JavaFX CSS
     // Retornamos una clase CSS predecible para que el desarrollador pueda manejarlo
-    // Ej: aspect-[16/9] -> "-fx-aspect-ratio-16-9"
+    // Eg: aspect-[16/9] -> "-fx-aspect-ratio-16-9"
     String sanitized = val.replaceAll("[^a-zA-Z0-9]", "-");
     LOG.warning(
         "TailwindFX JIT: aspect-ratio '"
             + val
-            + "' has no CSS equivalent - use TwLayoutHelper.setAspectRatio(node, ratio) in Java");
+            + "' has no CSS equivalent - use TwLayout.aspectRatio(node, width, height) in Java");
     return null; // CompileResult.cssClass will handle the fallback
   }
 }
