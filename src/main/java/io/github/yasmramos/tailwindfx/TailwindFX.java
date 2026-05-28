@@ -65,34 +65,9 @@ public final class TailwindFX {
     TwInstall.installBase(scene);
   }
 
-  /** Install components module. */
-  public static void installComponents(Scene scene) {
-    TwInstall.installComponents(scene);
-  }
-
-  /** Install utilities module. */
-  public static void installUtilities(Scene scene) {
-    TwInstall.installUtilities(scene);
-  }
-
-  /** Install colors module. */
-  public static void installColors(Scene scene) {
-    TwInstall.installColors(scene);
-  }
-
-  /** Install effects module. */
-  public static void installEffects(Scene scene) {
-    TwInstall.installEffects(scene);
-  }
-
   /** Install dark mode styles. */
   public static void installDark(Scene scene) {
     TwInstall.installDark(scene);
-  }
-
-  /** Install essential modules (base, components, presets). */
-  public static void installEssentials(Scene scene) {
-    TwInstall.installEssentials(scene);
   }
 
   /** Get theme manager for a scene. */

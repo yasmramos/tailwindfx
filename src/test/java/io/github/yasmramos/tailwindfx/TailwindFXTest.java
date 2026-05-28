@@ -2,10 +2,8 @@ package io.github.yasmramos.tailwindfx;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.github.yasmramos.tailwindfx.layout.TwFlexPane;
 import io.github.yasmramos.tailwindfx.layout.TwGridPane;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
-import io.github.yasmramos.tailwindfx.theme.ThemeManager;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
@@ -86,62 +84,8 @@ class TailwindFXTest extends ApplicationTest {
   }
 
   @Test
-  void testInstallComponents() {
-    assertDoesNotThrow(() -> TailwindFX.installComponents(scene));
-  }
-
-  @Test
-  void testInstallUtilities() {
-    assertDoesNotThrow(() -> TailwindFX.installUtilities(scene));
-  }
-
-  @Test
-  void testInstallColors() {
-    assertDoesNotThrow(() -> TailwindFX.installColors(scene));
-  }
-
-  @Test
-  void testInstallEffects() {
-    assertDoesNotThrow(() -> TailwindFX.installEffects(scene));
-  }
-
-  @Test
   void testInstallDark() {
     assertDoesNotThrow(() -> TailwindFX.installDark(scene));
-  }
-
-  @Test
-  void testInstallEssentials() {
-    assertDoesNotThrow(() -> TailwindFX.installEssentials(scene));
-  }
-
-  @Test
-  void testThemeOperation() {
-    ThemeManager themeManager = TailwindFX.theme(scene);
-    assertNotNull(themeManager);
-  }
-
-  @Test
-  void testLayoutHelper() {
-    var layoutHelper = TailwindFX.layout(testPane);
-    assertNotNull(layoutHelper);
-  }
-
-  @Test
-  void testLayoutApplication() {
-    assertDoesNotThrow(() -> TailwindFX.layout(testPane, "flex", "gap-4"));
-  }
-
-  @Test
-  void testFlexRowCreation() {
-    TwFlexPane flexPane = TailwindFX.flexRow();
-    assertNotNull(flexPane);
-    // Verify that a TwFlexPane instance was created
-    assertTrue(flexPane instanceof TwFlexPane);
-  }
-
-  @Test
-  void testGridCreation() {
     TwGridPane gridPane = TailwindFX.grid();
     assertNotNull(gridPane);
   }

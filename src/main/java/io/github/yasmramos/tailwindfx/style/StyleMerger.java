@@ -10,14 +10,14 @@ import java.util.regex.Pattern;
 import javafx.scene.Node;
 
 /**
- * StyleMerger — Aplica inline styles JIT a nodos JavaFX sin destruir estilos previos.
+ * StyleMerger — Applies JIT inline styles to JavaFX nodes without destroying previous styles.
  *
- * <p>Problema: node.setStyle() sobrescribe TODO el inline style existente. Solución: parsear el
- * estilo actual, mergear por propiedad, y reescribir.
+ * <p>Problem: node.setStyle() overwrites ALL existing inline style. Solution: parse current style,
+ * merge by property, and rewrite.
  *
- * <p>Reglas de merge: - JIT gana sobre estilos previos de la misma propiedad (es la intención del
- * dev) - Propiedades no afectadas por el JIT se preservan intactas - Las CSS classes del nodo NO se
- * tocan aquí (eso lo hace TailwindFX.apply)
+ * <p>Merge rules: - JIT wins over previous styles of the same property (developer's intent) -
+ * Properties not affected by JIT are preserved intact - Node's CSS classes are NOT touched here
+ * (handled by TailwindFX.apply)
  */
 public final class StyleMerger {
 
