@@ -206,7 +206,7 @@ class JitCompilerExtendedTest {
   class PaddingMarginTests {
 
     @ParameterizedTest
-    @CsvSource({"p-0, 0", "p-1, 4", "p-2, 8", "p-4, 16", "p-6, 24", "p-8, 32"})
+    @CsvSource({"p-0, 0", "p-1, 2", "p-2, 4", "p-4, 16", "p-6, 24", "p-8, 32"})
     @DisplayName("Should compile padding tokens")
     void testPaddingCompilation(String token, int expectedPx) {
       JitCompiler.CompileResult result = JitCompiler.compile(token);

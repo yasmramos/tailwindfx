@@ -1,6 +1,8 @@
 package io.github.yasmramos.tailwindfx;
 
 import io.github.yasmramos.tailwindfx.breakpoint.BreakpointManager;
+import io.github.yasmramos.tailwindfx.core.ThemeCssGenerator;
+import io.github.yasmramos.tailwindfx.theme.ThemeConfig;
 import java.util.Objects;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -8,77 +10,87 @@ import javafx.stage.Stage;
 /**
  * TwInstall — Installation facade for CSS stylesheets.
  *
- * <p>This class handles installing TailwindFX CSS files into JavaFX scenes.
+ * <p>This class handles installing minimal TailwindFX CSS files into JavaFX scenes. Most utilities
+ * are now JIT-compiled at runtime via JitCompiler. Base variables are generated dynamically from
+ * ThemeConfig.
  *
  * <p>Usage:
  *
  * <pre>
  * TwInstall.install(scene);
- * TwInstall.installBase(scene);
- * TwInstall.installDark(scene);
+ * TwInstall.installMinimal(scene);
  * </pre>
  */
 public final class TwInstall {
 
+  private static final String GENERATED_BASE_CSS_ID = "tailwindfx-base-generated";
+
   private TwInstall() {}
 
-  /** Installs the combined CSS file (all modules). */
+  /** Installs minimal CSS (base variables only). All utilities are JIT-compiled. */
   public static void install(Scene scene) {
-    installAll(scene);
+    installMinimal(scene);
   }
 
   public static void install(Scene scene, Stage stage) {
-    installAll(scene, stage);
+    installMinimal(scene, stage);
   }
 
-  /** Installs only the base module (variables and reset). Required by other modules. */
+  /** Installs only the base module (variables and reset). Required for JIT compilation. */
   public static void installBase(Scene scene) {
-    installCss(scene, "/tailwindfx/tailwindfx-base.css", 0);
+    installGeneratedBaseCss(scene, 0);
   }
 
-  public static void installComponents(Scene scene) {
-    installCss(scene, "/tailwindfx/tailwindfx-components.css", 1);
-  }
-
-  public static void installUtilities(Scene scene) {
-    installCss(scene, "/tailwindfx/tailwindfx-utilities.css", 2);
-  }
-
-  public static void installColors(Scene scene) {
-    installCss(scene, "/tailwindfx/tailwindfx-colors.css", 3);
-  }
-
-  public static void installEffects(Scene scene) {
-    installCss(scene, "/tailwindfx/tailwindfx-effects.css", 4);
-  }
-
-  public static void installComponentsPreset(Scene scene) {
-    installCss(scene, "/tailwindfx/tailwindfx-components-preset.css", 5);
-  }
-
+  /** Installs dark mode overrides. Optional. */
   public static void installDark(Scene scene) {
-    installCss(scene, "/tailwindfx/tailwindfx-dark.css", 10); // High priority to override
+    installCss(scene, "/tailwindfx/tailwindfx-dark.css", 10);
   }
 
-  public static void installEssentials(Scene scene) {
+  /**
+   * Minimal installation: base CSS generated dynamically. All utilities JIT-compiled at runtime.
+   */
+  public static void installMinimal(Scene scene) {
     installBase(scene);
-    installComponents(scene);
-    installComponentsPreset(scene);
+    // Optional: uncomment if you need dark mode support
+    // installDark(scene);
   }
 
-  private static void installAll(Scene scene) {
-    installBase(scene);
-    installComponents(scene);
-    installUtilities(scene);
-    installColors(scene);
-    installEffects(scene);
-    installComponentsPreset(scene);
-    installDark(scene);
-  }
-
-  private static void installAll(Scene scene, Stage stage) {
-    installAll(scene);
+  private static void installMinimal(Scene scene, Stage stage) {
+    installMinimal(scene);
     BreakpointManager.attach(stage);
+  }
+
+  /**
+   * Installs dynamically generated base CSS from ThemeConfig. Removes any previously installed
+   * static base CSS.
+   */
+  private static void installGeneratedBaseCss(Scene scene, int priority) {
+    // Generate CSS from ThemeConfig
+    ThemeConfig themeConfig = ThemeConfig.defaultConfig();
+    ThemeCssGenerator generator = new ThemeCssGenerator(themeConfig);
+    String generatedCss = generator.generateBaseCss();
+
+    // Properly encode CSS for data URL (RFC 2397)
+    String encodedCss = java.net.URLEncoder.encode(generatedCss, java.nio.charset.StandardCharsets.UTF_8)
+        .replace("+", "%20")
+        .replace("%3A", ":")
+        .replace("%3B", ";")
+        .replace("%7B", "{")
+        .replace("%7D", "}")
+        .replace("%23", "#");
+    
+    String dataUrl = "data:text/css;charset=utf-8," + encodedCss;
+
+    var sheets = scene.getStylesheets();
+
+    // Remove any existing generated base CSS
+    sheets.removeIf(url -> url.contains(GENERATED_BASE_CSS_ID));
+
+    // Also remove static base CSS if it exists
+    sheets.removeIf(url -> url.contains("tailwindfx-base.css"));
+
+    // Insert at specified priority
+    sheets.add(Math.min(priority, sheets.size()), dataUrl);
   }
 
   private static void installCss(Scene scene, String cssPath, int priority) {
