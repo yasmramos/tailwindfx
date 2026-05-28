@@ -70,8 +70,16 @@ public final class TwInstall {
     ThemeCssGenerator generator = new ThemeCssGenerator(themeConfig);
     String generatedCss = generator.generateBaseCss();
 
-    // Create a data URL for the generated CSS
-    String dataUrl = "data:text/css," + generatedCss.replace("#", "%23").replace("\n", "%0A");
+    // Properly encode CSS for data URL (RFC 2397)
+    String encodedCss = java.net.URLEncoder.encode(generatedCss, java.nio.charset.StandardCharsets.UTF_8)
+        .replace("+", "%20")
+        .replace("%3A", ":")
+        .replace("%3B", ";")
+        .replace("%7B", "{")
+        .replace("%7D", "}")
+        .replace("%23", "#");
+    
+    String dataUrl = "data:text/css;charset=utf-8," + encodedCss;
 
     var sheets = scene.getStylesheets();
 
