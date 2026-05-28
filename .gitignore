@@ -8,32 +8,35 @@ build/
 target/
 
 # Dependencies
-.mypy_cache/
-.pytest_cache/
 .gradle/
-node_modules/
-venv/
-.venv/
-__pycache__/
+libs/
+lib/
 
 # Logs and temp files
 *.log
 *.tmp
+
+# Editors
+.vscode/
+.idea/
 *.swp
+*.swo
 
 # Environment
 .env
 .env.local
 *.env.*
 
-# Editors
-.vscode/
-.idea/
-
 # Coverage reports
 coverage/
 htmlcov/
 .coverage
+
+# Package manager
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # System files
 .DS_Store
