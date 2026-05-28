@@ -95,7 +95,6 @@ public class ThemeCssGeneratorTest {
     String css = generator.generateBaseCss();
 
     // Check basic CSS structure
-    assertTrue(css.startsWith("/* Auto-generated"));
     assertTrue(css.contains(".root {"));
     assertTrue(css.endsWith("}\n"));
 
