@@ -3,6 +3,7 @@ package io.github.yasmramos.tailwindfx.core;
 import io.github.yasmramos.tailwindfx.color.ColorPalette;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
 import io.github.yasmramos.tailwindfx.style.StyleToken;
+import io.github.yasmramos.tailwindfx.theme.ThemeConfig;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -11,7 +12,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 /**
- * JitCompiler — Convierte tokens Tailwind en propiedades -fx-* inline.
+ * JitCompiler — Orquestador que convierte tokens Tailwind en propiedades -fx-* inline.
+ *
+ * <p>Delega la resolución y mapeo a StyleResolver y CssPropertyMapper. Solo maneja cache, logging y
+ * métricas.
  *
  * <p>Entrada: "p-4" → "-fx-padding: 16px;" Entrada: "bg-blue-500/80" → "-fx-background-color:
  * rgba(59,130,246,0.80);" Entrada: "w-[320px]" → "-fx-pref-width: 320px;" Entrada: "-translate-x-4"
@@ -27,6 +31,9 @@ import java.util.logging.Logger;
 public final class JitCompiler {
 
   private static final Logger LOG = Logger.getLogger("TailwindFX.JIT");
+
+  private final StyleResolver resolver;
+  private final CssPropertyMapper propertyMapper;
 
   // Cache global: token raw → resultado compilado
   // Lock-free LRU cache with bounded size — prevents unbounded growth in long-running apps
@@ -60,6 +67,18 @@ public final class JitCompiler {
 
   // Modo debug: loguea todos los tokens procesados
   private static volatile boolean DEBUG = false;
+
+  // Singleton instance for static compile() method
+  private static final JitCompiler INSTANCE = new JitCompiler();
+
+  public JitCompiler() {
+    this(ThemeConfig.defaultConfig());
+  }
+
+  public JitCompiler(ThemeConfig themeConfig) {
+    this.resolver = new StyleResolver(themeConfig);
+    this.propertyMapper = new CssPropertyMapper(themeConfig);
+  }
 
   /**
    * Detects if a token requires JIT compilation (arbitrary values only). Matches Tailwind CSS v4
@@ -205,8 +224,6 @@ public final class JitCompiler {
     return DEBUG;
   }
 
-  private JitCompiler() {}
-
   // Compilation result
   public record CompileResult(
       String inlineStyle, // -fx-* properties ready for setStyle()
@@ -260,7 +277,7 @@ public final class JitCompiler {
     }
     // Only synchronize on cache miss during compilation and put
     long t0 = System.nanoTime();
-    result = doCompile(key);
+    result = INSTANCE.doCompile(key);
     TailwindFXMetrics.instance().recordCompilation(System.nanoTime() - t0);
 
     // Thread-safe put with atomic operation
@@ -480,7 +497,8 @@ public final class JitCompiler {
     }
 
     gradient.append(")");
-    return prop("-fx-background-color", gradient.toString());
+    // Para gradientes, retornamos directamente el valor CSS ya construido
+    return "-fx-background-color: " + gradient.toString() + ";";
   }
 
   public record BatchResult(String inlineStyle, List<String> cssClasses) {
@@ -506,568 +524,26 @@ public final class JitCompiler {
     return CACHE.size();
   }
 
-  // Main compilation
-  private static CompileResult doCompile(String raw) {
+  // Main compilation - delega a StyleResolver y CssPropertyMapper
+  private CompileResult doCompile(String raw) {
     StyleToken t = StyleToken.parse(raw);
 
-    return switch (t.kind) {
-      case SCALE -> compileScale(t);
-      case COLOR_SHADE -> compileColor(t);
-      case ARBITRARY -> compileArbitrary(t);
-      case NAMED -> compileNamed(t);
-      case UNKNOWN -> CompileResult.unknown(raw);
-    };
-  }
-
-  // Scale: p-4, w-12, gap-8, opacity-75, rotate-45, -translate-x-4
-  private static CompileResult compileScale(StyleToken t) {
-    int n = t.scale;
-    int s = t.signedScale(); // con signo negativo si aplica
-    double unit = n * 4.0; // escala Tailwind: 1 unit = 4px
-    double signedUnit = s * 4.0;
-
-    String style =
-        switch (t.prefix) {
-          case "p" -> switch (nullSafe(t.subPrefix)) {
-            case "x" -> px("padding", "0px %.0fpx 0px %.0fpx".formatted(unit, unit));
-            case "y" -> px("padding", "%.0fpx 0px %.0fpx 0px".formatted(unit, unit));
-            case "t" -> px("padding", "%.0fpx 0px 0px 0px".formatted(unit));
-            case "r" -> px("padding", "0px %.0fpx 0px 0px".formatted(unit));
-            case "b" -> px("padding", "0px 0px %.0fpx 0px".formatted(unit));
-            case "l" -> px("padding", "0px 0px 0px %.0fpx".formatted(unit));
-            default -> px("padding", "%.0fpx".formatted(unit));
-          };
-          case "m" -> switch (nullSafe(t.subPrefix)) {
-              // JavaFX has no real CSS margin — we use translate as visual approximation
-            case "t" -> prop("-fx-translate-y", "%.0fpx".formatted(signedUnit));
-            case "b" -> prop("-fx-translate-y", "%.0fpx".formatted(-signedUnit));
-            case "l" -> prop("-fx-translate-x", "%.0fpx".formatted(signedUnit));
-            case "r" -> prop("-fx-translate-x", "%.0fpx".formatted(-signedUnit));
-            default -> ""; // m-4 without direction: no direct equivalent
-          };
-          case "w" -> prop("-fx-pref-width", "%.0fpx".formatted(unit));
-          case "h" -> prop("-fx-pref-height", "%.0fpx".formatted(unit));
-          case "gap" -> switch (nullSafe(t.subPrefix)) {
-            case "x" -> prop("-fx-hgap", "%.0fpx".formatted(unit));
-            case "y" -> prop("-fx-vgap", "%.0fpx".formatted(unit));
-            default -> prop("-fx-spacing", "%.0fpx".formatted(unit));
-          };
-          case "aspect" -> {
-            // aspect-ratio is Java-only (no CSS equivalent in JavaFX)
-            // Return a special marker so apply() can call Styles.aspectRatio() via auto-detection
-            // aspect-ratio-16-9 → scale=16, subPrefix="9" won't parse well
-            // Better handled via aspect-ratio-[16/9] arbitrary token below
-            yield null; // handled in ARBITRARY case
-          }
-          case "opacity" -> {
-            // opacity-75 → 0.75  (scale directo, no * 4)
-            double op = n / 100.0;
-            yield prop("-fx-opacity", "%.2f".formatted(op));
-          }
-          case "rotate" -> prop("-fx-rotate", "%.0f".formatted((double) s));
-          case "scale" -> prop("-fx-scale-x", "%.2f".formatted(n / 100.0))
-              + prop("-fx-scale-y", "%.2f".formatted(n / 100.0));
-          case "translate" -> switch (nullSafe(t.subPrefix)) {
-            case "x" -> prop("-fx-translate-x", "%.0fpx".formatted(signedUnit));
-            case "y" -> prop("-fx-translate-y", "%.0fpx".formatted(signedUnit));
-            default -> "";
-          };
-          case "z" -> ""; // z-index: node.setViewOrder() en Java, no CSS
-          case "rounded" -> {
-            double r = unit;
-            yield prop("-fx-background-radius", "%.0fpx".formatted(r))
-                + prop("-fx-border-radius", "%.0fpx".formatted(r));
-          }
-          case "border" -> prop("-fx-border-width", "%dpx".formatted(n));
-          case "shadow" -> buildShadow(n);
-          default -> null;
-        };
-
-    if (style == null) {
-      return CompileResult.unknown(t.raw);
-    }
-    if (style.isBlank()) {
-      return CompileResult.cssClass(t.raw); // fallback a CSS class
-    }
-    return CompileResult.inline(style);
-  }
-
-  // Color: bg-blue-500, text-gray-900/50, border-red-300
-  private static CompileResult compileColor(StyleToken t) {
-    // Clamp alpha to [0, 100] — warn on out-of-range, but produce valid output
-    Double alpha = null;
-    if (t.hasAlpha()) {
-      int rawAlpha = t.alpha;
-      if (rawAlpha < 0 || rawAlpha > 100) {
-        int clamped = Math.max(0, Math.min(100, rawAlpha));
-        LOG.warning(
-            "TailwindFX JIT: alpha "
-                + rawAlpha
-                + " out of range [0-100] in token '"
-                + t.raw
-                + "' — clamped to "
-                + clamped);
-        alpha = clamped / 100.0;
-      } else {
-        alpha = t.alphaFraction();
-      }
-    }
-    String color = ColorPalette.fxColor(t.colorName, t.shade, alpha);
-
-    if (color == null) {
-      LOG.warning("TailwindFX JIT: color not found: " + t.colorName + "-" + t.shade);
-      return CompileResult.unknown(t.raw);
+    // Delegar resolución al StyleResolver
+    String resolvedValue = resolver.resolve(t);
+    if (resolvedValue == null) {
+      return CompileResult.unknown(raw);
     }
 
-    String style =
-        switch (t.prefix) {
-          case "bg" -> prop("-fx-background-color", color);
-          case "text" -> prop("-fx-text-fill", color);
-          case "border" -> prop("-fx-border-color", color);
-          case "shadow" -> buildColoredShadow(color);
-          case "ring" -> buildRing(color);
-          case "outline" -> prop("-fx-border-color", color)
-              + prop("-fx-border-style", "solid")
-              + prop("-fx-border-width", "2px");
-          case "fill" -> prop("-fx-fill", color);
-          case "stroke" -> prop("-fx-stroke", color);
-          case "drop-shadow" -> buildColoredDropShadow(color);
-          case "text-shadow" -> buildColoredTextShadow(color);
-          default -> null;
-        };
+    // Delegar mapeo de propiedades al CssPropertyMapper
+    String style = propertyMapper.map(t, resolvedValue);
 
-    if (style == null) {
-      return CompileResult.unknown(t.raw);
-    }
-    return CompileResult.inline(style);
-  }
-
-  // Arbitrario: p-[13px], bg-[#ff6600], w-[320px], rotate-[45deg], opacity-[0.65]
-  private static CompileResult compileArbitrary(StyleToken t) {
-    String val = t.arbitraryVal.trim();
-
-    // Normalize: "45deg" → "45" for rotation
-    String style =
-        switch (t.prefix) {
-          case "p" -> switch (nullSafe(t.subPrefix)) {
-            case "x" -> px("padding", "0px " + val + " 0px " + val);
-            case "y" -> px("padding", val + " 0px " + val + " 0px");
-            case "t" -> px("padding", val + " 0px 0px 0px");
-            case "r" -> px("padding", "0px " + val + " 0px 0px");
-            case "b" -> px("padding", "0px 0px " + val + " 0px");
-            case "l" -> px("padding", "0px 0px 0px " + val);
-            default -> px("padding", val);
-          };
-          case "w" -> prop("-fx-pref-width", val);
-          case "h" -> prop("-fx-pref-height", val);
-          case "min" -> switch (nullSafe(t.subPrefix)) {
-            case "w" -> prop("-fx-min-width", val);
-            case "h" -> prop("-fx-min-height", val);
-            default -> "";
-          };
-          case "max" -> switch (nullSafe(t.subPrefix)) {
-            case "w" -> prop("-fx-max-width", val);
-            case "h" -> prop("-fx-max-height", val);
-            default -> "";
-          };
-          case "gap" -> prop("-fx-spacing", val);
-          case "text" -> prop("-fx-font-size", val);
-          case "bg" -> {
-            if (val.startsWith("linear-gradient") || val.startsWith("radial-gradient")) {
-              yield prop("-fx-background-color", val);
-            }
-            // Validar y normalizar colores hex: bg-[#f60] -> bg-[#ff6600]
-            if (val.startsWith("#")) {
-              String norm = ColorPalette.normalizeHex(val);
-              if (!ColorPalette.isValidHex(norm != null ? norm : val)) {
-                LOG.warning(
-                    "TailwindFX JIT: invalid hex format '" + val + "' in token '" + t.raw + "'");
-              } else if (norm != null && !norm.equals(val)) {
-                yield prop("-fx-background-color", norm);
-              }
-            }
-            yield prop("-fx-background-color", val);
-          }
-          case "opacity" -> {
-            // opacity-[0.65] o opacity-[65%]
-            String opVal =
-                val.endsWith("%")
-                    ? "%.2f".formatted(Double.parseDouble(val.replace("%", "")) / 100.0)
-                    : val;
-            yield prop("-fx-opacity", opVal);
-          }
-          case "rotate" -> {
-            String deg = val.endsWith("deg") ? val.replace("deg", "") : val;
-            String sign = t.negative ? "-" : "";
-            yield prop("-fx-rotate", sign + deg);
-          }
-          case "scale" -> {
-            yield prop("-fx-scale-x", val) + prop("-fx-scale-y", val);
-          }
-          case "translate" -> switch (nullSafe(t.subPrefix)) {
-            case "x" -> prop("-fx-translate-x", (t.negative ? "-" : "") + val);
-            case "y" -> prop("-fx-translate-y", (t.negative ? "-" : "") + val);
-            default -> "";
-          };
-          case "rounded" -> prop("-fx-background-radius", val) + prop("-fx-border-radius", val);
-          case "border" -> prop("-fx-border-width", val);
-          case "shadow" -> parseShadowArbitrary(val);
-          case "drop-shadow" -> parseDropShadowArbitrary(val);
-          case "text-shadow" -> parseTextShadowArbitrary(val);
-          case "stroke" -> prop("-fx-stroke-width", val);
-          case "fill" -> prop("-fx-fill", ColorPalette.isValidHex(val) ? val : "null");
-          case "stroke-color" -> prop("-fx-stroke", ColorPalette.isValidHex(val) ? val : "null");
-          case "aspect-ratio" -> parseAspectRatioArbitrary(val);
-          case "aspect" -> parseAspectRatioArbitrary(val);
-          case "bg-gradient" -> parseGradient(val);
-          case "ring" -> prop("-fx-border-width", "3px") + prop("-fx-border-color", val);
-          case "ring-offset" -> prop("-fx-border-width", "3px");
-          default -> null;
-        };
-
-    if (style == null) {
-      return CompileResult.unknown(t.raw);
-    }
-    if (style.isBlank()) {
+    if (style == null || style.isBlank()) {
       return CompileResult.cssClass(t.raw);
     }
     return CompileResult.inline(style);
   }
 
-  // Named: text-sm, rounded-lg, font-bold, italic, underline, truncate
-  private static CompileResult compileNamed(StyleToken t) {
-    String style =
-        switch (t.prefix + "-" + t.namedValue) {
-            // Font size
-          case "text-xs" -> prop("-fx-font-size", "11px");
-          case "text-sm" -> prop("-fx-font-size", "13px");
-          case "text-base" -> prop("-fx-font-size", "14px");
-          case "text-lg" -> prop("-fx-font-size", "16px");
-          case "text-xl" -> prop("-fx-font-size", "18px");
-          case "text-2xl" -> prop("-fx-font-size", "22px");
-          case "text-3xl" -> prop("-fx-font-size", "28px");
-          case "text-4xl" -> prop("-fx-font-size", "36px");
-          case "text-5xl" -> prop("-fx-font-size", "48px");
-
-            // Text alignment
-          case "text-left" -> prop("-fx-text-alignment", "left");
-          case "text-center" -> prop("-fx-text-alignment", "center");
-          case "text-right" -> prop("-fx-text-alignment", "right");
-
-            // Font weight
-          case "font-thin" -> prop("-fx-font-weight", "100");
-          case "font-light" -> prop("-fx-font-weight", "300");
-          case "font-normal" -> prop("-fx-font-weight", "normal");
-          case "font-medium" -> prop("-fx-font-weight", "500");
-          case "font-semibold" -> prop("-fx-font-weight", "600");
-          case "font-bold" -> prop("-fx-font-weight", "bold");
-          case "font-extrabold" -> prop("-fx-font-weight", "800");
-          case "font-black" -> prop("-fx-font-weight", "900");
-
-            // Font style
-          case "italic" -> prop("-fx-font-style", "italic");
-          case "not-italic" -> prop("-fx-font-style", "normal");
-
-            // Text decoration
-          case "underline" -> prop("-fx-underline", "true");
-          case "line-through" -> prop("-fx-strikethrough", "true");
-          case "no-underline" -> prop("-fx-underline", "false");
-          case "overrun-ellipsis" -> prop("-fx-text-overrun", "ellipsis");
-          case "overrun-clip" -> prop("-fx-text-overrun", "clip");
-          case "wrap-text" -> prop("-fx-wrap-text", "true");
-          case "nowrap" -> prop("-fx-wrap-text", "false");
-
-            // Border radius named
-          case "rounded-none" -> prop("-fx-background-radius", "0")
-              + prop("-fx-border-radius", "0");
-          case "rounded-sm" -> prop("-fx-background-radius", "2px")
-              + prop("-fx-border-radius", "2px");
-          case "rounded" -> prop("-fx-background-radius", "4px") + prop("-fx-border-radius", "4px");
-          case "rounded-md" -> prop("-fx-background-radius", "6px")
-              + prop("-fx-border-radius", "6px");
-          case "rounded-lg" -> prop("-fx-background-radius", "8px")
-              + prop("-fx-border-radius", "8px");
-          case "rounded-xl" -> prop("-fx-background-radius", "12px")
-              + prop("-fx-border-radius", "12px");
-          case "rounded-2xl" -> prop("-fx-background-radius", "16px")
-              + prop("-fx-border-radius", "16px");
-          case "rounded-full" -> prop("-fx-background-radius", "999px")
-              + prop("-fx-border-radius", "999px");
-
-            // Shadow named
-          case "shadow-none" -> prop("-fx-effect", "null");
-          case "shadow-sm" -> prop("-fx-effect", "dropshadow(gaussian,rgba(0,0,0,0.05),2,0,0,1)");
-          case "shadow" -> prop("-fx-effect", "dropshadow(gaussian,rgba(0,0,0,0.10),4,0,0,2)");
-          case "aspect-square" -> prop(
-              "/* aspect-ratio: 1/1 — call TailwindFX.aspectSquare(node) */", "");
-          case "aspect-video" -> prop(
-              "/* aspect-ratio: 16/9 — call TailwindFX.aspectRatio(node,16,9) */", "");
-          case "shadow-md" -> prop("-fx-effect", "dropshadow(gaussian,rgba(0,0,0,0.12),6,0,0,3)");
-          case "shadow-lg" -> prop("-fx-effect", "dropshadow(gaussian,rgba(0,0,0,0.15),10,0,0,4)");
-          case "shadow-xl" -> prop("-fx-effect", "dropshadow(gaussian,rgba(0,0,0,0.20),16,0,0,6)");
-          case "shadow-2xl" -> prop("-fx-effect", "dropshadow(gaussian,rgba(0,0,0,0.25),24,0,0,8)");
-
-            // Opacity named (complementario a scale)
-          case "opacity-0" -> prop("-fx-opacity", "0");
-          case "opacity-5" -> prop("-fx-opacity", "0.05");
-          case "opacity-10" -> prop("-fx-opacity", "0.1");
-          case "opacity-20" -> prop("-fx-opacity", "0.2");
-          case "opacity-25" -> prop("-fx-opacity", "0.25");
-          case "opacity-30" -> prop("-fx-opacity", "0.3");
-          case "opacity-40" -> prop("-fx-opacity", "0.4");
-          case "opacity-50" -> prop("-fx-opacity", "0.5");
-          case "opacity-60" -> prop("-fx-opacity", "0.6");
-          case "opacity-70" -> prop("-fx-opacity", "0.7");
-          case "opacity-75" -> prop("-fx-opacity", "0.75");
-          case "opacity-80" -> prop("-fx-opacity", "0.8");
-          case "opacity-90" -> prop("-fx-opacity", "0.9");
-          case "opacity-95" -> prop("-fx-opacity", "0.95");
-          case "opacity-100" -> prop("-fx-opacity", "1.0");
-
-            // Cursor
-          case "cursor-pointer" -> prop("-fx-cursor", "hand");
-          case "cursor-default" -> prop("-fx-cursor", "default");
-          case "cursor-grab" -> prop("-fx-cursor", "open-hand");
-          case "cursor-grabbing" -> prop("-fx-cursor", "closed-hand");
-          case "cursor-none" -> prop("-fx-cursor", "none");
-          case "cursor-crosshair" -> prop("-fx-cursor", "crosshair");
-          case "cursor-text" -> prop("-fx-cursor", "text");
-          case "cursor-resize" -> prop("-fx-cursor", "e-resize");
-
-            // Visibility
-          case "visible" -> prop("-fx-opacity", "1.0");
-          case "invisible" -> prop("-fx-opacity", "0");
-
-            // Overflow (JavaFX no tiene CSS equivalente — usar Java API)
-          case "overflow-auto" -> null; // handled by ScrollPane in Java
-          case "overflow-hidden" -> prop("-fx-clip", "null"); // JavaFX clip se maneja en Java
-          case "overflow-scroll" -> null; // handled by ScrollPane in Java
-          case "overflow-x-auto" -> null; // handled by ScrollPane in Java
-          case "overflow-y-auto" -> null; // handled by ScrollPane in Java
-
-            // Display
-          case "block" -> null; // default in JavaFX
-          case "inline" -> null; // use Label instead of Region
-          case "inline-block" -> null; // default in JavaFX
-          case "hidden" -> prop("-fx-visible", "false");
-          case "contents" -> null; // not applicable in JavaFX
-
-            // Position (JavaFX usa layout panes en vez de position CSS)
-          case "static" -> null; // default in JavaFX
-          case "fixed" -> null; // use Stage or Popup
-          case "absolute" -> null; // use Pane with layoutX/Y
-          case "relative" -> null; // use StackPane or AnchorPane
-          case "sticky" -> null; // implement in Java
-
-            // Backdrop filters
-          case "backdrop-blur-none" -> null; // use Java Effects
-          case "backdrop-blur-sm" -> null; // use BoxBlur in Java
-          case "backdrop-blur" -> null; // use BoxBlur in Java
-          case "backdrop-blur-md" -> null; // use BoxBlur in Java
-          case "backdrop-blur-lg" -> null; // use BoxBlur in Java
-          case "backdrop-blur-xl" -> null; // use BoxBlur in Java
-          case "backdrop-blur-2xl" -> null; // use BoxBlur in Java
-          case "backdrop-blur-3xl" -> null; // use BoxBlur in Java
-
-            // Ring utilities
-          case "ring-0" -> prop("-fx-border-width", "0px");
-          case "ring-1" -> prop("-fx-border-width", "1px") + prop("-fx-border-color", "#D1D5DB");
-          case "ring-2" -> prop("-fx-border-width", "2px") + prop("-fx-border-color", "#D1D5DB");
-          case "ring" -> prop("-fx-border-width", "3px") + prop("-fx-border-color", "#D1D5DB");
-          case "ring-4" -> prop("-fx-border-width", "4px") + prop("-fx-border-color", "#D1D5DB");
-          case "ring-8" -> prop("-fx-border-width", "8px") + prop("-fx-border-color", "#D1D5DB");
-
-            // Border style
-          case "border-solid" -> prop("-fx-border-style", "solid");
-          case "border-dashed" -> prop("-fx-border-style", "dashed");
-          case "border-dotted" -> prop("-fx-border-style", "dotted");
-          case "border-none" -> prop("-fx-border-width", "0px");
-          case "border-0" -> prop("-fx-border-width", "0px");
-          case "border" -> prop("-fx-border-width", "1px") + prop("-fx-border-color", "#E5E7EB");
-          case "border-2" -> prop("-fx-border-width", "2px");
-          case "border-4" -> prop("-fx-border-width", "4px");
-          case "border-8" -> prop("-fx-border-width", "8px");
-
-            // Transitions (JavaFX usa Animation API en Java)
-          case "transition-none" -> null; // use JavaFX Animation API
-          case "transition-all" -> null; // use JavaFX Timeline
-          case "transition" -> null; // use JavaFX Animation API
-          case "transition-colors" -> null; // use JavaFX Timeline
-          case "transition-opacity" -> null; // use FadeTransition
-          case "transition-shadow" -> null; // use JavaFX Timeline
-          case "transition-transform" -> null; // use TranslateTransition
-
-            // Blend mode
-          case "blend-multiply" -> prop("-fx-blend-mode", "multiply");
-          case "blend-screen" -> prop("-fx-blend-mode", "screen");
-          case "blend-overlay" -> prop("-fx-blend-mode", "overlay");
-          case "blend-darken" -> prop("-fx-blend-mode", "darken");
-          case "blend-lighten" -> prop("-fx-blend-mode", "lighten");
-          case "blend-difference" -> prop("-fx-blend-mode", "difference");
-          case "blend-add" -> prop("-fx-blend-mode", "add");
-
-            // Width / height especiales
-          case "w-full" -> prop("-fx-pref-width", "100%");
-          case "h-full" -> prop("-fx-pref-height", "100%");
-          case "w-auto" -> prop("-fx-pref-width", "-1");
-          case "h-auto" -> prop("-fx-pref-height", "-1");
-          case "w-screen" -> prop("-fx-pref-width", "-1"); // w-screen: USE_COMPUTED_SIZE
-          case "h-screen" -> prop("-fx-pref-height", "-1"); // h-screen: USE_COMPUTED_SIZE
-
-            // Overflow / display (no tienen equivalente CSS en JavaFX — delegar a CSS class)
-          default -> null;
-        };
-
-    if (style == null) {
-      return CompileResult.cssClass(t.raw); // fallback a CSS class
-    }
-    return CompileResult.inline(style);
-  }
-
-  // Helpers internos
-  /** Construye una propiedad CSS: "-fx-padding: 16px;" */
-  private static String prop(String property, String value) {
-    return property + ": " + value + "; ";
-  }
-
-  /** Shorthand para -fx-padding */
-  private static String px(String prop, String value) {
-    return "-fx-" + prop + ": " + value + "; ";
-  }
-
-  private static String nullSafe(String s) {
-    return s == null ? "" : s;
-  }
-
-  private static String buildShadow(int scale) {
-    double blur = Math.min(scale * 2.0, 32.0);
-    double offsetY = Math.min(scale * 0.5, 8.0);
-    double opacity = Math.min(0.05 + scale * 0.01, 0.25);
-    return prop(
-        "-fx-effect",
-        "dropshadow(gaussian,rgba(0,0,0,%.2f),%.0f,0,0,%.0f)".formatted(opacity, blur, offsetY));
-  }
-
-  private static String buildColoredShadow(String color) {
-    return prop("-fx-effect", "dropshadow(gaussian," + color + ",8,0,0,2)");
-  }
-
-  private static String buildRing(String color) {
-    return prop("-fx-border-color", color)
-        + prop("-fx-border-width", "2px")
-        + prop("-fx-border-style", "solid");
-  }
-
-  /**
-   * Parsea un gradiente arbitrario para -fx-background-color.
-   *
-   * <p>Soporta sintaxis Tailwind donde los espacios son {@code _}:
-   *
-   * <pre>
-   * bg-gradient-[to_right,#3b82f6,#8b5cf6]
-   * bg-gradient-[to_bottom,blue-500,purple-600]
-   * bg-gradient-[linear,from_#ff6600,to_#3b82f6]
-   * </pre>
-   */
-  private static String parseGradient(String val) {
-    if (val == null || val.isBlank()) {
-      return null;
-    }
-    // _ → space (Tailwind convention for spaces in arbitrary values)
-    String expanded = val.replace("_", " ");
-    // Replace palette color tokens: blue-500 → #3b82f6
-    java.util.regex.Matcher m =
-        java.util.regex.Pattern.compile("([a-z]+-)(\\d{2,3})").matcher(expanded);
-    StringBuffer sb = new StringBuffer();
-    while (m.find()) {
-      String name = m.group(1).replaceAll("-$", "");
-      try {
-        int shade = Integer.parseInt(m.group(2));
-        String hex = ColorPalette.hex(name, shade);
-        m.appendReplacement(sb, hex != null ? hex : m.group(0));
-      } catch (NumberFormatException e) {
-        m.appendReplacement(sb, m.group(0));
-      }
-    }
-    m.appendTail(sb);
-    String processed = sb.toString();
-    // If it already contains "to " or CSS directives, wrap directly
-    return prop("-fx-background-color", "linear-gradient(" + processed + ")");
-  }
-
-  /**
-   * Attempts to parse an arbitrary shadow like "0_4px_6px_rgba(0,0,0,0.1)" (Tailwind uses _ as
-   * space separator in arbitrary values)
-   */
-  private static String parseShadowArbitrary(String val) {
-    // Replace _ with space (Tailwind convention for values with spaces)
-    String expanded = val.replace("_", " ");
-    // JavaFX dropshadow does not accept standard CSS box-shadow format directly
-    // Attempt to parse format: [offset-x] [offset-y] [blur] [spread] [color]
-    if (expanded.startsWith("rgba") || expanded.startsWith("rgb") || expanded.startsWith("#")) {
-      // Only color provided - use reasonable defaults
-      return prop("-fx-effect", "dropshadow(gaussian," + expanded + ",8,0,0,2)");
-    }
-    // Try to parse full format "0 4px 6px -1px rgba(...)"
-    // Simplified pattern: extract color at end
-    java.util.regex.Pattern colorPattern =
-        java.util.regex.Pattern.compile("(rgba?\\([^)]+\\)|#[0-9a-fA-F]{3,8})$");
-    java.util.regex.Matcher matcher = colorPattern.matcher(expanded);
-    if (matcher.find()) {
-      String color = matcher.group(1);
-      // Extract numeric values (simplified - only first value as blur)
-      java.util.regex.Pattern numPattern =
-          java.util.regex.Pattern.compile("^(\\d+(?:\\.\\d+)?)(?:px)?");
-      java.util.regex.Matcher numMatcher = numPattern.matcher(expanded);
-      if (numMatcher.find()) {
-        try {
-          double blur = Double.parseDouble(numMatcher.group(1));
-          return prop(
-              "-fx-effect",
-              String.format("dropshadow(gaussian,%s,%.1f,0,0,%.1f)", color, blur, blur / 3));
-        } catch (NumberFormatException e) {
-          // Fall through to explicit failure
-        }
-      }
-    }
-    // Could not parse - fail explicitly with warning
-    LOG.warning(
-        "TailwindFX JIT: unsupported arbitrary shadow '"
-            + val
-            + "' (complex format requires Java API)");
-    return null;
-  }
-
-  /** Builds a drop shadow with a specific color. */
-  private static String buildColoredDropShadow(String color) {
-    return prop("-fx-effect", "dropshadow(gaussian," + color + ",12,0,0,4)");
-  }
-
-  /** Builds a text shadow with a specific color. */
-  private static String buildColoredTextShadow(String color) {
-    return prop("-fx-effect", "dropshadow(gaussian," + color + ",4,0,0,1)");
-  }
-
-  /** Parsea un valor arbitrario de drop-shadow. */
-  private static String parseDropShadowArbitrary(String val) {
-    return parseShadowArbitrary(val);
-  }
-
-  /** Parsea un valor arbitrario de text-shadow. */
-  private static String parseTextShadowArbitrary(String val) {
-    return parseShadowArbitrary(val);
-  }
-
-  /** Parsea un valor arbitrario de aspect-ratio. */
-  private static String parseAspectRatioArbitrary(String val) {
-    // aspect-ratio no tiene equivalente directo en JavaFX CSS
-    // Retornamos una clase CSS predecible para que el desarrollador pueda manejarlo
-    // Eg: aspect-[16/9] -> "-fx-aspect-ratio-16-9"
-    String sanitized = val.replaceAll("[^a-zA-Z0-9]", "-");
-    LOG.warning(
-        "TailwindFX JIT: aspect-ratio '"
-            + val
-            + "' has no CSS equivalent - use TwLayout.aspectRatio(node, width, height) in Java");
-    return null; // CompileResult.cssClass will handle the fallback
-  }
+  // Métodos estáticos legacy REMOVIDOS - ahora toda la lógica está en StyleResolver y
+  // CssPropertyMapper
+  // compileScale, compileColor, compileArbitrary, compileNamed han sido eliminados
 }
