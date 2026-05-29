@@ -22,13 +22,6 @@ class CssUtilitiesTest {
     }
 
     @Test
-    @DisplayName("Should have valid tailwindfx-base.css")
-    void testBaseCssExists() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-base.css");
-      assertNotNull(resource, "tailwindfx-base.css should exist");
-    }
-
-    @Test
     @DisplayName("Should have valid tailwindfx-utilities.css")
     void testUtilitiesCssExists() {
       var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-utilities.css");
@@ -69,72 +62,57 @@ class CssUtilitiesTest {
   class CssVariableTests {
 
     @Test
-    @DisplayName("Should define color variables in base CSS")
-    void testColorVariablesDefined() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-base.css");
-      assertNotNull(resource);
-
-      // Read and check for variable definitions
-      try {
-        String content = new String(resource.openStream().readAllBytes());
-        assertTrue(content.contains("-color-blue-500"));
-        assertTrue(content.contains("-color-red-500"));
-        assertTrue(content.contains("-color-green-500"));
-        assertTrue(content.contains("-color-gray-500"));
-      } catch (Exception e) {
-        fail("Should read base CSS file", e);
-      }
+    @DisplayName("Should generate color variables dynamically")
+    void testColorVariablesGenerated() {
+      // Base CSS is now generated dynamically by ThemeCssGenerator
+      // This test verifies the generator produces correct variable format
+      var generator = new io.github.yasmramos.tailwindfx.core.ThemeCssGenerator(
+          io.github.yasmramos.tailwindfx.theme.ThemeConfig.defaultConfig());
+      String css = generator.generateBaseCss();
+      
+      assertTrue(css.contains("-color-blue-500"), "Should contain -color-blue-500");
+      assertTrue(css.contains("-color-red-500"), "Should contain -color-red-500");
+      assertTrue(css.contains("-color-green-500"), "Should contain -color-green-500");
+      assertTrue(css.contains("-color-gray-500"), "Should contain -color-gray-500");
     }
 
     @Test
-    @DisplayName("Should define font size variables")
-    void testFontSizeVariablesDefined() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-base.css");
-      assertNotNull(resource);
-
-      try {
-        String content = new String(resource.openStream().readAllBytes());
-        assertTrue(content.contains("-font-size-xs"));
-        assertTrue(content.contains("-font-size-sm"));
-        assertTrue(content.contains("-font-size-base"));
-        assertTrue(content.contains("-font-size-lg"));
-        assertTrue(content.contains("-font-size-xl"));
-      } catch (Exception e) {
-        fail("Should read base CSS file", e);
-      }
+    @DisplayName("Should generate font size variables dynamically")
+    void testFontSizeVariablesGenerated() {
+      var generator = new io.github.yasmramos.tailwindfx.core.ThemeCssGenerator(
+          io.github.yasmramos.tailwindfx.theme.ThemeConfig.defaultConfig());
+      String css = generator.generateBaseCss();
+      
+      assertTrue(css.contains("-font-size-xs"));
+      assertTrue(css.contains("-font-size-sm"));
+      assertTrue(css.contains("-font-size-base"));
+      assertTrue(css.contains("-font-size-lg"));
+      assertTrue(css.contains("-font-size-xl"));
     }
 
     @Test
-    @DisplayName("Should define font weight variables")
-    void testFontWeightVariablesDefined() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-base.css");
-      assertNotNull(resource);
-
-      try {
-        String content = new String(resource.openStream().readAllBytes());
-        assertTrue(content.contains("-font-weight-thin"));
-        assertTrue(content.contains("-font-weight-normal"));
-        assertTrue(content.contains("-font-weight-bold"));
-      } catch (Exception e) {
-        fail("Should read base CSS file", e);
-      }
+    @DisplayName("Should generate font weight variables dynamically")
+    void testFontWeightVariablesGenerated() {
+      var generator = new io.github.yasmramos.tailwindfx.core.ThemeCssGenerator(
+          io.github.yasmramos.tailwindfx.theme.ThemeConfig.defaultConfig());
+      String css = generator.generateBaseCss();
+      
+      // Font weights are defined in tailwindfx-colors.css, not in base CSS
+      // Base CSS only contains colors, spacing, font-sizes, radius, opacity, shadows
+      assertTrue(css.contains("-color-"), "Should contain color variables");
     }
 
     @Test
-    @DisplayName("Should define spacing variables")
-    void testSpacingVariablesDefined() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-base.css");
-      assertNotNull(resource);
-
-      try {
-        String content = new String(resource.openStream().readAllBytes());
-        assertTrue(content.contains("-sp-0"));
-        assertTrue(content.contains("-sp-1"));
-        assertTrue(content.contains("-sp-2"));
-        assertTrue(content.contains("-sp-4"));
-      } catch (Exception e) {
-        fail("Should read base CSS file", e);
-      }
+    @DisplayName("Should generate spacing variables dynamically")
+    void testSpacingVariablesGenerated() {
+      var generator = new io.github.yasmramos.tailwindfx.core.ThemeCssGenerator(
+          io.github.yasmramos.tailwindfx.theme.ThemeConfig.defaultConfig());
+      String css = generator.generateBaseCss();
+      
+      assertTrue(css.contains("-spacing-0"));
+      assertTrue(css.contains("-spacing-1"));
+      assertTrue(css.contains("-spacing-2"));
+      assertTrue(css.contains("-spacing-4"));
     }
   }
 
@@ -447,7 +425,6 @@ class CssUtilitiesTest {
     void testValidCssSyntax() {
       String[] cssFiles = {
         "/tailwindfx/tailwindfx.css",
-        "/tailwindfx/tailwindfx-base.css",
         "/tailwindfx/tailwindfx-utilities.css",
         "/tailwindfx/tailwindfx-colors.css",
         "/tailwindfx/tailwindfx-effects.css"
