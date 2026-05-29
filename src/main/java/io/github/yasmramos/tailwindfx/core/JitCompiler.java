@@ -480,7 +480,7 @@ public final class JitCompiler {
 
     // Validate that we have at least one valid color - fail explicitly if not
     if (from == null && to == null) {
-      LOG.warning("TailwindFX JIT: gradient without valid colors (from-* or to-* required)");
+      // Silent fail for incomplete gradient tokens (e.g., only from-* without to-*)
       return null;
     }
 
