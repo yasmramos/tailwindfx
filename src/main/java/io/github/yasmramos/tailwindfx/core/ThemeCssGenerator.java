@@ -39,20 +39,24 @@ public class ThemeCssGenerator {
     generateShadowVariables(css);
 
     css.append("}\n");
-    
+
     // Validate CSS structure
     String result = css.toString();
     if (!result.trim().endsWith("}")) {
       throw new IllegalStateException("Generated CSS does not end with closing brace");
     }
-    
+
     long openBraces = result.chars().filter(ch -> ch == '{').count();
     long closeBraces = result.chars().filter(ch -> ch == '}').count();
     if (openBraces != closeBraces) {
       throw new IllegalStateException(
-          "CSS brace mismatch: " + openBraces + " opening braces, " + closeBraces + " closing braces");
+          "CSS brace mismatch: "
+              + openBraces
+              + " opening braces, "
+              + closeBraces
+              + " closing braces");
     }
-    
+
     return result;
   }
 

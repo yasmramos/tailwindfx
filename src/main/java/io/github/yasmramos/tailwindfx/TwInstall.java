@@ -71,14 +71,15 @@ public final class TwInstall {
     String generatedCss = generator.generateBaseCss();
 
     // Properly encode CSS for data URL (RFC 2397)
-    String encodedCss = java.net.URLEncoder.encode(generatedCss, java.nio.charset.StandardCharsets.UTF_8)
-        .replace("+", "%20")
-        .replace("%3A", ":")
-        .replace("%3B", ";")
-        .replace("%7B", "{")
-        .replace("%7D", "}")
-        .replace("%23", "#");
-    
+    String encodedCss =
+        java.net.URLEncoder.encode(generatedCss, java.nio.charset.StandardCharsets.UTF_8)
+            .replace("+", "%20")
+            .replace("%3A", ":")
+            .replace("%3B", ";")
+            .replace("%7B", "{")
+            .replace("%7D", "}")
+            .replace("%23", "#");
+
     String dataUrl = "data:text/css;charset=utf-8," + encodedCss;
 
     var sheets = scene.getStylesheets();
