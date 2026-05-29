@@ -71,7 +71,7 @@ public class ThemeCssGenerator {
 
       for (int i = 0; i < shadeValues.length && i < shades.length; i++) {
         int shade = shadeValues[i];
-        String varName = "--color-" + colorName + "-" + shade;
+        String varName = "-color-" + colorName + "-" + shade;
         css.append("    ").append(varName).append(": ").append(shades[i]).append(";\n");
       }
     }
@@ -80,7 +80,7 @@ public class ThemeCssGenerator {
   private void generateSpacingVariables(StringBuilder css) {
     double[] spacing = themeConfig.spacing();
     for (int i = 0; i < spacing.length; i++) {
-      String varName = "--spacing-" + i;
+      String varName = "-spacing-" + i;
       css.append("    ").append(varName).append(": ").append((int) spacing[i]).append("px;\n");
     }
   }
@@ -90,7 +90,7 @@ public class ThemeCssGenerator {
     for (Map.Entry<String, Double> entry : fontSizes.entrySet()) {
       String key = entry.getKey();
       Double value = entry.getValue();
-      String varName = "--font-size-" + key;
+      String varName = "-font-size-" + key;
       css.append("    ").append(varName).append(": ").append(value.intValue()).append("px;\n");
     }
   }
@@ -101,7 +101,7 @@ public class ThemeCssGenerator {
 
     for (int i = 0; i < radiusKeys.length; i++) {
       double value = themeConfig.borderRadius(i);
-      String varName = "--radius-" + radiusKeys[i];
+      String varName = "-radius-" + radiusKeys[i];
       css.append("    ").append(varName).append(": ").append((int) value).append("px;\n");
     }
   }
@@ -111,7 +111,7 @@ public class ThemeCssGenerator {
     for (Map.Entry<String, Double> entry : opacity.entrySet()) {
       String key = entry.getKey();
       Double value = entry.getValue();
-      String varName = "--opacity-" + key;
+      String varName = "-opacity-" + key;
       css.append("    ").append(varName).append(": ").append(value).append(";\n");
     }
   }
@@ -130,7 +130,7 @@ public class ThemeCssGenerator {
     };
 
     for (int i = 0; i < shadows.length; i++) {
-      String varName = "--shadow-" + shadows[i];
+      String varName = "-shadow-" + shadows[i];
       css.append("    ").append(varName).append(": ").append(values[i]).append(";\n");
     }
   }
