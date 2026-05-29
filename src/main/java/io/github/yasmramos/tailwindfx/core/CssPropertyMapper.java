@@ -68,6 +68,22 @@ public final class CssPropertyMapper {
       case "rounded" -> "-fx-background-radius";
       case "shadow" -> "-fx-effect";
 
+      case "visible" -> "-fx-visibility";
+      case "hidden" -> "-fx-visibility";
+      case "invisible" -> "-fx-visibility";
+      
+      case "gap" -> "-fx-hgap";
+      case "gap-x" -> "-fx-hgap";
+      case "gap-y" -> "-fx-vgap";
+      
+      case "overflow" -> "-fx-overflow";
+      
+      case "cursor" -> "-fx-cursor";
+      
+      case "z" -> "-fx-z-index";
+      
+      case "resize" -> "-fx-resize";
+
       default -> null;
     };
   }
@@ -83,6 +99,26 @@ public final class CssPropertyMapper {
     // Handle border styles: border-solid, border-dashed, border-dotted, border-none
     if ("border".equals(prefix)) {
       return resolveBorderStyle(namedValue);
+    }
+    
+    // Handle cursor styles: cursor-pointer, cursor-default, etc.
+    if ("cursor".equals(prefix)) {
+      return resolveCursor(namedValue);
+    }
+    
+    // Handle overflow styles: overflow-hidden, overflow-visible, etc.
+    if ("overflow".equals(prefix)) {
+      return resolveOverflow(namedValue);
+    }
+    
+    // Handle visibility: visible, hidden, invisible
+    if ("visible".equals(prefix) || "hidden".equals(prefix) || "invisible".equals(prefix)) {
+      return resolveVisibility(prefix);
+    }
+    
+    // Handle resize: resize-none, resize-y, etc.
+    if ("resize".equals(prefix)) {
+      return resolveResize(namedValue);
     }
 
     return switch (prefix) {
@@ -101,6 +137,71 @@ public final class CssPropertyMapper {
       case "dashed" -> "dashed";
       case "dotted" -> "dotted";
       case "none" -> "none";
+      default -> null;
+    };
+  }
+  
+  /** Resuelve un cursor a su valor JavaFX. */
+  private String resolveCursor(String cursor) {
+    return switch (cursor) {
+      case "default" -> "-cursor-default";
+      case "pointer" -> "-cursor-hand";
+      case "text" -> "-cursor-text";
+      case "move" -> "-cursor-move";
+      case "wait" -> "-cursor-wait";
+      case "crosshair" -> "-cursor-crosshair";
+      case "help" -> "-cursor-wait";
+      case "not-allowed" -> "-cursor-disappear";
+      case "context-menu" -> "-cursor-default";
+      case "vertical-text" -> "-cursor-text";
+      case "alias" -> "-cursor-hand";
+      case "all-scroll" -> "-cursor-move";
+      case "grab" -> "-cursor-open-hand";
+      case "grabbing" -> "-cursor-closed-hand";
+      case "col-resize" -> "-cursor-h-resize";
+      case "row-resize" -> "-cursor-v-resize";
+      case "n-resize" -> "-cursor-n-resize";
+      case "e-resize" -> "-cursor-e-resize";
+      case "s-resize" -> "-cursor-s-resize";
+      case "w-resize" -> "-cursor-w-resize";
+      case "ne-resize" -> "-cursor-ne-resize";
+      case "nw-resize" -> "-cursor-nw-resize";
+      case "se-resize" -> "-cursor-se-resize";
+      case "sw-resize" -> "-cursor-sw-resize";
+      case "nesw-resize" -> "-cursor-ne-resize";
+      case "nwse-resize" -> "-cursor-nw-resize";
+      case "none" -> "-cursor-none";
+      default -> null;
+    };
+  }
+  
+  /** Resuelve overflow a su valor JavaFX. */
+  private String resolveOverflow(String overflow) {
+    return switch (overflow) {
+      case "visible" -> "visible";
+      case "hidden" -> "hidden";
+      case "scroll" -> "scroll";
+      case "auto" -> "auto";
+      default -> null;
+    };
+  }
+  
+  /** Resuelve visibilidad. */
+  private String resolveVisibility(String visibility) {
+    return switch (visibility) {
+      case "visible" -> "visible";
+      case "hidden", "invisible" -> "hidden";
+      default -> null;
+    };
+  }
+  
+  /** Resuelve resize a su valor JavaFX. */
+  private String resolveResize(String resize) {
+    return switch (resize) {
+      case "none" -> "none";
+      case "x" -> "horizontal";
+      case "y" -> "vertical";
+      case "both" -> "both";
       default -> null;
     };
   }
