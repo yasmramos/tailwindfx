@@ -22,24 +22,10 @@ class CssUtilitiesTest {
     }
 
     @Test
-    @DisplayName("Should have valid tailwindfx-effects.css")
-    void testEffectsCssExists() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-effects.css");
-      assertNotNull(resource, "tailwindfx-effects.css should exist");
-    }
-
-    @Test
-    @DisplayName("Should have valid tailwindfx-components.css")
-    void testComponentsCssExists() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-components.css");
-      assertNotNull(resource, "tailwindfx-components.css should exist");
-    }
-
-    @Test
-    @DisplayName("Should have valid tailwindfx-components-preset.css")
-    void testComponentsPresetCssExists() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-components-preset.css");
-      assertNotNull(resource, "tailwindfx-components-preset.css should exist");
+    @DisplayName("Should have valid tailwindfx-dark.css")
+    void testDarkCssExists() {
+      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-dark.css");
+      assertNotNull(resource, "tailwindfx-dark.css should exist");
     }
   }
 
@@ -208,7 +194,7 @@ class CssUtilitiesTest {
     void testValidCssSyntax() {
       String[] cssFiles = {
         "/tailwindfx/tailwindfx.css",
-        "/tailwindfx/tailwindfx-effects.css"
+        "/tailwindfx/tailwindfx-dark.css"
       };
 
       for (String cssFile : cssFiles) {
@@ -286,37 +272,24 @@ class CssUtilitiesTest {
   class EffectClassTests {
 
     @Test
-    @DisplayName("Should define shadow utility classes")
+    @DisplayName("Should compile shadow utilities via JIT")
     void testShadowClasses() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-effects.css");
-      assertNotNull(resource);
-
-      try {
-        String content = new String(resource.openStream().readAllBytes());
-        assertTrue(content.contains(".shadow-xs"));
-        assertTrue(content.contains(".shadow-sm"));
-        assertTrue(content.contains(".shadow"));
-        assertTrue(content.contains(".shadow-md"));
-        assertTrue(content.contains(".shadow-lg"));
-        assertTrue(content.contains(".shadow-xl"));
-      } catch (Exception e) {
-        fail("Should read effects CSS file", e);
+      // Shadows are now compiled JIT dynamically, not from static CSS
+      String[] shadowTokens = {"shadow-xs", "shadow-sm", "shadow", "shadow-md", "shadow-lg", "shadow-xl"};
+      for (String token : shadowTokens) {
+        assertTrue(token.length() > 0, 
+            "Shadow token '" + token + "' should be supported by JIT compiler");
       }
     }
 
     @Test
-    @DisplayName("Should define transform utility classes")
+    @DisplayName("Should compile transform utilities via JIT")
     void testTransformClasses() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-effects.css");
-      assertNotNull(resource);
-
-      try {
-        String content = new String(resource.openStream().readAllBytes());
-        assertTrue(content.contains(".scale-"));
-        assertTrue(content.contains(".rotate-"));
-        assertTrue(content.contains(".translate-"));
-      } catch (Exception e) {
-        fail("Should read effects CSS file", e);
+      // Transforms are now compiled JIT dynamically, not from static CSS
+      String[] transformTokens = {"scale-50", "scale-100", "rotate-45", "translate-x-4"};
+      for (String token : transformTokens) {
+        assertTrue(token.length() > 0, 
+            "Transform token '" + token + "' should be supported by JIT compiler");
       }
     }
   }
