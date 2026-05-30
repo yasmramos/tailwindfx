@@ -84,6 +84,16 @@ public final class CssPropertyMapper {
       
       case "resize" -> "-fx-resize";
 
+      case "skew-x" -> "-fx-she-x";
+      case "skew-y" -> "-fx-she-y";
+      
+      case "blur" -> "-fx-blur";
+      case "brightness" -> "-fx-brightness";
+      case "contrast" -> "-fx-contrast";
+      case "grayscale" -> "-fx-saturation";
+      case "invert" -> "-fx-invert";
+      case "sepia" -> "-fx-sepia";
+
       default -> null;
     };
   }
@@ -129,6 +139,13 @@ public final class CssPropertyMapper {
     // Handle max-width named values: max-w-xs, max-w-sm, etc.
     if ("max-w".equals(prefix)) {
       return resolveMaxWidth(namedValue);
+    }
+    
+    // Handle effects: blur, brightness, contrast, grayscale, invert, sepia, skew
+    if ("blur".equals(prefix) || "brightness".equals(prefix) || "contrast".equals(prefix) 
+        || "grayscale".equals(prefix) || "invert".equals(prefix) || "sepia".equals(prefix)
+        || "skew-x".equals(prefix) || "skew-y".equals(prefix)) {
+      return resolveEffectValue(prefix, namedValue);
     }
 
     return switch (prefix) {
@@ -377,6 +394,170 @@ public final class CssPropertyMapper {
       case "2xl" -> "0 25px 50px -12px rgba(0, 0, 0, 0.25)";
       case "none" -> "none";
       default -> null;
+    };
+  }
+
+  /** Resuelve valores de efectos: blur, brightness, contrast, grayscale, invert, sepia, skew. */
+  private String resolveEffectValue(String prefix, String value) {
+    if ("blur".equals(prefix)) {
+      return resolveBlur(value);
+    }
+    if ("brightness".equals(prefix)) {
+      return resolveBrightness(value);
+    }
+    if ("contrast".equals(prefix)) {
+      return resolveContrast(value);
+    }
+    if ("grayscale".equals(prefix)) {
+      return resolveGrayscale(value);
+    }
+    if ("invert".equals(prefix)) {
+      return resolveInvert(value);
+    }
+    if ("sepia".equals(prefix)) {
+      return resolveSepia(value);
+    }
+    if ("skew-x".equals(prefix)) {
+      return resolveSkewX(value);
+    }
+    if ("skew-y".equals(prefix)) {
+      return resolveSkewY(value);
+    }
+    return null;
+  }
+
+  private String resolveBlur(String value) {
+    return switch (value) {
+      case "none" -> "0px";
+      case "sm" -> "2px";
+      case "default" -> "4px";
+      case "md" -> "8px";
+      case "lg" -> "12px";
+      case "xl" -> "16px";
+      case "2xl" -> "24px";
+      case "3xl" -> "32px";
+      default -> {
+        // Handle numeric values like blur-10, blur-20
+        try {
+          int px = Integer.parseInt(value);
+          yield px + "px";
+        } catch (NumberFormatException e) {
+          yield null;
+        }
+      }
+    };
+  }
+
+  private String resolveBrightness(String value) {
+    return switch (value) {
+      case "0" -> "0%";
+      case "50" -> "50%";
+      case "75" -> "75%";
+      case "90" -> "90%";
+      case "95" -> "95%";
+      case "100" -> "100%";
+      case "105" -> "105%";
+      case "110" -> "110%";
+      case "125" -> "125%";
+      case "150" -> "150%";
+      case "200" -> "200%";
+      default -> value + "%";
+    };
+  }
+
+  private String resolveContrast(String value) {
+    return switch (value) {
+      case "0" -> "0%";
+      case "50" -> "50%";
+      case "75" -> "75%";
+      case "100" -> "100%";
+      case "125" -> "125%";
+      case "150" -> "150%";
+      case "200" -> "200%";
+      default -> value + "%";
+    };
+  }
+
+  private String resolveGrayscale(String value) {
+    return switch (value) {
+      case "0" -> "0%";
+      case "100" -> "100%";
+      default -> {
+        try {
+          int pct = Integer.parseInt(value);
+          yield pct + "%";
+        } catch (NumberFormatException e) {
+          yield null;
+        }
+      }
+    };
+  }
+
+  private String resolveInvert(String value) {
+    return switch (value) {
+      case "0" -> "0%";
+      case "100" -> "100%";
+      default -> {
+        try {
+          int pct = Integer.parseInt(value);
+          yield pct + "%";
+        } catch (NumberFormatException e) {
+          yield null;
+        }
+      }
+    };
+  }
+
+  private String resolveSepia(String value) {
+    return switch (value) {
+      case "0" -> "0%";
+      case "100" -> "100%";
+      default -> {
+        try {
+          int pct = Integer.parseInt(value);
+          yield pct + "%";
+        } catch (NumberFormatException e) {
+          yield null;
+        }
+      }
+    };
+  }
+
+  private String resolveSkewX(String value) {
+    return switch (value) {
+      case "0" -> "0";
+      case "1" -> "0.0175";
+      case "2" -> "0.0349";
+      case "3" -> "0.0524";
+      case "6" -> "0.1051";
+      case "12" -> "0.2126";
+      default -> {
+        try {
+          double degrees = Double.parseDouble(value);
+          yield String.valueOf(Math.tan(Math.toRadians(degrees)));
+        } catch (NumberFormatException e) {
+          yield null;
+        }
+      }
+    };
+  }
+
+  private String resolveSkewY(String value) {
+    return switch (value) {
+      case "0" -> "0";
+      case "1" -> "0.0175";
+      case "2" -> "0.0349";
+      case "3" -> "0.0524";
+      case "6" -> "0.1051";
+      case "12" -> "0.2126";
+      default -> {
+        try {
+          double degrees = Double.parseDouble(value);
+          yield String.valueOf(Math.tan(Math.toRadians(degrees)));
+        } catch (NumberFormatException e) {
+          yield null;
+        }
+      }
     };
   }
 }
