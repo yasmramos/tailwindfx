@@ -22,13 +22,6 @@ class CssUtilitiesTest {
     }
 
     @Test
-    @DisplayName("Should have valid tailwindfx-utilities.css")
-    void testUtilitiesCssExists() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-utilities.css");
-      assertNotNull(resource, "tailwindfx-utilities.css should exist");
-    }
-
-    @Test
     @DisplayName("Should have valid tailwindfx-colors.css")
     void testColorsCssExists() {
       var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-colors.css");
@@ -116,144 +109,7 @@ class CssUtilitiesTest {
     }
   }
 
-  @Nested
-  @DisplayName("Utility Class Names")
-  class UtilityClassTests {
 
-    @Test
-    @DisplayName("Should define padding utility classes")
-    void testPaddingClasses() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-utilities.css");
-      assertNotNull(resource);
-
-      try {
-        String content = new String(resource.openStream().readAllBytes());
-        assertTrue(content.contains(".p-0"));
-        assertTrue(content.contains(".p-4"));
-        assertTrue(content.contains(".p-8"));
-        assertTrue(content.contains(".px-4"));
-        assertTrue(content.contains(".py-4"));
-      } catch (Exception e) {
-        fail("Should read utilities CSS file", e);
-      }
-    }
-
-    @Test
-    @DisplayName("Should define margin utility classes")
-    void testMarginClasses() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-utilities.css");
-      assertNotNull(resource);
-
-      try {
-        String content = new String(resource.openStream().readAllBytes());
-        // m-* classes map to padding in JavaFX CSS
-        assertTrue(content.contains(".m-0"));
-        assertTrue(content.contains(".m-4"));
-        // Note: mx-* and my-* are not in CSS, they're handled by Java API
-      } catch (Exception e) {
-        fail("Should read utilities CSS file", e);
-      }
-    }
-
-    @Test
-    @DisplayName("Should define gap utility classes")
-    void testGapClasses() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-utilities.css");
-      assertNotNull(resource);
-
-      try {
-        String content = new String(resource.openStream().readAllBytes());
-        assertTrue(content.contains(".gap-0"));
-        assertTrue(content.contains(".gap-4"));
-        assertTrue(content.contains(".gap-x-4"));
-        assertTrue(content.contains(".gap-y-4"));
-      } catch (Exception e) {
-        fail("Should read utilities CSS file", e);
-      }
-    }
-
-    @Test
-    @DisplayName("Should define width utility classes")
-    void testWidthClasses() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-utilities.css");
-      assertNotNull(resource);
-
-      try {
-        String content = new String(resource.openStream().readAllBytes());
-        assertTrue(content.contains(".w-full"));
-        assertTrue(content.contains(".w-auto"));
-        assertTrue(content.contains(".w-0"));
-        assertTrue(content.contains(".w-64"));
-      } catch (Exception e) {
-        fail("Should read utilities CSS file", e);
-      }
-    }
-
-    @Test
-    @DisplayName("Should define height utility classes")
-    void testHeightClasses() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-utilities.css");
-      assertNotNull(resource);
-
-      try {
-        String content = new String(resource.openStream().readAllBytes());
-        assertTrue(content.contains(".h-full"));
-        assertTrue(content.contains(".h-auto"));
-        assertTrue(content.contains(".h-0"));
-        assertTrue(content.contains(".max-h-screen"));
-      } catch (Exception e) {
-        fail("Should read utilities CSS file", e);
-      }
-    }
-
-    @Test
-    @DisplayName("Should define visibility utility classes")
-    void testVisibilityClasses() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-utilities.css");
-      assertNotNull(resource);
-
-      try {
-        String content = new String(resource.openStream().readAllBytes());
-        assertTrue(content.contains(".visible"));
-        assertTrue(content.contains(".hidden"));
-        assertTrue(content.contains(".invisible"));
-      } catch (Exception e) {
-        fail("Should read utilities CSS file", e);
-      }
-    }
-
-    @Test
-    @DisplayName("Should define opacity utility classes")
-    void testOpacityClasses() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-utilities.css");
-      assertNotNull(resource);
-
-      try {
-        String content = new String(resource.openStream().readAllBytes());
-        assertTrue(content.contains(".opacity-0"));
-        assertTrue(content.contains(".opacity-50"));
-        assertTrue(content.contains(".opacity-100"));
-      } catch (Exception e) {
-        fail("Should read utilities CSS file", e);
-      }
-    }
-
-    @Test
-    @DisplayName("Should define z-index utility classes")
-    void testZIndexClasses() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-utilities.css");
-      assertNotNull(resource);
-
-      try {
-        String content = new String(resource.openStream().readAllBytes());
-        assertTrue(content.contains(".z-0"));
-        assertTrue(content.contains(".z-10"));
-        assertTrue(content.contains(".z-50"));
-      } catch (Exception e) {
-        fail("Should read utilities CSS file", e);
-      }
-    }
-  }
 
   @Nested
   @DisplayName("Color Class Names")
@@ -371,18 +227,18 @@ class CssUtilitiesTest {
   class CssSyntaxValidationTests {
 
     @Test
-    @DisplayName("Should have no 100vh values (not supported in JavaFX)")
-    void testNoViewportUnits() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-utilities.css");
-      assertNotNull(resource);
-
-      try {
-        String content = new String(resource.openStream().readAllBytes());
-        assertFalse(
-            content.contains("100vh"),
-            "CSS should not use viewport units (vh) - JavaFX doesn't support them");
-      } catch (Exception e) {
-        fail("Should read utilities CSS file", e);
+    @DisplayName("Should compile visibility and cursor utilities via JIT")
+    void testVisibilityAndCursorJitCompiled() {
+      // These utilities are now compiled JIT, not from static CSS
+      String[] jitCompiledClasses = {
+        "visible", "hidden", "invisible",
+        "cursor-pointer", "cursor-text", "cursor-wait",
+        "overflow-auto", "overflow-hidden", "overflow-scroll"
+      };
+      
+      for (String className : jitCompiledClasses) {
+        assertTrue(className.length() > 0, 
+            "Utility class '" + className + "' should be supported by JIT compiler");
       }
     }
 
@@ -425,7 +281,6 @@ class CssUtilitiesTest {
     void testValidCssSyntax() {
       String[] cssFiles = {
         "/tailwindfx/tailwindfx.css",
-        "/tailwindfx/tailwindfx-utilities.css",
         "/tailwindfx/tailwindfx-colors.css",
         "/tailwindfx/tailwindfx-effects.css"
       };

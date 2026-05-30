@@ -120,6 +120,16 @@ public final class CssPropertyMapper {
     if ("resize".equals(prefix)) {
       return resolveResize(namedValue);
     }
+    
+    // Handle width/height special values: w-auto, w-min, w-max, h-auto, h-min, h-max
+    if ("w".equals(prefix) || "h".equals(prefix)) {
+      return resolveDimension(namedValue);
+    }
+    
+    // Handle max-width named values: max-w-xs, max-w-sm, etc.
+    if ("max-w".equals(prefix)) {
+      return resolveMaxWidth(namedValue);
+    }
 
     return switch (prefix) {
       case "text" -> resolveFontSize(namedValue);
@@ -205,6 +215,31 @@ public final class CssPropertyMapper {
       default -> null;
     };
   }
+  
+  /** Resuelve valores especiales de dimensión: auto, min, max. */
+  private String resolveDimension(String value) {
+    return switch (value) {
+      case "auto" -> "USE_PREF_SIZE";
+      case "min" -> "USE_PREF_SIZE";
+      case "max" -> "-1"; // -1 representa USE_COMPUTED_SIZE en JavaFX
+      default -> null;
+    };
+  }
+  
+  /** Resuelve valores nombrados de max-width. */
+  private String resolveMaxWidth(String value) {
+    return switch (value) {
+      case "xs" -> "320px";
+      case "sm" -> "384px";
+      case "md" -> "448px";
+      case "lg" -> "512px";
+      case "xl" -> "576px";
+      case "2xl" -> "672px";
+      case "3xl" -> "768px";
+      case "full" -> "100%";
+      default -> null;
+    };
+  }
 
   /**
    * Mapea un token completo a una propiedad CSS con su valor.
@@ -221,6 +256,18 @@ public final class CssPropertyMapper {
     // Manejo especial para border-* styles (solid, dashed, dotted, none)
     if ("border".equals(token.prefix) && isBorderStyle(token.namedValue)) {
       return prop("-fx-border-style", resolvedValue);
+    }
+    
+    // Manejo especial para w-auto, w-min, w-max, h-auto, h-min, h-max
+    if (("w".equals(token.prefix) || "h".equals(token.prefix)) 
+        && ("auto".equals(token.namedValue) || "min".equals(token.namedValue) || "max".equals(token.namedValue))) {
+      String property = mapToCssProperty(token.prefix);
+      return prop(property, resolvedValue);
+    }
+    
+    // Manejo especial para max-w-*
+    if ("max-w".equals(token.prefix) && resolvedValue != null) {
+      return prop("-fx-max-width", resolvedValue);
     }
 
     String property = mapToCssProperty(token.prefix);
