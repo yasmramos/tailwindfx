@@ -1,13 +1,13 @@
 package io.github.yasmramos.tailwindfx.components;
 
-import io.github.yasmramos.tailwindfx.TailwindFX;
 import io.github.yasmramos.tailwindfx.animation.TwAnimation;
+import io.github.yasmramos.tailwindfx.core.ComponentStyles;
 import javafx.scene.control.Button;
 
 /**
  * TwButton — Pre-styled button component with TailwindCSS variants.
  *
- * <p>Uses base .btn class from tailwindfx-components.css with utility modifiers.
+ * <p>Uses programmatic styles from ComponentStyles for dynamic theming.
  *
  * <pre>
  * Button btn = TwButton.primary("Save");
@@ -40,7 +40,7 @@ public final class TwButton {
    */
   public static Button primary(String text, String color) {
     Button btn = new Button(text);
-    TailwindFX.apply(btn, "btn", "btn-primary", "btn-" + color, "btn-md");
+    ComponentStyles.applyButtonPrimary(btn, color);
     TwAnimation.onHoverLift(btn, -2);
     return btn;
   }
@@ -64,7 +64,7 @@ public final class TwButton {
    */
   public static Button secondary(String text, String color) {
     Button btn = new Button(text);
-    TailwindFX.apply(btn, "btn", "btn-secondary", "btn-" + color, "btn-md");
+    ComponentStyles.applyButtonSecondary(btn, color);
     TwAnimation.onHoverLift(btn, -1);
     return btn;
   }
@@ -88,7 +88,7 @@ public final class TwButton {
    */
   public static Button outline(String text, String color) {
     Button btn = new Button(text);
-    TailwindFX.apply(btn, "btn", "btn-outline", "btn-" + color, "btn-md");
+    ComponentStyles.applyButtonOutline(btn, color);
     TwAnimation.onHoverLift(btn, -1);
     return btn;
   }
@@ -112,7 +112,7 @@ public final class TwButton {
    */
   public static Button ghost(String text, String color) {
     Button btn = new Button(text);
-    TailwindFX.apply(btn, "btn", "btn-ghost", "btn-" + color, "btn-md");
+    ComponentStyles.applyButtonGhost(btn, color);
     return btn;
   }
 
@@ -138,7 +138,8 @@ public final class TwButton {
   public static Button icon(String icon, String label, String color) {
     Button btn = new Button(icon);
     btn.setAccessibleText(label);
-    TailwindFX.apply(btn, "btn", "btn-icon", "btn-" + color, "btn-circle");
+    ComponentStyles.applyButtonBase(btn);
+    btn.setStyle(btn.getStyle() + " -fx-min-width: 40px; -fx-min-height: 40px; -fx-padding: 0; -fx-background-radius: 9999px;");
     return btn;
   }
 
@@ -171,8 +172,7 @@ public final class TwButton {
    */
   public static Button disabled(String text) {
     Button btn = new Button(text);
-    TailwindFX.apply(btn, "btn", "btn-disabled");
-    btn.setDisable(true);
+    ComponentStyles.applyButtonDisabled(btn);
     return btn;
   }
 }
