@@ -28,6 +28,8 @@ public final class ComponentStyles {
 
   public static void applyButtonPrimary(Button btn, String colorName) {
     applyButtonBase(btn);
+    btn.getStyleClass().addAll("btn", "btn-primary", "btn-" + colorName, "btn-md");
+    
     String hexColor = ColorPalette.hex(colorName, 500);
     String hexHover = ColorPalette.hex(colorName, 600);
     String hexPressed = ColorPalette.hex(colorName, 700);
@@ -47,6 +49,8 @@ public final class ComponentStyles {
 
   public static void applyButtonSecondary(Button btn, String colorName) {
     applyButtonBase(btn);
+    btn.getStyleClass().addAll("btn", "btn-secondary", "btn-" + colorName, "btn-md");
+    
     String hexBg = ColorPalette.hex(colorName, 100);
     String hexText = ColorPalette.hex(colorName, 700);
     String hexHoverBg = ColorPalette.hex(colorName, 200);
@@ -64,6 +68,8 @@ public final class ComponentStyles {
 
   public static void applyButtonOutline(Button btn, String colorName) {
     applyButtonBase(btn);
+    btn.getStyleClass().addAll("btn", "btn-outline", "btn-" + colorName, "btn-md");
+    
     String hexBorder = ColorPalette.hex(colorName, 500);
     String hexHoverBg = ColorPalette.hex(colorName, 50);
     String hexText = ColorPalette.hex(colorName, 700);
@@ -86,6 +92,8 @@ public final class ComponentStyles {
 
   public static void applyButtonGhost(Button btn, String colorName) {
     applyButtonBase(btn);
+    btn.getStyleClass().addAll("btn", "btn-ghost", "btn-" + colorName, "btn-md");
+    
     String hexText = ColorPalette.hex(colorName, 700);
     String hexHoverBg = ColorPalette.hex(colorName, 100);
     
@@ -101,6 +109,8 @@ public final class ComponentStyles {
 
   public static void applyButtonDisabled(Button btn) {
     applyButtonBase(btn);
+    btn.getStyleClass().addAll("btn", "btn-disabled", "btn-gray", "btn-md");
+    
     Color bg = Color.GRAY;
     Color text = Color.LIGHTGRAY;
 
