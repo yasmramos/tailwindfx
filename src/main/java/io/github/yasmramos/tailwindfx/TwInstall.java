@@ -45,7 +45,6 @@ public final class TwInstall {
   public static void installDark(Scene scene) {
     // Dark mode is now handled by ThemeManager.theme(scene).dark().apply()
     // No static CSS file needed
-    TwLog.debug("Dark mode installed via ThemeManager (no static CSS)");
   }
 
   /**
