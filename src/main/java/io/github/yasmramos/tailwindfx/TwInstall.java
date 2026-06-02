@@ -43,7 +43,8 @@ public final class TwInstall {
 
   /** Installs dark mode overrides. Optional. */
   public static void installDark(Scene scene) {
-    installCss(scene, "/tailwindfx/tailwindfx-dark.css", 10);
+    // Dark mode is now handled by ThemeManager.theme(scene).dark().apply()
+    // No static CSS file needed
   }
 
   /**
