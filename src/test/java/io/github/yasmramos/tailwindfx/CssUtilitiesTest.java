@@ -15,17 +15,15 @@ class CssUtilitiesTest {
   class CssFileValidationTests {
 
     @Test
-    @DisplayName("Should have valid tailwindfx.css")
-    void testMainCssExists() {
+    @DisplayName("Should have no static CSS files as everything is JIT compiled")
+    void testNoStaticCssFiles() {
+      // All CSS is now generated dynamically by ThemeCssGenerator and applied via JIT
+      // No static CSS files should be required
       var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx.css");
-      assertNotNull(resource, "tailwindfx.css should exist");
-    }
-
-    @Test
-    @DisplayName("Should have valid tailwindfx-dark.css")
-    void testDarkCssExists() {
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-dark.css");
-      assertNotNull(resource, "tailwindfx-dark.css should exist");
+      assertNull(resource, "tailwindfx.css should NOT exist (JIT compiled)");
+      
+      var darkResource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-dark.css");
+      assertNull(darkResource, "tailwindfx-dark.css should NOT exist (handled by ThemeManager)");
     }
   }
 
@@ -190,31 +188,25 @@ class CssUtilitiesTest {
     }
 
     @Test
-    @DisplayName("Should have valid CSS syntax (basic check)")
+    @DisplayName("Should have valid CSS syntax in generated base CSS")
     void testValidCssSyntax() {
-      String[] cssFiles = {
-        "/tailwindfx/tailwindfx.css",
-        "/tailwindfx/tailwindfx-dark.css"
-      };
-
-      for (String cssFile : cssFiles) {
-        var resource = TailwindFX.class.getResource(cssFile);
-        assertNotNull(resource, cssFile + " should exist");
-
-        try {
-          String content = new String(resource.openStream().readAllBytes());
-          // Basic syntax checks
-          assertTrue(
-              content.startsWith("/*") || content.startsWith("."),
-              cssFile + " should start with comment or selector");
-          // Should have balanced braces
-          long openBraces = content.chars().filter(ch -> ch == '{').count();
-          long closeBraces = content.chars().filter(ch -> ch == '}').count();
-          assertEquals(openBraces, closeBraces, cssFile + " should have balanced braces");
-        } catch (Exception e) {
-          fail("Should read CSS file: " + cssFile, e);
-        }
-      }
+      // Test the dynamically generated base CSS instead of static files
+      var generator = new io.github.yasmramos.tailwindfx.core.ThemeCssGenerator(
+          io.github.yasmramos.tailwindfx.theme.ThemeConfig.defaultConfig());
+      String content = generator.generateBaseCss();
+      
+      assertNotNull(content, "Generated CSS should not be null");
+      assertTrue(content.length() > 0, "Generated CSS should not be empty");
+      
+      // Basic syntax checks
+      assertTrue(
+          content.startsWith(".root") || content.contains("-color-"),
+          "Generated CSS should start with .root or contain color variables");
+      
+      // Should have balanced braces
+      long openBraces = content.chars().filter(ch -> ch == '{').count();
+      long closeBraces = content.chars().filter(ch -> ch == '}').count();
+      assertEquals(openBraces, closeBraces, "Generated CSS should have balanced braces");
     }
   }
 
