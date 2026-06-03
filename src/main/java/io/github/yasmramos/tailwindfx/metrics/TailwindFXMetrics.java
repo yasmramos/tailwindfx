@@ -545,9 +545,9 @@ public final class TailwindFXMetrics {
   public void printHealth() {
     java.util.List<HealthIssue> issues = checkHealth();
     if (issues.isEmpty()) {
-      System.out.println("TailwindFX metrics: ✅ All healthy");
+      System.out.println("[TailwindFX Metrics] ✅ All healthy");
     } else {
-      System.out.println("TailwindFX metrics health report:");
+      System.out.println("[TailwindFX Metrics] Health report:");
       for (HealthIssue issue : issues) {
         System.out.println("  " + issue.level() + ": " + issue.message());
         System.out.println("        → " + issue.advice());

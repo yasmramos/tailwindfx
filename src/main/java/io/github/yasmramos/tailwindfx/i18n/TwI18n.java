@@ -363,8 +363,7 @@ public final class TwI18n {
           try {
             return ResourceBundle.getBundle(baseName, loc);
           } catch (MissingResourceException e) {
-            System.err.println(
-                "TwI18n: Could not load bundle '"
+            System.err.println("[TwI18n] Could not load bundle '"
                     + baseName
                     + "' for locale '"
                     + loc
