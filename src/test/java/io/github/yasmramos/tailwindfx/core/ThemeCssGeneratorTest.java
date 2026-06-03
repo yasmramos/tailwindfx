@@ -80,15 +80,8 @@ public class ThemeCssGeneratorTest {
     assertTrue(css.contains("-opacity-100"));
   }
 
-  @Test
-  public void testGenerateBaseCss_HasShadowVariables() {
-    String css = generator.generateBaseCss();
-    assertTrue(css.contains("-shadow-sm"));
-    assertTrue(css.contains("-shadow-default"));
-    assertTrue(css.contains("-shadow-md"));
-    assertTrue(css.contains("-shadow-lg"));
-    assertTrue(css.contains("-shadow-xl"));
-  }
+  // Note: Shadow variables are no longer generated in CSS as shadows are applied
+  // directly via JavaFX API (DropShadow) in Styles.java
 
   @Test
   public void testGenerateBaseCss_ValidCssSyntax() {

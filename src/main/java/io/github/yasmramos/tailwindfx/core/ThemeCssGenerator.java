@@ -35,8 +35,8 @@ public class ThemeCssGenerator {
     // Generate Opacity Variables
     generateOpacityVariables(css);
 
-    // Generate Box Shadow Variables (Basic implementation)
-    generateShadowVariables(css);
+    // Note: Shadow variables are not generated here as they are applied
+    // directly via JavaFX API (DropShadow) in Styles.java, not via CSS.
 
     css.append("}\n");
 
@@ -116,22 +116,5 @@ public class ThemeCssGenerator {
     }
   }
 
-  private void generateShadowVariables(StringBuilder css) {
-    // Basic shadow mapping - can be expanded based on ThemeConfig if it supports custom shadows
-    String[] shadows = {"sm", "default", "md", "lg", "xl", "2xl", "none"};
-    String[] values = {
-      "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-      "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)",
-      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)",
-      "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)",
-      "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
-      "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-      "none"
-    };
-
-    for (int i = 0; i < shadows.length; i++) {
-      String varName = "-shadow-" + shadows[i];
-      css.append("    ").append(varName).append(": ").append(values[i]).append(";\n");
-    }
-  }
+  // Removed generateShadowVariables method as shadows are now applied via JavaFX API
 }
