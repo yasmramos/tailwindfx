@@ -36,13 +36,13 @@ public final class CssPropertyMapper {
       case "pb", "bottom" -> "-fx-padding";
       case "pl", "left" -> "-fx-padding";
 
-      case "m" -> "-fx-margin";
-      case "mx" -> "-fx-margin";
-      case "my" -> "-fx-margin";
-      case "mt" -> "-fx-margin";
-      case "mr" -> "-fx-margin";
-      case "mb" -> "-fx-margin";
-      case "ml" -> "-fx-margin";
+      case "m" -> null; // Margin handled via code (Styles.java) - CSS property doesn't exist
+      case "mx" -> null; // Margin handled via code (Styles.java) - CSS property doesn't exist
+      case "my" -> null; // Margin handled via code (Styles.java) - CSS property doesn't exist
+      case "mt" -> null; // Margin handled via code (Styles.java) - CSS property doesn't exist
+      case "mr" -> null; // Margin handled via code (Styles.java) - CSS property doesn't exist
+      case "mb" -> null; // Margin handled via code (Styles.java) - CSS property doesn't exist
+      case "ml" -> null; // Margin handled via code (Styles.java) - CSS property doesn't exist
 
       case "bg" -> "-fx-background-color";
       case "border" -> "-fx-border-color";
@@ -76,23 +76,20 @@ public final class CssPropertyMapper {
       case "gap-x" -> "-fx-hgap";
       case "gap-y" -> "-fx-vgap";
       
-      case "overflow" -> "-fx-overflow";
+      case "overflow" -> null; // Not supported in JavaFX CSS - requires code
+      case "cursor" -> null; // Cursor handled via code (node.setCursor) - CSS values incompatible
+      case "z" -> null; // Z-index not supported in JavaFX CSS - use node.setViewOrder()
+      case "resize" -> null; // Resize not supported in JavaFX CSS - requires code
       
-      case "cursor" -> "-fx-cursor";
+      case "skew-x" -> null; // Skew not supported in JavaFX CSS - requires Transform
+      case "skew-y" -> null; // Skew not supported in JavaFX CSS - requires Transform
       
-      case "z" -> "-fx-z-index";
-      
-      case "resize" -> "-fx-resize";
-
-      case "skew-x" -> "-fx-she-x";
-      case "skew-y" -> "-fx-she-y";
-      
-      case "blur" -> "-fx-blur";
-      case "brightness" -> "-fx-brightness";
-      case "contrast" -> "-fx-contrast";
-      case "grayscale" -> "-fx-saturation";
-      case "invert" -> "-fx-invert";
-      case "sepia" -> "-fx-sepia";
+      case "blur" -> null; // Effects not supported in JavaFX CSS - use Effect API
+      case "brightness" -> null; // Effects not supported in JavaFX CSS - use Effect API
+      case "contrast" -> null; // Effects not supported in JavaFX CSS - use Effect API
+      case "grayscale" -> null; // Effects not supported in JavaFX CSS - use Effect API
+      case "invert" -> null; // Effects not supported in JavaFX CSS - use Effect API
+      case "sepia" -> null; // Effects not supported in JavaFX CSS - use Effect API
 
       default -> null;
     };

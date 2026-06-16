@@ -599,6 +599,35 @@ public final class TwStyle {
         || STATE_PREFIXES.stream().anyMatch(token::startsWith);
   }
 
+  /** Checks if a token has any variant prefix (state, responsive, theme, group, arbitrary). */
+  private static boolean hasVariant(String token) {
+    // Check for standard variants
+    if (RESPONSIVE_PREFIXES.stream().anyMatch(token::startsWith)
+        || STATE_PREFIXES.stream().anyMatch(token::startsWith)
+        || token.startsWith("dark:")
+        || token.startsWith("light:")
+        || token.startsWith("group-")) {
+      return true;
+    }
+    // Check for arbitrary variants: [&:hover], [@media...]
+    if (token.startsWith("[") && token.contains("]")) {
+      int closeBracket = token.indexOf(']');
+      if (closeBracket < token.length() - 1 && token.charAt(closeBracket + 1) == ':') {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /** Extracts the base utility from a variant token (e.g., "hover:bg-blue-500" -> "bg-blue-500"). */
+  private static String getUtilityFromVariant(String token) {
+    int lastColon = token.lastIndexOf(':');
+    if (lastColon >= 0 && lastColon < token.length() - 1) {
+      return token.substring(lastColon + 1);
+    }
+    return token;
+  }
+
   /** Checks if a token requires layout context (parent container) to be applied. */
   private static boolean isLayoutDependent(String token) {
     return LAYOUT_DEPENDENT_PREFIXES.stream().anyMatch(token::startsWith);
