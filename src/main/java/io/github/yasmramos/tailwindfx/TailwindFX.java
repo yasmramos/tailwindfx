@@ -35,11 +35,6 @@ public final class TailwindFX {
     TwStyle.apply(node, tokens);
   }
 
-  /** Apply JIT-compiled styles to a node. */
-  public static void jit(Node node, String... tokens) {
-    TwStyle.apply(node, tokens);
-  }
-
   /** Remove CSS classes from a node. */
   public static void remove(Node node, String... classes) {
     TwStyle.remove(node, classes);

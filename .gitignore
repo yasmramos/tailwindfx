@@ -1,54 +1,17 @@
 ```
+# Compiled and build artifacts
+*.class
+*.o
+*.obj
+*.out
 # Dependencies
 target/
-
+.gradle/
 # Logs and temp files
 *.log
 *.tmp
-
-# Environment
-.env
-.env.local
-*.env.*
-
+*.swp
 # Editors
 .vscode/
 .idea/
-
-# Compiled and build artifacts
-*.class
-*.jar
-*.war
-*.ear
-*.so
-*.dll
-*.exe
-*.out
-*.o
-*.obj
-
-# Package management
-.gradle/
-.m2/
-.npm/
-.yarn/
-
-# Testing
-*.pyc
-__pycache__/
-*.pyo
-*.pyd
-
-# Coverage reports
-coverage/
-htmlcov/
-.coverage
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Build outputs
-dist/
-build/
 ```

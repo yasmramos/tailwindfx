@@ -480,51 +480,6 @@ public final class TwStyle {
     }
   }
 
-  /** Applies flex-related styles (flex-*, grow, shrink). */
-  private static void applyFlexStyle(Node node, javafx.scene.layout.Pane parent, String token) {
-    if (token.equals("grow") || token.equals("flex-1")) {
-      if (parent instanceof HBox) {
-        HBox.setHgrow(node, Priority.ALWAYS);
-      } else if (parent instanceof VBox) {
-        VBox.setVgrow(node, Priority.ALWAYS);
-      }
-    } else if (token.equals("shrink") || token.equals("flex-none")) {
-      if (parent instanceof HBox) {
-        HBox.setHgrow(node, Priority.NEVER);
-      } else if (parent instanceof VBox) {
-        VBox.setVgrow(node, Priority.NEVER);
-      }
-    } else if (token.equals("flex-auto")) {
-      if (parent instanceof HBox) {
-        HBox.setHgrow(node, Priority.ALWAYS);
-      } else if (parent instanceof VBox) {
-        VBox.setVgrow(node, Priority.ALWAYS);
-      }
-    } else if (token.equals("flex-initial")) {
-      if (parent instanceof HBox) {
-        HBox.setHgrow(node, Priority.SOMETIMES);
-      } else if (parent instanceof VBox) {
-        VBox.setVgrow(node, Priority.SOMETIMES);
-      }
-    } else if (token.startsWith("flex-")) {
-      // Handle arbitrary flex values like flex-[2]
-      try {
-        String value = token.substring(5);
-        if (value.startsWith("[") && value.endsWith("]")) {
-          value = value.substring(1, value.length() - 1);
-        }
-        double flexValue = Double.parseDouble(value);
-        if (parent instanceof HBox) {
-          HBox.setHgrow(node, Priority.ALWAYS);
-        } else if (parent instanceof VBox) {
-          VBox.setVgrow(node, Priority.ALWAYS);
-        }
-      } catch (NumberFormatException e) {
-        // Ignore invalid flex values
-      }
-    }
-  }
-
   /** Parses numeric value from Tailwind token (e.g., "m-4" -> 4, "p-[16px]" -> 4). */
   private static int parseTailwindValue(String token) {
     // Handle arbitrary values like m-[16px]

@@ -43,7 +43,8 @@ class TailwindFXTest extends ApplicationTest {
 
   @Test
   void testJitStyles() {
-    TailwindFX.jit(testButton, "bg-red-500");
+    // jit() was removed - use apply() instead as they were identical
+    TailwindFX.apply(testButton, "bg-red-500");
 
     // Verify that JIT styles were applied
     assertFalse(testButton.getStyleClass().isEmpty());

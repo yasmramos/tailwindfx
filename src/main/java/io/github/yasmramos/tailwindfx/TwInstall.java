@@ -94,32 +94,4 @@ public final class TwInstall {
     // Insert at specified priority
     sheets.add(Math.min(priority, sheets.size()), dataUrl);
   }
-
-  private static void installCss(Scene scene, String cssPath, int priority) {
-    // ClassLoader.getResource() no acepta "/" inicial; Class.getResource() sí.
-    String normalizedPath = cssPath.startsWith("/") ? cssPath.substring(1) : cssPath;
-    java.net.URL url = null;
-
-    // 1. Thread Context ClassLoader: resolve recursos en OSGi bundles, Java Modules o classloaders
-    // delegados
-    ClassLoader tccl = Thread.currentThread().getContextClassLoader();
-    if (tccl != null) url = tccl.getResource(normalizedPath);
-
-    // 2. ClassLoader de TailwindFX: fallback para entornos donde el TCCL es el del host/app
-    if (url == null) url = TwInstall.class.getClassLoader().getResource(normalizedPath);
-
-    // 3. Resolución relativa a la clase: captura recursos empaquetados junto al framework
-    if (url == null) url = TwInstall.class.getResource(cssPath);
-
-    String urlStr =
-        Objects.requireNonNull(
-                url, cssPath + " not found via TCCL, Framework CL, or class-relative path")
-            .toExternalForm();
-
-    var sheets = scene.getStylesheets();
-    if (sheets.contains(urlStr)) sheets.remove(urlStr);
-
-    // Inserción determinista por prioridad (mantiene cascada CSS estable)
-    sheets.add(Math.min(priority, sheets.size()), urlStr);
-  }
 }
