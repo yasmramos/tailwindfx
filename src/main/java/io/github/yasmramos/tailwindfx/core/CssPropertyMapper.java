@@ -100,32 +100,25 @@ public final class CssPropertyMapper {
    *
    * @param prefix Prefijo del token
    * @param namedValue Valor nominal (sm, md, lg, bold, solid, dashed, etc.)
-   * @return Valor CSS o null si no hay mapeo
+   * @return Valor CSS o null si no hay mapeo o la propiedad no es soportada vía CSS
    */
   public String resolveNamedValue(String prefix, String namedValue) {
+    // Properties not supported via CSS - must be handled via code (return null immediately)
+    if ("cursor".equals(prefix) || "overflow".equals(prefix) || "resize".equals(prefix)
+        || "z".equals(prefix) || "skew-x".equals(prefix) || "skew-y".equals(prefix)
+        || "blur".equals(prefix) || "brightness".equals(prefix) || "contrast".equals(prefix)
+        || "grayscale".equals(prefix) || "invert".equals(prefix) || "sepia".equals(prefix)) {
+      return null; // These require JavaFX API calls, not CSS
+    }
+    
     // Handle border styles: border-solid, border-dashed, border-dotted, border-none
     if ("border".equals(prefix)) {
       return resolveBorderStyle(namedValue);
     }
     
-    // Handle cursor styles: cursor-pointer, cursor-default, etc.
-    if ("cursor".equals(prefix)) {
-      return resolveCursor(namedValue);
-    }
-    
-    // Handle overflow styles: overflow-hidden, overflow-visible, etc.
-    if ("overflow".equals(prefix)) {
-      return resolveOverflow(namedValue);
-    }
-    
     // Handle visibility: visible, hidden, invisible
     if ("visible".equals(prefix) || "hidden".equals(prefix) || "invisible".equals(prefix)) {
       return resolveVisibility(prefix);
-    }
-    
-    // Handle resize: resize-none, resize-y, etc.
-    if ("resize".equals(prefix)) {
-      return resolveResize(namedValue);
     }
     
     // Handle width/height special values: w-auto, w-min, w-max, h-auto, h-min, h-max
@@ -136,13 +129,6 @@ public final class CssPropertyMapper {
     // Handle max-width named values: max-w-xs, max-w-sm, etc.
     if ("max-w".equals(prefix)) {
       return resolveMaxWidth(namedValue);
-    }
-    
-    // Handle effects: blur, brightness, contrast, grayscale, invert, sepia, skew
-    if ("blur".equals(prefix) || "brightness".equals(prefix) || "contrast".equals(prefix) 
-        || "grayscale".equals(prefix) || "invert".equals(prefix) || "sepia".equals(prefix)
-        || "skew-x".equals(prefix) || "skew-y".equals(prefix)) {
-      return resolveEffectValue(prefix, namedValue);
     }
 
     return switch (prefix) {
@@ -165,146 +151,6 @@ public final class CssPropertyMapper {
     };
   }
   
-  /** Resuelve un cursor a su valor JavaFX. */
-  private String resolveCursor(String cursor) {
-    return switch (cursor) {
-      case "default" -> "-cursor-default";
-      case "pointer" -> "-cursor-hand";
-      case "text" -> "-cursor-text";
-      case "move" -> "-cursor-move";
-      case "wait" -> "-cursor-wait";
-      case "crosshair" -> "-cursor-crosshair";
-      case "help" -> "-cursor-wait";
-      case "not-allowed" -> "-cursor-disappear";
-      case "context-menu" -> "-cursor-default";
-      case "vertical-text" -> "-cursor-text";
-      case "alias" -> "-cursor-hand";
-      case "all-scroll" -> "-cursor-move";
-      case "grab" -> "-cursor-open-hand";
-      case "grabbing" -> "-cursor-closed-hand";
-      case "col-resize" -> "-cursor-h-resize";
-      case "row-resize" -> "-cursor-v-resize";
-      case "n-resize" -> "-cursor-n-resize";
-      case "e-resize" -> "-cursor-e-resize";
-      case "s-resize" -> "-cursor-s-resize";
-      case "w-resize" -> "-cursor-w-resize";
-      case "ne-resize" -> "-cursor-ne-resize";
-      case "nw-resize" -> "-cursor-nw-resize";
-      case "se-resize" -> "-cursor-se-resize";
-      case "sw-resize" -> "-cursor-sw-resize";
-      case "nesw-resize" -> "-cursor-ne-resize";
-      case "nwse-resize" -> "-cursor-nw-resize";
-      case "none" -> "-cursor-none";
-      default -> null;
-    };
-  }
-  
-  /** Resuelve overflow a su valor JavaFX. */
-  private String resolveOverflow(String overflow) {
-    return switch (overflow) {
-      case "visible" -> "visible";
-      case "hidden" -> "hidden";
-      case "scroll" -> "scroll";
-      case "auto" -> "auto";
-      default -> null;
-    };
-  }
-  
-  /** Resuelve visibilidad. */
-  private String resolveVisibility(String visibility) {
-    return switch (visibility) {
-      case "visible" -> "visible";
-      case "hidden", "invisible" -> "hidden";
-      default -> null;
-    };
-  }
-  
-  /** Resuelve resize a su valor JavaFX. */
-  private String resolveResize(String resize) {
-    return switch (resize) {
-      case "none" -> "none";
-      case "x" -> "horizontal";
-      case "y" -> "vertical";
-      case "both" -> "both";
-      default -> null;
-    };
-  }
-  
-  /** Resuelve valores especiales de dimensión: auto, min, max. */
-  private String resolveDimension(String value) {
-    return switch (value) {
-      case "auto" -> "USE_PREF_SIZE";
-      case "min" -> "USE_PREF_SIZE";
-      case "max" -> "-1"; // -1 representa USE_COMPUTED_SIZE en JavaFX
-      default -> null;
-    };
-  }
-  
-  /** Resuelve valores nombrados de max-width. */
-  private String resolveMaxWidth(String value) {
-    return switch (value) {
-      case "xs" -> "320px";
-      case "sm" -> "384px";
-      case "md" -> "448px";
-      case "lg" -> "512px";
-      case "xl" -> "576px";
-      case "2xl" -> "672px";
-      case "3xl" -> "768px";
-      case "full" -> "100%";
-      default -> null;
-    };
-  }
-
-  /**
-   * Mapea un token completo a una propiedad CSS con su valor.
-   *
-   * @param token Token parseado
-   * @param resolvedValue Valor ya resuelto (ej: "16px", "rgb(...)")
-   * @return Propiedad CSS completa o null
-   */
-  public String map(StyleToken token, String resolvedValue) {
-    if (token == null || resolvedValue == null) {
-      return null;
-    }
-
-    // Manejo especial para border-* styles (solid, dashed, dotted, none)
-    if ("border".equals(token.prefix) && isBorderStyle(token.namedValue)) {
-      return prop("-fx-border-style", resolvedValue);
-    }
-    
-    // Manejo especial para w-auto, w-min, w-max, h-auto, h-min, h-max
-    if (("w".equals(token.prefix) || "h".equals(token.prefix)) 
-        && ("auto".equals(token.namedValue) || "min".equals(token.namedValue) || "max".equals(token.namedValue))) {
-      String property = mapToCssProperty(token.prefix);
-      return prop(property, resolvedValue);
-    }
-    
-    // Manejo especial para max-w-*
-    if ("max-w".equals(token.prefix) && resolvedValue != null) {
-      return prop("-fx-max-width", resolvedValue);
-    }
-
-    String property = mapToCssProperty(token.prefix);
-    if (property == null) {
-      return null;
-    }
-
-    // Manejo especial para propiedades compuestas
-    if ("p".equals(token.prefix) && token.subPrefix != null) {
-      return switch (token.subPrefix) {
-        case "x" -> px("padding", "0px %s 0px %s".formatted(resolvedValue, resolvedValue));
-        case "y" -> px("padding", "%s 0px %s 0px".formatted(resolvedValue, resolvedValue));
-        case "t" -> px("padding", "%s 0px 0px 0px".formatted(resolvedValue));
-        case "r" -> px("padding", "0px %s 0px 0px".formatted(resolvedValue));
-        case "b" -> px("padding", "0px 0px %s 0px".formatted(resolvedValue));
-        case "l" -> px("padding", "0px 0px 0px %s".formatted(resolvedValue));
-        default -> prop(property, resolvedValue);
-      };
-    }
-
-    return prop(property, resolvedValue);
-  }
-
   /** Verifica si un valor es un estilo de borde válido. */
   private boolean isBorderStyle(String value) {
     return "solid".equals(value)
@@ -394,167 +240,87 @@ public final class CssPropertyMapper {
     };
   }
 
-  /** Resuelve valores de efectos: blur, brightness, contrast, grayscale, invert, sepia, skew. */
-  private String resolveEffectValue(String prefix, String value) {
-    if ("blur".equals(prefix)) {
-      return resolveBlur(value);
-    }
-    if ("brightness".equals(prefix)) {
-      return resolveBrightness(value);
-    }
-    if ("contrast".equals(prefix)) {
-      return resolveContrast(value);
-    }
-    if ("grayscale".equals(prefix)) {
-      return resolveGrayscale(value);
-    }
-    if ("invert".equals(prefix)) {
-      return resolveInvert(value);
-    }
-    if ("sepia".equals(prefix)) {
-      return resolveSepia(value);
-    }
-    if ("skew-x".equals(prefix)) {
-      return resolveSkewX(value);
-    }
-    if ("skew-y".equals(prefix)) {
-      return resolveSkewY(value);
-    }
-    return null;
-  }
-
-  private String resolveBlur(String value) {
+  /** Resuelve valores especiales de dimensión: auto, min, max. */
+  private String resolveDimension(String value) {
     return switch (value) {
-      case "none" -> "0px";
-      case "sm" -> "2px";
-      case "default" -> "4px";
-      case "md" -> "8px";
-      case "lg" -> "12px";
-      case "xl" -> "16px";
-      case "2xl" -> "24px";
-      case "3xl" -> "32px";
-      default -> {
-        // Handle numeric values like blur-10, blur-20
-        try {
-          int px = Integer.parseInt(value);
-          yield px + "px";
-        } catch (NumberFormatException e) {
-          yield null;
-        }
-      }
+      case "auto" -> "USE_PREF_SIZE";
+      case "min" -> "USE_PREF_SIZE";
+      case "max" -> "-1"; // -1 representa USE_COMPUTED_SIZE en JavaFX
+      default -> null;
+    };
+  }
+  
+  /** Resuelve valores nombrados de max-width. */
+  private String resolveMaxWidth(String value) {
+    return switch (value) {
+      case "xs" -> "320px";
+      case "sm" -> "384px";
+      case "md" -> "448px";
+      case "lg" -> "512px";
+      case "xl" -> "576px";
+      case "2xl" -> "672px";
+      case "3xl" -> "768px";
+      case "full" -> "100%";
+      default -> null;
     };
   }
 
-  private String resolveBrightness(String value) {
-    return switch (value) {
-      case "0" -> "0%";
-      case "50" -> "50%";
-      case "75" -> "75%";
-      case "90" -> "90%";
-      case "95" -> "95%";
-      case "100" -> "100%";
-      case "105" -> "105%";
-      case "110" -> "110%";
-      case "125" -> "125%";
-      case "150" -> "150%";
-      case "200" -> "200%";
-      default -> value + "%";
-    };
+  /**
+   * Mapea un token completo a una propiedad CSS con su valor.
+   *
+   * @param token Token parseado
+   * @param resolvedValue Valor ya resuelto (ej: "16px", "rgb(...)")
+   * @return Propiedad CSS completa o null
+   */
+  public String map(StyleToken token, String resolvedValue) {
+    if (token == null || resolvedValue == null) {
+      return null;
+    }
+
+    // Manejo especial para border-* styles (solid, dashed, dotted, none)
+    if ("border".equals(token.prefix) && isBorderStyle(token.namedValue)) {
+      return prop("-fx-border-style", resolvedValue);
+    }
+    
+    // Manejo especial para w-auto, w-min, w-max, h-auto, h-min, h-max
+    if (("w".equals(token.prefix) || "h".equals(token.prefix)) 
+        && ("auto".equals(token.namedValue) || "min".equals(token.namedValue) || "max".equals(token.namedValue))) {
+      String property = mapToCssProperty(token.prefix);
+      return prop(property, resolvedValue);
+    }
+    
+    // Manejo especial para max-w-*
+    if ("max-w".equals(token.prefix) && resolvedValue != null) {
+      return prop("-fx-max-width", resolvedValue);
+    }
+
+    String property = mapToCssProperty(token.prefix);
+    if (property == null) {
+      return null;
+    }
+
+    // Manejo especial para propiedades compuestas
+    if ("p".equals(token.prefix) && token.subPrefix != null) {
+      return switch (token.subPrefix) {
+        case "x" -> px("padding", "0px %s 0px %s".formatted(resolvedValue, resolvedValue));
+        case "y" -> px("padding", "%s 0px %s 0px".formatted(resolvedValue, resolvedValue));
+        case "t" -> px("padding", "%s 0px 0px 0px".formatted(resolvedValue));
+        case "r" -> px("padding", "0px %s 0px 0px".formatted(resolvedValue));
+        case "b" -> px("padding", "0px 0px %s 0px".formatted(resolvedValue));
+        case "l" -> px("padding", "0px 0px 0px %s".formatted(resolvedValue));
+        default -> prop(property, resolvedValue);
+      };
+    }
+
+    return prop(property, resolvedValue);
   }
 
-  private String resolveContrast(String value) {
-    return switch (value) {
-      case "0" -> "0%";
-      case "50" -> "50%";
-      case "75" -> "75%";
-      case "100" -> "100%";
-      case "125" -> "125%";
-      case "150" -> "150%";
-      case "200" -> "200%";
-      default -> value + "%";
-    };
-  }
-
-  private String resolveGrayscale(String value) {
-    return switch (value) {
-      case "0" -> "0%";
-      case "100" -> "100%";
-      default -> {
-        try {
-          int pct = Integer.parseInt(value);
-          yield pct + "%";
-        } catch (NumberFormatException e) {
-          yield null;
-        }
-      }
-    };
-  }
-
-  private String resolveInvert(String value) {
-    return switch (value) {
-      case "0" -> "0%";
-      case "100" -> "100%";
-      default -> {
-        try {
-          int pct = Integer.parseInt(value);
-          yield pct + "%";
-        } catch (NumberFormatException e) {
-          yield null;
-        }
-      }
-    };
-  }
-
-  private String resolveSepia(String value) {
-    return switch (value) {
-      case "0" -> "0%";
-      case "100" -> "100%";
-      default -> {
-        try {
-          int pct = Integer.parseInt(value);
-          yield pct + "%";
-        } catch (NumberFormatException e) {
-          yield null;
-        }
-      }
-    };
-  }
-
-  private String resolveSkewX(String value) {
-    return switch (value) {
-      case "0" -> "0";
-      case "1" -> "0.0175";
-      case "2" -> "0.0349";
-      case "3" -> "0.0524";
-      case "6" -> "0.1051";
-      case "12" -> "0.2126";
-      default -> {
-        try {
-          double degrees = Double.parseDouble(value);
-          yield String.valueOf(Math.tan(Math.toRadians(degrees)));
-        } catch (NumberFormatException e) {
-          yield null;
-        }
-      }
-    };
-  }
-
-  private String resolveSkewY(String value) {
-    return switch (value) {
-      case "0" -> "0";
-      case "1" -> "0.0175";
-      case "2" -> "0.0349";
-      case "3" -> "0.0524";
-      case "6" -> "0.1051";
-      case "12" -> "0.2126";
-      default -> {
-        try {
-          double degrees = Double.parseDouble(value);
-          yield String.valueOf(Math.tan(Math.toRadians(degrees)));
-        } catch (NumberFormatException e) {
-          yield null;
-        }
-      }
+  /** Resuelve visibilidad. */
+  private String resolveVisibility(String visibility) {
+    return switch (visibility) {
+      case "visible" -> "visible";
+      case "hidden", "invisible" -> "hidden";
+      default -> null;
     };
   }
 }
