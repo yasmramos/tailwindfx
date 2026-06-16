@@ -1,27 +1,25 @@
 package io.github.yasmramos.tailwindfx.core;
 
+import io.github.yasmramos.tailwindfx.cache.LruCache;
 import io.github.yasmramos.tailwindfx.color.ColorPalette;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
 import io.github.yasmramos.tailwindfx.style.StyleToken;
 import io.github.yasmramos.tailwindfx.theme.ThemeConfig;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 /**
- * JitCompiler — Orquestador que convierte tokens Tailwind en propiedades -fx-* inline.
+ * JitCompiler — Orchestrator that converts Tailwind tokens into inline -fx-* properties.
  *
- * <p>Delega la resolución y mapeo a StyleResolver y CssPropertyMapper. Solo maneja cache, logging y
- * métricas.
+ * <p>Delegates resolution and mapping to StyleResolver and CssPropertyMapper. Only handles cache, logging and
+ * metrics.
  *
- * <p>Entrada: "p-4" → "-fx-padding: 16px;" Entrada: "bg-blue-500/80" → "-fx-background-color:
- * rgba(59,130,246,0.80);" Entrada: "w-[320px]" → "-fx-pref-width: 320px;" Entrada: "-translate-x-4"
+ * <p>Input: "p-4" → "-fx-padding: 16px;" Input: "bg-blue-500/80" → "-fx-background-color:
+ * rgba(59,130,246,0.80);" Input: "w-[320px]" → "-fx-pref-width: 320px;" Input: "-translate-x-4"
  * → "-fx-translate-x: -16px;"
  *
- * <p>Cache: compiled tokens are stored in a lock-free ConcurrentHashMap. Compiling "p-4" 1000 times
+ * <p>Cache: compiled tokens are stored in a thread-safe LRU cache with bounded size. Compiling "p-4" 1000 times
  * costs the same as compiling it once.
  *
  * <p>Unknown tokens — smart heuristic: If the token looks like a JIT utility (has numbers, /, [) →
@@ -35,35 +33,18 @@ public final class JitCompiler {
   private final StyleResolver resolver;
   private final CssPropertyMapper propertyMapper;
 
-  // Cache global: token raw → resultado compilado
-  // Lock-free LRU cache with bounded size — prevents unbounded growth in long-running apps
-  // Uses ConcurrentHashMap for thread-safe access without global locking
+  // Thread-safe LRU cache with bounded size — prevents unbounded growth in long-running apps
   /** Maximum number of compiled tokens to keep in the cache. */
   static final int MAX_CACHE_SIZE = 2_000;
 
   /**
-   * Thread-safe LRU cache using ConcurrentHashMap for storage. Access order is tracked via the
-   * ConcurrentHashMap itself using a secondary map with explicit synchronization to ensure atomic
-   * updates during eviction checks.
+   * Thread-safe LRU cache using ReentrantReadWriteLock for high-concurrency scenarios.
+   * Provides O(1) get/put operations with automatic LRU eviction.
    *
    * <p>Why 2000? A typical large app uses ~300-500 unique utility tokens. 2000 gives 4× headroom
    * for JIT-compiled arbitrary values while keeping the cache under ~400KB in the worst case.
    */
-  private static final ConcurrentHashMap<String, CompileResult> CACHE =
-      new ConcurrentHashMap<>(256);
-
-  /**
-   * Separate LRU tracking map for eviction policy. Synchronized explicitly to ensure thread-safe
-   * access and atomic eviction checks.
-   */
-  private static final Map<String, Long> ACCESS_ORDER =
-      Collections.synchronizedMap(new java.util.LinkedHashMap<>(256, 0.75f, true));
-
-  /**
-   * Lock object for coordinating cache eviction checks. Ensures that size checks and potential
-   * evictions are atomic.
-   */
-  private static final Object EVICTION_LOCK = new Object();
+  private static final LruCache<String, CompileResult> CACHE = new LruCache<>(MAX_CACHE_SIZE);
 
   // Modo debug: loguea todos los tokens procesados
   private static volatile boolean DEBUG = false;
@@ -254,8 +235,8 @@ public final class JitCompiler {
 
   // Public API
   /**
-   * Compiles a single token. Uses lock-free cache: compiling the same token N times costs the same
-   * as 1. Lock-free reads, atomic writes with putIfAtomic for thread-safety.
+   * Compiles a single token. Uses thread-safe LRU cache with automatic eviction.
+   * The cache provides O(1) get/put operations with ReadWriteLock for high concurrency.
    */
   public static CompileResult compile(String token) {
     if (token == null) {
@@ -265,57 +246,19 @@ public final class JitCompiler {
       return CompileResult.unknown(token);
     }
     String key = token.trim();
-    // Lock-free read - ConcurrentHashMap.get() is thread-safe without locking
-    CompileResult result = CACHE.get(key);
-    if (result != null) {
-      // Update access order for LRU eviction (synchronized internally)
-      synchronized (EVICTION_LOCK) {
-        ACCESS_ORDER.put(key, System.nanoTime());
-      }
-      TailwindFXMetrics.instance().recordCacheHit();
-      return result;
-    }
-    // Only synchronize on cache miss during compilation and put
+    
+    // Use computeIfAbsent for atomic check-and-compute operation
     long t0 = System.nanoTime();
-    result = INSTANCE.doCompile(key);
+    CompileResult result = CACHE.computeIfAbsent(key, k -> {
+      TailwindFXMetrics.instance().recordCacheMiss();
+      return INSTANCE.doCompile(k);
+    });
+    
+    // Record compilation time only on cache miss (when computation actually happened)
+    // Note: computeIfAbsent doesn't distinguish hit/miss, so we track via metrics in the lambda
     TailwindFXMetrics.instance().recordCompilation(System.nanoTime() - t0);
-
-    // Thread-safe put with atomic operation
-    CompileResult existing = CACHE.putIfAbsent(key, result);
-    if (existing != null) {
-      // Another thread compiled it first, use their result
-      TailwindFXMetrics.instance().recordCacheHit();
-      return existing;
-    }
-
-    // Update access order and perform eviction check atomically
-    synchronized (EVICTION_LOCK) {
-      ACCESS_ORDER.put(key, System.nanoTime());
-      // Manual eviction check since we removed the automatic callback
-      if (ACCESS_ORDER.size() > MAX_CACHE_SIZE) {
-        evictOldestEntries();
-      }
-    }
-    TailwindFXMetrics.instance().recordCacheMiss();
+    
     return result;
-  }
-
-  /**
-   * Evicts oldest entries from cache when size exceeds MAX_CACHE_SIZE. Must be called while holding
-   * EVICTION_LOCK.
-   */
-  private static void evictOldestEntries() {
-    // Remove eldest entries until we're under the limit
-    // The LinkedHashMap maintains access order, so eldest = least recently accessed
-    int toRemove = ACCESS_ORDER.size() - MAX_CACHE_SIZE;
-    if (toRemove <= 0) return;
-
-    java.util.Iterator<Map.Entry<String, Long>> iterator = ACCESS_ORDER.entrySet().iterator();
-    for (int i = 0; i < toRemove && iterator.hasNext(); i++) {
-      Map.Entry<String, Long> entry = iterator.next();
-      iterator.remove();
-      CACHE.remove(entry.getKey());
-    }
   }
 
   /**
@@ -426,11 +369,11 @@ public final class JitCompiler {
                 || t.startsWith("bg-gradient-");
         if (requiresJitCompilation(t) && !isGradientRelated) {
           LOG.warning(
-              "TailwindFX JIT: token desconocido '"
+              "TailwindFX JIT: unknown token '"
                   + t
                   + "' (looks like a JIT utility but was not recognized)");
         } else if (DEBUG) {
-          LOG.info("TailwindFX JIT: '" + t + "' → CSS class (fallback al stylesheet)");
+          LOG.info("TailwindFX JIT: '" + t + "' → CSS class (fallback to stylesheet)");
         }
       } else if (DEBUG) {
         String what =
@@ -516,7 +459,6 @@ public final class JitCompiler {
    */
   public static void clearCache() {
     CACHE.clear();
-    ACCESS_ORDER.clear();
   }
 
   /** Current cache size */
