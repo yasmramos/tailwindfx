@@ -1,7 +1,9 @@
 package io.github.yasmramos.tailwindfx;
 
+import io.github.yasmramos.tailwindfx.core.JitCompiler;
 import io.github.yasmramos.tailwindfx.core.Preconditions;
 import io.github.yasmramos.tailwindfx.core.UtilityConflictResolver;
+import io.github.yasmramos.tailwindfx.core.VariantManager;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
 import io.github.yasmramos.tailwindfx.style.StyleMerger;
 import io.github.yasmramos.tailwindfx.style.StylePerf;
@@ -121,6 +123,7 @@ public final class TwStyle {
     java.util.List<String> jitTokens = new java.util.ArrayList<>();
     java.util.List<String> layoutDependentTokens = new java.util.ArrayList<>();
     java.util.List<String> layoutMigrationTokens = new java.util.ArrayList<>();
+    java.util.List<String> variantTokens = new java.util.ArrayList<>();
 
     for (String token : tokens) {
       if (token == null || token.isBlank()) continue;
@@ -135,7 +138,10 @@ public final class TwStyle {
                   + ". Use programmatic logic instead.");
         }
 
-        if (isJitToken(t)) {
+        // Check if token has variants (hover:, focus:, md:, dark:, group-, etc.)
+        if (hasVariant(t)) {
+          variantTokens.add(t);
+        } else if (isJitToken(t)) {
           jitTokens.add(t);
           if (isLayoutDependent(t)) {
             layoutDependentTokens.add(t);
@@ -166,6 +172,13 @@ public final class TwStyle {
     // Apply layout-dependent styles first (needs parent context)
     if (!layoutDependentTokens.isEmpty()) {
       applyLayoutDependentStyles(node, layoutDependentTokens);
+    }
+
+    // Apply variant tokens (hover:, focus:, md:, etc.) via VariantManager
+    if (!variantTokens.isEmpty()) {
+      for (String variantToken : variantTokens) {
+        VariantManager.processToken(node, variantToken, JitCompiler.getInstance());
+      }
     }
 
     if (!jitTokens.isEmpty()) {

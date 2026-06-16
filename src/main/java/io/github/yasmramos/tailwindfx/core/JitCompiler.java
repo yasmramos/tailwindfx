@@ -51,6 +51,14 @@ public final class JitCompiler {
 
   // Singleton instance for static compile() method
   private static final JitCompiler INSTANCE = new JitCompiler();
+  
+  /**
+   * Returns the singleton JitCompiler instance.
+   * @return the singleton instance
+   */
+  public static JitCompiler getInstance() {
+    return INSTANCE;
+  }
 
   public JitCompiler() {
     this(ThemeConfig.defaultConfig());
