@@ -1277,4 +1277,200 @@ public final class Styles {
             4,
             4));
   }
+
+  // CURSOR — cursor-pointer, cursor-wait, cursor-text, etc.
+  // Corresponde a: cursor en CSS web
+  // NOTA: JavaFX usa node.setCursor(Cursor), no CSS
+
+  /** .cursor-default — cursor por defecto */
+  public static <T extends Node> T cursorDefault(T node) {
+    Preconditions.requireNode(node, "Styles.cursorDefault");
+    node.setCursor(javafx.scene.Cursor.DEFAULT);
+    return node;
+  }
+
+  /** .cursor-pointer — mano apuntando (equivalente a link web) */
+  public static <T extends Node> T cursorPointer(T node) {
+    Preconditions.requireNode(node, "Styles.cursorPointer");
+    node.setCursor(javafx.scene.Cursor.HAND);
+    return node;
+  }
+
+  /** .cursor-text — cursor de inserción de texto (I-beam) */
+  public static <T extends Node> T cursorText(T node) {
+    Preconditions.requireNode(node, "Styles.cursorText");
+    node.setCursor(javafx.scene.Cursor.TEXT);
+    return node;
+  }
+
+  /** .cursor-wait — cursor de espera (reloj/arena) */
+  public static <T extends Node> T cursorWait(T node) {
+    Preconditions.requireNode(node, "Styles.cursorWait");
+    node.setCursor(javafx.scene.Cursor.WAIT);
+    return node;
+  }
+
+  /** .cursor-crosshair — cursor de cruz */
+  public static <T extends Node> T cursorCrosshair(T node) {
+    Preconditions.requireNode(node, "Styles.cursorCrosshair");
+    node.setCursor(javafx.scene.Cursor.CROSSHAIR);
+    return node;
+  }
+
+  /** .cursor-move — cursor de movimiento (cuatro flechas) */
+  public static <T extends Node> T cursorMove(T node) {
+    Preconditions.requireNode(node, "Styles.cursorMove");
+    node.setCursor(javafx.scene.Cursor.MOVE);
+    return node;
+  }
+
+  /** .cursor-not-allowed — cursor de operación no permitida */
+  public static <T extends Node> T cursorNotAllowed(T node) {
+    Preconditions.requireNode(node, "Styles.cursorNotAllowed");
+    node.setCursor(javafx.scene.Cursor.NONE);
+    return node;
+  }
+
+  /** .cursor-e-resize — redimensionar hacia la derecha */
+  public static <T extends Node> T cursorEResize(T node) {
+    Preconditions.requireNode(node, "Styles.cursorEResize");
+    node.setCursor(javafx.scene.Cursor.E_RESIZE);
+    return node;
+  }
+
+  /** .cursor-n-resize — redimensionar hacia arriba */
+  public static <T extends Node> T cursorNResize(T node) {
+    Preconditions.requireNode(node, "Styles.cursorNResize");
+    node.setCursor(javafx.scene.Cursor.N_RESIZE);
+    return node;
+  }
+
+  /** .cursor-ne-resize — redimensionar diagonal noreste */
+  public static <T extends Node> T cursorNEResize(T node) {
+    Preconditions.requireNode(node, "Styles.cursorNEResize");
+    node.setCursor(javafx.scene.Cursor.NE_RESIZE);
+    return node;
+  }
+
+  /** .cursor-nw-resize — redimensionar diagonal noroeste */
+  public static <T extends Node> T cursorNWResize(T node) {
+    Preconditions.requireNode(node, "Styles.cursorNWResize");
+    node.setCursor(javafx.scene.Cursor.NW_RESIZE);
+    return node;
+  }
+
+  /** .cursor-s-resize — redimensionar hacia abajo */
+  public static <T extends Node> T cursorSResize(T node) {
+    Preconditions.requireNode(node, "Styles.cursorSResize");
+    node.setCursor(javafx.scene.Cursor.S_RESIZE);
+    return node;
+  }
+
+  /** .cursor-se-resize — redimensionar diagonal sureste */
+  public static <T extends Node> T cursorSEResize(T node) {
+    Preconditions.requireNode(node, "Styles.cursorSEResize");
+    node.setCursor(javafx.scene.Cursor.SE_RESIZE);
+    return node;
+  }
+
+  /** .cursor-sw-resize — redimensionar diagonal suroeste */
+  public static <T extends Node> T cursorSWResize(T node) {
+    Preconditions.requireNode(node, "Styles.cursorSWResize");
+    node.setCursor(javafx.scene.Cursor.SW_RESIZE);
+    return node;
+  }
+
+  /** .cursor-w-resize — redimensionar hacia la izquierda */
+  public static <T extends Node> T cursorWResize(T node) {
+    Preconditions.requireNode(node, "Styles.cursorWResize");
+    node.setCursor(javafx.scene.Cursor.W_RESIZE);
+    return node;
+  }
+
+  /** .cursor-help — cursor de ayuda (?) */
+  public static <T extends Node> T cursorHelp(T node) {
+    Preconditions.requireNode(node, "Styles.cursorHelp");
+    node.setCursor(javafx.scene.Cursor.HAND);
+    return node;
+  }
+
+  /** .cursor-progress — cursor de progreso en segundo plano */
+  public static <T extends Node> T cursorProgress(T node) {
+    Preconditions.requireNode(node, "Styles.cursorProgress");
+    node.setCursor(javafx.scene.Cursor.WAIT);
+    return node;
+  }
+
+  // OVERFLOW — overflow-hidden, overflow-visible, overflow-scroll, overflow-auto
+  // Corresponde a: overflow en CSS web
+  // NOTA: JavaFX no tiene overflow CSS. Se usa clipping o ScrollPane.
+
+  /** .overflow-hidden — recorta contenido fuera de los bounds */
+  public static <T extends Node> T overflowHidden(T node) {
+    Preconditions.requireNode(node, "Styles.overflowHidden");
+    if (node instanceof Region r) {
+      javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
+      clip.widthProperty().bind(r.widthProperty());
+      clip.heightProperty().bind(r.heightProperty());
+      r.setClip(clip);
+    }
+    return node;
+  }
+
+  /** .overflow-visible — muestra todo el contenido (default) */
+  public static <T extends Node> T overflowVisible(T node) {
+    Preconditions.requireNode(node, "Styles.overflowVisible");
+    if (node instanceof Region r) {
+      r.setClip(null);
+    }
+    return node;
+  }
+
+  /** .overflow-scroll — envuelve en ScrollPane si es necesario */
+  public static <T extends Node> T overflowScroll(T node) {
+    Preconditions.requireNode(node, "Styles.overflowScroll");
+    // En JavaFX, overflow-scroll requiere envolver en ScrollPane
+    // Este método marca el nodo para que el contenedor lo maneje
+    node.getProperties().put("tailwindfx-overflow", "scroll");
+    return node;
+  }
+
+  /** .overflow-auto — scroll automático cuando el contenido excede */
+  public static <T extends Node> T overflowAuto(T node) {
+    Preconditions.requireNode(node, "Styles.overflowAuto");
+    node.getProperties().put("tailwindfx-overflow", "auto");
+    return node;
+  }
+
+  // RESIZE — resize-none, resize-x, resize-y, resize
+  // Corresponde a: resize en CSS web
+  // NOTA: JavaFX no tiene resize CSS. Se usa mediante handlers de mouse.
+
+  /** .resize-none — deshabilita redimensionado */
+  public static <T extends Node> T resizeNone(T node) {
+    Preconditions.requireNode(node, "Styles.resizeNone");
+    node.getProperties().put("tailwindfx-resize", "none");
+    return node;
+  }
+
+  /** .resize — habilita redimensionado en ambas direcciones */
+  public static <T extends Node> T resize(T node) {
+    Preconditions.requireNode(node, "Styles.resize");
+    node.getProperties().put("tailwindfx-resize", "both");
+    return node;
+  }
+
+  /** .resize-x — habilita redimensionado horizontal */
+  public static <T extends Node> T resizeX(T node) {
+    Preconditions.requireNode(node, "Styles.resizeX");
+    node.getProperties().put("tailwindfx-resize", "horizontal");
+    return node;
+  }
+
+  /** .resize-y — habilita redimensionado vertical */
+  public static <T extends Node> T resizeY(T node) {
+    Preconditions.requireNode(node, "Styles.resizeY");
+    node.getProperties().put("tailwindfx-resize", "vertical");
+    return node;
+  }
 }
