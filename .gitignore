@@ -1,0 +1,17 @@
+```
+# Compiled and build artifacts
+*.class
+*.o
+*.obj
+*.out
+# Dependencies
+target/
+.gradle/
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+# Editors
+.vscode/
+.idea/
+```
