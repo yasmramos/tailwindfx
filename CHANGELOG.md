@@ -5,7 +5,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [1.0-SNAPSHOT] - Unreleased
+## [0.1.0] - 2025-01-XX
 
 ### Added
 - **Comprehensive Javadoc for `FxAnimation`** — Complete API documentation with examples, parameter descriptions, and usage guidelines (PR #69)
@@ -31,7 +31,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **`TailwindFX.dataTable()`**, **`flexBasis()`**, **`flexDirection()`** — new entry-point shortcuts
 - **Module descriptor** — `module-info.java` for modular projects
 - **Package Javadoc** — `package-info.java` with class overview
-- **Build file** — `pom.xml` (Maven, JavaFX 21, shade plugin)
+- **Build file** — `pom.xml` (Maven, JavaFX 17, shade plugin)
 - **Comprehensive example** — `TailwindFXExample` updated to demo all major features
 - **`ResponsiveNode`** — per-node responsive utility rules driven by `Scene.widthProperty()`
 - **`FxFlexPane`** — full Flexbox model: direction, wrap, justify-content (6), align-items (4), gap, flex-grow, flex-shrink, order, align-self
@@ -71,6 +71,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `ColorPalette` — 209 Tailwind colors
 - `BreakpointManager` — SM/MD/LG/XL/XXL breakpoints
 - `ThemeManager` — dark/light/blue/green/purple/rose/slate presets
+- **LRU Cache implementation** — Thread-safe generic LRU cache with Read-Write Locks, automatic eviction, and performance metrics
+- **Logging improvements** — Comprehensive logging guide, consistent English messages, better log clarity
+- **Variant support** — Full implementation of state variants (`hover:`, `focus:`), responsive variants (`md:`, `lg:`), and theme variants (`dark:`)
+- **API-based property handling** — Support for properties not available in JavaFX CSS via `Styles.java` (cursor, overflow, z-index, skew, effects)
 
 ### Changed
 - **Java 17 Migration** — Project migrated from Java 21 to Java 17 for broader compatibility
@@ -80,6 +84,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **TestFX integration** — Comprehensive headless testing with Monocle and xvfb
 - **Documentation overhaul** — Added CONTRIBUTING.md, CODE_OF_CONDUCT.md, updated README
 - **MIT License** — Added LICENSE file with 2026 copyright
+- **Refactored JitCompiler** — Integrated LRU cache into JitCompiler, replaced manual eviction logic
+- **Improved logging** — All log messages normalized to English, clearer diagnostic messages
+- **Cleaned up CssPropertyMapper** — Removed unsupported CSS properties (margin, overflow, cursor, z-index, resize, skew, effects), now return null for API-based handling
 
 ### Fixed
 - `JitCompiler` regex patterns to prevent false positives in arbitrary value parsing
@@ -95,6 +102,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Avatar component test updated for Java 17
 - Documentation typos and grammatical errors corrected
 - README updated to reflect Java 17 requirement
+- **State variants broken** — Connected `VariantManager.processToken()` to main pipeline, `hover:`, `focus:`, etc. now work correctly
+- **Invalid margin CSS** — Unified margin path to always use `Styles.m()`, `Styles.mx()`, etc. instead of generating invalid `-fx-margin`
+- **Unsupported CSS properties** — Removed phantom CSS properties that don't exist in JavaFX
+- **Skew typo** — Fixed `-fx-she-x/y` to correct property names
+- **LRU cache race condition** — Fixed thread-safety issues in cache access ordering
 
 ### Removed
 - **`AnimationUtil.java`** — Removed dead code, functionality fully migrated to `FxAnimation`
@@ -103,9 +115,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Preview features** — Removed Java 21 preview features for Java 17 compatibility
 - **`TailwindFXExample.java`** — Moved to examples module
 - **Obsolete test suites** — Removed deprecated ComponentFactory, TailwindFXMain, and ThemeManagerRefresh tests
+- **Dead code** — Removed `TwInstall.installCss()`, duplicate `applyFlexStyle()`, duplicate `jit()` method
+- **Unsupported CSS properties** — Removed generation of invalid CSS for margin, overflow, cursor, z-index, resize, skew, and effects
 
 ### Documentation
 - **`FxAnimation`** — comprehensive JavaDoc added to all methods with detailed descriptions, parameters, return values, and usage examples
+- **`CACHE_LRU.md`** — Complete documentation of LRU cache architecture, API reference, and integration guide
+- **`LOGGING_GUIDE.md`** — Comprehensive logging guide with levels, configuration, best practices, and troubleshooting
 
 ### Tests added
 - `FxDataTableTest` — 21 tests covering builder, filter, pagination, search, style
@@ -119,10 +135,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `FxI18nTest` — Internationalization tests
 - `FxFlexPaneTest` — Flexbox layout tests
 - `EdgeCaseTests` — Edge case handling tests
+- `LruCacheTest` — 28 tests for LRU cache operations, eviction, metrics, and thread safety
 
 ### Breaking Changes
 - **`AnimationUtil` deprecated** — Migrate to `FxAnimation` fluent API
 - **Java 17 required** — Update your JDK from Java 21 to Java 17
-- **`jit()` method deprecated** — Use `apply()` which now auto-detects JIT tokens
+- **`jit()` method removed** — Use `apply()` which now auto-detects JIT tokens
 - **`applyDiff()` made private** — Internal optimization, use `apply()` instead
 - **Examples moved** — Example applications now in separate `tailwindfx-examples` module
+- **CSS properties removed** — Properties like margin, overflow, cursor, z-index no longer generate CSS; they are now handled via JavaFX API through `Styles.java`
