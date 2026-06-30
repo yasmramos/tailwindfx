@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -124,6 +125,13 @@ public final class StylesTest {
     testGlass();
     testNeumorph();
     testSvgHelpers();
+    testWithParentMethods();
+    
+    // New utilities tests (v0.1.1)
+    testUserSelectUtilities();
+    testTouchActionUtilities();
+    testScrollSnapUtilities();
+    testColumnsUtilities();
 
     System.out.printf("  %d passed, %d failed%n", passed, failed);
     return failed == 0;
@@ -693,6 +701,149 @@ public final class StylesTest {
           check("mWithParent: added", vbox.getChildren().contains(c));
           Insets ic = VBox.getMargin(c);
           approx("mWithParent: margin=8px", 8.0, ic.getTop());
+        });
+  }
+
+  // ── New Utilities (v0.1.1) ────────────────────────────────────────────
+  static void testUserSelectUtilities() throws Exception {
+    runFx(
+        () -> {
+          Label lbl = new Label("Test");
+          
+          Styles.selectNone(lbl);
+          check("selectNone sets cursor default", 
+              lbl.getCursor() == javafx.scene.Cursor.DEFAULT);
+          
+          Styles.selectText(lbl);
+          check("selectText restores cursor", 
+              lbl.getCursor() == javafx.scene.Cursor.TEXT);
+          
+          Styles.selectAll(lbl);
+          check("selectAll sets style", 
+              lbl.getStyle().contains("-fx-selection-bar"));
+          
+          Styles.selectAuto(lbl);
+          check("selectAuto works", true);
+          
+          // Null safety
+          throws_("selectNone(null)", IllegalArgumentException.class, 
+              () -> Styles.selectNone(null));
+        });
+  }
+
+  static void testTouchActionUtilities() throws Exception {
+    runFx(
+        () -> {
+          Region r = new Region();
+          
+          Styles.touchAuto(r);
+          check("touchAuto works", true);
+          
+          Styles.touchNone(r);
+          check("touchNone sets pointer-events none", 
+              r.getStyle().contains("-fx-pointer-events: none"));
+          
+          Styles.touchPanX(r);
+          check("touchPanX works", true);
+          
+          Styles.touchPanY(r);
+          check("touchPanY works", true);
+          
+          Styles.touchPinchZoom(r);
+          check("touchPinchZoom works", true);
+          
+          Styles.touchManipulation(r);
+          check("touchManipulation works", true);
+          
+          // Null safety
+          throws_("touchNone(null)", IllegalArgumentException.class, 
+              () -> Styles.touchNone(null));
+        });
+  }
+
+  static void testScrollSnapUtilities() throws Exception {
+    runFx(
+        () -> {
+          Region r = new Region();
+          
+          Styles.snapStart(r);
+          check("snapStart sets scroll-snap-align start", 
+              r.getStyle().contains("-fx-scroll-snap-align: start"));
+          
+          Styles.snapEnd(r);
+          check("snapEnd sets scroll-snap-align end", 
+              r.getStyle().contains("-fx-scroll-snap-align: end"));
+          
+          Styles.snapCenter(r);
+          check("snapCenter sets scroll-snap-align center", 
+              r.getStyle().contains("-fx-scroll-snap-align: center"));
+          
+          Styles.snapX(r);
+          check("snapX sets scroll-snap-type x", 
+              r.getStyle().contains("-fx-scroll-snap-type: x"));
+          
+          Styles.snapY(r);
+          check("snapY sets scroll-snap-type y", 
+              r.getStyle().contains("-fx-scroll-snap-type: y"));
+          
+          Styles.snapBoth(r);
+          check("snapBoth sets scroll-snap-type both", 
+              r.getStyle().contains("-fx-scroll-snap-type: both"));
+          
+          Styles.snapMandatory(r);
+          check("snapMandatory sets scroll-snap-stop always", 
+              r.getStyle().contains("-fx-scroll-snap-stop: always"));
+          
+          Styles.snapProximity(r);
+          check("snapProximity sets scroll-snap-stop normal", 
+              r.getStyle().contains("-fx-scroll-snap-stop: normal"));
+          
+          // Null safety
+          throws_("snapStart(null)", IllegalArgumentException.class, 
+              () -> Styles.snapStart(null));
+        });
+  }
+
+  static void testColumnsUtilities() throws Exception {
+    runFx(
+        () -> {
+          Pane p = new Pane();
+          
+          Styles.columns1(p);
+          check("columns1 sets column-count 1", 
+              p.getStyle().contains("-fx-column-count: 1"));
+          
+          Styles.columns2(p);
+          check("columns2 sets column-count 2", 
+              p.getStyle().contains("-fx-column-count: 2"));
+          
+          Styles.columns3(p);
+          check("columns3 sets column-count 3", 
+              p.getStyle().contains("-fx-column-count: 3"));
+          
+          Styles.columns4(p);
+          check("columns4 sets column-count 4", 
+              p.getStyle().contains("-fx-column-count: 4"));
+          
+          Styles.columns6(p);
+          check("columns6 sets column-count 6", 
+              p.getStyle().contains("-fx-column-count: 6"));
+          
+          Styles.columns8(p);
+          check("columns8 sets column-count 8", 
+              p.getStyle().contains("-fx-column-count: 8"));
+          
+          Styles.columns12(p);
+          check("columns12 sets column-count 12", 
+              p.getStyle().contains("-fx-column-count: 12"));
+          
+          Styles.columnsAuto(p);
+          check("columnsAuto sets column-count auto", 
+              p.getStyle().contains("-fx-column-count: auto"));
+          
+          // Null safety
+          throws_("columns1(null)", IllegalArgumentException.class, 
+              () -> Styles.columns1(null));
         });
   }
 }
