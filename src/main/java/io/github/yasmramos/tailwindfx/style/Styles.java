@@ -1473,4 +1473,244 @@ public final class Styles {
     node.getProperties().put("tailwindfx-resize", "vertical");
     return node;
   }
+
+  // USER-SELECT — select-none, select-text, select-all, select-auto
+  // Corresponde a: user-select en CSS web
+  // NOTA: JavaFX no tiene user-select CSS nativo. Se controla via properties.
+
+  /** .select-none — deshabilita selección de texto */
+  public static <T extends Node> T selectNone(T node) {
+    Preconditions.requireNode(node, "Styles.selectNone");
+    node.getProperties().put("tailwindfx-user-select", "none");
+    return node;
+  }
+
+  /** .select-text — permite selección de texto (default) */
+  public static <T extends Node> T selectText(T node) {
+    Preconditions.requireNode(node, "Styles.selectText");
+    node.getProperties().put("tailwindfx-user-select", "text");
+    return node;
+  }
+
+  /** .select-all — selecciona todo al hacer click */
+  public static <T extends Node> T selectAll(T node) {
+    Preconditions.requireNode(node, "Styles.selectAll");
+    node.getProperties().put("tailwindfx-user-select", "all");
+    return node;
+  }
+
+  /** .select-auto — comportamiento automático de selección */
+  public static <T extends Node> T selectAuto(T node) {
+    Preconditions.requireNode(node, "Styles.selectAuto");
+    node.getProperties().put("tailwindfx-user-select", "auto");
+    return node;
+  }
+
+  // TOUCH-ACTION — touch-auto, touch-none, touch-pan-x, touch-pan-y, touch-pinch-zoom, touch-manipulation
+  // Corresponde a: touch-action en CSS web
+  // NOTA: JavaFX no tiene touch-action CSS nativo. Se controla via properties para gestos.
+
+  /** .touch-auto — gestos táctiles automáticos (default) */
+  public static <T extends Node> T touchAuto(T node) {
+    Preconditions.requireNode(node, "Styles.touchAuto");
+    node.getProperties().put("tailwindfx-touch-action", "auto");
+    return node;
+  }
+
+  /** .touch-none — deshabilita todos los gestos táctiles */
+  public static <T extends Node> T touchNone(T node) {
+    Preconditions.requireNode(node, "Styles.touchNone");
+    node.getProperties().put("tailwindfx-touch-action", "none");
+    return node;
+  }
+
+  /** .touch-pan-x — permite solo scroll horizontal */
+  public static <T extends Node> T touchPanX(T node) {
+    Preconditions.requireNode(node, "Styles.touchPanX");
+    node.getProperties().put("tailwindfx-touch-action", "pan-x");
+    return node;
+  }
+
+  /** .touch-pan-y — permite solo scroll vertical */
+  public static <T extends Node> T touchPanY(T node) {
+    Preconditions.requireNode(node, "Styles.touchPanY");
+    node.getProperties().put("tailwindfx-touch-action", "pan-y");
+    return node;
+  }
+
+  /** .touch-pinch-zoom — permite zoom con pinza */
+  public static <T extends Node> T touchPinchZoom(T node) {
+    Preconditions.requireNode(node, "Styles.touchPinchZoom");
+    node.getProperties().put("tailwindfx-touch-action", "pinch-zoom");
+    return node;
+  }
+
+  /** .touch-manipulation — permite pan sin zoom */
+  public static <T extends Node> T touchManipulation(T node) {
+    Preconditions.requireNode(node, "Styles.touchManipulation");
+    node.getProperties().put("tailwindfx-touch-action", "manipulation");
+    return node;
+  }
+
+  // SCROLL-SNAP — snap-start, snap-end, snap-center, snap-align-none, snap-x, snap-y, snap-both, snap-mandatory, snap-proximity
+  // Corresponde a: scroll-snap-* en CSS web
+  // NOTA: JavaFX no tiene scroll-snap CSS nativo. Se controla via properties.
+
+  /** .snap-start — snap al inicio del contenedor */
+  public static <T extends Node> T snapStart(T node) {
+    Preconditions.requireNode(node, "Styles.snapStart");
+    node.getProperties().put("tailwindfx-scroll-snap-align", "start");
+    return node;
+  }
+
+  /** .snap-end — snap al final del contenedor */
+  public static <T extends Node> T snapEnd(T node) {
+    Preconditions.requireNode(node, "Styles.snapEnd");
+    node.getProperties().put("tailwindfx-scroll-snap-align", "end");
+    return node;
+  }
+
+  /** .snap-center — snap al centro del contenedor */
+  public static <T extends Node> T snapCenter(T node) {
+    Preconditions.requireNode(node, "Styles.snapCenter");
+    node.getProperties().put("tailwindfx-scroll-snap-align", "center");
+    return node;
+  }
+
+  /** .snap-align-none — sin alineación snap específica */
+  public static <T extends Node> T snapAlignNone(T node) {
+    Preconditions.requireNode(node, "Styles.snapAlignNone");
+    node.getProperties().put("tailwindfx-scroll-snap-align", "none");
+    return node;
+  }
+
+  /** .snap-x — snap en eje horizontal */
+  public static <T extends Node> T snapX(T node) {
+    Preconditions.requireNode(node, "Styles.snapX");
+    node.getProperties().put("tailwindfx-scroll-snap-type", "x");
+    return node;
+  }
+
+  /** .snap-y — snap en eje vertical */
+  public static <T extends Node> T snapY(T node) {
+    Preconditions.requireNode(node, "Styles.snapY");
+    node.getProperties().put("tailwindfx-scroll-snap-type", "y");
+    return node;
+  }
+
+  /** .snap-both — snap en ambos ejes */
+  public static <T extends Node> T snapBoth(T node) {
+    Preconditions.requireNode(node, "Styles.snapBoth");
+    node.getProperties().put("tailwindfx-scroll-snap-type", "both");
+    return node;
+  }
+
+  /** .snap-mandatory — snap obligatorio siempre */
+  public static <T extends Node> T snapMandatory(T node) {
+    Preconditions.requireNode(node, "Styles.snapMandatory");
+    node.getProperties().put("tailwindfx-scroll-snap-stop", "mandatory");
+    return node;
+  }
+
+  /** .snap-proximity — snap solo cuando está cerca */
+  public static <T extends Node> T snapProximity(T node) {
+    Preconditions.requireNode(node, "Styles.snapProximity");
+    node.getProperties().put("tailwindfx-scroll-snap-stop", "proximity");
+    return node;
+  }
+
+  // COLUMNS — columns-1 a columns-12, columns-auto
+  // Corresponde a: columns en CSS web (multi-column layout)
+  // NOTA: JavaFX no tiene columns CSS nativo. Se simula con GridPane o propiedades.
+
+  /** .columns-1 — layout de 1 columna */
+  public static <T extends Node> T columns1(T node) {
+    Preconditions.requireNode(node, "Styles.columns1");
+    node.getProperties().put("tailwindfx-columns", "1");
+    return node;
+  }
+
+  /** .columns-2 — layout de 2 columnas */
+  public static <T extends Node> T columns2(T node) {
+    Preconditions.requireNode(node, "Styles.columns2");
+    node.getProperties().put("tailwindfx-columns", "2");
+    return node;
+  }
+
+  /** .columns-3 — layout de 3 columnas */
+  public static <T extends Node> T columns3(T node) {
+    Preconditions.requireNode(node, "Styles.columns3");
+    node.getProperties().put("tailwindfx-columns", "3");
+    return node;
+  }
+
+  /** .columns-4 — layout de 4 columnas */
+  public static <T extends Node> T columns4(T node) {
+    Preconditions.requireNode(node, "Styles.columns4");
+    node.getProperties().put("tailwindfx-columns", "4");
+    return node;
+  }
+
+  /** .columns-5 — layout de 5 columnas */
+  public static <T extends Node> T columns5(T node) {
+    Preconditions.requireNode(node, "Styles.columns5");
+    node.getProperties().put("tailwindfx-columns", "5");
+    return node;
+  }
+
+  /** .columns-6 — layout de 6 columnas */
+  public static <T extends Node> T columns6(T node) {
+    Preconditions.requireNode(node, "Styles.columns6");
+    node.getProperties().put("tailwindfx-columns", "6");
+    return node;
+  }
+
+  /** .columns-7 — layout de 7 columnas */
+  public static <T extends Node> T columns7(T node) {
+    Preconditions.requireNode(node, "Styles.columns7");
+    node.getProperties().put("tailwindfx-columns", "7");
+    return node;
+  }
+
+  /** .columns-8 — layout de 8 columnas */
+  public static <T extends Node> T columns8(T node) {
+    Preconditions.requireNode(node, "Styles.columns8");
+    node.getProperties().put("tailwindfx-columns", "8");
+    return node;
+  }
+
+  /** .columns-9 — layout de 9 columnas */
+  public static <T extends Node> T columns9(T node) {
+    Preconditions.requireNode(node, "Styles.columns9");
+    node.getProperties().put("tailwindfx-columns", "9");
+    return node;
+  }
+
+  /** .columns-10 — layout de 10 columnas */
+  public static <T extends Node> T columns10(T node) {
+    Preconditions.requireNode(node, "Styles.columns10");
+    node.getProperties().put("tailwindfx-columns", "10");
+    return node;
+  }
+
+  /** .columns-11 — layout de 11 columnas */
+  public static <T extends Node> T columns11(T node) {
+    Preconditions.requireNode(node, "Styles.columns11");
+    node.getProperties().put("tailwindfx-columns", "11");
+    return node;
+  }
+
+  /** .columns-12 — layout de 12 columnas */
+  public static <T extends Node> T columns12(T node) {
+    Preconditions.requireNode(node, "Styles.columns12");
+    node.getProperties().put("tailwindfx-columns", "12");
+    return node;
+  }
+
+  /** .columns-auto — columnas automáticas según ancho */
+  public static <T extends Node> T columnsAuto(T node) {
+    Preconditions.requireNode(node, "Styles.columnsAuto");
+    node.getProperties().put("tailwindfx-columns", "auto");
+    return node;
+  }
 }

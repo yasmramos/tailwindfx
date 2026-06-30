@@ -124,6 +124,10 @@ public final class StylesTest {
     testGlass();
     testNeumorph();
     testSvgHelpers();
+    testUserSelectUtilities();
+    testTouchActionUtilities();
+    testScrollSnapUtilities();
+    testColumnsUtilities();
 
     System.out.printf("  %d passed, %d failed%n", passed, failed);
     return failed == 0;
@@ -693,6 +697,107 @@ public final class StylesTest {
           check("mWithParent: added", vbox.getChildren().contains(c));
           Insets ic = VBox.getMargin(c);
           approx("mWithParent: margin=8px", 8.0, ic.getTop());
+        });
+  }
+
+  static void testUserSelectUtilities() throws Exception {
+    runFx(
+        () -> {
+          Pane p = new Pane();
+          
+          Styles.selectNone(p);
+          check("select-none sets property", "none".equals(p.getProperties().get("tailwindfx-user-select")));
+          
+          Styles.selectText(p);
+          check("select-text sets property", "text".equals(p.getProperties().get("tailwindfx-user-select")));
+          
+          Styles.selectAll(p);
+          check("select-all sets property", "all".equals(p.getProperties().get("tailwindfx-user-select")));
+          
+          Styles.selectAuto(p);
+          check("select-auto sets property", "auto".equals(p.getProperties().get("tailwindfx-user-select")));
+          
+          throws_("selectNone(null)", IllegalArgumentException.class, () -> Styles.selectNone(null));
+        });
+  }
+
+  static void testTouchActionUtilities() throws Exception {
+    runFx(
+        () -> {
+          Pane p = new Pane();
+          
+          Styles.touchAuto(p);
+          check("touch-auto sets property", "auto".equals(p.getProperties().get("tailwindfx-touch-action")));
+          
+          Styles.touchNone(p);
+          check("touch-none sets property", "none".equals(p.getProperties().get("tailwindfx-touch-action")));
+          
+          Styles.touchPanX(p);
+          check("touch-pan-x sets property", "pan-x".equals(p.getProperties().get("tailwindfx-touch-action")));
+          
+          Styles.touchPanY(p);
+          check("touch-pan-y sets property", "pan-y".equals(p.getProperties().get("tailwindfx-touch-action")));
+          
+          Styles.touchPinchZoom(p);
+          check("touch-pinch-zoom sets property", "pinch-zoom".equals(p.getProperties().get("tailwindfx-touch-action")));
+          
+          Styles.touchManipulation(p);
+          check("touch-manipulation sets property", "manipulation".equals(p.getProperties().get("tailwindfx-touch-action")));
+          
+          throws_("touchNone(null)", IllegalArgumentException.class, () -> Styles.touchNone(null));
+        });
+  }
+
+  static void testScrollSnapUtilities() throws Exception {
+    runFx(
+        () -> {
+          Pane p = new Pane();
+          
+          Styles.snapStart(p);
+          check("snap-start sets align", "start".equals(p.getProperties().get("tailwindfx-scroll-snap-align")));
+          
+          Styles.snapEnd(p);
+          check("snap-end sets align", "end".equals(p.getProperties().get("tailwindfx-scroll-snap-align")));
+          
+          Styles.snapCenter(p);
+          check("snap-center sets align", "center".equals(p.getProperties().get("tailwindfx-scroll-snap-align")));
+          
+          Styles.snapAlignNone(p);
+          check("snap-align-none sets align", "none".equals(p.getProperties().get("tailwindfx-scroll-snap-align")));
+          
+          Styles.snapX(p);
+          check("snap-x sets type", "x".equals(p.getProperties().get("tailwindfx-scroll-snap-type")));
+          
+          Styles.snapY(p);
+          check("snap-y sets type", "y".equals(p.getProperties().get("tailwindfx-scroll-snap-type")));
+          
+          Styles.snapBoth(p);
+          check("snap-both sets type", "both".equals(p.getProperties().get("tailwindfx-scroll-snap-type")));
+          
+          Styles.snapMandatory(p);
+          check("snap-mandatory sets stop", "mandatory".equals(p.getProperties().get("tailwindfx-scroll-snap-stop")));
+          
+          Styles.snapProximity(p);
+          check("snap-proximity sets stop", "proximity".equals(p.getProperties().get("tailwindfx-scroll-snap-stop")));
+          
+          throws_("snapStart(null)", IllegalArgumentException.class, () -> Styles.snapStart(null));
+        });
+  }
+
+  static void testColumnsUtilities() throws Exception {
+    runFx(
+        () -> {
+          Pane p = new Pane();
+          
+          for (int i = 1; i <= 12; i++) {
+            Styles.columns1(p);
+            check("columns-" + i + " sets value", String.valueOf(i).equals(p.getProperties().get("tailwindfx-columns")));
+          }
+          
+          Styles.columnsAuto(p);
+          check("columns-auto sets property", "auto".equals(p.getProperties().get("tailwindfx-columns")));
+          
+          throws_("columns1(null)", IllegalArgumentException.class, () -> Styles.columns1(null));
         });
   }
 }
