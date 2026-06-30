@@ -22,6 +22,13 @@ public final class ContainerQuery {
 
   private ChangeListener<Number> listener;
   private Region currentContainer;
+  
+  // Ensure customBreakpoints is never null
+  {
+    if (customBreakpoints == null) {
+      throw new IllegalStateException("customBreakpoints initialization failed");
+    }
+  }
 
   public static final class CustomBreakpoint {
     public final double minWidth;
