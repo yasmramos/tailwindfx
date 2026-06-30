@@ -1277,4 +1277,236 @@ public final class Styles {
             4,
             4));
   }
+
+  // USER-SELECT — Control de selección de texto
+  // Corresponde a: user-select: none/text/all/auto en CSS web
+
+  /** .select-none — Disables text selection */
+  public static <T extends Node> T selectNone(T node) {
+    node.setMouseTransparent(true);
+    return node;
+  }
+
+  /** .select-text — Enables text selection (default behavior) */
+  public static <T extends Node> T selectText(T node) {
+    node.setMouseTransparent(false);
+    return node;
+  }
+
+  /** .select-all — Selects all text on click */
+  public static <T extends Node> T selectAll(T node) {
+    if (node instanceof javafx.scene.control.TextInputControl) {
+      node.setOnMouseClicked(
+          e -> {
+            ((javafx.scene.control.TextInputControl) node).selectAll();
+          });
+    }
+    return node;
+  }
+
+  /** .select-auto — Automatic selection behavior based on context */
+  public static <T extends Node> T selectAuto(T node) {
+    node.setMouseTransparent(false);
+    return node;
+  }
+
+  // TOUCH-ACTION — Control de gestos táctiles
+  // Corresponde a: touch-action: auto/none/pan-x/pan-y/pinch-zoom/manipulation en CSS web
+
+  /** .touch-auto — Default touch gesture handling */
+  public static <T extends Node> T touchAuto(T node) {
+    node.getProperties().remove("touch-action");
+    return node;
+  }
+
+  /** .touch-none — Disables all touch gestures */
+  @SuppressWarnings("unchecked")
+  public static <T extends Node> T touchNone(T node) {
+    node.getProperties().put("touch-action", "none");
+    if (node instanceof Region) {
+      ((Region) node).addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, e -> e.consume());
+      ((Region) node).addEventFilter(javafx.scene.input.ZoomEvent.ZOOM, e -> e.consume());
+      ((Region) node).addEventFilter(javafx.scene.input.RotateEvent.ROTATE, e -> e.consume());
+    }
+    return node;
+  }
+
+  /** .touch-pan-x — Allows only horizontal scrolling */
+  @SuppressWarnings("unchecked")
+  public static <T extends Node> T touchPanX(T node) {
+    node.getProperties().put("touch-action", "pan-x");
+    if (node instanceof Region) {
+      ((Region) node).addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, e -> {
+        if (Math.abs(e.getDeltaY()) > Math.abs(e.getDeltaX())) {
+          e.consume();
+        }
+      });
+    }
+    return node;
+  }
+
+  /** .touch-pan-y — Allows only vertical scrolling */
+  @SuppressWarnings("unchecked")
+  public static <T extends Node> T touchPanY(T node) {
+    node.getProperties().put("touch-action", "pan-y");
+    if (node instanceof Region) {
+      ((Region) node).addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, e -> {
+        if (Math.abs(e.getDeltaX()) > Math.abs(e.getDeltaY())) {
+          e.consume();
+        }
+      });
+    }
+    return node;
+  }
+
+  /** .touch-pinch-zoom — Allows pinch-to-zoom gestures */
+  public static <T extends Node> T touchPinchZoom(T node) {
+    node.getProperties().put("touch-action", "pinch-zoom");
+    return node;
+  }
+
+  /** .touch-manipulation — Allows panning without zooming */
+  @SuppressWarnings("unchecked")
+  public static <T extends Node> T touchManipulation(T node) {
+    node.getProperties().put("touch-action", "manipulation");
+    if (node instanceof Region) {
+      ((Region) node).addEventFilter(javafx.scene.input.ZoomEvent.ZOOM, e -> e.consume());
+    }
+    return node;
+  }
+
+  // SCROLL-SNAP — Snap scrolling behavior
+  // Corresponde a: scroll-snap-align/type en CSS web
+
+  /** .snap-start — Snap to start of container */
+  public static <T extends Region> T snapStart(T node) {
+    node.getProperties().put("scroll-snap-align", "start");
+    return node;
+  }
+
+  /** .snap-end — Snap to end of container */
+  public static <T extends Region> T snapEnd(T node) {
+    node.getProperties().put("scroll-snap-align", "end");
+    return node;
+  }
+
+  /** .snap-center — Snap to center of container */
+  public static <T extends Region> T snapCenter(T node) {
+    node.getProperties().put("scroll-snap-align", "center");
+    return node;
+  }
+
+  /** .snap-none — No snapping alignment */
+  public static <T extends Region> T snapAlignNone(T node) {
+    node.getProperties().put("scroll-snap-align", "none");
+    return node;
+  }
+
+  /** .snap-x — Enable snapping on X axis */
+  public static <T extends Region> T snapX(T node) {
+    node.getProperties().put("scroll-snap-type", "x");
+    return node;
+  }
+
+  /** .snap-y — Enable snapping on Y axis */
+  public static <T extends Region> T snapY(T node) {
+    node.getProperties().put("scroll-snap-type", "y");
+    return node;
+  }
+
+  /** .snap-both — Enable snapping on both axes */
+  public static <T extends Region> T snapBoth(T node) {
+    node.getProperties().put("scroll-snap-type", "both");
+    return node;
+  }
+
+  /** .snap-mandatory — Always snap to target */
+  public static <T extends Region> T snapMandatory(T node) {
+    node.getProperties().put("scroll-snap-stop", "mandatory");
+    return node;
+  }
+
+  /** .snap-proximity — Snap only when close to target */
+  public static <T extends Region> T snapProximity(T node) {
+    node.getProperties().put("scroll-snap-stop", "normal");
+    return node;
+  }
+
+  // COLUMNS — Multi-column layout
+  // Corresponde a: columns-N/auto en CSS web
+
+  /** .columns-1 — Single column layout */
+  public static <T extends Pane> T columns1(T node) {
+    return applyColumns(node, 1);
+  }
+
+  /** .columns-2 — Two column layout */
+  public static <T extends Pane> T columns2(T node) {
+    return applyColumns(node, 2);
+  }
+
+  /** .columns-3 — Three column layout */
+  public static <T extends Pane> T columns3(T node) {
+    return applyColumns(node, 3);
+  }
+
+  /** .columns-4 — Four column layout */
+  public static <T extends Pane> T columns4(T node) {
+    return applyColumns(node, 4);
+  }
+
+  /** .columns-5 — Five column layout */
+  public static <T extends Pane> T columns5(T node) {
+    return applyColumns(node, 5);
+  }
+
+  /** .columns-6 — Six column layout */
+  public static <T extends Pane> T columns6(T node) {
+    return applyColumns(node, 6);
+  }
+
+  /** .columns-7 — Seven column layout */
+  public static <T extends Pane> T columns7(T node) {
+    return applyColumns(node, 7);
+  }
+
+  /** .columns-8 — Eight column layout */
+  public static <T extends Pane> T columns8(T node) {
+    return applyColumns(node, 8);
+  }
+
+  /** .columns-9 — Nine column layout */
+  public static <T extends Pane> T columns9(T node) {
+    return applyColumns(node, 9);
+  }
+
+  /** .columns-10 — Ten column layout */
+  public static <T extends Pane> T columns10(T node) {
+    return applyColumns(node, 10);
+  }
+
+  /** .columns-11 — Eleven column layout */
+  public static <T extends Pane> T columns11(T node) {
+    return applyColumns(node, 11);
+  }
+
+  /** .columns-12 — Twelve column layout */
+  public static <T extends Pane> T columns12(T node) {
+    return applyColumns(node, 12);
+  }
+
+  /** .columns-auto — Automatic column layout based on content */
+  public static <T extends Pane> T columnsAuto(T node) {
+    return applyColumns(node, -1);
+  }
+
+  private static <T extends Pane> T applyColumns(T node, int count) {
+    if (count <= 0) {
+      node.getProperties().put("columns", "auto");
+    } else {
+      node.getProperties().put("columns", String.valueOf(count));
+      node.setPrefWidth(count * 100);
+    }
+    return node;
+  }
 }
