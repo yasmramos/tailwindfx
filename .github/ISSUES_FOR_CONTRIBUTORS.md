@@ -2,91 +2,40 @@
 
 This document contains curated issues for contributors at all levels.
 
+## ✅ Resolved Issues (v0.1.0)
+
+The following issues have been completed and merged into the main branch:
+
+- ~~**1. Add Missing Cursor Utilities** - Implemented in v0.1.0~~
+- ~~**2. Add User-Select Utilities** - Implemented in Styles.java~~
+- ~~**3. Add Resize Utilities** - Implemented in v0.1.0~~
+- ~~**4. Document FxAnimation Class** - docs/FxAnimation.md created~~
+- ~~**5. Add Unit Tests for ColorPalette** - ColorPaletteTest.java added with 80%+ coverage~~
+- ~~**6. Create Example Project** - basic-app and demo-app examples created~~
+- ~~**7. Add Touch-Action Utilities** - Implemented in Styles.java~~
+- ~~**8. Fix Typos in Documentation** - README.md and CONTRIBUTING.md reviewed~~
+- ~~**9. Optimize JitCompiler Cache Performance** - LRU cache with ReadWriteLock implemented~~
+- ~~**10. Add Container Queries Support** - ContainerQuery class implemented~~
+- ~~**12. Implement Scroll-Snap Utilities** - Implemented in Styles.java~~
+- ~~**14. Implement Columns Utilities** - Implemented in Styles.java~~
+
+---
+
 ## 🟢 Good First Issues (Perfect for Newcomers)
 
-### 1. Add Missing Cursor Utilities
-**Difficulty:** Beginner  
-**Labels:** `good first issue`, `css`, `utilities`  
-**Description:** Add cursor utility classes (`cursor-pointer`, `cursor-text`, `cursor-grab`, etc.) to match TailwindCSS v4.  
-**Files:** `src/main/resources/tailwindfx.css`  
-**Expected:** ~15 new CSS classes following existing patterns.
+### None Currently Available
 
-### 2. Add User-Select Utilities
-**Difficulty:** Beginner  
-**Labels:** `good first issue`, `css`, `utilities`  
-**Description:** Implement user-select utilities (`select-none`, `select-text`, `select-all`, `select-auto`).  
-**Files:** `src/main/resources/tailwindfx.css`  
-**Reference:** https://tailwindcss.com/docs/user-select
-
-### 3. Add Resize Utilities
-**Difficulty:** Beginner  
-**Labels:** `good first issue`, `css`, `utilities`  
-**Description:** Add resize property utilities (`resize-none`, `resize-y`, `resize-x`, `resize`).  
-**Files:** `src/main/resources/tailwindfx.css`
-
-### 4. Document FxAnimation Class
-**Difficulty:** Beginner  
-**Labels:** `good first issue`, `documentation`, `java`  
-**Description:** Add comprehensive Javadoc to all public methods in FxAnimation.java with examples.  
-**Files:** `src/main/java/io/github/yasmramos/tailwindfx/FxAnimation.java`
-
-### 5. Add Unit Tests for ColorPalette
-**Difficulty:** Beginner  
-**Labels:** `good first issue`, `tests`, `java`  
-**Description:** Write unit tests for ColorPalette class methods that lack coverage.  
-**Files:** `src/test/java/io/github/tailwindfx/ColorPaletteTest.java`  
-**Expected:** 80%+ code coverage for ColorPalette.
-
-### 6. Create Example Project
-**Difficulty:** Beginner  
-**Labels:** `good first issue`, `example`, `documentation`  
-**Description:** Create a complete example application demonstrating basic TailwindFX usage (login form, dashboard).  
-**Files:** `examples/basic-app/`  
-**Expected:** README with screenshots and setup instructions.
-
-### 7. Add Touch-Action Utilities
-**Difficulty:** Beginner  
-**Labels:** `good first issue`, `css`, `utilities`  
-**Description:** Implement touch-action utilities for mobile gesture control.  
-**Files:** `src/main/resources/tailwindfx.css`  
-**Reference:** https://tailwindcss.com/docs/touch-action
-
-### 8. Fix Typos in Documentation
-**Difficulty:** Beginner  
-**Labels:** `good first issue`, `documentation`  
-**Description:** Review and fix any typos or grammatical errors in README.md and CONTRIBUTING.md.  
-**Files:** `README.md`, `CONTRIBUTING.md`
+All good first issues have been resolved! Check back soon for new opportunities, or consider tackling a medium-level issue with guidance from maintainers.
 
 ---
 
 ## 🟡 Medium Issues (Some Experience Required)
-
-### 9. Optimize JitCompiler Cache Performance
-**Difficulty:** Intermediate  
-**Labels:** `enhancement`, `performance`, `java`  
-**Description:** Profile and optimize the JIT compiler cache. Consider implementing better eviction strategies or cache warming.  
-**Files:** `src/main/java/io/github/tailwindfx/compiler/JitCompiler.java`  
-**Metrics:** Improve cache hit ratio by 10%+.
-
-### 10. Add Container Queries Support
-**Difficulty:** Intermediate  
-**Labels:** `enhancement`, `css`, `responsive`  
-**Description:** Implement container query utilities (@container) for component-level responsive design.  
-**Files:** `src/main/resources/tailwindfx.css`, `src/main/java/io/github/tailwindfx/BreakpointManager.java`  
-**Reference:** https://tailwindcss.com/docs/container-queries
 
 ### 11. Create CLI Tool for CSS Scanning
 **Difficulty:** Intermediate  
 **Labels:** `enhancement`, `tooling`, `cli`  
 **Description:** Build a CLI tool that scans Java/FXML files and reports unused CSS utilities.  
 **Expected:** `java -jar tailwindfx-cli.jar scan --input src/ --output report.json`
-
-### 12. Implement Scroll-Snap Utilities
-**Difficulty:** Intermediate  
-**Labels:** `enhancement`, `css`, `scrolling`  
-**Description:** Add scroll-snap CSS utilities for creating snap-scrolling containers.  
-**Files:** `src/main/resources/tailwindfx.css`  
-**Reference:** https://tailwindcss.com/docs/scroll-snap-type
 
 ### 13. Add E-commerce Example
 **Difficulty:** Intermediate  
@@ -95,18 +44,11 @@ This document contains curated issues for contributors at all levels.
 **Files:** `examples/ecommerce/`  
 **Expected:** Full working demo with multiple screens.
 
-### 14. Implement Columns Utilities
-**Difficulty:** Intermediate  
-**Labels:** `enhancement`, `css`, `layout`  
-**Description:** Add multi-column layout utilities (columns-2, columns-3, break-inside, etc.).  
-**Files:** `src/main/resources/tailwindfx.css`  
-**Reference:** https://tailwindcss.com/docs/columns
-
 ### 15. Add Theme Customization UI
 **Difficulty:** Intermediate  
 **Labels:** `enhancement`, `ui`, `theme`  
 **Description:** Create a runtime theme customization panel (color picker, font selector, preview).  
-**Files:** `src/main/java/io/github/tailwindfx/theme/ThemeCustomizer.java`  
+**Files:** `src/main/java/io/github/yasmramos/tailwindfx/theme/ThemeCustomizer.java`  
 **Expected:** Modal dialog with live preview.
 
 ---
@@ -124,7 +66,7 @@ This document contains curated issues for contributors at all levels.
 **Difficulty:** Advanced  
 **Labels:** `enhancement`, `devtools`, `hot-reload`  
 **Description:** Implement a file watcher that automatically recompiles and applies CSS changes during development.  
-**Files:** `src/main/java/io/github/tailwindfx/TailwindFX.java` (watch method enhancement)  
+**Files:** `src/main/java/io/github/yasmramos/tailwindfx/TailwindFX.java` (watch method enhancement)  
 **Expected:** Sub-second reload on CSS file changes.
 
 ### 18. Visual Builder Tool
@@ -145,7 +87,7 @@ This document contains curated issues for contributors at all levels.
 **Difficulty:** Advanced  
 **Labels:** `performance`, `benchmark`, `tests`  
 **Description:** Create automated performance benchmarks comparing TailwindFX vs manual CSS styling.  
-**Files:** `src/test/java/io/github/tailwindfx/perf/`  
+**Files:** `src/test/java/io/github/yasmramos/tailwindfx/perf/`  
 **Expected:** CI integration with performance regression detection.
 
 ---
