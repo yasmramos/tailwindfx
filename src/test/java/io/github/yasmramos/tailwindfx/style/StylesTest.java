@@ -1,5 +1,7 @@
 package io.github.yasmramos.tailwindfx.style;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -10,14 +12,15 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.testfx.framework.junit5.ApplicationTest;
 
 /**
  * Tests for {@link Styles} — GridPane constraints, margins, z-order, ColorAdjust filters, skew,
  * ImageView, and visibility helpers.
  */
-public final class StylesTest {
-
-  private StylesTest() {}
+public class StylesTest extends ApplicationTest {
 
   private static int passed = 0, failed = 0;
 
@@ -79,58 +82,6 @@ public final class StylesTest {
     if (err.get() != null) {
       throw new RuntimeException(err.get());
     }
-  }
-
-  public static boolean runAll() throws Exception {
-    passed = 0;
-    failed = 0;
-    System.out.println("\n── Styles ──");
-
-    testGridPaneSpans();
-    testGridPaneSpanGuards();
-    testGridCell();
-    testGrow();
-    testGrowNone();
-    testMarginWithParent();
-    testMarginGuards();
-    testZOrder();
-    testOrderFirstLast();
-    testSelfAlignment();
-    testJustifySelf();
-    testGrayscale();
-    testBrightness();
-    testContrast();
-    testSaturate();
-    testHueRotate();
-    testInvert();
-    testSepia();
-    testFilterNone();
-    testSkewX();
-    testSkewY();
-    testVisibility();
-    testHiddenNode();
-    testShow();
-    testWithParentMethods();
-    testTextShadow();
-    testDropShadowColored();
-    testClipCircle();
-    testClipRounded();
-    testClipMask();
-    testRotateX();
-    testRotateY();
-    testTranslateZ();
-    testReset3D();
-    testReducedMotion();
-    testGlass();
-    testNeumorph();
-    testSvgHelpers();
-    testUserSelectUtilities();
-    testTouchActionUtilities();
-    testScrollSnapUtilities();
-    testColumnsUtilities();
-
-    System.out.printf("  %d passed, %d failed%n", passed, failed);
-    return failed == 0;
   }
 
   // ── GridPane constraints ────────────────────────────────────────────
@@ -789,15 +740,300 @@ public final class StylesTest {
         () -> {
           Pane p = new Pane();
           
-          for (int i = 1; i <= 12; i++) {
-            Styles.columns1(p);
-            check("columns-" + i + " sets value", String.valueOf(i).equals(p.getProperties().get("tailwindfx-columns")));
-          }
+          Styles.columns1(p);
+          check("columns-1 sets value", "1".equals(p.getProperties().get("tailwindfx-columns")));
+          
+          Styles.columns2(p);
+          check("columns-2 sets value", "2".equals(p.getProperties().get("tailwindfx-columns")));
+          
+          Styles.columns3(p);
+          check("columns-3 sets value", "3".equals(p.getProperties().get("tailwindfx-columns")));
+          
+          Styles.columns4(p);
+          check("columns-4 sets value", "4".equals(p.getProperties().get("tailwindfx-columns")));
+          
+          Styles.columns5(p);
+          check("columns-5 sets value", "5".equals(p.getProperties().get("tailwindfx-columns")));
+          
+          Styles.columns6(p);
+          check("columns-6 sets value", "6".equals(p.getProperties().get("tailwindfx-columns")));
+          
+          Styles.columns7(p);
+          check("columns-7 sets value", "7".equals(p.getProperties().get("tailwindfx-columns")));
+          
+          Styles.columns8(p);
+          check("columns-8 sets value", "8".equals(p.getProperties().get("tailwindfx-columns")));
+          
+          Styles.columns9(p);
+          check("columns-9 sets value", "9".equals(p.getProperties().get("tailwindfx-columns")));
+          
+          Styles.columns10(p);
+          check("columns-10 sets value", "10".equals(p.getProperties().get("tailwindfx-columns")));
+          
+          Styles.columns11(p);
+          check("columns-11 sets value", "11".equals(p.getProperties().get("tailwindfx-columns")));
+          
+          Styles.columns12(p);
+          check("columns-12 sets value", "12".equals(p.getProperties().get("tailwindfx-columns")));
           
           Styles.columnsAuto(p);
           check("columns-auto sets property", "auto".equals(p.getProperties().get("tailwindfx-columns")));
           
           throws_("columns1(null)", IllegalArgumentException.class, () -> Styles.columns1(null));
         });
+  }
+
+  // ── JUnit 5 Test Wrappers ────────────────────────────────────────────
+
+  @Test
+  @DisplayName("GridPane Spans")
+  void testGridPaneSpansJUnit() throws Exception {
+    testGridPaneSpans();
+  }
+
+  @Test
+  @DisplayName("GridPane Span Guards")
+  void testGridPaneSpanGuardsJUnit() {
+    testGridPaneSpanGuards();
+  }
+
+  @Test
+  @DisplayName("Grid Cell")
+  void testGridCellJUnit() throws Exception {
+    testGridCell();
+  }
+
+  @Test
+  @DisplayName("Grow")
+  void testGrowJUnit() throws Exception {
+    testGrow();
+  }
+
+  @Test
+  @DisplayName("Grow None")
+  void testGrowNoneJUnit() throws Exception {
+    testGrowNone();
+  }
+
+  @Test
+  @DisplayName("Margin With Parent")
+  void testMarginWithParentJUnit() throws Exception {
+    testMarginWithParent();
+  }
+
+  @Test
+  @DisplayName("Margin Guards")
+  void testMarginGuardsJUnit() {
+    testMarginGuards();
+  }
+
+  @Test
+  @DisplayName("Z Order")
+  void testZOrderJUnit() throws Exception {
+    testZOrder();
+  }
+
+  @Test
+  @DisplayName("Order First Last")
+  void testOrderFirstLastJUnit() throws Exception {
+    testOrderFirstLast();
+  }
+
+  @Test
+  @DisplayName("Self Alignment")
+  void testSelfAlignmentJUnit() throws Exception {
+    testSelfAlignment();
+  }
+
+  @Test
+  @DisplayName("Justify Self")
+  void testJustifySelfJUnit() throws Exception {
+    testJustifySelf();
+  }
+
+  @Test
+  @DisplayName("Grayscale")
+  void testGrayscaleJUnit() throws Exception {
+    testGrayscale();
+  }
+
+  @Test
+  @DisplayName("Brightness")
+  void testBrightnessJUnit() throws Exception {
+    testBrightness();
+  }
+
+  @Test
+  @DisplayName("Contrast")
+  void testContrastJUnit() throws Exception {
+    testContrast();
+  }
+
+  @Test
+  @DisplayName("Saturate")
+  void testSaturateJUnit() throws Exception {
+    testSaturate();
+  }
+
+  @Test
+  @DisplayName("Hue Rotate")
+  void testHueRotateJUnit() throws Exception {
+    testHueRotate();
+  }
+
+  @Test
+  @DisplayName("Invert")
+  void testInvertJUnit() throws Exception {
+    testInvert();
+  }
+
+  @Test
+  @DisplayName("Sepia")
+  void testSepiaJUnit() throws Exception {
+    testSepia();
+  }
+
+  @Test
+  @DisplayName("Filter None")
+  void testFilterNoneJUnit() throws Exception {
+    testFilterNone();
+  }
+
+  @Test
+  @DisplayName("Skew X")
+  void testSkewXJUnit() throws Exception {
+    testSkewX();
+  }
+
+  @Test
+  @DisplayName("Skew Y")
+  void testSkewYJUnit() throws Exception {
+    testSkewY();
+  }
+
+  @Test
+  @DisplayName("Visibility")
+  void testVisibilityJUnit() throws Exception {
+    testVisibility();
+  }
+
+  @Test
+  @DisplayName("Hidden Node")
+  void testHiddenNodeJUnit() throws Exception {
+    testHiddenNode();
+  }
+
+  @Test
+  @DisplayName("Show")
+  void testShowJUnit() throws Exception {
+    testShow();
+  }
+
+  @Test
+  @DisplayName("With Parent Methods")
+  void testWithParentMethodsJUnit() throws Exception {
+    testWithParentMethods();
+  }
+
+  @Test
+  @DisplayName("Text Shadow")
+  void testTextShadowJUnit() throws Exception {
+    testTextShadow();
+  }
+
+  @Test
+  @DisplayName("Drop Shadow Colored")
+  void testDropShadowColoredJUnit() throws Exception {
+    testDropShadowColored();
+  }
+
+  @Test
+  @DisplayName("Clip Circle")
+  void testClipCircleJUnit() throws Exception {
+    testClipCircle();
+  }
+
+  @Test
+  @DisplayName("Clip Rounded")
+  void testClipRoundedJUnit() throws Exception {
+    testClipRounded();
+  }
+
+  @Test
+  @DisplayName("Clip Mask")
+  void testClipMaskJUnit() throws Exception {
+    testClipMask();
+  }
+
+  @Test
+  @DisplayName("Rotate X")
+  void testRotateXJUnit() throws Exception {
+    testRotateX();
+  }
+
+  @Test
+  @DisplayName("Rotate Y")
+  void testRotateYJUnit() throws Exception {
+    testRotateY();
+  }
+
+  @Test
+  @DisplayName("Translate Z")
+  void testTranslateZJUnit() throws Exception {
+    testTranslateZ();
+  }
+
+  @Test
+  @DisplayName("Reset 3D")
+  void testReset3DJUnit() throws Exception {
+    testReset3D();
+  }
+
+  @Test
+  @DisplayName("Reduced Motion")
+  void testReducedMotionJUnit() throws Exception {
+    testReducedMotion();
+  }
+
+  @Test
+  @DisplayName("Glass")
+  void testGlassJUnit() throws Exception {
+    testGlass();
+  }
+
+  @Test
+  @DisplayName("Neumorph")
+  void testNeumorphJUnit() throws Exception {
+    testNeumorph();
+  }
+
+  @Test
+  @DisplayName("SVG Helpers")
+  void testSvgHelpersJUnit() throws Exception {
+    testSvgHelpers();
+  }
+
+  @Test
+  @DisplayName("User Select Utilities")
+  void testUserSelectUtilitiesJUnit() throws Exception {
+    testUserSelectUtilities();
+  }
+
+  @Test
+  @DisplayName("Touch Action Utilities")
+  void testTouchActionUtilitiesJUnit() throws Exception {
+    testTouchActionUtilities();
+  }
+
+  @Test
+  @DisplayName("Scroll Snap Utilities")
+  void testScrollSnapUtilitiesJUnit() throws Exception {
+    testScrollSnapUtilities();
+  }
+
+  @Test
+  @DisplayName("Columns Utilities")
+  void testColumnsUtilitiesJUnit() throws Exception {
+    testColumnsUtilities();
   }
 }
