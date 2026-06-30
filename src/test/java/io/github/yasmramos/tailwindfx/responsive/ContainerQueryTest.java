@@ -168,7 +168,7 @@ public class ContainerQueryTest extends ApplicationTest {
     @DisplayName("Null Safety")
     public void testNullSafety() {
         // Test with null node
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(NullPointerException.class, () -> {
             ContainerQuery.on(null);
         }, "Should throw exception for null node");
         
