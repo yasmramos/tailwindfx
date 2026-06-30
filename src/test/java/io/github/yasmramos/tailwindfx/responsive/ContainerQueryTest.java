@@ -48,7 +48,8 @@ public class ContainerQueryTest extends ApplicationTest {
                 .base("p-4")
                 .sm("p-6")
                 .md("p-8")
-                .install(container);
+                ;
+            query.install(container);
             
             assertNotNull(query);
             assertTrue(query instanceof ContainerQuery);
@@ -65,7 +66,7 @@ public class ContainerQueryTest extends ApplicationTest {
                 .lg("text-lg")
                 .xl("text-xl")
                 .xxl("text-xxl")
-                .install(container);
+                ; query.install(container);
             
             assertNotNull(query);
         }, "Standard breakpoints should work correctly");
@@ -79,7 +80,7 @@ public class ContainerQueryTest extends ApplicationTest {
                 .at(300, "w-[300px]")
                 .at(500, "w-[500px]")
                 .at(700, "w-[700px]")
-                .install(container);
+                ; query.install(container);
             
             assertNotNull(query);
         }, "Custom breakpoints should work correctly");
@@ -92,7 +93,7 @@ public class ContainerQueryTest extends ApplicationTest {
             ContainerQuery query = ContainerQuery.on(testLabel)
                 .base("flex", "flex-col", "gap-4")
                 .sm("flex-row")
-                .install(container);
+                ; query.install(container);
             
             assertNotNull(query);
             // Base classes should be present regardless of breakpoint
@@ -109,7 +110,7 @@ public class ContainerQueryTest extends ApplicationTest {
                 .onBreakpoint(bp -> capturedBreakpoint[0] = bp)
                 .sm("text-sm")
                 .md("text-md")
-                .install(container);
+                ; query.install(container);
             
             assertNotNull(query);
             // Allow time for callback to execute
@@ -133,7 +134,7 @@ public class ContainerQueryTest extends ApplicationTest {
             
             ContainerQuery query = ContainerQuery.on(tempLabel)
                 .sm("text-sm")
-                .install(tempContainer);
+                ; query.install(tempContainer);
             
             assertNotNull(query);
             
@@ -154,7 +155,7 @@ public class ContainerQueryTest extends ApplicationTest {
             ContainerQuery query = ContainerQuery.on(testLabel)
                 .sm("text-sm")
                 .md("text-md")
-                .install(container);
+                ; query.install(container);
             
             assertNotNull(query);
             
@@ -175,7 +176,7 @@ public class ContainerQueryTest extends ApplicationTest {
         assertDoesNotThrow(() -> {
             ContainerQuery query = ContainerQuery.on(testLabel)
                 .sm("text-sm")
-                .install(null);
+                ; query.install(container);
             // Should handle null container gracefully
         }, "Should handle null container gracefully");
     }
