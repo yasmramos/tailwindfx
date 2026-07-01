@@ -126,7 +126,7 @@ public final class StylesTest {
     testNeumorph();
     testSvgHelpers();
     testWithParentMethods();
-    
+
     // New utilities tests (v0.1.1)
     testUserSelectUtilities();
     testTouchActionUtilities();
@@ -709,25 +709,22 @@ public final class StylesTest {
     runFx(
         () -> {
           Label lbl = new Label("Test");
-          
+
           Styles.selectNone(lbl);
-          check("selectNone sets cursor default", 
-              lbl.getCursor() == javafx.scene.Cursor.DEFAULT);
-          
+          check("selectNone sets cursor default", lbl.getCursor() == javafx.scene.Cursor.DEFAULT);
+
           Styles.selectText(lbl);
-          check("selectText restores cursor", 
-              lbl.getCursor() == javafx.scene.Cursor.TEXT);
-          
+          check("selectText restores cursor", lbl.getCursor() == javafx.scene.Cursor.TEXT);
+
           Styles.selectAll(lbl);
-          check("selectAll sets style", 
-              lbl.getStyle().contains("-fx-selection-bar"));
-          
+          check("selectAll sets style", lbl.getStyle().contains("-fx-selection-bar"));
+
           Styles.selectAuto(lbl);
           check("selectAuto works", true);
-          
+
           // Null safety
-          throws_("selectNone(null)", IllegalArgumentException.class, 
-              () -> Styles.selectNone(null));
+          throws_(
+              "selectNone(null)", IllegalArgumentException.class, () -> Styles.selectNone(null));
         });
   }
 
@@ -735,29 +732,29 @@ public final class StylesTest {
     runFx(
         () -> {
           Region r = new Region();
-          
+
           Styles.touchAuto(r);
           check("touchAuto works", true);
-          
+
           Styles.touchNone(r);
-          check("touchNone sets pointer-events none", 
+          check(
+              "touchNone sets pointer-events none",
               r.getStyle().contains("-fx-pointer-events: none"));
-          
+
           Styles.touchPanX(r);
           check("touchPanX works", true);
-          
+
           Styles.touchPanY(r);
           check("touchPanY works", true);
-          
+
           Styles.touchPinchZoom(r);
           check("touchPinchZoom works", true);
-          
+
           Styles.touchManipulation(r);
           check("touchManipulation works", true);
-          
+
           // Null safety
-          throws_("touchNone(null)", IllegalArgumentException.class, 
-              () -> Styles.touchNone(null));
+          throws_("touchNone(null)", IllegalArgumentException.class, () -> Styles.touchNone(null));
         });
   }
 
@@ -765,42 +762,45 @@ public final class StylesTest {
     runFx(
         () -> {
           Region r = new Region();
-          
+
           Styles.snapStart(r);
-          check("snapStart sets scroll-snap-align start", 
+          check(
+              "snapStart sets scroll-snap-align start",
               r.getStyle().contains("-fx-scroll-snap-align: start"));
-          
+
           Styles.snapEnd(r);
-          check("snapEnd sets scroll-snap-align end", 
+          check(
+              "snapEnd sets scroll-snap-align end",
               r.getStyle().contains("-fx-scroll-snap-align: end"));
-          
+
           Styles.snapCenter(r);
-          check("snapCenter sets scroll-snap-align center", 
+          check(
+              "snapCenter sets scroll-snap-align center",
               r.getStyle().contains("-fx-scroll-snap-align: center"));
-          
+
           Styles.snapX(r);
-          check("snapX sets scroll-snap-type x", 
-              r.getStyle().contains("-fx-scroll-snap-type: x"));
-          
+          check("snapX sets scroll-snap-type x", r.getStyle().contains("-fx-scroll-snap-type: x"));
+
           Styles.snapY(r);
-          check("snapY sets scroll-snap-type y", 
-              r.getStyle().contains("-fx-scroll-snap-type: y"));
-          
+          check("snapY sets scroll-snap-type y", r.getStyle().contains("-fx-scroll-snap-type: y"));
+
           Styles.snapBoth(r);
-          check("snapBoth sets scroll-snap-type both", 
+          check(
+              "snapBoth sets scroll-snap-type both",
               r.getStyle().contains("-fx-scroll-snap-type: both"));
-          
+
           Styles.snapMandatory(r);
-          check("snapMandatory sets scroll-snap-stop always", 
+          check(
+              "snapMandatory sets scroll-snap-stop always",
               r.getStyle().contains("-fx-scroll-snap-stop: always"));
-          
+
           Styles.snapProximity(r);
-          check("snapProximity sets scroll-snap-stop normal", 
+          check(
+              "snapProximity sets scroll-snap-stop normal",
               r.getStyle().contains("-fx-scroll-snap-stop: normal"));
-          
+
           // Null safety
-          throws_("snapStart(null)", IllegalArgumentException.class, 
-              () -> Styles.snapStart(null));
+          throws_("snapStart(null)", IllegalArgumentException.class, () -> Styles.snapStart(null));
         });
   }
 
@@ -808,42 +808,35 @@ public final class StylesTest {
     runFx(
         () -> {
           Pane p = new Pane();
-          
+
           Styles.columns1(p);
-          check("columns1 sets column-count 1", 
-              p.getStyle().contains("-fx-column-count: 1"));
-          
+          check("columns1 sets column-count 1", p.getStyle().contains("-fx-column-count: 1"));
+
           Styles.columns2(p);
-          check("columns2 sets column-count 2", 
-              p.getStyle().contains("-fx-column-count: 2"));
-          
+          check("columns2 sets column-count 2", p.getStyle().contains("-fx-column-count: 2"));
+
           Styles.columns3(p);
-          check("columns3 sets column-count 3", 
-              p.getStyle().contains("-fx-column-count: 3"));
-          
+          check("columns3 sets column-count 3", p.getStyle().contains("-fx-column-count: 3"));
+
           Styles.columns4(p);
-          check("columns4 sets column-count 4", 
-              p.getStyle().contains("-fx-column-count: 4"));
-          
+          check("columns4 sets column-count 4", p.getStyle().contains("-fx-column-count: 4"));
+
           Styles.columns6(p);
-          check("columns6 sets column-count 6", 
-              p.getStyle().contains("-fx-column-count: 6"));
-          
+          check("columns6 sets column-count 6", p.getStyle().contains("-fx-column-count: 6"));
+
           Styles.columns8(p);
-          check("columns8 sets column-count 8", 
-              p.getStyle().contains("-fx-column-count: 8"));
-          
+          check("columns8 sets column-count 8", p.getStyle().contains("-fx-column-count: 8"));
+
           Styles.columns12(p);
-          check("columns12 sets column-count 12", 
-              p.getStyle().contains("-fx-column-count: 12"));
-          
+          check("columns12 sets column-count 12", p.getStyle().contains("-fx-column-count: 12"));
+
           Styles.columnsAuto(p);
-          check("columnsAuto sets column-count auto", 
+          check(
+              "columnsAuto sets column-count auto",
               p.getStyle().contains("-fx-column-count: auto"));
-          
+
           // Null safety
-          throws_("columns1(null)", IllegalArgumentException.class, 
-              () -> Styles.columns1(null));
+          throws_("columns1(null)", IllegalArgumentException.class, () -> Styles.columns1(null));
         });
   }
 }

@@ -21,7 +21,7 @@ class CssUtilitiesTest {
       // No static CSS files should be required
       var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx.css");
       assertNull(resource, "tailwindfx.css should NOT exist (JIT compiled)");
-      
+
       var darkResource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-dark.css");
       assertNull(darkResource, "tailwindfx-dark.css should NOT exist (handled by ThemeManager)");
     }
@@ -36,10 +36,11 @@ class CssUtilitiesTest {
     void testColorVariablesGenerated() {
       // Base CSS is now generated dynamically by ThemeCssGenerator
       // This test verifies the generator produces correct variable format
-      var generator = new io.github.yasmramos.tailwindfx.core.ThemeCssGenerator(
-          io.github.yasmramos.tailwindfx.theme.ThemeConfig.defaultConfig());
+      var generator =
+          new io.github.yasmramos.tailwindfx.core.ThemeCssGenerator(
+              io.github.yasmramos.tailwindfx.theme.ThemeConfig.defaultConfig());
       String css = generator.generateBaseCss();
-      
+
       assertTrue(css.contains("-color-blue-500"), "Should contain -color-blue-500");
       assertTrue(css.contains("-color-red-500"), "Should contain -color-red-500");
       assertTrue(css.contains("-color-green-500"), "Should contain -color-green-500");
@@ -49,10 +50,11 @@ class CssUtilitiesTest {
     @Test
     @DisplayName("Should generate font size variables dynamically")
     void testFontSizeVariablesGenerated() {
-      var generator = new io.github.yasmramos.tailwindfx.core.ThemeCssGenerator(
-          io.github.yasmramos.tailwindfx.theme.ThemeConfig.defaultConfig());
+      var generator =
+          new io.github.yasmramos.tailwindfx.core.ThemeCssGenerator(
+              io.github.yasmramos.tailwindfx.theme.ThemeConfig.defaultConfig());
       String css = generator.generateBaseCss();
-      
+
       assertTrue(css.contains("-font-size-xs"));
       assertTrue(css.contains("-font-size-sm"));
       assertTrue(css.contains("-font-size-base"));
@@ -63,10 +65,11 @@ class CssUtilitiesTest {
     @Test
     @DisplayName("Should generate font weight variables dynamically")
     void testFontWeightVariablesGenerated() {
-      var generator = new io.github.yasmramos.tailwindfx.core.ThemeCssGenerator(
-          io.github.yasmramos.tailwindfx.theme.ThemeConfig.defaultConfig());
+      var generator =
+          new io.github.yasmramos.tailwindfx.core.ThemeCssGenerator(
+              io.github.yasmramos.tailwindfx.theme.ThemeConfig.defaultConfig());
       String css = generator.generateBaseCss();
-      
+
       // Font weights are defined in tailwindfx-colors.css, not in base CSS
       // Base CSS only contains colors, spacing, font-sizes, radius, opacity, shadows
       assertTrue(css.contains("-color-"), "Should contain color variables");
@@ -75,18 +78,17 @@ class CssUtilitiesTest {
     @Test
     @DisplayName("Should generate spacing variables dynamically")
     void testSpacingVariablesGenerated() {
-      var generator = new io.github.yasmramos.tailwindfx.core.ThemeCssGenerator(
-          io.github.yasmramos.tailwindfx.theme.ThemeConfig.defaultConfig());
+      var generator =
+          new io.github.yasmramos.tailwindfx.core.ThemeCssGenerator(
+              io.github.yasmramos.tailwindfx.theme.ThemeConfig.defaultConfig());
       String css = generator.generateBaseCss();
-      
+
       assertTrue(css.contains("-spacing-0"));
       assertTrue(css.contains("-spacing-1"));
       assertTrue(css.contains("-spacing-2"));
       assertTrue(css.contains("-spacing-4"));
     }
   }
-
-
 
   @Nested
   @DisplayName("Color Class Names")
@@ -97,14 +99,23 @@ class CssUtilitiesTest {
     void testDynamicColorCompilation() {
       // Colors are now compiled JIT dynamically, not from static CSS
       String[] colorTokens = {
-        "bg-blue-500", "bg-red-500", "bg-green-500", "bg-gray-500", "bg-white",
-        "text-blue-500", "text-red-500", "text-green-500", "text-white",
-        "border-gray-200", "border-blue-500", "border-transparent"
+        "bg-blue-500",
+        "bg-red-500",
+        "bg-green-500",
+        "bg-gray-500",
+        "bg-white",
+        "text-blue-500",
+        "text-red-500",
+        "text-green-500",
+        "text-white",
+        "border-gray-200",
+        "border-blue-500",
+        "border-transparent"
       };
-      
+
       for (String token : colorTokens) {
-        assertTrue(token.length() > 0, 
-            "Color token '" + token + "' should be supported by JIT compiler");
+        assertTrue(
+            token.length() > 0, "Color token '" + token + "' should be supported by JIT compiler");
       }
     }
 
@@ -112,12 +123,11 @@ class CssUtilitiesTest {
     @DisplayName("Should compile font size tokens dynamically via JIT")
     void testDynamicFontSizeCompilation() {
       // Font sizes are now compiled JIT dynamically
-      String[] fontSizeTokens = {
-        "text-xs", "text-sm", "text-base", "text-lg", "text-xl"
-      };
-      
+      String[] fontSizeTokens = {"text-xs", "text-sm", "text-base", "text-lg", "text-xl"};
+
       for (String token : fontSizeTokens) {
-        assertTrue(token.length() > 0, 
+        assertTrue(
+            token.length() > 0,
             "Font size token '" + token + "' should be supported by JIT compiler");
       }
     }
@@ -129,9 +139,10 @@ class CssUtilitiesTest {
       String[] fontWeightTokens = {
         "font-thin", "font-normal", "font-medium", "font-bold", "font-black"
       };
-      
+
       for (String token : fontWeightTokens) {
-        assertTrue(token.length() > 0, 
+        assertTrue(
+            token.length() > 0,
             "Font weight token '" + token + "' should be supported by JIT compiler");
       }
     }
@@ -143,9 +154,10 @@ class CssUtilitiesTest {
       String[] radiusTokens = {
         "rounded-none", "rounded-sm", "rounded", "rounded-md", "rounded-lg", "rounded-full"
       };
-      
+
       for (String token : radiusTokens) {
-        assertTrue(token.length() > 0, 
+        assertTrue(
+            token.length() > 0,
             "Border radius token '" + token + "' should be supported by JIT compiler");
       }
     }
@@ -164,9 +176,10 @@ class CssUtilitiesTest {
         "cursor-pointer", "cursor-text", "cursor-wait",
         "overflow-auto", "overflow-hidden", "overflow-scroll"
       };
-      
+
       for (String className : jitCompiledClasses) {
-        assertTrue(className.length() > 0, 
+        assertTrue(
+            className.length() > 0,
             "Utility class '" + className + "' should be supported by JIT compiler");
       }
     }
@@ -191,18 +204,19 @@ class CssUtilitiesTest {
     @DisplayName("Should have valid CSS syntax in generated base CSS")
     void testValidCssSyntax() {
       // Test the dynamically generated base CSS instead of static files
-      var generator = new io.github.yasmramos.tailwindfx.core.ThemeCssGenerator(
-          io.github.yasmramos.tailwindfx.theme.ThemeConfig.defaultConfig());
+      var generator =
+          new io.github.yasmramos.tailwindfx.core.ThemeCssGenerator(
+              io.github.yasmramos.tailwindfx.theme.ThemeConfig.defaultConfig());
       String content = generator.generateBaseCss();
-      
+
       assertNotNull(content, "Generated CSS should not be null");
       assertTrue(content.length() > 0, "Generated CSS should not be empty");
-      
+
       // Basic syntax checks
       assertTrue(
           content.startsWith(".root") || content.contains("-color-"),
           "Generated CSS should start with .root or contain color variables");
-      
+
       // Should have balanced braces
       long openBraces = content.chars().filter(ch -> ch == '{').count();
       long closeBraces = content.chars().filter(ch -> ch == '}').count();
@@ -220,8 +234,8 @@ class CssUtilitiesTest {
       // Text alignment is now compiled JIT dynamically
       String[] alignTokens = {"text-left", "text-center", "text-right"};
       for (String token : alignTokens) {
-        assertTrue(token.length() > 0, 
-            "Text alignment token '" + token + "' should be supported by JIT");
+        assertTrue(
+            token.length() > 0, "Text alignment token '" + token + "' should be supported by JIT");
       }
     }
 
@@ -231,8 +245,8 @@ class CssUtilitiesTest {
       // Text decoration is now compiled JIT dynamically
       String[] decorTokens = {"underline", "no-underline", "line-through"};
       for (String token : decorTokens) {
-        assertTrue(token.length() > 0, 
-            "Text decoration token '" + token + "' should be supported by JIT");
+        assertTrue(
+            token.length() > 0, "Text decoration token '" + token + "' should be supported by JIT");
       }
     }
 
@@ -242,8 +256,8 @@ class CssUtilitiesTest {
       // Text transform is now compiled JIT dynamically
       String[] transformTokens = {"uppercase", "lowercase", "capitalize"};
       for (String token : transformTokens) {
-        assertTrue(token.length() > 0, 
-            "Text transform token '" + token + "' should be supported by JIT");
+        assertTrue(
+            token.length() > 0, "Text transform token '" + token + "' should be supported by JIT");
       }
     }
 
@@ -253,8 +267,8 @@ class CssUtilitiesTest {
       // Font family is now compiled JIT dynamically
       String[] familyTokens = {"font-sans", "font-serif", "font-mono"};
       for (String token : familyTokens) {
-        assertTrue(token.length() > 0, 
-            "Font family token '" + token + "' should be supported by JIT");
+        assertTrue(
+            token.length() > 0, "Font family token '" + token + "' should be supported by JIT");
       }
     }
   }
@@ -267,10 +281,12 @@ class CssUtilitiesTest {
     @DisplayName("Should compile shadow utilities via JIT")
     void testShadowClasses() {
       // Shadows are now compiled JIT dynamically, not from static CSS
-      String[] shadowTokens = {"shadow-xs", "shadow-sm", "shadow", "shadow-md", "shadow-lg", "shadow-xl"};
+      String[] shadowTokens = {
+        "shadow-xs", "shadow-sm", "shadow", "shadow-md", "shadow-lg", "shadow-xl"
+      };
       for (String token : shadowTokens) {
-        assertTrue(token.length() > 0, 
-            "Shadow token '" + token + "' should be supported by JIT compiler");
+        assertTrue(
+            token.length() > 0, "Shadow token '" + token + "' should be supported by JIT compiler");
       }
     }
 
@@ -280,7 +296,8 @@ class CssUtilitiesTest {
       // Transforms are now compiled JIT dynamically, not from static CSS
       String[] transformTokens = {"scale-50", "scale-100", "rotate-45", "translate-x-4"};
       for (String token : transformTokens) {
-        assertTrue(token.length() > 0, 
+        assertTrue(
+            token.length() > 0,
             "Transform token '" + token + "' should be supported by JIT compiler");
       }
     }
