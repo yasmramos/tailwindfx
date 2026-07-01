@@ -140,7 +140,9 @@ public final class TwButton {
     btn.setAccessibleText(label);
     ComponentStyles.applyButtonBase(btn);
     btn.getStyleClass().addAll("btn", "btn-icon", "btn-" + color, "btn-circle");
-    btn.setStyle(btn.getStyle() + " -fx-min-width: 40px; -fx-min-height: 40px; -fx-padding: 0; -fx-background-radius: 9999px;");
+    btn.setStyle(
+        btn.getStyle()
+            + " -fx-min-width: 40px; -fx-min-height: 40px; -fx-padding: 0; -fx-background-radius: 9999px;");
     return btn;
   }
 
