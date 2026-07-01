@@ -1,181 +1,125 @@
 package io.github.yasmramos.tailwindfx.components;
 
-import io.github.yasmramos.tailwindfx.animation.TwAnimation;
-import io.github.yasmramos.tailwindfx.core.ComponentStyles;
 import javafx.scene.control.Button;
+import javafx.beans.property.BooleanProperty;
 
 /**
- * TwButton — Pre-styled button component with TailwindCSS variants.
- *
- * <p>Uses programmatic styles from ComponentStyles for dynamic theming.
- *
- * <pre>
- * Button btn = TwButton.primary("Save");
- * Button btn = TwButton.secondary("Cancel");
- * Button btn = TwButton.outline("Delete", "red");
- * Button btn = TwButton.ghost("More info");
- * Button btn = TwButton.icon("🔍", "Search");
- * </pre>
+ * TwButton — Custom button component extending JavaFX Button with TailwindCSS variants.
  */
-public final class TwButton {
+public class TwButton extends Button {
 
-  private TwButton() {}
+    private TwButtonVariant variant = TwButtonVariant.PRIMARY;
+    private String color = "blue";
+    private boolean loading = false;
 
-  /**
-   * Creates a primary button (solid background, prominent).
-   *
-   * @param text button text
-   * @return styled Button
-   */
-  public static Button primary(String text) {
-    return primary(text, "blue");
-  }
+    public TwButton(String text) {
+        super(text);
+        initialize();
+    }
 
-  /**
-   * Creates a primary button with custom color.
-   *
-   * @param text button text
-   * @param color Tailwind color name (e.g. "blue", "green", "red")
-   * @return styled Button
-   */
-  public static Button primary(String text, String color) {
-    Button btn = new Button(text);
-    ComponentStyles.applyButtonPrimary(btn, color);
-    TwAnimation.onHoverLift(btn, -2);
-    return btn;
-  }
+    private void initialize() {
+        getStyleClass().add("tw-button");
+        applyVariant();
+        setupEventHandlers();
+    }
 
-  /**
-   * Creates a secondary button (subtle background).
-   *
-   * @param text button text
-   * @return styled Button
-   */
-  public static Button secondary(String text) {
-    return secondary(text, "gray");
-  }
+    private void setupEventHandlers() {
+        hoverProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal && !isDisabled()) {
+                setScaleX(1.05);
+                setScaleY(1.05);
+            } else if (!isDisabled()) {
+                setScaleX(1.0);
+                setScaleY(1.0);
+            }
+        });
+    }
 
-  /**
-   * Creates a secondary button with custom color.
-   *
-   * @param text button text
-   * @param color Tailwind color name
-   * @return styled Button
-   */
-  public static Button secondary(String text, String color) {
-    Button btn = new Button(text);
-    ComponentStyles.applyButtonSecondary(btn, color);
-    TwAnimation.onHoverLift(btn, -1);
-    return btn;
-  }
+    private void applyVariant() {
+        getStyleClass().removeAll("btn-primary", "btn-secondary", "btn-outline", "btn-ghost", "btn-danger");
+        
+        switch (variant) {
+            case PRIMARY:
+                getStyleClass().add("btn-primary");
+                break;
+            case SECONDARY:
+                getStyleClass().add("btn-secondary");
+                break;
+            case OUTLINE:
+                getStyleClass().add("btn-outline");
+                break;
+            case GHOST:
+                getStyleClass().add("btn-ghost");
+                break;
+            case DANGER:
+                getStyleClass().add("btn-danger");
+                break;
+        }
+    }
 
-  /**
-   * Creates an outline button (border only).
-   *
-   * @param text button text
-   * @return styled Button
-   */
-  public static Button outline(String text) {
-    return outline(text, "gray");
-  }
+    public void setVariant(TwButtonVariant variant) {
+        this.variant = variant;
+        applyVariant();
+    }
 
-  /**
-   * Creates an outline button with custom color.
-   *
-   * @param text button text
-   * @param color Tailwind color name
-   * @return styled Button
-   */
-  public static Button outline(String text, String color) {
-    Button btn = new Button(text);
-    ComponentStyles.applyButtonOutline(btn, color);
-    TwAnimation.onHoverLift(btn, -1);
-    return btn;
-  }
+    public TwButtonVariant getVariant() {
+        return variant;
+    }
 
-  /**
-   * Creates a ghost button (no border, subtle hover).
-   *
-   * @param text button text
-   * @return styled Button
-   */
-  public static Button ghost(String text) {
-    return ghost(text, "gray");
-  }
+    public void setColor(String color) {
+        this.color = color;
+        applyVariant();
+    }
 
-  /**
-   * Creates a ghost button with custom color.
-   *
-   * @param text button text
-   * @param color Tailwind color name
-   * @return styled Button
-   */
-  public static Button ghost(String text, String color) {
-    Button btn = new Button(text);
-    ComponentStyles.applyButtonGhost(btn, color);
-    return btn;
-  }
+    public String getColor() {
+        return color;
+    }
 
-  /**
-   * Creates an icon button with text label (for accessibility).
-   *
-   * @param icon icon character or emoji
-   * @param label accessible label
-   * @return styled Button
-   */
-  public static Button icon(String icon, String label) {
-    return icon(icon, label, "gray");
-  }
+    public void setLoading(boolean loading) {
+        this.loading = loading;
+        setDisabled(loading);
+    }
 
-  /**
-   * Creates an icon button with custom color.
-   *
-   * @param icon icon character or emoji
-   * @param label accessible label
-   * @param color Tailwind color name
-   * @return styled Button
-   */
-  public static Button icon(String icon, String label, String color) {
-    Button btn = new Button(icon);
-    btn.setAccessibleText(label);
-    ComponentStyles.applyButtonBase(btn);
-    btn.getStyleClass().addAll("btn", "btn-icon", "btn-" + color, "btn-circle");
-    btn.setStyle(
-        btn.getStyle()
-            + " -fx-min-width: 40px; -fx-min-height: 40px; -fx-padding: 0; -fx-background-radius: 9999px;");
-    return btn;
-  }
+    public boolean isLoading() {
+        return loading;
+    }
 
-  /**
-   * Creates a danger button (red, destructive action).
-   *
-   * @param text button text
-   * @return styled Button
-   */
-  public static Button danger(String text) {
-    return primary(text, "red");
-  }
+    public static TwButton primary(String text) {
+        TwButton btn = new TwButton(text);
+        btn.setVariant(TwButtonVariant.PRIMARY);
+        return btn;
+    }
 
-  /**
-   * Creates a success button (green, confirmatory action).
-   *
-   * @param text button text
-   * @return styled Button
-   */
-  public static Button success(String text) {
-    return primary(text, "green");
-  }
+    public static TwButton secondary(String text) {
+        TwButton btn = new TwButton(text);
+        btn.setVariant(TwButtonVariant.SECONDARY);
+        return btn;
+    }
 
-  /**
-   * Creates a disabled-looking button (non-interactive style). Note: You should also call
-   * setDisable(true) on the returned button.
-   *
-   * @param text button text
-   * @return styled Button
-   */
-  public static Button disabled(String text) {
-    Button btn = new Button(text);
-    ComponentStyles.applyButtonDisabled(btn);
-    return btn;
-  }
+    public static TwButton outline(String text, String color) {
+        TwButton btn = new TwButton(text);
+        btn.setVariant(TwButtonVariant.OUTLINE);
+        btn.setColor(color);
+        return btn;
+    }
+
+    public static TwButton ghost(String text) {
+        TwButton btn = new TwButton(text);
+        btn.setVariant(TwButtonVariant.GHOST);
+        return btn;
+    }
+
+    public static TwButton danger(String text) {
+        TwButton btn = new TwButton(text);
+        btn.setVariant(TwButtonVariant.DANGER);
+        return btn;
+    }
+
+    public enum TwButtonVariant {
+        PRIMARY,
+        SECONDARY,
+        OUTLINE,
+        GHOST,
+        DANGER
+    }
 }
