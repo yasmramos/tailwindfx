@@ -87,12 +87,35 @@ public class TwButton extends Button {
     public static TwButton primary(String text) {
         TwButton btn = new TwButton(text);
         btn.setVariant(TwButtonVariant.PRIMARY);
+        btn.setColor("blue");
+        return btn;
+    }
+
+    public static TwButton primary(String text, String color) {
+        TwButton btn = new TwButton(text);
+        btn.setVariant(TwButtonVariant.PRIMARY);
+        btn.setColor(color);
         return btn;
     }
 
     public static TwButton secondary(String text) {
         TwButton btn = new TwButton(text);
         btn.setVariant(TwButtonVariant.SECONDARY);
+        btn.setColor("gray");
+        return btn;
+    }
+
+    public static TwButton secondary(String text, String color) {
+        TwButton btn = new TwButton(text);
+        btn.setVariant(TwButtonVariant.SECONDARY);
+        btn.setColor(color);
+        return btn;
+    }
+
+    public static TwButton outline(String text) {
+        TwButton btn = new TwButton(text);
+        btn.setVariant(TwButtonVariant.OUTLINE);
+        btn.setColor("gray");
         return btn;
     }
 
@@ -106,12 +129,51 @@ public class TwButton extends Button {
     public static TwButton ghost(String text) {
         TwButton btn = new TwButton(text);
         btn.setVariant(TwButtonVariant.GHOST);
+        btn.setColor("gray");
+        return btn;
+    }
+
+    public static TwButton ghost(String text, String color) {
+        TwButton btn = new TwButton(text);
+        btn.setVariant(TwButtonVariant.GHOST);
+        btn.setColor(color);
         return btn;
     }
 
     public static TwButton danger(String text) {
         TwButton btn = new TwButton(text);
         btn.setVariant(TwButtonVariant.DANGER);
+        btn.setColor("red");
+        return btn;
+    }
+
+    public static TwButton success(String text) {
+        TwButton btn = new TwButton(text);
+        btn.setVariant(TwButtonVariant.PRIMARY);
+        btn.setColor("green");
+        return btn;
+    }
+
+    public static TwButton disabled(String text) {
+        TwButton btn = new TwButton(text);
+        btn.setDisable(true);
+        btn.getStyleClass().add("btn-disabled");
+        return btn;
+    }
+
+    public static TwButton icon(String icon, String label) {
+        TwButton btn = new TwButton(icon);
+        btn.setAccessibleText(label);
+        btn.getStyleClass().addAll("btn-icon", "btn-circle");
+        btn.setColor("gray");
+        return btn;
+    }
+
+    public static TwButton icon(String icon, String label, String color) {
+        TwButton btn = new TwButton(icon);
+        btn.setAccessibleText(label);
+        btn.getStyleClass().addAll("btn-icon", "btn-circle");
+        btn.setColor(color);
         return btn;
     }
 
