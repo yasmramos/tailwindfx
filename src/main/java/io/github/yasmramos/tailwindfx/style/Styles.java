@@ -1336,11 +1336,14 @@ public final class Styles {
   public static <T extends Node> T touchPanX(T node) {
     node.getProperties().put("touch-action", "pan-x");
     if (node instanceof Region) {
-      ((Region) node).addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, e -> {
-        if (Math.abs(e.getDeltaY()) > Math.abs(e.getDeltaX())) {
-          e.consume();
-        }
-      });
+      ((Region) node)
+          .addEventFilter(
+              javafx.scene.input.ScrollEvent.SCROLL,
+              e -> {
+                if (Math.abs(e.getDeltaY()) > Math.abs(e.getDeltaX())) {
+                  e.consume();
+                }
+              });
     }
     return node;
   }
@@ -1350,11 +1353,14 @@ public final class Styles {
   public static <T extends Node> T touchPanY(T node) {
     node.getProperties().put("touch-action", "pan-y");
     if (node instanceof Region) {
-      ((Region) node).addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, e -> {
-        if (Math.abs(e.getDeltaX()) > Math.abs(e.getDeltaY())) {
-          e.consume();
-        }
-      });
+      ((Region) node)
+          .addEventFilter(
+              javafx.scene.input.ScrollEvent.SCROLL,
+              e -> {
+                if (Math.abs(e.getDeltaX()) > Math.abs(e.getDeltaY())) {
+                  e.consume();
+                }
+              });
     }
     return node;
   }

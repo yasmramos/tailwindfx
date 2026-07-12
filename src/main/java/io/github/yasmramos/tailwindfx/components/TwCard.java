@@ -1,205 +1,57 @@
 package io.github.yasmramos.tailwindfx.components;
 
-import io.github.yasmramos.tailwindfx.TailwindFX;
-import io.github.yasmramos.tailwindfx.animation.TwAnimation;
-import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.Node;
+import javafx.geometry.Insets;
 
 /**
- * TwCard — Pre-styled card container component.
- *
- * <p>Uses base .card class from tailwindfx-components.css with utility modifiers.
- *
- * <pre>
- * TwCard card = TwCard.create()
- *     .title("Revenue")
- *     .body(chart)
- *     .footer(actions)
- *     .build();
- *
- * TwCard simpleCard = TwCard.simple(content);
- * </pre>
+ * TwCard — Custom card component extending JavaFX VBox with TailwindCSS styling.
  */
 public class TwCard extends VBox {
 
-  /**
-   * Creates a card builder for complex cards.
-   *
-   * @return CardBuilder instance
-   */
-  public static CardBuilder create() {
-    return new CardBuilder();
-  }
-
-  /**
-   * Creates a simple card with just content.
-   *
-   * @param content the card content
-   * @return styled TwCard
-   */
-  public static TwCard simple(Node content) {
-    return create().body(content).build();
-  }
-
-  /**
-   * Creates a card with title and content.
-   *
-   * @param title card title
-   * @param content card content
-   * @return styled TwCard
-   */
-  public static TwCard withTitle(String title, Node content) {
-    return create().title(title).body(content).build();
-  }
-
-  /** Protected constructor for builder usage. */
-  protected TwCard() {
-    super();
-  }
-
-  /** Builder for styled card containers. */
-  public static class CardBuilder {
-    private String title = null;
-    private Node body = null;
-    private Node footer = null;
-    private boolean shadow = true;
-    private boolean border = false;
-    private boolean hoverable = false;
-    private String size = "md"; // sm, md, lg
-    private String radius = "lg"; // sm, md, lg, xl
-
-    /**
-     * Sets the card title.
-     *
-     * @param t title text
-     * @return this builder
-     */
-    public CardBuilder title(String t) {
-      this.title = t;
-      return this;
+    public TwCard() {
+        super();
+        initialize();
     }
 
-    /**
-     * Sets the card body content.
-     *
-     * @param n body node
-     * @return this builder
-     */
-    public CardBuilder body(Node n) {
-      this.body = n;
-      return this;
+    public TwCard(Node... children) {
+        super(children);
+        initialize();
     }
 
-    /**
-     * Sets the card footer content.
-     *
-     * @param n footer node
-     * @return this builder
-     */
-    public CardBuilder footer(Node n) {
-      this.footer = n;
-      return this;
+    private void initialize() {
+        getStyleClass().add("tw-card");
+        setSpacing(16);
+        setPadding(new Insets(16));
     }
 
-    /**
-     * Enables or disables shadow.
-     *
-     * @param s true to show shadow
-     * @return this builder
-     */
-    public CardBuilder shadow(boolean s) {
-      this.shadow = s;
-      return this;
+    public void setHeader(Node header) {
+        if (!getChildren().isEmpty()) {
+            getChildren().add(0, header);
+        } else {
+            getChildren().add(header);
+        }
     }
 
-    /**
-     * Enables or disables border.
-     *
-     * @param b true to show border
-     * @return this builder
-     */
-    public CardBuilder border(boolean b) {
-      this.border = b;
-      return this;
+    public void setBody(Node body) {
+        getChildren().add(body);
     }
 
-    /**
-     * Enables hover lift animation.
-     *
-     * @param h true to enable hover effect
-     * @return this builder
-     */
-    public CardBuilder hoverable(boolean h) {
-      this.hoverable = h;
-      return this;
+    public void setFooter(Node footer) {
+        getChildren().add(footer);
     }
 
-    /**
-     * Sets card size (sm, md, lg).
-     *
-     * @param s size value
-     * @return this builder
-     */
-    public CardBuilder size(String s) {
-      this.size = s;
-      return this;
+    public static TwCard withTitle(String title) {
+        TwCard card = new TwCard();
+        javafx.scene.control.Label titleLabel = new javafx.scene.control.Label(title);
+        titleLabel.getStyleClass().addAll("text-xl", "font-bold");
+        card.setHeader(titleLabel);
+        return card;
     }
 
-    /**
-     * Sets corner radius (sm, md, lg, xl).
-     *
-     * @param r radius value
-     * @return this builder
-     */
-    public CardBuilder radius(String r) {
-      this.radius = r;
-      return this;
+    public static TwCard withContent(Node content) {
+        TwCard card = new TwCard();
+        card.setBody(content);
+        return card;
     }
-
-    /**
-     * Builds the card.
-     *
-     * @return styled TwCard
-     */
-    public TwCard build() {
-      TwCard card = new TwCard();
-
-      // Apply base card class and variants
-      TailwindFX.apply(
-          card,
-          "card",
-          shadow ? "shadow-md" : "",
-          border ? "border" : "",
-          hoverable ? "card-hoverable" : "",
-          "card-" + size,
-          "rounded-" + radius);
-
-      card.setSpacing(12);
-
-      if (title != null) {
-        Label lbl = new Label(title);
-        TailwindFX.apply(lbl, "text-lg", "font-semibold", "text-gray-900");
-        card.getChildren().add(lbl);
-      }
-      if (body != null) {
-        VBox.setVgrow(body, Priority.ALWAYS);
-        card.getChildren().add(body);
-      }
-      if (footer != null) {
-        Region spacer = new Region();
-        VBox.setVgrow(spacer, Priority.ALWAYS);
-        if (body != null) card.getChildren().add(spacer);
-        TailwindFX.apply(footer, "pt-3", "border-t", "border-gray-100");
-        card.getChildren().add(footer);
-      }
-
-      if (hoverable) {
-        TwAnimation.onHoverLift(card, -3);
-      }
-      return card;
-    }
-  }
 }

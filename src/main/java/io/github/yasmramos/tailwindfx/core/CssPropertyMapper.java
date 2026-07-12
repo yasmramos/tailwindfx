@@ -71,22 +71,22 @@ public final class CssPropertyMapper {
       case "visible" -> "-fx-visibility";
       case "hidden" -> "-fx-visibility";
       case "invisible" -> "-fx-visibility";
-      
+
       case "gap" -> "-fx-hgap";
       case "gap-x" -> "-fx-hgap";
       case "gap-y" -> "-fx-vgap";
-      
+
       case "overflow" -> "-fx-overflow";
-      
+
       case "cursor" -> "-fx-cursor";
-      
+
       case "z" -> "-fx-z-index";
-      
+
       case "resize" -> "-fx-resize";
 
       case "skew-x" -> "-fx-she-x";
       case "skew-y" -> "-fx-she-y";
-      
+
       case "blur" -> "-fx-blur";
       case "brightness" -> "-fx-brightness";
       case "contrast" -> "-fx-contrast";
@@ -110,41 +110,46 @@ public final class CssPropertyMapper {
     if ("border".equals(prefix)) {
       return resolveBorderStyle(namedValue);
     }
-    
+
     // Handle cursor styles: cursor-pointer, cursor-default, etc.
     if ("cursor".equals(prefix)) {
       return resolveCursor(namedValue);
     }
-    
+
     // Handle overflow styles: overflow-hidden, overflow-visible, etc.
     if ("overflow".equals(prefix)) {
       return resolveOverflow(namedValue);
     }
-    
+
     // Handle visibility: visible, hidden, invisible
     if ("visible".equals(prefix) || "hidden".equals(prefix) || "invisible".equals(prefix)) {
       return resolveVisibility(prefix);
     }
-    
+
     // Handle resize: resize-none, resize-y, etc.
     if ("resize".equals(prefix)) {
       return resolveResize(namedValue);
     }
-    
+
     // Handle width/height special values: w-auto, w-min, w-max, h-auto, h-min, h-max
     if ("w".equals(prefix) || "h".equals(prefix)) {
       return resolveDimension(namedValue);
     }
-    
+
     // Handle max-width named values: max-w-xs, max-w-sm, etc.
     if ("max-w".equals(prefix)) {
       return resolveMaxWidth(namedValue);
     }
-    
+
     // Handle effects: blur, brightness, contrast, grayscale, invert, sepia, skew
-    if ("blur".equals(prefix) || "brightness".equals(prefix) || "contrast".equals(prefix) 
-        || "grayscale".equals(prefix) || "invert".equals(prefix) || "sepia".equals(prefix)
-        || "skew-x".equals(prefix) || "skew-y".equals(prefix)) {
+    if ("blur".equals(prefix)
+        || "brightness".equals(prefix)
+        || "contrast".equals(prefix)
+        || "grayscale".equals(prefix)
+        || "invert".equals(prefix)
+        || "sepia".equals(prefix)
+        || "skew-x".equals(prefix)
+        || "skew-y".equals(prefix)) {
       return resolveEffectValue(prefix, namedValue);
     }
 
@@ -167,7 +172,7 @@ public final class CssPropertyMapper {
       default -> null;
     };
   }
-  
+
   /** Resuelve un cursor a su valor JavaFX. */
   private String resolveCursor(String cursor) {
     return switch (cursor) {
@@ -201,7 +206,7 @@ public final class CssPropertyMapper {
       default -> null;
     };
   }
-  
+
   /** Resuelve overflow a su valor JavaFX. */
   private String resolveOverflow(String overflow) {
     return switch (overflow) {
@@ -212,7 +217,7 @@ public final class CssPropertyMapper {
       default -> null;
     };
   }
-  
+
   /** Resuelve visibilidad. */
   private String resolveVisibility(String visibility) {
     return switch (visibility) {
@@ -221,7 +226,7 @@ public final class CssPropertyMapper {
       default -> null;
     };
   }
-  
+
   /** Resuelve resize a su valor JavaFX. */
   private String resolveResize(String resize) {
     return switch (resize) {
@@ -232,7 +237,7 @@ public final class CssPropertyMapper {
       default -> null;
     };
   }
-  
+
   /** Resuelve valores especiales de dimensión: auto, min, max. */
   private String resolveDimension(String value) {
     return switch (value) {
@@ -242,7 +247,7 @@ public final class CssPropertyMapper {
       default -> null;
     };
   }
-  
+
   /** Resuelve valores nombrados de max-width. */
   private String resolveMaxWidth(String value) {
     return switch (value) {
@@ -274,14 +279,16 @@ public final class CssPropertyMapper {
     if ("border".equals(token.prefix) && isBorderStyle(token.namedValue)) {
       return prop("-fx-border-style", resolvedValue);
     }
-    
+
     // Manejo especial para w-auto, w-min, w-max, h-auto, h-min, h-max
-    if (("w".equals(token.prefix) || "h".equals(token.prefix)) 
-        && ("auto".equals(token.namedValue) || "min".equals(token.namedValue) || "max".equals(token.namedValue))) {
+    if (("w".equals(token.prefix) || "h".equals(token.prefix))
+        && ("auto".equals(token.namedValue)
+            || "min".equals(token.namedValue)
+            || "max".equals(token.namedValue))) {
       String property = mapToCssProperty(token.prefix);
       return prop(property, resolvedValue);
     }
-    
+
     // Manejo especial para max-w-*
     if ("max-w".equals(token.prefix) && resolvedValue != null) {
       return prop("-fx-max-width", resolvedValue);
