@@ -37,9 +37,14 @@ public class TwButton extends Button {
     }
 
     private void applyVariant() {
-        // Remove all variant, color and size classes
+        // Remove all variant, color and size classes but preserve special classes like btn-icon, btn-circle
         getStyleClass().removeAll("btn-primary", "btn-secondary", "btn-outline", "btn-ghost", "btn-danger");
-        getStyleClass().removeIf(cls -> cls.startsWith("btn-") && !cls.equals("btn"));
+        getStyleClass().removeIf(cls -> 
+            cls.startsWith("btn-") && 
+            !cls.equals("btn") && 
+            !cls.equals("btn-icon") && 
+            !cls.equals("btn-circle")
+        );
         
         switch (variant) {
             case PRIMARY:
@@ -64,7 +69,7 @@ public class TwButton extends Button {
             getStyleClass().add("btn-" + color);
         }
         
-        // Add size class
+        // Add size class (only if not an icon button)
         if (size != null && !size.isEmpty()) {
             getStyleClass().add("btn-" + size);
         }
