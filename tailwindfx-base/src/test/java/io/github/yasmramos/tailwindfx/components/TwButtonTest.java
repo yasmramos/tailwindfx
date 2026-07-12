@@ -121,7 +121,7 @@ public class TwButtonTest {
     assertNotNull(btn);
     assertEquals("Delete All", btn.getText());
     assertTrue(btn.getStyleClass().contains("btn"));
-    assertTrue(btn.getStyleClass().contains("btn-primary"));
+    assertTrue(btn.getStyleClass().contains("btn-danger"));
     assertTrue(btn.getStyleClass().contains("btn-red"));
   }
 
