@@ -10,6 +10,7 @@ public class TwButton extends Button {
 
     private TwButtonVariant variant = TwButtonVariant.PRIMARY;
     private String color = "blue";
+    private String size = "md";
     private boolean loading = false;
 
     public TwButton(String text) {
@@ -18,7 +19,7 @@ public class TwButton extends Button {
     }
 
     private void initialize() {
-        getStyleClass().add("tw-button");
+        getStyleClass().add("btn");
         applyVariant();
         setupEventHandlers();
     }
@@ -36,7 +37,9 @@ public class TwButton extends Button {
     }
 
     private void applyVariant() {
+        // Remove all variant, color and size classes
         getStyleClass().removeAll("btn-primary", "btn-secondary", "btn-outline", "btn-ghost", "btn-danger");
+        getStyleClass().removeIf(cls -> cls.startsWith("btn-") && !cls.equals("btn"));
         
         switch (variant) {
             case PRIMARY:
@@ -54,6 +57,16 @@ public class TwButton extends Button {
             case DANGER:
                 getStyleClass().add("btn-danger");
                 break;
+        }
+        
+        // Add color class
+        if (color != null && !color.isEmpty()) {
+            getStyleClass().add("btn-" + color);
+        }
+        
+        // Add size class
+        if (size != null && !size.isEmpty()) {
+            getStyleClass().add("btn-" + size);
         }
     }
 
@@ -164,17 +177,25 @@ public class TwButton extends Button {
     public static TwButton icon(String icon, String label) {
         TwButton btn = new TwButton(icon);
         btn.setAccessibleText(label);
-        btn.getStyleClass().addAll("btn-icon", "btn-circle");
         btn.setColor("gray");
+        btn.size = null; // Remove size class for icon buttons
+        // Add icon-specific classes after setColor to avoid removal
+        getStyleClassStatic(btn).addAll("btn-icon", "btn-circle");
         return btn;
     }
 
     public static TwButton icon(String icon, String label, String color) {
         TwButton btn = new TwButton(icon);
         btn.setAccessibleText(label);
-        btn.getStyleClass().addAll("btn-icon", "btn-circle");
         btn.setColor(color);
+        btn.size = null; // Remove size class for icon buttons
+        // Add icon-specific classes after setColor to avoid removal
+        getStyleClassStatic(btn).addAll("btn-icon", "btn-circle");
         return btn;
+    }
+    
+    private static javafx.collections.ObservableList<String> getStyleClassStatic(javafx.scene.control.Button btn) {
+        return btn.getStyleClass();
     }
 
     public enum TwButtonVariant {
