@@ -158,17 +158,17 @@ public class ThemeCustomizationPanel extends VBox {
 
     // Border Radius
     VBox radiusBox = createSliderControl("Border Radius:", 0, 24, 8, "px");
-    radiusSlider = (Slider) ((VBox) radiusBox.getChildren().get(1)).getChildren().get(0);
+    radiusSlider = (Slider) ((HBox) radiusBox.getChildren().get(1)).getChildren().get(0);
     controls.getChildren().add(radiusBox);
 
     // Spacing Scale
     VBox spacingBox = createSliderControl("Spacing Scale:", 0.5, 2.0, 1.0, "x");
-    spacingSlider = (Slider) ((VBox) spacingBox.getChildren().get(1)).getChildren().get(0);
+    spacingSlider = (Slider) ((HBox) spacingBox.getChildren().get(1)).getChildren().get(0);
     controls.getChildren().add(spacingBox);
 
     // Shadow Intensity
     VBox shadowBox = createSliderControl("Shadow Intensity:", 0, 100, 50, "%");
-    shadowIntensitySlider = (Slider) ((VBox) shadowBox.getChildren().get(1)).getChildren().get(0);
+    shadowIntensitySlider = (Slider) ((HBox) shadowBox.getChildren().get(1)).getChildren().get(0);
     controls.getChildren().add(shadowBox);
 
     section.getChildren().addAll(title, controls);
