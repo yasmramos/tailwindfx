@@ -208,22 +208,46 @@ public final class StyleToken {
   private static boolean isColorName(String s) {
     return COLOR_NAMES.contains(s);
   }
-  
+
   /** Prefijos que son valores nombrados sin escala (visible, hidden, overflow-*, cursor-*, etc.) */
   private static final java.util.Set<String> NAMED_PREFIXES =
       java.util.Set.of(
-          "visible", "hidden", "invisible",
-          "overflow", "cursor", "resize", "z",
-          "gap", "gap-x", "gap-y",
-          "w-auto", "w-full", "w-min", "w-max",
-          "h-auto", "h-full", "h-min", "h-max",
-          "min-w-0", "min-w-full", "min-w-max",
-          "max-w-xs", "max-w-sm", "max-w-md", "max-w-lg", "max-w-xl", 
-          "max-w-2xl", "max-w-3xl", "max-w-full",
-          "max-h-full", "max-h-screen",
-          "relative", "absolute",
-          "sr-only", "not-sr-only");
-  
+          "visible",
+          "hidden",
+          "invisible",
+          "overflow",
+          "cursor",
+          "resize",
+          "z",
+          "gap",
+          "gap-x",
+          "gap-y",
+          "w-auto",
+          "w-full",
+          "w-min",
+          "w-max",
+          "h-auto",
+          "h-full",
+          "h-min",
+          "h-max",
+          "min-w-0",
+          "min-w-full",
+          "min-w-max",
+          "max-w-xs",
+          "max-w-sm",
+          "max-w-md",
+          "max-w-lg",
+          "max-w-xl",
+          "max-w-2xl",
+          "max-w-3xl",
+          "max-w-full",
+          "max-h-full",
+          "max-h-screen",
+          "relative",
+          "absolute",
+          "sr-only",
+          "not-sr-only");
+
   private static boolean isNamedPrefix(String s) {
     return NAMED_PREFIXES.contains(s);
   }

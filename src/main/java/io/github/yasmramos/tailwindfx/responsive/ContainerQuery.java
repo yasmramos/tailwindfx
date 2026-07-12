@@ -22,7 +22,7 @@ public final class ContainerQuery {
 
   private ChangeListener<Number> listener;
   private Region currentContainer;
-  
+
   // Ensure customBreakpoints is never null
   {
     if (customBreakpoints == null) {
@@ -123,25 +123,31 @@ public final class ContainerQuery {
 
     applyClasses(baseClasses);
 
-    listener = (obs, oldVal, newVal) -> {
-      double width = newVal.doubleValue();
-      updateClasses(width);
-    };
+    listener =
+        (obs, oldVal, newVal) -> {
+          double width = newVal.doubleValue();
+          updateClasses(width);
+        };
 
     container.widthProperty().addListener(listener);
     updateClasses(container.getWidth());
 
-    node.sceneProperty().addListener((obs, oldScene, newScene) -> {
-      if (newScene == null) {
-        detach();
-      }
-    });
+    node.sceneProperty()
+        .addListener(
+            (obs, oldScene, newScene) -> {
+              if (newScene == null) {
+                detach();
+              }
+            });
 
-    container.sceneProperty().addListener((obs, oldScene, newScene) -> {
-      if (newScene == null) {
-        detach();
-      }
-    });
+    container
+        .sceneProperty()
+        .addListener(
+            (obs, oldScene, newScene) -> {
+              if (newScene == null) {
+                detach();
+              }
+            });
   }
 
   private void updateClasses(double width) {

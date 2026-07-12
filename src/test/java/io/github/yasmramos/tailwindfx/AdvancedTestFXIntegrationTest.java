@@ -380,7 +380,8 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
       AtomicBoolean actionClicked = new AtomicBoolean(false);
       actionBtn.setOnAction(e -> actionClicked.set(true));
 
-      VBox card = TwCard.create().body(new Label("Card Content")).build();
+      TwCard card = new TwCard();
+      card.setBody(new Label("Card Content"));
 
       interact(
           () -> {

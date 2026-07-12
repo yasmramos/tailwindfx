@@ -1,137 +1,167 @@
 package io.github.yasmramos.tailwindfx.components;
 
-import io.github.yasmramos.tailwindfx.TailwindFX;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
+import javafx.scene.Node;
+import javafx.geometry.Insets;
 
 /**
- * TwAlert — Pre-styled alert/notification component.
+ * TwAlert — Custom alert component extending JavaFX HBox with TailwindCSS styling.
  *
- * <p>Uses base .alert class from tailwindfx-components.css with utility modifiers.
- *
- * <pre>
- * TwAlert info = TwAlert.info("Operation completed successfully");
- * TwAlert warning = TwAlert.warning("Please review before continuing");
- * TwAlert error = TwAlert.error("Something went wrong");
- * TwAlert success = TwAlert.success("Data saved!");
- * </pre>
+ * <p>Extends HBox for proper layout support, CSS styling, and native behavior.
  */
 public class TwAlert extends HBox {
 
-  /**
-   * Creates an info alert (blue).
-   *
-   * @param message alert message
-   * @return styled TwAlert
-   */
-  public static TwAlert info(String message) {
-    return create(message, "info", "blue");
-  }
+    private AlertType type = AlertType.INFO;
 
-  /**
-   * Creates a success alert (green).
-   *
-   * @param message alert message
-   * @return styled TwAlert
-   */
-  public static TwAlert success(String message) {
-    return create(message, "success", "green");
-  }
+    /**
+     * Creates a default alert.
+     */
+    public TwAlert() {
+        super();
+        initialize();
+    }
 
-  /**
-   * Creates a warning alert (yellow/amber).
-   *
-   * @param message alert message
-   * @return styled TwAlert
-   */
-  public static TwAlert warning(String message) {
-    return create(message, "warning", "yellow");
-  }
+    /**
+     * Creates an alert with content.
+     *
+     * @param content the alert content
+     */
+    public TwAlert(String content) {
+        super();
+        initialize();
+        setContent(content);
+    }
 
-  /**
-   * Creates an error alert (red).
-   *
-   * @param message alert message
-   * @return styled TwAlert
-   */
-  public static TwAlert error(String message) {
-    return create(message, "error", "red");
-  }
+    /**
+     * Creates an alert with type and content.
+     *
+     * @param type the alert type
+     * @param content the alert content
+     */
+    public TwAlert(AlertType type, String content) {
+        super();
+        this.type = type;
+        initialize();
+        setContent(content);
+    }
 
-  /**
-   * Creates a custom alert.
-   *
-   * @param message alert message
-   * @param type type label (INFO, SUCCESS, WARNING, ERROR)
-   * @param color Tailwind color name
-   * @return styled TwAlert
-   */
-  public static TwAlert create(String message, String type, String color) {
-    TwAlert alert = new TwAlert();
-    alert.setSpacing(12);
-    alert.setPadding(new Insets(12, 16, 12, 16));
+    private void initialize() {
+        getStyleClass().add("tw-alert");
+        setSpacing(12);
+        setPadding(new Insets(16));
+        applyType();
+    }
 
-    // Apply base alert class and variant
-    TailwindFX.apply(alert, "alert", "alert-" + color);
+    private void applyType() {
+        getStyleClass().removeAll("alert-info", "alert-success", "alert-warning", "alert-error");
+        
+        switch (type) {
+            case INFO:
+                getStyleClass().add("alert-info");
+                break;
+            case SUCCESS:
+                getStyleClass().add("alert-success");
+                break;
+            case WARNING:
+                getStyleClass().add("alert-warning");
+                break;
+            case ERROR:
+                getStyleClass().add("alert-error");
+                break;
+        }
+    }
 
-    // Icon/Type label
-    Label typeLabel = new Label(type.toUpperCase());
-    TailwindFX.apply(typeLabel, "font-bold", "text-sm", "text-" + color + "-800");
+    /**
+     * Sets the alert type.
+     *
+     * @param type the alert type
+     */
+    public void setType(AlertType type) {
+        this.type = type;
+        applyType();
+    }
 
-    // Message
-    Label msgLabel = new Label(message);
-    TailwindFX.apply(msgLabel, "text-gray-700");
+    /**
+     * Gets the alert type.
+     *
+     * @return the alert type
+     */
+    public AlertType getType() {
+        return type;
+    }
 
-    alert.getChildren().addAll(typeLabel, msgLabel);
-    alert.setAlignment(Pos.CENTER_LEFT);
+    /**
+     * Sets the alert content.
+     *
+     * @param content the content text
+     */
+    public void setContent(String content) {
+        getChildren().clear();
+        javafx.scene.control.Label label = new javafx.scene.control.Label(content);
+        label.setWrapText(true);
+        getChildren().add(label);
+    }
 
-    return alert;
-  }
+    /**
+     * Sets the alert content with icon.
+     *
+     * @param icon the icon node
+     * @param content the content text
+     */
+    public void setContent(Node icon, String content) {
+        getChildren().clear();
+        javafx.scene.control.Label label = new javafx.scene.control.Label(content);
+        label.setWrapText(true);
+        getChildren().addAll(icon, label);
+    }
 
-  /**
-   * Creates an alert with a dismiss button.
-   *
-   * @param message alert message
-   * @param type alert type
-   * @param color Tailwind color name
-   * @param onDismiss callback when dismissed
-   * @return styled TwAlert with dismiss button
-   */
-  public static TwAlert dismissible(String message, String type, String color, Runnable onDismiss) {
-    TwAlert alert = create(message, type, color);
+    /**
+     * Creates an info alert.
+     *
+     * @param content the alert content
+     * @return TwAlert instance
+     */
+    public static TwAlert info(String content) {
+        return new TwAlert(AlertType.INFO, content);
+    }
 
-    Label closeBtn = new Label("✕");
-    TailwindFX.apply(
-        closeBtn,
-        "font-bold",
-        "cursor-hand",
-        "px-2",
-        "py-1",
-        "rounded",
-        "text-" + color + "-600",
-        "hover:bg-" + color + "-100");
+    /**
+     * Creates a success alert.
+     *
+     * @param content the alert content
+     * @return TwAlert instance
+     */
+    public static TwAlert success(String content) {
+        return new TwAlert(AlertType.SUCCESS, content);
+    }
 
-    closeBtn.setOnMouseClicked(
-        e -> {
-          if (onDismiss != null) onDismiss.run();
-          if (alert.getParent() instanceof Pane) {
-            ((Pane) alert.getParent()).getChildren().remove(alert);
-          }
-        });
+    /**
+     * Creates a warning alert.
+     *
+     * @param content the alert content
+     * @return TwAlert instance
+     */
+    public static TwAlert warning(String content) {
+        return new TwAlert(AlertType.WARNING, content);
+    }
 
-    HBox.setHgrow(closeBtn, Priority.NEVER);
-    alert.getChildren().add(closeBtn);
-    alert.setAlignment(Pos.CENTER_RIGHT);
+    /**
+     * Creates an error alert.
+     *
+     * @param content the alert content
+     * @return TwAlert instance
+     */
+    public static TwAlert error(String content) {
+        return new TwAlert(AlertType.ERROR, content);
+    }
 
-    return alert;
-  }
-
-  /** Protected constructor for internal usage. */
-  protected TwAlert() {
-    super();
-  }
+    /**
+     * Alert type enum.
+     */
+    public enum AlertType {
+        INFO,
+        SUCCESS,
+        WARNING,
+        ERROR
+    }
 }

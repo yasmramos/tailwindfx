@@ -1,17 +1,35 @@
 ```
-# Java/Maven build artifacts
+# Java/Maven specific
 target/
-**/*.class
+*.class
+*.jar
+*.war
+*.ear
 
-# Maven status files
-target/maven-status/
+# Dependencies
+lib/
+libs/
 
-# Test resources
-target/test-classes/
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
 
-# Compiled CSS
-target/classes/**/*.css
+# Logs
+*.log
 
-# Package/module info
-target/classes/**/MODULES.md
+# Environment
+.env
+.env.local
+*.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build system
+.gradle/
+build/
 ```
