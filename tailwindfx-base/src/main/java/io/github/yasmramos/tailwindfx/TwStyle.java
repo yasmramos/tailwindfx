@@ -129,10 +129,14 @@ public final class TwStyle {
         if (t.isBlank()) continue;
 
         // Check if token has variants (hover:, focus:, dark:, sm:, etc.)
-        boolean hasVariant = t.contains(":");
+        // Must distinguish between variant syntax (prefix:) and arbitrary property syntax ([prop:value])
+        boolean hasVariant = t.contains(":") && !t.startsWith("[");
+        
+        // Extract base utility for variant tokens to enable proper validation
+        String baseUtility = hasVariant ? stripVariantPrefix(t) : t;
         
         // Check for unsupported variants (responsive/state) on layout-dependent properties
-        if (hasVariant && isLayoutDependent(t)) {
+        if (hasVariant && isLayoutDependent(baseUtility)) {
           throw new UnsupportedOperationException(
               "Layout-dependent properties do not support responsive or state variants: "
                   + t
