@@ -49,14 +49,31 @@ public class VariantManager {
     // Compile the base utility
     JitCompiler.CompileResult result = jitCompiler.compile(utility);
     if (result == null || !result.hasInlineStyle()) {
+      // Fallback: try to apply as CSS class for static utilities (e.g., hover:btn-primary)
+      if (!utility.contains("[") && !utility.startsWith("bg-") && !utility.startsWith("text-")) {
+        // It's likely a CSS class - we'll handle it via styleClass manipulation
+        // This is a limitation: static CSS classes with variants need special handling
+        // For now, log in debug mode and skip
+        if (io.github.yasmramos.tailwindfx.TwConfig.isDebug()) {
+          System.out.println(
+              "[TailwindFX Warning] Variant on non-JIT utility not fully supported: "
+                  + variant
+                  + ":"
+                  + utility);
+        }
+      }
       return;
     }
     String baseStyle = result.inlineStyle();
 
     switch (variant) {
       case "hover":
-        node.setOnMouseEntered(e -> applyStyle(node, baseStyle));
-        node.setOnMouseExited(e -> removeStyle(node, baseStyle));
+        node.addEventHandler(
+            javafx.scene.input.MouseEvent.MOUSE_ENTERED,
+            e -> applyStyle(node, baseStyle));
+        node.addEventHandler(
+            javafx.scene.input.MouseEvent.MOUSE_EXITED,
+            e -> removeStyle(node, baseStyle));
         break;
 
       case "focus":
@@ -76,8 +93,12 @@ public class VariantManager {
         break;
 
       case "active":
-        node.setOnMousePressed(e -> applyStyle(node, baseStyle));
-        node.setOnMouseReleased(e -> removeStyle(node, baseStyle));
+        node.addEventHandler(
+            javafx.scene.input.MouseEvent.MOUSE_PRESSED,
+            e -> applyStyle(node, baseStyle));
+        node.addEventHandler(
+            javafx.scene.input.MouseEvent.MOUSE_RELEASED,
+            e -> removeStyle(node, baseStyle));
         break;
 
       case "disabled":
