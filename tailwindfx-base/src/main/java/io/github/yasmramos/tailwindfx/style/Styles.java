@@ -1515,4 +1515,33 @@ public final class Styles {
     }
     return node;
   }
+
+  /**
+   * Checks if a token is a known utility class that can be applied via CSS.
+   * Used for debug warnings on unknown tokens.
+   */
+  public static boolean isKnownUtilityClass(String token) {
+    // Common utility class prefixes that are handled by CSS
+    java.util.Set<String> knownPrefixes = new java.util.HashSet<>();
+    knownPrefixes.add("btn");
+    knownPrefixes.add("input");
+    knownPrefixes.add("card");
+    knownPrefixes.add("badge");
+    knownPrefixes.add("avatar");
+    knownPrefixes.add("alert");
+    knownPrefixes.add("spinner");
+    knownPrefixes.add("tooltip");
+    knownPrefixes.add("modal");
+    knownPrefixes.add("group");
+    knownPrefixes.add("dark");
+    knownPrefixes.add("light");
+    
+    for (String prefix : knownPrefixes) {
+      if (token.startsWith(prefix)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
 }

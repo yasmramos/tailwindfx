@@ -183,6 +183,23 @@ public final class TwStyle {
       }
     }
 
+    // Handle unknown tokens with debug warning (Smart fallback as documented in README)
+    for (String token : tokens) {
+      if (token == null || token.isBlank()) continue;
+      for (String t : token.split("\\s+")) {
+        if (t.isBlank()) continue;
+        boolean hasVariant = t.contains(":");
+        if (!hasVariant && !isJitToken(t)) {
+          // Check if it's a known CSS class or an unknown token
+          if (!io.github.yasmramos.tailwindfx.style.Styles.isKnownUtilityClass(t)) {
+            if (io.github.yasmramos.tailwindfx.TwConfig.isDebug()) {
+              System.out.println("[TailwindFX Warning] Unknown token ignored: " + t);
+            }
+          }
+        }
+      }
+    }
+
     if (!jitTokens.isEmpty()) {
       StyleMerger.applyJit(node, jitTokens.toArray(new String[0]));
     }
