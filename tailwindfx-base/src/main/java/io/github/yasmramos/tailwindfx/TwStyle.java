@@ -121,21 +121,28 @@ public final class TwStyle {
     java.util.List<String> jitTokens = new java.util.ArrayList<>();
     java.util.List<String> layoutDependentTokens = new java.util.ArrayList<>();
     java.util.List<String> layoutMigrationTokens = new java.util.ArrayList<>();
+    java.util.List<String> variantTokens = new java.util.ArrayList<>();
 
     for (String token : tokens) {
       if (token == null || token.isBlank()) continue;
       for (String t : token.split("\\s+")) {
         if (t.isBlank()) continue;
 
+        // Check if token has variants (hover:, focus:, dark:, sm:, etc.)
+        boolean hasVariant = t.contains(":");
+        
         // Check for unsupported variants (responsive/state) on layout-dependent properties
-        if (hasUnsupportedVariant(t) && isLayoutDependent(t)) {
+        if (hasVariant && isLayoutDependent(t)) {
           throw new UnsupportedOperationException(
               "Layout-dependent properties do not support responsive or state variants: "
                   + t
                   + ". Use programmatic logic instead.");
         }
 
-        if (isJitToken(t)) {
+        if (hasVariant) {
+          // Tokens with variants need special handling via VariantManager
+          variantTokens.add(t);
+        } else if (isJitToken(t)) {
           jitTokens.add(t);
           if (isLayoutDependent(t)) {
             layoutDependentTokens.add(t);
@@ -166,6 +173,14 @@ public final class TwStyle {
     // Apply layout-dependent styles first (needs parent context)
     if (!layoutDependentTokens.isEmpty()) {
       applyLayoutDependentStyles(node, layoutDependentTokens);
+    }
+
+    // Apply variant tokens via VariantManager
+    if (!variantTokens.isEmpty()) {
+      for (String variantToken : variantTokens) {
+        io.github.yasmramos.tailwindfx.core.VariantManager.processToken(node, variantToken, 
+            new io.github.yasmramos.tailwindfx.core.JitCompiler());
+      }
     }
 
     if (!jitTokens.isEmpty()) {
@@ -680,27 +695,33 @@ public final class TwStyle {
    * Detects if a token should be compiled as JIT. Uses strict prefix matching +
    * numeric/arbitrary/negative pattern validation. Eliminates false positives like "card-2" or
    * "panel-v2".
+   * 
+   * <p>This method strips variant prefixes (hover:, focus:, dark:, sm:, etc.) before checking,
+   * so that "hover:bg-blue-500" is correctly identified as a JIT token.
    */
   private static boolean isJitToken(String token) {
+    // Strip variant prefixes before checking (e.g., "hover:bg-blue-500" -> "bg-blue-500")
+    String baseToken = stripVariantPrefix(token);
+    
     // Opacity modifier: bg-blue-500/80 - but only for valid color utilities
-    if (token.contains("/")) {
-      String base = token.substring(0, token.indexOf('/'));
+    if (baseToken.contains("/")) {
+      String base = baseToken.substring(0, baseToken.indexOf('/'));
       return isValidColorUtilityBase(base);
     }
-    if (token.contains("[")) return true; // arbitrary: w-[320px]
+    if (baseToken.contains("[")) return true; // arbitrary: w-[320px]
 
     // Special layout keywords without numeric values
-    if (token.equals("grow")
-        || token.equals("shrink")
-        || token.equals("flex-none")
-        || token.equals("flex-auto")
-        || token.equals("flex-1")) {
+    if (baseToken.equals("grow")
+        || baseToken.equals("shrink")
+        || baseToken.equals("flex-none")
+        || baseToken.equals("flex-auto")
+        || baseToken.equals("flex-1")) {
       return true;
     }
 
     // Strict negative prefix: only JIT if followed by a known property prefix
-    if (token.startsWith("-") && token.length() > 1) {
-      String withoutNeg = token.substring(1);
+    if (baseToken.startsWith("-") && baseToken.length() > 1) {
+      String withoutNeg = baseToken.substring(1);
       return JIT_PREFIXES.stream().anyMatch(withoutNeg::startsWith);
     }
 
@@ -709,14 +730,31 @@ public final class TwStyle {
         JIT_PREFIXES.stream()
             .anyMatch(
                 p ->
-                    token.startsWith(p)
-                        && (token.length() == p.length() || token.charAt(p.length()) == '-'));
+                    baseToken.startsWith(p)
+                        && (baseToken.length() == p.length() || baseToken.charAt(p.length()) == '-'));
 
     if (hasPrefix) {
-      return token.matches(".*\\d+.*");
+      return baseToken.matches(".*\\d+.*");
     }
 
     return false;
+  }
+
+  /**
+   * Strips variant prefixes from a token.
+   * Examples: "hover:bg-blue-500" -> "bg-blue-500", "dark:hover:text-white" -> "text-white",
+   * "md:w-full" -> "w-full"
+   */
+  private static String stripVariantPrefix(String token) {
+    if (token == null || !token.contains(":")) {
+      return token;
+    }
+    // Find the last colon to handle chained variants like "dark:hover:bg-blue-500"
+    int lastColon = token.lastIndexOf(':');
+    if (lastColon >= 0 && lastColon < token.length() - 1) {
+      return token.substring(lastColon + 1);
+    }
+    return token;
   }
 
   /**
