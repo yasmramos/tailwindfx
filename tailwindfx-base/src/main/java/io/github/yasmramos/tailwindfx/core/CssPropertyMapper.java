@@ -241,9 +241,9 @@ public final class CssPropertyMapper {
   /** Resuelve valores especiales de dimensión: auto, min-content, max-content. */
   private String resolveDimension(String value) {
     return switch (value) {
-      case "auto" -> "USE_PREF_SIZE";
-      case "min" -> "USE_COMPUTED_SIZE"; // min-content → JavaFX USE_COMPUTED_SIZE
-      case "max" -> "USE_COMPUTED_SIZE"; // max-content → JavaFX USE_COMPUTED_SIZE
+      case "auto" -> "-1"; // JavaFX: -1 = USE_PREF_SIZE for pref-width/height
+      case "min" -> "-1"; // JavaFX: -1 = USE_COMPUTED_SIZE for min-width/height (min-content)
+      case "max" -> "-1"; // JavaFX: -1 = USE_COMPUTED_SIZE for max-width/height (max-content)
       default -> null;
     };
   }

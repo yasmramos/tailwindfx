@@ -188,11 +188,13 @@ public final class TwStyle {
     }
 
     // Handle unknown tokens with debug warning (Smart fallback as documented in README)
+    // Only check non-variant, non-JIT tokens to avoid false positives
     for (String token : tokens) {
       if (token == null || token.isBlank()) continue;
       for (String t : token.split("\\s+")) {
         if (t.isBlank()) continue;
-        boolean hasVariant = t.contains(":");
+        // Skip variant tokens (hover:, focus:, etc.) and arbitrary properties ([color:red])
+        boolean hasVariant = t.contains(":") && !t.startsWith("[");
         if (!hasVariant && !isJitToken(t)) {
           // Check if it's a known CSS class or an unknown token
           if (!io.github.yasmramos.tailwindfx.style.Styles.isKnownUtilityClass(t)) {
