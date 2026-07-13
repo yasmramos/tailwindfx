@@ -26,10 +26,12 @@ public class ThemeCustomizationPanelTest {
   @Start
   public void start(Stage stage) {
     this.stage = stage;
+    WaitForAsyncUtils.waitForFxEvents();
     panel = new ThemeCustomizationPanel();
     Scene scene = new Scene(panel, 800, 600);
     stage.setScene(scene);
     stage.show();
+    WaitForAsyncUtils.waitForFxEvents();
   }
 
   @BeforeEach

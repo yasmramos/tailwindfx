@@ -110,9 +110,11 @@
                     <systemPropertyVariables>
                         <testfx.robot>glass</testfx.robot>
                         <testfx.headless>true</testfx.headless>
+                        <monocle.platform>GTK</monocle.platform>
                         <prism.order>sw</prism.order>
                         <prism.text>t2k</prism.text>
                         <java.awt.headless>true</java.awt.headless>
+                        <glass.platform>com.sun.glass.ui.monocle.MonoclePlatform</glass.platform>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
