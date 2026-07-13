@@ -238,12 +238,12 @@ public final class CssPropertyMapper {
     };
   }
 
-  /** Resuelve valores especiales de dimensión: auto, min, max. */
+  /** Resuelve valores especiales de dimensión: auto, min-content, max-content. */
   private String resolveDimension(String value) {
     return switch (value) {
       case "auto" -> "USE_PREF_SIZE";
-      case "min" -> "USE_PREF_SIZE";
-      case "max" -> "-1"; // -1 representa USE_COMPUTED_SIZE en JavaFX
+      case "min" -> "USE_COMPUTED_SIZE"; // min-content → JavaFX USE_COMPUTED_SIZE
+      case "max" -> "USE_COMPUTED_SIZE"; // max-content → JavaFX USE_COMPUTED_SIZE
       default -> null;
     };
   }
