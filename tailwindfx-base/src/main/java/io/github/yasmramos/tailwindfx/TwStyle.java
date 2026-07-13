@@ -129,10 +129,14 @@ public final class TwStyle {
         if (t.isBlank()) continue;
 
         // Check if token has variants (hover:, focus:, dark:, sm:, etc.)
-        boolean hasVariant = t.contains(":");
+        // Must distinguish between variant syntax (prefix:) and arbitrary property syntax ([prop:value])
+        boolean hasVariant = t.contains(":") && !t.startsWith("[");
+        
+        // Extract base utility for variant tokens to enable proper validation
+        String baseUtility = hasVariant ? stripVariantPrefix(t) : t;
         
         // Check for unsupported variants (responsive/state) on layout-dependent properties
-        if (hasVariant && isLayoutDependent(t)) {
+        if (hasVariant && isLayoutDependent(baseUtility)) {
           throw new UnsupportedOperationException(
               "Layout-dependent properties do not support responsive or state variants: "
                   + t
@@ -180,6 +184,23 @@ public final class TwStyle {
       for (String variantToken : variantTokens) {
         io.github.yasmramos.tailwindfx.core.VariantManager.processToken(node, variantToken, 
             new io.github.yasmramos.tailwindfx.core.JitCompiler());
+      }
+    }
+
+    // Handle unknown tokens with debug warning (Smart fallback as documented in README)
+    for (String token : tokens) {
+      if (token == null || token.isBlank()) continue;
+      for (String t : token.split("\\s+")) {
+        if (t.isBlank()) continue;
+        boolean hasVariant = t.contains(":");
+        if (!hasVariant && !isJitToken(t)) {
+          // Check if it's a known CSS class or an unknown token
+          if (!io.github.yasmramos.tailwindfx.style.Styles.isKnownUtilityClass(t)) {
+            if (io.github.yasmramos.tailwindfx.TwConfig.isDebug()) {
+              System.out.println("[TailwindFX Warning] Unknown token ignored: " + t);
+            }
+          }
+        }
       }
     }
 
