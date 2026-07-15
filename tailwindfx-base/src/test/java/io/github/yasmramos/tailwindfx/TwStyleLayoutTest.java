@@ -183,4 +183,40 @@ public class TwStyleLayoutTest extends ApplicationTest {
     assertNotNull(marginAfter);
     assertEquals(12.0, marginAfter.getTop(), 0.01);
   }
+
+  @Test
+  public void testWidthAuto_SetsComputedSize() {
+    interact(() -> hbox.getChildren().add(button));
+    TwStyle.apply(button, "w-auto");
+
+    // w-auto should set prefWidth to -1 (USE_COMPUTED_SIZE in JavaFX)
+    assertEquals(-1.0, button.getPrefWidth(), 0.01);
+  }
+
+  @Test
+  public void testWidthMin_SetsComputedSize() {
+    interact(() -> hbox.getChildren().add(button));
+    TwStyle.apply(button, "w-min");
+
+    // w-min should set prefWidth to -1 (JavaFX doesn't support min-content)
+    assertEquals(-1.0, button.getPrefWidth(), 0.01);
+  }
+
+  @Test
+  public void testWidthMax_SetsComputedSize() {
+    interact(() -> hbox.getChildren().add(button));
+    TwStyle.apply(button, "w-max");
+
+    // w-max should set prefWidth to -1 (JavaFX doesn't support max-content)
+    assertEquals(-1.0, button.getPrefWidth(), 0.01);
+  }
+
+  @Test
+  public void testHeightAuto_SetsComputedSize() {
+    interact(() -> vbox.getChildren().add(button));
+    TwStyle.apply(button, "h-auto");
+
+    // h-auto should set prefHeight to -1 (USE_COMPUTED_SIZE in JavaFX)
+    assertEquals(-1.0, button.getPrefHeight(), 0.01);
+  }
 }
