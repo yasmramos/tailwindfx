@@ -1,5 +1,10 @@
 package io.github.yasmramos.tailwindfx.components;
 
+<<<<<<< HEAD
+=======
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+>>>>>>> 75f6c44 (test: add component tests for TwAlert, TwAvatar, TwBadge, TwCard and TwInput to increase coverage)
 import javafx.scene.control.Label;
 import org.junit.jupiter.api.Test;
 import org.testfx.framework.junit5.ApplicationTest;
