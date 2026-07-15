@@ -1,18 +1,17 @@
 package io.github.yasmramos.tailwindfx.components;
 
-import io.github.yasmramos.tailwindfx.TailwindFX;
 import javafx.scene.control.ProgressIndicator;
 
 /**
  * TwSpinner — Loading spinner component using ProgressIndicator.
  *
- * <p>Uses base ProgressIndicator styles from tailwindfx-components.css.
+ * <p>Utility class for creating styled ProgressIndicator spinners.
  *
  * <pre>
- * Node spinner = TwSpinner.create();
- * Node spinner = TwSpinner.small();
- * Node spinner = TwSpinner.large();
- * Node spinner = TwSpinner.colored("red");
+ * ProgressIndicator spinner = TwSpinner.create();
+ * ProgressIndicator spinner = TwSpinner.small();
+ * ProgressIndicator spinner = TwSpinner.large();
+ * ProgressIndicator spinner = TwSpinner.colored("red");
  * </pre>
  */
 public final class TwSpinner {
@@ -29,30 +28,12 @@ public final class TwSpinner {
   }
 
   /**
-   * Creates an extra small spinner.
-   *
-   * @return styled ProgressIndicator
-   */
-  public static ProgressIndicator xs() {
-    return size("xs");
-  }
-
-  /**
    * Creates a small spinner.
    *
    * @return styled ProgressIndicator
    */
-  public static ProgressIndicator sm() {
+  public static ProgressIndicator small() {
     return size("sm");
-  }
-
-  /**
-   * Creates a medium spinner (default).
-   *
-   * @return styled ProgressIndicator
-   */
-  public static ProgressIndicator md() {
-    return size("md");
   }
 
   /**
@@ -60,53 +41,55 @@ public final class TwSpinner {
    *
    * @return styled ProgressIndicator
    */
-  public static ProgressIndicator lg() {
+  public static ProgressIndicator large() {
     return size("lg");
-  }
-
-  /**
-   * Creates an extra large spinner.
-   *
-   * @return styled ProgressIndicator
-   */
-  public static ProgressIndicator xl() {
-    return size("xl");
   }
 
   /**
    * Creates a spinner with custom size.
    *
-   * @param size Tailwind size modifier (xs, sm, md, lg, xl)
+   * @param size size variant (sm, md, lg)
    * @return styled ProgressIndicator
    */
   public static ProgressIndicator size(String size) {
     ProgressIndicator spinner = new ProgressIndicator();
-    TailwindFX.apply(spinner, "spinner", "spinner-" + size);
+    spinner.getStyleClass().addAll("spinner", "spinner-" + size);
     return spinner;
   }
 
   /**
    * Creates a spinner with custom color.
    *
-   * @param color Tailwind color name (e.g. "blue", "green", "red")
+   * @param color Tailwind color name
    * @return styled ProgressIndicator
    */
   public static ProgressIndicator colored(String color) {
     ProgressIndicator spinner = new ProgressIndicator();
-    TailwindFX.apply(spinner, "spinner", "spinner-md", "spinner-" + color);
+    spinner.getStyleClass().addAll("spinner", "spinner-md", "spinner-" + color);
     return spinner;
   }
 
   /**
-   * Creates a colored spinner with custom size.
+   * Creates a small spinner with custom color.
    *
    * @param color Tailwind color name
-   * @param size Tailwind size modifier
    * @return styled ProgressIndicator
    */
-  public static ProgressIndicator colored(String color, String size) {
+  public static ProgressIndicator smallColored(String color) {
     ProgressIndicator spinner = new ProgressIndicator();
-    TailwindFX.apply(spinner, "spinner", "spinner-" + size, "spinner-" + color);
+    spinner.getStyleClass().addAll("spinner", "spinner-sm", "spinner-" + color);
+    return spinner;
+  }
+
+  /**
+   * Creates a large spinner with custom color.
+   *
+   * @param color Tailwind color name
+   * @return styled ProgressIndicator
+   */
+  public static ProgressIndicator largeColored(String color) {
+    ProgressIndicator spinner = new ProgressIndicator();
+    spinner.getStyleClass().addAll("spinner", "spinner-lg", "spinner-" + color);
     return spinner;
   }
 }
