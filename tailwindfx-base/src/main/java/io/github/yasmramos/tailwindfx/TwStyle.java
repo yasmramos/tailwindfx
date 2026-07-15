@@ -129,8 +129,12 @@ public final class TwStyle {
         if (t.isBlank()) continue;
 
         // Check if token has variants (hover:, focus:, dark:, sm:, etc.)
-        // Must distinguish between variant syntax (prefix:) and arbitrary property syntax ([prop:value])
-        boolean hasVariant = t.contains(":") && !t.startsWith("[");
+        // Must distinguish between:
+        // 1. Variant syntax (prefix:) → hasVariant = true
+        // 2. Arbitrary property syntax ([prop:value]) → hasVariant = false, goes to JIT
+        // 3. Arbitrary variant syntax ([&:hover]:utility or [@media...]:utility) → hasVariant = true
+        boolean isArbitraryProperty = t.startsWith("[") && !t.contains("]:");
+        boolean hasVariant = t.contains(":") && !isArbitraryProperty;
         
         // Extract base utility for variant tokens to enable proper validation
         String baseUtility = hasVariant ? stripVariantPrefix(t) : t;
@@ -188,11 +192,15 @@ public final class TwStyle {
     }
 
     // Handle unknown tokens with debug warning (Smart fallback as documented in README)
+    // Only check non-variant, non-JIT tokens to avoid false positives
     for (String token : tokens) {
       if (token == null || token.isBlank()) continue;
       for (String t : token.split("\\s+")) {
         if (t.isBlank()) continue;
-        boolean hasVariant = t.contains(":");
+        // Skip variant tokens (hover:, focus:, etc.) and arbitrary properties ([color:red])
+        // Also skip arbitrary variants ([&:hover]:utility, [@media...]:utility)
+        boolean isArbitraryProperty = t.startsWith("[") && !t.contains("]:");
+        boolean hasVariant = t.contains(":") && !isArbitraryProperty;
         if (!hasVariant && !isJitToken(t)) {
           // Check if it's a known CSS class or an unknown token
           if (!io.github.yasmramos.tailwindfx.style.Styles.isKnownUtilityClass(t)) {

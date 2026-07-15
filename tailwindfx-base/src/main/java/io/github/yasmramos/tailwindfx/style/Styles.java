@@ -1523,6 +1523,7 @@ public final class Styles {
   public static boolean isKnownUtilityClass(String token) {
     // Common utility class prefixes that are handled by CSS
     java.util.Set<String> knownPrefixes = new java.util.HashSet<>();
+    // Component classes
     knownPrefixes.add("btn");
     knownPrefixes.add("input");
     knownPrefixes.add("card");
@@ -1535,6 +1536,38 @@ public final class Styles {
     knownPrefixes.add("group");
     knownPrefixes.add("dark");
     knownPrefixes.add("light");
+    // Tailwind utility classes (1,400+ static utilities)
+    knownPrefixes.add("rounded");
+    knownPrefixes.add("font");
+    knownPrefixes.add("shadow");
+    knownPrefixes.add("flex");
+    knownPrefixes.add("hidden");
+    knownPrefixes.add("italic");
+    knownPrefixes.add("text");
+    knownPrefixes.add("bg");
+    knownPrefixes.add("border");
+    knownPrefixes.add("p");
+    knownPrefixes.add("m");
+    knownPrefixes.add("w");
+    knownPrefixes.add("h");
+    knownPrefixes.add("min");
+    knownPrefixes.add("max");
+    knownPrefixes.add("opacity");
+    knownPrefixes.add("rotate");
+    knownPrefixes.add("scale");
+    knownPrefixes.add("translate");
+    knownPrefixes.add("skew");
+    knownPrefixes.add("cursor");
+    knownPrefixes.add("overflow");
+    knownPrefixes.add("resize");
+    knownPrefixes.add("visible");
+    knownPrefixes.add("z");
+    knownPrefixes.add("blur");
+    knownPrefixes.add("brightness");
+    knownPrefixes.add("contrast");
+    knownPrefixes.add("grayscale");
+    knownPrefixes.add("invert");
+    knownPrefixes.add("sepia");
     
     for (String prefix : knownPrefixes) {
       if (token.startsWith(prefix)) {
