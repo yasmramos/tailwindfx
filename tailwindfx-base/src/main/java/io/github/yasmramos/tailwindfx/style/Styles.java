@@ -1518,59 +1518,72 @@ public final class Styles {
 
   /**
    * Checks if a token is a known utility class that can be applied via CSS.
+   * Uses regex validation to detect typos while avoiding false positives.
    * Used for debug warnings on unknown tokens.
    */
   public static boolean isKnownUtilityClass(String token) {
-    // Common utility class prefixes that are handled by CSS
-    java.util.Set<String> knownPrefixes = new java.util.HashSet<>();
-    // Component classes
-    knownPrefixes.add("btn");
-    knownPrefixes.add("input");
-    knownPrefixes.add("card");
-    knownPrefixes.add("badge");
-    knownPrefixes.add("avatar");
-    knownPrefixes.add("alert");
-    knownPrefixes.add("spinner");
-    knownPrefixes.add("tooltip");
-    knownPrefixes.add("modal");
-    knownPrefixes.add("group");
-    knownPrefixes.add("dark");
-    knownPrefixes.add("light");
-    // Tailwind utility classes (1,400+ static utilities)
-    knownPrefixes.add("rounded");
-    knownPrefixes.add("font");
-    knownPrefixes.add("shadow");
-    knownPrefixes.add("flex");
-    knownPrefixes.add("hidden");
-    knownPrefixes.add("italic");
-    knownPrefixes.add("text");
-    knownPrefixes.add("bg");
-    knownPrefixes.add("border");
-    knownPrefixes.add("p");
-    knownPrefixes.add("m");
-    knownPrefixes.add("w");
-    knownPrefixes.add("h");
-    knownPrefixes.add("min");
-    knownPrefixes.add("max");
-    knownPrefixes.add("opacity");
-    knownPrefixes.add("rotate");
-    knownPrefixes.add("scale");
-    knownPrefixes.add("translate");
-    knownPrefixes.add("skew");
-    knownPrefixes.add("cursor");
-    knownPrefixes.add("overflow");
-    knownPrefixes.add("resize");
-    knownPrefixes.add("visible");
-    knownPrefixes.add("z");
-    knownPrefixes.add("blur");
-    knownPrefixes.add("brightness");
-    knownPrefixes.add("contrast");
-    knownPrefixes.add("grayscale");
-    knownPrefixes.add("invert");
-    knownPrefixes.add("sepia");
+    if (token == null || token.isEmpty()) {
+      return false;
+    }
     
-    for (String prefix : knownPrefixes) {
-      if (token.startsWith(prefix)) {
+    // Component classes - exact prefix match
+    java.util.Set<String> componentPrefixes = new java.util.HashSet<>();
+    componentPrefixes.add("btn");
+    componentPrefixes.add("input");
+    componentPrefixes.add("card");
+    componentPrefixes.add("badge");
+    componentPrefixes.add("avatar");
+    componentPrefixes.add("alert");
+    componentPrefixes.add("spinner");
+    componentPrefixes.add("tooltip");
+    componentPrefixes.add("modal");
+    componentPrefixes.add("group");
+    
+    for (String prefix : componentPrefixes) {
+      if (token.equals(prefix) || token.startsWith(prefix + "-")) {
+        return true;
+      }
+    }
+    
+    // Theme variants
+    if (token.equals("dark") || token.equals("light") || 
+        token.startsWith("dark:") || token.startsWith("light:")) {
+      return true;
+    }
+    
+    // Tailwind utility classes with regex validation to catch typos
+    // Pattern: prefix-value (e.g., rounded-lg, p-4, bg-red-500)
+    // This catches typos like "pd-4" (invalid) vs "p-4" (valid)
+    java.util.regex.Pattern[] validPatterns = {
+      java.util.regex.Pattern.compile("^rounded(-[a-zA-Z0-9]+)?$"),
+      java.util.regex.Pattern.compile("^font(-[a-zA-Z0-9]+)?$"),
+      java.util.regex.Pattern.compile("^shadow(-[a-zA-Z0-9]+)?$"),
+      java.util.regex.Pattern.compile("^(flex|hidden|italic)$"),
+      java.util.regex.Pattern.compile("^text(-[a-zA-Z0-9]+)?$"),
+      java.util.regex.Pattern.compile("^bg(-[a-zA-Z0-9]+)?$"),
+      java.util.regex.Pattern.compile("^border(-[a-zA-Z0-9]+)?$"),
+      java.util.regex.Pattern.compile("^[pm](t|r|b|l|x|y)?(-[a-zA-Z0-9\\[\\]]+)?$"),
+      java.util.regex.Pattern.compile("^(w|h|min|max)(-[a-zA-Z0-9]+)?$"),
+      java.util.regex.Pattern.compile("^opacity(-[0-9]+)?$"),
+      java.util.regex.Pattern.compile("^rotate(-[0-9]+)?$"),
+      java.util.regex.Pattern.compile("^scale(-[0-9]+)?$"),
+      java.util.regex.Pattern.compile("^translate(x|y)?(-[a-zA-Z0-9]+)?$"),
+      java.util.regex.Pattern.compile("^skew(x|y)?(-[0-9]+)?$"),
+      java.util.regex.Pattern.compile("^cursor(-[a-zA-Z]+)?$"),
+      java.util.regex.Pattern.compile("^overflow(-[a-zA-Z]+)?$"),
+      java.util.regex.Pattern.compile("^resize$"),
+      java.util.regex.Pattern.compile("^visible$"),
+      java.util.regex.Pattern.compile("^z(-[a-zA-Z0-9]+)?$"),
+      java.util.regex.Pattern.compile("^blur(-[a-zA-Z0-9]+)?$"),
+      java.util.regex.Pattern.compile("^brightness(-[0-9]+)?$"),
+      java.util.regex.Pattern.compile("^contrast(-[0-9]+)?$"),
+      java.util.regex.Pattern.compile("^grayscale(-[0-9]+)?$"),
+      java.util.regex.Pattern.compile("^invert(-[0-9]+)?$"),
+      java.util.regex.Pattern.compile("^sepia(-[0-9]+)?$")
+    };
+    
+    for (java.util.regex.Pattern pattern : validPatterns) {
+      if (pattern.matcher(token).matches()) {
         return true;
       }
     }
