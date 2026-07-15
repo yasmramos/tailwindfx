@@ -1,20 +1,17 @@
 package io.github.yasmramos.tailwindfx.components;
 
-import io.github.yasmramos.tailwindfx.TailwindFX;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 
 /**
  * TwSelect — Pre-styled select/combobox components with TailwindCSS variants.
  *
- * <p>Uses base ChoiceBox and ComboBox controls styled via tailwindfx-components.css utility
- * classes.
+ * <p>Utility class for creating styled ChoiceBox and ComboBox controls.
  *
  * <pre>
  * ChoiceBox&lt;String&gt; cb = TwSelect.choiceBox("Option 1", "Option 2");
- * ComboBox&lt;String&gt; combo = TwSelect.comboBox("Select...", "A", "B", "C");
+ * ComboBox&lt;String&gt; combo = TwSelect.comboBox("A", "B", "C");
  * ComboBox&lt;String&gt; editable = TwSelect.editable("Type or select...");
  * </pre>
  */
@@ -23,154 +20,45 @@ public final class TwSelect {
   private TwSelect() {}
 
   /**
-   * Creates a ChoiceBox with the given options.
+   * Creates a styled ChoiceBox with the given options.
    *
    * @param options option values
    * @return styled ChoiceBox
    */
   @SafeVarargs
   public static <T> ChoiceBox<T> choiceBox(T... options) {
-    ChoiceBox<T> cb = new ChoiceBox<>();
-    cb.setItems(FXCollections.observableArrayList(options));
+    ChoiceBox<T> cb = new ChoiceBox<>(FXCollections.observableArrayList(options));
+    cb.getStyleClass().addAll("select", "select-base");
     if (options.length > 0) {
       cb.setValue(options[0]);
     }
-    TailwindFX.apply(cb, "select", "select-md");
     return cb;
   }
 
   /**
-   * Creates a ChoiceBox with a placeholder (first item as default).
-   *
-   * @param placeholder placeholder text (used as first item if string)
-   * @param options option values
-   * @return styled ChoiceBox
-   */
-  @SafeVarargs
-  public static <T> ChoiceBox<T> choiceBoxWithPlaceholder(String placeholder, T... options) {
-    ChoiceBox<T> cb = new ChoiceBox<>();
-    ObservableList<T> items = FXCollections.observableArrayList();
-    // Note: placeholder is just for display, user should handle it appropriately
-    cb.setItems(FXCollections.observableArrayList(options));
-    TailwindFX.apply(cb, "select", "select-md");
-    return cb;
-  }
-
-  /**
-   * Creates a large ChoiceBox.
-   *
-   * @param options option values
-   * @return styled ChoiceBox (large)
-   */
-  @SafeVarargs
-  public static <T> ChoiceBox<T> choiceBoxLarge(T... options) {
-    ChoiceBox<T> cb = new ChoiceBox<>();
-    cb.setItems(FXCollections.observableArrayList(options));
-    if (options.length > 0) {
-      cb.setValue(options[0]);
-    }
-    TailwindFX.apply(cb, "select", "select-lg");
-    return cb;
-  }
-
-  /**
-   * Creates a small ChoiceBox.
-   *
-   * @param options option values
-   * @return styled ChoiceBox (small)
-   */
-  @SafeVarargs
-  public static <T> ChoiceBox<T> choiceBoxSmall(T... options) {
-    ChoiceBox<T> cb = new ChoiceBox<>();
-    cb.setItems(FXCollections.observableArrayList(options));
-    if (options.length > 0) {
-      cb.setValue(options[0]);
-    }
-    TailwindFX.apply(cb, "select", "select-sm");
-    return cb;
-  }
-
-  /**
-   * Creates a ComboBox with the given options.
+   * Creates a styled ComboBox with the given options.
    *
    * @param options option values
    * @return styled ComboBox
    */
   @SafeVarargs
   public static <T> ComboBox<T> comboBox(T... options) {
-    ComboBox<T> combo = new ComboBox<>();
-    combo.setItems(FXCollections.observableArrayList(options));
-    if (options.length > 0) {
-      combo.setValue(options[0]);
-    }
-    TailwindFX.apply(combo, "select", "select-md");
+    ComboBox<T> combo = new ComboBox<>(FXCollections.observableArrayList(options));
+    combo.getStyleClass().addAll("select", "select-base");
     return combo;
   }
 
   /**
-   * Creates a ComboBox with a prompt text.
+   * Creates a styled editable ComboBox.
    *
-   * @param promptText prompt text
-   * @param options option values
-   * @return styled ComboBox
-   */
-  @SafeVarargs
-  public static <T> ComboBox<T> comboBoxWithPrompt(String promptText, T... options) {
-    ComboBox<T> combo = new ComboBox<>();
-    combo.setPromptText(promptText);
-    combo.setItems(FXCollections.observableArrayList(options));
-    TailwindFX.apply(combo, "select", "select-md");
-    return combo;
-  }
-
-  /**
-   * Creates a large ComboBox.
-   *
-   * @param options option values
-   * @return styled ComboBox (large)
-   */
-  @SafeVarargs
-  public static <T> ComboBox<T> comboBoxLarge(T... options) {
-    ComboBox<T> combo = new ComboBox<>();
-    combo.setItems(FXCollections.observableArrayList(options));
-    if (options.length > 0) {
-      combo.setValue(options[0]);
-    }
-    TailwindFX.apply(combo, "select", "select-lg");
-    return combo;
-  }
-
-  /**
-   * Creates a small ComboBox.
-   *
-   * @param options option values
-   * @return styled ComboBox (small)
-   */
-  @SafeVarargs
-  public static <T> ComboBox<T> comboBoxSmall(T... options) {
-    ComboBox<T> combo = new ComboBox<>();
-    combo.setItems(FXCollections.observableArrayList(options));
-    if (options.length > 0) {
-      combo.setValue(options[0]);
-    }
-    TailwindFX.apply(combo, "select", "select-sm");
-    return combo;
-  }
-
-  /**
-   * Creates an editable ComboBox.
-   *
-   * @param promptText prompt text
-   * @param options option values
+   * @param placeholder placeholder text
    * @return styled editable ComboBox
    */
-  @SafeVarargs
-  public static <T> ComboBox<T> editable(String promptText, T... options) {
-    ComboBox<T> combo = new ComboBox<>();
-    combo.setPromptText(promptText);
+  public static ComboBox<String> editable(String placeholder) {
+    ComboBox<String> combo = new ComboBox<>();
     combo.setEditable(true);
-    combo.setItems(FXCollections.observableArrayList(options));
-    TailwindFX.apply(combo, "select", "select-md", "select-editable");
+    combo.setPromptText(placeholder);
+    combo.getStyleClass().addAll("select", "select-base");
     return combo;
   }
 
@@ -188,7 +76,7 @@ public final class TwSelect {
     if (options.length > 0) {
       cb.setValue(options[0]);
     }
-    TailwindFX.apply(cb, "select", "select-disabled");
+    cb.getStyleClass().addAll("select", "select-disabled");
     return cb;
   }
 
@@ -206,7 +94,7 @@ public final class TwSelect {
     if (options.length > 0) {
       combo.setValue(options[0]);
     }
-    TailwindFX.apply(combo, "select", "select-disabled");
+    combo.getStyleClass().addAll("select", "select-disabled");
     return combo;
   }
 
@@ -222,7 +110,7 @@ public final class TwSelect {
     ComboBox<T> combo = new ComboBox<>();
     combo.setPromptText(promptText);
     combo.setItems(FXCollections.observableArrayList(options));
-    TailwindFX.apply(combo, "select", "select-error");
+    combo.getStyleClass().addAll("select", "select-error");
     return combo;
   }
 }
