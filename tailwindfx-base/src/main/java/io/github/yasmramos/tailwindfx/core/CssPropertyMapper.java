@@ -238,12 +238,12 @@ public final class CssPropertyMapper {
     };
   }
 
-  /** Resuelve valores especiales de dimensión: auto, min-content, max-content. */
+  /** Resuelve valores especiales de dimensión para JavaFX. */
   private String resolveDimension(String value) {
     return switch (value) {
-      case "auto" -> "auto"; // CSS standard: sizes to content naturally
-      case "min" -> "min-content"; // CSS standard: smallest size without overflow
-      case "max" -> "max-content"; // CSS standard: largest intrinsic size
+      case "auto" -> "-1"; // JavaFX: -1 means USE_COMPUTED_SIZE (default behavior)
+      case "min" -> "-1"; // JavaFX doesn't support min-content, use computed size
+      case "max" -> "-1"; // JavaFX doesn't support max-content, use computed size
       default -> null;
     };
   }
