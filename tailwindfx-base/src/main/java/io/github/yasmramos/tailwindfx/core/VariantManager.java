@@ -69,11 +69,9 @@ public class VariantManager {
     switch (variant) {
       case "hover":
         node.addEventHandler(
-            javafx.scene.input.MouseEvent.MOUSE_ENTERED,
-            e -> applyStyle(node, baseStyle));
+            javafx.scene.input.MouseEvent.MOUSE_ENTERED, e -> applyStyle(node, baseStyle));
         node.addEventHandler(
-            javafx.scene.input.MouseEvent.MOUSE_EXITED,
-            e -> removeStyle(node, baseStyle));
+            javafx.scene.input.MouseEvent.MOUSE_EXITED, e -> removeStyle(node, baseStyle));
         break;
 
       case "focus":
@@ -94,11 +92,9 @@ public class VariantManager {
 
       case "active":
         node.addEventHandler(
-            javafx.scene.input.MouseEvent.MOUSE_PRESSED,
-            e -> applyStyle(node, baseStyle));
+            javafx.scene.input.MouseEvent.MOUSE_PRESSED, e -> applyStyle(node, baseStyle));
         node.addEventHandler(
-            javafx.scene.input.MouseEvent.MOUSE_RELEASED,
-            e -> removeStyle(node, baseStyle));
+            javafx.scene.input.MouseEvent.MOUSE_RELEASED, e -> removeStyle(node, baseStyle));
         break;
 
       case "disabled":
