@@ -27,7 +27,7 @@ import javafx.util.Duration;
 /**
  * TwDataTable — a styled, sortable, filterable data table for TailwindFX.
  *
- * <p>Wraps JavaFX's {@link TableView} with a declarative builder API, built-in sorting, search
+ * <p>Extends JavaFX's {@link TableView} with a declarative builder API, built-in sorting, search
  * filtering, pagination, and TailwindFX utility classes.
  *
  * <h3>Usage</h3>
@@ -47,8 +47,8 @@ import javafx.util.Duration;
  *
  * table.setItems(userList);
  *
- * // Access the underlying TableView:
- * TableView&lt;User&gt; tv = table.tableView();
+ * // Access the underlying TableView (it IS a TableView):
+ * TableView&lt;User&gt; tv = table; // Direct assignment works
  *
  * // Get the full VBox (search bar + table + pagination):
  * VBox container = table.container();
@@ -66,7 +66,7 @@ import javafx.util.Duration;
  *
  * @param <T> the data item type
  */
-public final class TwDataTable<T> {
+public final class TwDataTable<T> extends TableView<T> {
 
   // Builder
 
@@ -162,7 +162,6 @@ public final class TwDataTable<T> {
   private final ObservableList<T> source = FXCollections.observableArrayList();
   private final FilteredList<T> filtered;
   private final SortedList<T> sorted;
-  private final TableView<T> table;
   private final VBox container;
 
   // Pagination state
@@ -176,11 +175,11 @@ public final class TwDataTable<T> {
   // Construction
 
   private TwDataTable(Builder<T> b) {
+    super(); // Initialize TableView
     this.paginated = b.paginated;
     this.pageSize = b.pageSize;
     this.filtered = new FilteredList<>(source, p -> true);
     this.sorted = new SortedList<>(filtered);
-    this.table = new TableView<>();
     this.searchField = b.searchable ? new TextField() : null;
 
     buildColumns(b.cols);
@@ -200,6 +199,8 @@ public final class TwDataTable<T> {
     if (paginated) {
       currentPage = 0;
       applyPage();
+    } else {
+      super.setItems(sorted);
     }
   }
 
@@ -215,12 +216,12 @@ public final class TwDataTable<T> {
 
   /** Returns the currently selected item, or {@code null} if none. */
   public T selectedItem() {
-    return table.getSelectionModel().getSelectedItem();
+    return getSelectionModel().getSelectedItem();
   }
 
   /** Clears the current selection. */
   public void clearSelection() {
-    table.getSelectionModel().clearSelection();
+    getSelectionModel().clearSelection();
   }
 
   /**
@@ -273,11 +274,6 @@ public final class TwDataTable<T> {
     goToPage(currentPage - 1);
   }
 
-  /** Returns the underlying {@link TableView}. */
-  public TableView<T> tableView() {
-    return table;
-  }
-
   /**
    * Returns the full container (search bar + table + pagination controls). Add this to your scene.
    */
@@ -307,19 +303,19 @@ public final class TwDataTable<T> {
       if (def.sortable()) {
         col.setComparator(Comparator.naturalOrder());
       }
-      table.getColumns().add(col);
+      getColumns().add(col);
     }
-    sorted.comparatorProperty().bind(table.comparatorProperty());
+    sorted.comparatorProperty().bind(comparatorProperty());
   }
 
   private void configureTable(Builder<T> b) {
-    table.setItems(paginated ? FXCollections.observableArrayList() : sorted);
-    table.setPlaceholder(new Label(b.placeholder));
-    table.getStyleClass().addAll("table-view");
-    if (b.styleClasses.length > 0) table.getStyleClass().addAll(b.styleClasses);
-    if (b.rowFactory != null) table.setRowFactory(b.rowFactory);
-    else table.setRowFactory(tv -> buildStyledRow());
-    VBox.setVgrow(table, Priority.ALWAYS);
+    setItems(paginated ? FXCollections.observableArrayList() : sorted);
+    setPlaceholder(new Label(b.placeholder));
+    getStyleClass().addAll("table-view");
+    if (b.styleClasses.length > 0) getStyleClass().addAll(b.styleClasses);
+    if (b.rowFactory != null) setRowFactory(b.rowFactory);
+    else setRowFactory(tv -> buildStyledRow());
+    VBox.setVgrow(this, Priority.ALWAYS);
 
     if (paginated) {
       filtered.addListener(
@@ -386,14 +382,14 @@ public final class TwDataTable<T> {
               });
     }
 
-    nodes.add(table);
+    nodes.add(this);
 
     if (b.paginated) {
       nodes.add(buildPaginationBar());
     }
 
     VBox box = new VBox(nodes.toArray(new javafx.scene.Node[0]));
-    VBox.setVgrow(table, Priority.ALWAYS);
+    VBox.setVgrow(this, Priority.ALWAYS);
     return box;
   }
 
@@ -443,6 +439,6 @@ public final class TwDataTable<T> {
     ObservableList<T> page =
         FXCollections.observableArrayList(
             from < filtered.size() ? sorted.subList(from, to) : List.of());
-    table.setItems(page);
+    setItems(page);
   }
 }
