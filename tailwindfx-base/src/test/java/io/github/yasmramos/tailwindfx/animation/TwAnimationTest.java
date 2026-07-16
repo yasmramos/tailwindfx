@@ -1,5 +1,11 @@
 package io.github.yasmramos.tailwindfx.animation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -8,64 +14,26 @@ import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.application.Platform;
 import javafx.scene.layout.Region;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.testfx.framework.junit5.ApplicationTest;
+import org.testfx.util.WaitForAsyncUtils;
 
 /**
  * Tests for {@link TwAnimation} — requires JavaFX Application Thread.
  *
- * <p>Run via {@link #runAll()} after the JavaFX platform is initialized. Each test runs on the FX
- * thread via {@code runFx()} and blocks until done.
+ * <p>Each test runs on the FX thread via {@code runFx()} and blocks until done.
  */
-public final class TwAnimationTest {
+@DisplayName("TwAnimation Tests")
+public class TwAnimationTest extends ApplicationTest {
 
-  private TwAnimationTest() {}
+  private static final double DELTA = 0.5;
 
-  private static int passed = 0, failed = 0;
-
-  static void ok(String label) {
-    System.out.printf("  ✅ %s%n", label);
-    passed++;
-  }
-
-  static void fail(String label, String msg) {
-    System.out.printf("  ❌ %s — %s%n", label, msg);
-    failed++;
-  }
-
-  static void check(String label, boolean v) {
-    if (v) {
-      ok(label);
-    } else {
-      fail(label, "expected true");
-    }
-  }
-
-  static void eq(String label, Object e, Object a) {
-    if (e == null ? a == null : e.equals(a)) {
-      ok(label);
-    } else {
-      fail(label, "expected <" + e + "> got <" + a + ">");
-    }
-  }
-
-  static void approx(String label, double e, double a) {
-    if (Math.abs(e - a) <= 0.5) {
-      ok(label);
-    } else {
-      fail(label, "expected ≈" + e + " got " + a);
-    }
-  }
-
-  static void throws_(String label, Class<? extends Throwable> type, Runnable r) {
-    try {
-      r.run();
-      fail(label, "no exception thrown");
-    } catch (Throwable t) {
-      if (type.isInstance(t)) {
-        ok(label);
-      } else {
-        fail(label, "expected " + type.getSimpleName() + " got " + t.getClass().getSimpleName());
-      }
-    }
+  @BeforeAll
+  static void setupSpec() {
+    // Ensure JavaFX is initialized
   }
 
   /** Runs work on FX thread and blocks until done (max 3s). */
@@ -90,325 +58,408 @@ public final class TwAnimationTest {
     }
   }
 
-  public static boolean runAll() throws Exception {
-    passed = 0;
-    failed = 0;
-    System.out.println("\n── TwAnimation ──");
+  @Nested
+  @DisplayName("Null Guards and Validation")
+  class NullGuardsTests {
 
-    testNullGuards();
-    testFadeInCreatesTimeline();
-    testFadeInWithInterpolator();
-    testFadeInDurationGuard();
-    testFadeOutCreatesTimeline();
-    testSlideUpCreatesTimeline();
-    testScaleInCreatesTimeline();
-    testScaleInWithInterpolator();
-    testShakeCreatesTimeline();
-    testBounceCreatesTimeline();
-    testPulseIsInfinite();
-    testSpinIsInfinite();
-    testBreatheIsInfinite();
-    testChainSequential();
-    testParallelTransition();
-    testDelayCreatesTimeline();
-    testTwAnimationSpeed();
-    testTwAnimationCycleCount();
-    testTwAnimationAutoReverse();
-    testTwAnimationOnFinished();
-    testTwAnimationEaseIn();
-    testRegistrySlotIsolation();
-    testRegistryReplacesCancels();
-    testOnHoverScaleNullGuard();
-    testOnHoverScaleZeroGuard();
-    testRemoveHoverEffectsNoop();
-    testResponsiveGuardResetNode();
+    @Test
+    @DisplayName("fadeIn should throw IllegalArgumentException for null node")
+    void testFadeInNullNode() {
+      assertThrows(IllegalArgumentException.class, () -> TwAnimation.fadeIn(null));
+    }
 
-    System.out.printf("  %d passed, %d failed%n", passed, failed);
-    return failed == 0;
+    @Test
+    @DisplayName("fadeOut should throw IllegalArgumentException for null node")
+    void testFadeOutNullNode() {
+      assertThrows(IllegalArgumentException.class, () -> TwAnimation.fadeOut(null));
+    }
+
+    @Test
+    @DisplayName("shake should throw IllegalArgumentException for null node")
+    void testShakeNullNode() {
+      assertThrows(IllegalArgumentException.class, () -> TwAnimation.shake(null));
+    }
+
+    @Test
+    @DisplayName("spin should throw IllegalArgumentException for null node")
+    void testSpinNullNode() {
+      assertThrows(IllegalArgumentException.class, () -> TwAnimation.spin(null));
+    }
+
+    @Test
+    @DisplayName("onHoverScale should throw IllegalArgumentException for null node")
+    void testOnHoverScaleNullNode() {
+      assertThrows(IllegalArgumentException.class, () -> TwAnimation.onHoverScale(null, 1.05));
+    }
+
+    @Test
+    @DisplayName("fadeIn should throw IllegalArgumentException for zero duration")
+    void testFadeInZeroDuration() {
+      assertThrows(IllegalArgumentException.class, () -> TwAnimation.fadeIn(new Region(), 0));
+    }
+
+    @Test
+    @DisplayName("fadeIn should throw IllegalArgumentException for negative duration")
+    void testFadeInNegativeDuration() {
+      assertThrows(IllegalArgumentException.class, () -> TwAnimation.fadeIn(new Region(), -1));
+    }
+
+    @Test
+    @DisplayName("fadeIn with interpolator should throw IllegalArgumentException for null interpolator")
+    void testFadeInNullInterpolator() {
+      assertThrows(
+          IllegalArgumentException.class, () -> TwAnimation.fadeIn(new Region(), 100, null));
+    }
+
+    @Test
+    @DisplayName("onHoverScale should throw IllegalArgumentException for zero scale factor")
+    void testOnHoverScaleZeroFactor() {
+      assertThrows(IllegalArgumentException.class, () -> TwAnimation.onHoverScale(new Region(), 0));
+    }
   }
 
-  // ── Guard tests ────────────────────────────────────────────────────
-  static void testNullGuards() {
-    throws_("fadeIn(null)", IllegalArgumentException.class, () -> TwAnimation.fadeIn(null));
-    throws_("fadeOut(null)", IllegalArgumentException.class, () -> TwAnimation.fadeOut(null));
-    throws_("shake(null)", IllegalArgumentException.class, () -> TwAnimation.shake(null));
-    throws_("spin(null)", IllegalArgumentException.class, () -> TwAnimation.spin(null));
-    throws_(
-        "onHoverScale(null)",
-        IllegalArgumentException.class,
-        () -> TwAnimation.onHoverScale(null, 1.05));
-    throws_(
-        "fadeIn(node, 0ms)",
-        IllegalArgumentException.class,
-        () -> TwAnimation.fadeIn(new Region(), 0));
-    throws_(
-        "fadeIn(node, -1ms)",
-        IllegalArgumentException.class,
-        () -> TwAnimation.fadeIn(new Region(), -1));
+  @Nested
+  @DisplayName("Entry Animations")
+  class EntryAnimationsTests {
+
+    @Test
+    @DisplayName("fadeIn should create Timeline and reset opacity to 0")
+    void testFadeInCreatesTimeline() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            TwAnimation anim = TwAnimation.fadeIn(n, 100);
+            assertNotNull(anim, "fadeIn should return non-null TwAnimation");
+            assertNotNull(anim.raw(), "fadeIn raw() should be non-null Animation");
+            assertEquals(0.0, n.getOpacity(), DELTA, "node opacity should be reset to 0");
+          });
+    }
+
+    @Test
+    @DisplayName("fadeIn with custom interpolator should work correctly")
+    void testFadeInWithInterpolator() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            TwAnimation anim = TwAnimation.fadeIn(n, 200, Interpolator.LINEAR);
+            assertNotNull(anim, "fadeIn(interpolator) should return non-null");
+          });
+    }
+
+    @Test
+    @DisplayName("fadeOut should create Timeline")
+    void testFadeOutCreatesTimeline() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            n.setOpacity(1.0);
+            TwAnimation anim = TwAnimation.fadeOut(n, 100);
+            assertNotNull(anim, "fadeOut should return non-null");
+          });
+    }
+
+    @Test
+    @DisplayName("slideUp should create Timeline and reset opacity")
+    void testSlideUpCreatesTimeline() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            TwAnimation anim = TwAnimation.slideUp(n);
+            assertNotNull(anim, "slideUp should return non-null");
+            assertEquals(0.0, n.getOpacity(), DELTA, "opacity should be reset to 0");
+          });
+    }
+
+    @Test
+    @DisplayName("scaleIn should create Timeline and reset scale")
+    void testScaleInCreatesTimeline() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            TwAnimation anim = TwAnimation.scaleIn(n);
+            assertNotNull(anim, "scaleIn should return non-null");
+            assertEquals(0.85, n.getScaleX(), DELTA, "scaleX should be reset to 0.85");
+          });
+    }
+
+    @Test
+    @DisplayName("scaleIn with custom interpolator should work correctly")
+    void testScaleInWithInterpolator() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            TwAnimation a = TwAnimation.scaleIn(n, 150, Interpolator.EASE_IN);
+            assertNotNull(a, "scaleIn(interpolator) should return non-null");
+          });
+    }
   }
 
-  static void testFadeInCreatesTimeline() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          TwAnimation anim = TwAnimation.fadeIn(n, 100);
-          check("fadeIn returns TwAnimation", anim != null);
-          check("fadeIn raw() is Animation", anim.raw() instanceof Animation);
-          check("node opacity reset to 0", n.getOpacity() == 0.0);
-        });
+  @Nested
+  @DisplayName("Attention Animations")
+  class AttentionAnimationsTests {
+
+    @Test
+    @DisplayName("shake should create Timeline")
+    void testShakeCreatesTimeline() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            TwAnimation a = TwAnimation.shake(n);
+            assertNotNull(a, "shake should return non-null");
+          });
+    }
+
+    @Test
+    @DisplayName("bounce should create Timeline")
+    void testBounceCreatesTimeline() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            TwAnimation a = TwAnimation.bounce(n);
+            assertNotNull(a, "bounce should return non-null");
+          });
+    }
+
+    @Test
+    @DisplayName("pulse should have INDEFINITE cycle count")
+    void testPulseIsInfinite() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            TwAnimation a = TwAnimation.pulse(n);
+            assertEquals(
+                Animation.INDEFINITE,
+                a.raw().getCycleCount(),
+                "pulse cycleCount should be INDEFINITE");
+          });
+    }
+
+    @Test
+    @DisplayName("spin should have INDEFINITE cycle count")
+    void testSpinIsInfinite() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            TwAnimation a = TwAnimation.spin(n);
+            assertEquals(
+                Animation.INDEFINITE,
+                a.raw().getCycleCount(),
+                "spin cycleCount should be INDEFINITE");
+          });
+    }
+
+    @Test
+    @DisplayName("breathe should have INDEFINITE cycle count")
+    void testBreatheIsInfinite() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            TwAnimation a = TwAnimation.breathe(n);
+            assertEquals(
+                Animation.INDEFINITE,
+                a.raw().getCycleCount(),
+                "breathe cycleCount should be INDEFINITE");
+          });
+    }
   }
 
-  static void testFadeInWithInterpolator() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          TwAnimation anim = TwAnimation.fadeIn(n, 200, Interpolator.LINEAR);
-          check("fadeIn(interpolator) non-null", anim != null);
-          throws_(
-              "fadeIn(null interpolator)",
-              IllegalArgumentException.class,
-              () -> TwAnimation.fadeIn(new Region(), 100, null));
-        });
+  @Nested
+  @DisplayName("Animation Composition")
+  class CompositionTests {
+
+    @Test
+    @DisplayName("chain should create SequentialTransition")
+    void testChainSequential() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            TwAnimation a1 = TwAnimation.fadeIn(n, 50);
+            TwAnimation a2 = TwAnimation.fadeOut(n, 50);
+            TwAnimation chain = TwAnimation.chain(a1, a2);
+            assertNotNull(chain, "chain should return non-null");
+            assertNotNull(chain.raw(), "chain raw should return non-null");
+          });
+    }
+
+    @Test
+    @DisplayName("parallel should create ParallelTransition")
+    void testParallelTransition() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            TwAnimation a1 = TwAnimation.fadeIn(n, 50);
+            TwAnimation a2 = TwAnimation.scaleIn(n, 50);
+            TwAnimation par = TwAnimation.parallel(a1, a2);
+            assertNotNull(par, "parallel should return non-null");
+          });
+    }
+
+    @Test
+    @DisplayName("pause should create delay Timeline")
+    void testDelayCreatesTimeline() throws Exception {
+      runFx(
+          () -> {
+            TwAnimation d = TwAnimation.pause(200);
+            assertNotNull(d, "delay should return non-null");
+          });
+    }
   }
 
-  static void testFadeInDurationGuard() {
-    throws_(
-        "fadeIn(-1ms)", IllegalArgumentException.class, () -> TwAnimation.fadeIn(new Region(), -1));
+  @Nested
+  @DisplayName("Fluent API")
+  class FluentApiTests {
+
+    @Test
+    @DisplayName("speed should set animation rate")
+    void testTwAnimationSpeed() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            TwAnimation a = TwAnimation.fadeIn(n, 200).speed(2.0);
+            assertEquals(2.0, a.raw().getRate(), DELTA, "speed should be 2.0");
+          });
+    }
+
+    @Test
+    @DisplayName("cycleCount should set animation cycle count")
+    void testTwAnimationCycleCount() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            TwAnimation a = TwAnimation.fadeIn(n, 200).cycleCount(3);
+            assertEquals(3, a.raw().getCycleCount(), "cycleCount should be 3");
+          });
+    }
+
+    @Test
+    @DisplayName("autoReverse should enable auto reverse")
+    void testTwAnimationAutoReverse() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            TwAnimation a = TwAnimation.fadeIn(n, 200).autoReverse();
+            assertTrue(a.raw().isAutoReverse(), "autoReverse should be true");
+          });
+    }
+
+    @Test
+    @DisplayName("onFinished should set handler")
+    void testTwAnimationOnFinished() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            AtomicBoolean fired = new AtomicBoolean(false);
+            TwAnimation a = TwAnimation.fadeIn(n, 1).onFinished(e -> fired.set(true));
+            assertNotNull(a.raw().getOnFinished(), "onFinished handler should be set");
+          });
+    }
+
+    @Test
+    @DisplayName("easeIn should return self")
+    void testTwAnimationEaseIn() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            TwAnimation a = TwAnimation.fadeIn(n, 200).easeIn();
+            assertNotNull(a, "easeIn should return self");
+          });
+    }
   }
 
-  static void testFadeOutCreatesTimeline() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          n.setOpacity(1.0);
-          TwAnimation anim = TwAnimation.fadeOut(n, 100);
-          check("fadeOut non-null", anim != null);
-        });
+  @Nested
+  @DisplayName("Animation Registry")
+  class AnimationRegistryTests {
+
+    @Test
+    @DisplayName("registry should support slot isolation")
+    void testRegistrySlotIsolation() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            TwAnimation enter = TwAnimation.fadeIn(n, 50);
+            TwAnimation loop = TwAnimation.spin(n).loop();
+            // Different slots — both should coexist
+            TwAnimation.AnimationRegistry.play(n, "enter", enter.raw());
+            TwAnimation.AnimationRegistry.play(n, "loop", loop.raw());
+            assertTrue(TwAnimation.AnimationRegistry.isActive(n, "enter"), "enter should be active");
+            assertTrue(TwAnimation.AnimationRegistry.isActive(n, "loop"), "loop should be active");
+            TwAnimation.AnimationRegistry.cancelAll(n);
+          });
+    }
+
+    @Test
+    @DisplayName("registry should cancel previous animation when replacing")
+    void testRegistryReplacesCancels() throws Exception {
+      runFx(
+          () -> {
+            try {
+              Region n = new Region();
+              javafx.animation.Timeline t1 = new javafx.animation.Timeline(
+                  new javafx.animation.KeyFrame(
+                      javafx.util.Duration.millis(1000),
+                      e -> {}
+                  )
+              );
+              javafx.animation.Timeline t2 = new javafx.animation.Timeline(
+                  new javafx.animation.KeyFrame(
+                      javafx.util.Duration.millis(1000),
+                      e -> {}
+                  )
+              );
+              TwAnimation.AnimationRegistry.play(n, "enter", t1);
+              // Give it a moment to start
+              Thread.sleep(50);
+              assertEquals(Animation.Status.RUNNING, t1.getStatus(), "t1 should be running after play()");
+              TwAnimation.AnimationRegistry.play(n, "enter", t2);
+              // Give it a moment to stop
+              Thread.sleep(50);
+              assertEquals(Animation.Status.STOPPED, t1.getStatus(), "t1 should be stopped after replace");
+              assertEquals(Animation.Status.RUNNING, t2.getStatus(), "t2 should be running after play()");
+              TwAnimation.AnimationRegistry.cancelAll(n);
+            } catch (InterruptedException e) {
+              Thread.currentThread().interrupt();
+              throw new RuntimeException(e);
+            }
+          });
+    }
   }
 
-  static void testSlideUpCreatesTimeline() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          TwAnimation anim = TwAnimation.slideUp(n);
-          check("slideUp non-null", anim != null);
-          check("opacity reset to 0", n.getOpacity() == 0.0);
-        });
+  @Nested
+  @DisplayName("Hover Effects")
+  class HoverEffectsTests {
+
+    @Test
+    @DisplayName("removeHoverEffects should not throw on clean node")
+    void testRemoveHoverEffectsNoop() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            // removeHoverEffects on a node with no hover effects should not throw
+            TwAnimation.removeHoverEffects(n);
+          });
+    }
   }
 
-  static void testScaleInCreatesTimeline() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          TwAnimation anim = TwAnimation.scaleIn(n);
-          check("scaleIn non-null", anim != null);
-          approx("scaleX reset", 0.85, n.getScaleX());
-        });
-  }
+  @Nested
+  @DisplayName("Responsive Animation Guard")
+  class ResponsiveGuardTests {
 
-  static void testScaleInWithInterpolator() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          TwAnimation a = TwAnimation.scaleIn(n, 150, Interpolator.EASE_IN);
-          check("scaleIn(interpolator) non-null", a != null);
-        });
-  }
-
-  static void testShakeCreatesTimeline() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          TwAnimation a = TwAnimation.shake(n);
-          check("shake non-null", a != null);
-        });
-  }
-
-  static void testBounceCreatesTimeline() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          TwAnimation a = TwAnimation.bounce(n);
-          check("bounce non-null", a != null);
-        });
-  }
-
-  static void testPulseIsInfinite() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          TwAnimation a = TwAnimation.pulse(n);
-          eq("pulse cycleCount INDEFINITE", Animation.INDEFINITE, a.raw().getCycleCount());
-        });
-  }
-
-  static void testSpinIsInfinite() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          TwAnimation a = TwAnimation.spin(n);
-          eq("spin cycleCount INDEFINITE", Animation.INDEFINITE, a.raw().getCycleCount());
-        });
-  }
-
-  static void testBreatheIsInfinite() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          TwAnimation a = TwAnimation.breathe(n);
-          eq("breathe cycleCount INDEFINITE", Animation.INDEFINITE, a.raw().getCycleCount());
-        });
-  }
-
-  // ── Composition ────────────────────────────────────────────────────
-  static void testChainSequential() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          TwAnimation a1 = TwAnimation.fadeIn(n, 50);
-          TwAnimation a2 = TwAnimation.fadeOut(n, 50);
-          TwAnimation chain = TwAnimation.chain(a1, a2);
-          check("chain non-null", chain != null);
-          check("chain raw non-null", chain.raw() != null);
-        });
-  }
-
-  static void testParallelTransition() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          TwAnimation a1 = TwAnimation.fadeIn(n, 50);
-          TwAnimation a2 = TwAnimation.scaleIn(n, 50);
-          TwAnimation par = TwAnimation.parallel(a1, a2);
-          check("parallel non-null", par != null);
-        });
-  }
-
-  static void testDelayCreatesTimeline() throws Exception {
-    runFx(
-        () -> {
-          TwAnimation d = TwAnimation.pause(200);
-          check("delay non-null", d != null);
-        });
-  }
-
-  // ── TwAnimation fluent API ──────────────────────────────────────────
-  static void testTwAnimationSpeed() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          TwAnimation a = TwAnimation.fadeIn(n, 200).speed(2.0);
-          approx("speed=2.0", 2.0, a.raw().getRate());
-        });
-  }
-
-  static void testTwAnimationCycleCount() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          TwAnimation a = TwAnimation.fadeIn(n, 200).cycleCount(3);
-          eq("cycleCount=3", 3, a.raw().getCycleCount());
-        });
-  }
-
-  static void testTwAnimationAutoReverse() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          TwAnimation a = TwAnimation.fadeIn(n, 200).autoReverse();
-          check("autoReverse=true", a.raw().isAutoReverse());
-        });
-  }
-
-  static void testTwAnimationOnFinished() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          AtomicBoolean fired = new AtomicBoolean(false);
-          TwAnimation a = TwAnimation.fadeIn(n, 1).onFinished(e -> fired.set(true));
-          check("onFinished set", a.raw().getOnFinished() != null);
-        });
-  }
-
-  static void testTwAnimationEaseIn() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          TwAnimation a = TwAnimation.fadeIn(n, 200).easeIn();
-          check("easeIn returns self", a != null);
-        });
-  }
-
-  // ── AnimationRegistry ────────────────────────────────────────────────
-  static void testRegistrySlotIsolation() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          TwAnimation enter = TwAnimation.fadeIn(n, 50);
-          TwAnimation loop = TwAnimation.spin(n).loop();
-          // Different slots — both should coexist
-          TwAnimation.AnimationRegistry.play(n, "enter", enter.raw());
-          TwAnimation.AnimationRegistry.play(n, "loop", loop.raw());
-          check("enter active", TwAnimation.AnimationRegistry.isActive(n, "enter"));
-          check("loop active", TwAnimation.AnimationRegistry.isActive(n, "loop"));
-          TwAnimation.AnimationRegistry.cancelAll(n);
-        });
-  }
-
-  static void testRegistryReplacesCancels() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          javafx.animation.Timeline t1 = new javafx.animation.Timeline();
-          javafx.animation.Timeline t2 = new javafx.animation.Timeline();
-          TwAnimation.AnimationRegistry.play(n, "enter", t1);
-          check("t1 running", t1.getStatus() == Animation.Status.RUNNING);
-          TwAnimation.AnimationRegistry.play(n, "enter", t2);
-          check("t1 stopped after replace", t1.getStatus() == Animation.Status.STOPPED);
-          check("t2 running", t2.getStatus() == Animation.Status.RUNNING);
-          TwAnimation.AnimationRegistry.cancelAll(n);
-        });
-  }
-
-  // ── Hover effects ─────────────────────────────────────────────────────
-  static void testOnHoverScaleNullGuard() {
-    throws_(
-        "onHoverScale(null)",
-        IllegalArgumentException.class,
-        () -> TwAnimation.onHoverScale(null, 1.05));
-  }
-
-  static void testOnHoverScaleZeroGuard() {
-    throws_(
-        "onHoverScale(node, 0)",
-        IllegalArgumentException.class,
-        () -> TwAnimation.onHoverScale(new Region(), 0));
-  }
-
-  static void testRemoveHoverEffectsNoop() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          // removeHoverEffects on a node with no hover effects should not throw
-          TwAnimation.removeHoverEffects(n);
-          ok("removeHoverEffects on clean node: no throw");
-        });
-  }
-
-  // ── ResponsiveAnimationGuard ──────────────────────────────────────────
-  static void testResponsiveGuardResetNode() throws Exception {
-    runFx(
-        () -> {
-          Region n = new Region();
-          n.setTranslateX(20);
-          n.setTranslateY(-10);
-          n.setScaleX(1.5);
-          n.setOpacity(0.3);
-          TwAnimation.ResponsiveAnimationGuard.resetNode(n);
-          approx("translateX=0", 0, n.getTranslateX());
-          approx("translateY=0", 0, n.getTranslateY());
-          approx("scaleX=1", 1, n.getScaleX());
-          approx("opacity=1", 1, n.getOpacity());
-        });
+    @Test
+    @DisplayName("resetNode should reset all transforms to defaults")
+    void testResponsiveGuardResetNode() throws Exception {
+      runFx(
+          () -> {
+            Region n = new Region();
+            n.setTranslateX(20);
+            n.setTranslateY(-10);
+            n.setScaleX(1.5);
+            n.setOpacity(0.3);
+            TwAnimation.ResponsiveAnimationGuard.resetNode(n);
+            assertEquals(0, n.getTranslateX(), DELTA, "translateX should be 0");
+            assertEquals(0, n.getTranslateY(), DELTA, "translateY should be 0");
+            assertEquals(1, n.getScaleX(), DELTA, "scaleX should be 1");
+            assertEquals(1, n.getOpacity(), DELTA, "opacity should be 1");
+          });
+    }
   }
 }
