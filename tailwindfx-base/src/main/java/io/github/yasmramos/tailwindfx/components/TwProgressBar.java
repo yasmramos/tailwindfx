@@ -1,6 +1,5 @@
 package io.github.yasmramos.tailwindfx.components;
 
-import io.github.yasmramos.tailwindfx.TailwindFX;
 import javafx.scene.control.ProgressBar;
 
 /**

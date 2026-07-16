@@ -132,13 +132,14 @@ public final class TwStyle {
         // Must distinguish between:
         // 1. Variant syntax (prefix:) → hasVariant = true
         // 2. Arbitrary property syntax ([prop:value]) → hasVariant = false, goes to JIT
-        // 3. Arbitrary variant syntax ([&:hover]:utility or [@media...]:utility) → hasVariant = true
+        // 3. Arbitrary variant syntax ([&:hover]:utility or [@media...]:utility) → hasVariant =
+        // true
         boolean isArbitraryProperty = t.startsWith("[") && !t.contains("]:");
         boolean hasVariant = t.contains(":") && !isArbitraryProperty;
-        
+
         // Extract base utility for variant tokens to enable proper validation
         String baseUtility = hasVariant ? stripVariantPrefix(t) : t;
-        
+
         // Check for unsupported variants (responsive/state) on layout-dependent properties
         if (hasVariant && isLayoutDependent(baseUtility)) {
           throw new UnsupportedOperationException(
@@ -186,8 +187,8 @@ public final class TwStyle {
     // Apply variant tokens via VariantManager
     if (!variantTokens.isEmpty()) {
       for (String variantToken : variantTokens) {
-        io.github.yasmramos.tailwindfx.core.VariantManager.processToken(node, variantToken, 
-            new io.github.yasmramos.tailwindfx.core.JitCompiler());
+        io.github.yasmramos.tailwindfx.core.VariantManager.processToken(
+            node, variantToken, new io.github.yasmramos.tailwindfx.core.JitCompiler());
       }
     }
 
@@ -724,14 +725,14 @@ public final class TwStyle {
    * Detects if a token should be compiled as JIT. Uses strict prefix matching +
    * numeric/arbitrary/negative pattern validation. Eliminates false positives like "card-2" or
    * "panel-v2".
-   * 
-   * <p>This method strips variant prefixes (hover:, focus:, dark:, sm:, etc.) before checking,
-   * so that "hover:bg-blue-500" is correctly identified as a JIT token.
+   *
+   * <p>This method strips variant prefixes (hover:, focus:, dark:, sm:, etc.) before checking, so
+   * that "hover:bg-blue-500" is correctly identified as a JIT token.
    */
   private static boolean isJitToken(String token) {
     // Strip variant prefixes before checking (e.g., "hover:bg-blue-500" -> "bg-blue-500")
     String baseToken = stripVariantPrefix(token);
-    
+
     // Opacity modifier: bg-blue-500/80 - but only for valid color utilities
     if (baseToken.contains("/")) {
       String base = baseToken.substring(0, baseToken.indexOf('/'));
@@ -760,7 +761,8 @@ public final class TwStyle {
             .anyMatch(
                 p ->
                     baseToken.startsWith(p)
-                        && (baseToken.length() == p.length() || baseToken.charAt(p.length()) == '-'));
+                        && (baseToken.length() == p.length()
+                            || baseToken.charAt(p.length()) == '-'));
 
     if (hasPrefix) {
       return baseToken.matches(".*\\d+.*");
@@ -770,9 +772,8 @@ public final class TwStyle {
   }
 
   /**
-   * Strips variant prefixes from a token.
-   * Examples: "hover:bg-blue-500" -> "bg-blue-500", "dark:hover:text-white" -> "text-white",
-   * "md:w-full" -> "w-full"
+   * Strips variant prefixes from a token. Examples: "hover:bg-blue-500" -> "bg-blue-500",
+   * "dark:hover:text-white" -> "text-white", "md:w-full" -> "w-full"
    */
   private static String stripVariantPrefix(String token) {
     if (token == null || !token.contains(":")) {

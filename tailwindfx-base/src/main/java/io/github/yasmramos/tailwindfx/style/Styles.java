@@ -1517,15 +1517,14 @@ public final class Styles {
   }
 
   /**
-   * Checks if a token is a known utility class that can be applied via CSS.
-   * Uses regex validation to detect typos while avoiding false positives.
-   * Used for debug warnings on unknown tokens.
+   * Checks if a token is a known utility class that can be applied via CSS. Uses regex validation
+   * to detect typos while avoiding false positives. Used for debug warnings on unknown tokens.
    */
   public static boolean isKnownUtilityClass(String token) {
     if (token == null || token.isEmpty()) {
       return false;
     }
-    
+
     // Component classes - exact prefix match
     java.util.Set<String> componentPrefixes = new java.util.HashSet<>();
     componentPrefixes.add("btn");
@@ -1538,19 +1537,21 @@ public final class Styles {
     componentPrefixes.add("tooltip");
     componentPrefixes.add("modal");
     componentPrefixes.add("group");
-    
+
     for (String prefix : componentPrefixes) {
       if (token.equals(prefix) || token.startsWith(prefix + "-")) {
         return true;
       }
     }
-    
+
     // Theme variants
-    if (token.equals("dark") || token.equals("light") || 
-        token.startsWith("dark:") || token.startsWith("light:")) {
+    if (token.equals("dark")
+        || token.equals("light")
+        || token.startsWith("dark:")
+        || token.startsWith("light:")) {
       return true;
     }
-    
+
     // Tailwind utility classes with regex validation to catch typos
     // Pattern: prefix-value (e.g., rounded-lg, p-4, bg-red-500)
     // This catches typos like "pd-4" (invalid) vs "p-4" (valid)
@@ -1581,13 +1582,13 @@ public final class Styles {
       java.util.regex.Pattern.compile("^invert(-[0-9]+)?$"),
       java.util.regex.Pattern.compile("^sepia(-[0-9]+)?$")
     };
-    
+
     for (java.util.regex.Pattern pattern : validPatterns) {
       if (pattern.matcher(token).matches()) {
         return true;
       }
     }
-    
+
     return false;
   }
 }
