@@ -1,0 +1,62 @@
+# =============================================================================
+# Conventional Commits Template for Java Projects
+# Language: English (Strict)
+# =============================================================================
+# 
+# <type>(<scope>): <subject>
+# <BLANK LINE>
+# <body>
+# <BLANK LINE>
+# <footer>
+# 
+# Type must be one of:
+#   feat:     A new feature for the user
+#   fix:      A bug fix for the user
+#   docs:     Documentation only changes
+#   style:    Changes that do not affect the meaning (white-space, formatting, etc.)
+#   refactor: A code change that neither fixes a bug nor adds a feature
+#   perf:     A code change that improves performance
+#   test:     Adding missing tests or correcting existing tests
+#   chore:    Changes to the build process or auxiliary tools
+#   revert:   Reverts a previous commit
+# 
+# Subject guidelines:
+#   - Use imperative mood ("add" not "added")
+#   - Do not capitalize first letter after type
+#   - No period at the end
+#   - Maximum 72 characters
+# 
+# Body guidelines:
+#   - Explain WHAT and WHY, not HOW
+#   - Use imperative mood
+#   - Wrap at 72 characters
+# 
+# Footer guidelines:
+#   - Reference issues: Closes #123, Fixes #456
+#   - Breaking changes: BREAKING CHANGE: description
+# =============================================================================
+
+# Example commits for Java projects:
+# -----------------------------------
+# feat(user-auth): add JWT token validation middleware
+# fix(payment): resolve null pointer in transaction processor
+# docs(api): update REST endpoint documentation for v2
+# style(formatter): apply consistent code formatting across services
+# refactor(database): extract connection pooling to separate module
+# perf(query): optimize SQL query reducing response time by 40%
+# test(validation): add unit tests for input sanitization
+# chore(deps): upgrade Spring Boot from 2.7 to 3.0
+# revert(auth): revert "feat(auth): add OAuth2 support" due to security issue
+#
+# =============================================================================
+# Write your commit message below this line:
+# =============================================================================
+
+
+
+# =============================================================================
+# Footer (optional):
+# Closes #ISSUE_NUMBER
+# Fixes #ISSUE_NUMBER
+# BREAKING CHANGE: describe if applicable
+# =============================================================================

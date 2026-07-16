@@ -87,12 +87,18 @@ public class TailwindCssMojo extends AbstractMojo {
         getLog().info("TailwindFX: Starting CSS generation...");
 
         // Validate source directory
-        if (!sourceDirectory.exists()) {
+        if (sourceDirectory == null || !sourceDirectory.exists()) {
             throw new MojoExecutionException(
-                "Source directory does not exist: " + sourceDirectory.getAbsolutePath()
+                "Source directory does not exist: " + (sourceDirectory != null ? sourceDirectory.getAbsolutePath() : "null")
             );
         }
 
+        // Validate and initialize output directory
+        if (outputDirectory == null) {
+            outputDirectory = new File(sourceDirectory.getParentFile(), "generated/css");
+            getLog().warn("Output directory not set, using default: " + outputDirectory.getAbsolutePath());
+        }
+        
         // Create output directory
         if (!outputDirectory.exists()) {
             if (!outputDirectory.mkdirs()) {
@@ -115,7 +121,10 @@ public class TailwindCssMojo extends AbstractMojo {
             String generatedCss = generateCss(usedClasses);
 
             // Write CSS file
-            Path outputPath = Paths.get(outputDirectory.getAbsolutePath(), outputFileName);
+            if (outputFileName == null || outputFileName.trim().isEmpty()) {
+                outputFileName = "tailwindfx-generated.css";
+            }
+            Path outputPath = outputDirectory.toPath().resolve(outputFileName);
             try (FileWriter writer = new FileWriter(outputPath.toFile())) {
                 writer.write(generatedCss);
             }

@@ -189,9 +189,10 @@ public class VariantManagerTest extends ApplicationTest {
   @Test
   public void testProcessTokenWithStateVariant() {
     // When processing token with hover variant
-    assertDoesNotThrow(() -> {
-      VariantManager.processToken(testButton, "hover:opacity-80", JitCompiler);
-    });
+    assertDoesNotThrow(
+        () -> {
+          VariantManager.processToken(testButton, "hover:opacity-80", JitCompiler);
+        });
   }
 
   @Test

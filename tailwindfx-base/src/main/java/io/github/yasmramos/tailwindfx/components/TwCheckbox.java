@@ -1,49 +1,138 @@
 package io.github.yasmramos.tailwindfx.components;
 
-import io.github.yasmramos.tailwindfx.TailwindFX;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ToggleButton;
 
 /**
- * TwCheckbox — Pre-styled checkbox and switch components with TailwindCSS variants.
+ * TwCheckbox — Custom checkbox component extending JavaFX CheckBox with TailwindCSS variants.
  *
- * <p>Uses base CheckBox and ToggleButton controls styled via tailwindfx-components.css utility
- * classes.
- *
- * <pre>
- * CheckBox chk = TwCheckbox.create("Accept terms");
- * CheckBox chk = TwCheckbox.checked("Remember me", true);
- * ToggleButton swt = TwSwitch.create("Enable notifications");
- * ToggleButton swt = TwSwitch.checked("Dark mode", true);
- * </pre>
+ * <p>Extends CheckBox for full CSS support and native behavior.
  */
-public final class TwCheckbox {
+public class TwCheckbox extends CheckBox {
 
-  private TwCheckbox() {}
+  private String color = "blue";
+  private String size = "md";
 
-  /**
-   * Creates a standard checkbox.
-   *
-   * @param text label text
-   * @return styled CheckBox
-   */
-  public static CheckBox create(String text) {
-    CheckBox chk = new CheckBox(text);
-    TailwindFX.apply(chk, "checkbox");
-    return chk;
+  /** Creates a default checkbox. */
+  public TwCheckbox() {
+    super();
+    initialize();
   }
 
   /**
-   * Creates a checkbox with initial state.
+   * Creates a checkbox with text.
+   *
+   * @param text the label text
+   */
+  public TwCheckbox(String text) {
+    super(text);
+    initialize();
+  }
+
+  private void initialize() {
+    getStyleClass().add("checkbox");
+    applyStyling();
+  }
+
+  private void applyStyling() {
+    // Remove old color and size classes
+    getStyleClass()
+        .removeIf(
+            cls ->
+                (cls.startsWith("checkbox-") && !cls.equals("checkbox"))
+                    || cls.equals("checkbox-error")
+                    || cls.equals("checkbox-disabled"));
+
+    // Add color class
+    if (color != null && !color.isEmpty()) {
+      getStyleClass().add("checkbox-" + color);
+    }
+
+    // Add size class
+    if (size != null && !size.isEmpty()) {
+      getStyleClass().add("checkbox-" + size);
+    }
+  }
+
+  /**
+   * Sets the checkbox color.
+   *
+   * @param color Tailwind color name
+   */
+  public void setColor(String color) {
+    this.color = color;
+    applyStyling();
+  }
+
+  /**
+   * Gets the checkbox color.
+   *
+   * @return the color
+   */
+  public String getColor() {
+    return color;
+  }
+
+  /**
+   * Sets the checkbox size.
+   *
+   * @param size size modifier (xs, sm, md, lg, xl)
+   */
+  public void setSize(String size) {
+    this.size = size;
+    applyStyling();
+  }
+
+  /**
+   * Gets the checkbox size.
+   *
+   * @return the size
+   */
+  public String getSize() {
+    return size;
+  }
+
+  /**
+   * Sets the error state.
+   *
+   * @param error true to show error state
+   */
+  public void setError(boolean error) {
+    if (error) {
+      getStyleClass().add("checkbox-error");
+    } else {
+      getStyleClass().remove("checkbox-error");
+    }
+  }
+
+  /**
+   * Checks if input is in error state.
+   *
+   * @return true if error
+   */
+  public boolean isError() {
+    return getStyleClass().contains("checkbox-error");
+  }
+
+  /**
+   * Creates a checkbox with text.
+   *
+   * @param text label text
+   * @return TwCheckbox instance
+   */
+  public static TwCheckbox create(String text) {
+    return new TwCheckbox(text);
+  }
+
+  /**
+   * Creates a checked checkbox.
    *
    * @param text label text
    * @param checked initial checked state
-   * @return styled CheckBox
+   * @return TwCheckbox instance
    */
-  public static CheckBox checked(String text, boolean checked) {
-    CheckBox chk = new CheckBox(text);
+  public static TwCheckbox checked(String text, boolean checked) {
+    TwCheckbox chk = new TwCheckbox(text);
     chk.setSelected(checked);
-    TailwindFX.apply(chk, "checkbox");
     return chk;
   }
 
@@ -51,75 +140,24 @@ public final class TwCheckbox {
    * Creates a disabled checkbox.
    *
    * @param text label text
-   * @return styled CheckBox (disabled)
+   * @return TwCheckbox instance
    */
-  public static CheckBox disabled(String text) {
-    CheckBox chk = new CheckBox(text);
+  public static TwCheckbox disabled(String text) {
+    TwCheckbox chk = new TwCheckbox(text);
     chk.setDisable(true);
-    TailwindFX.apply(chk, "checkbox", "checkbox-disabled");
+    chk.getStyleClass().add("checkbox-disabled");
     return chk;
   }
 
   /**
-   * Creates a checkbox with error styling.
+   * Creates a small checkbox.
    *
    * @param text label text
-   * @return styled CheckBox (error state)
+   * @return TwCheckbox instance
    */
-  public static CheckBox error(String text) {
-    CheckBox chk = new CheckBox(text);
-    TailwindFX.apply(chk, "checkbox", "checkbox-error");
-    return chk;
-  }
-
-  /**
-   * Creates a switch/toggle button (alternative to checkbox).
-   *
-   * @param text label text
-   * @return styled ToggleButton (switch style)
-   */
-  public static ToggleButton createSwitch(String text) {
-    ToggleButton toggle = new ToggleButton(text);
-    TailwindFX.apply(toggle, "switch");
-    return toggle;
-  }
-
-  /**
-   * Creates a switch with initial state.
-   *
-   * @param text label text
-   * @param toggled initial toggled state
-   * @return styled ToggleButton (switch style)
-   */
-  public static ToggleButton checkedSwitch(String text, boolean toggled) {
-    ToggleButton toggle = new ToggleButton(text);
-    toggle.setSelected(toggled);
-    TailwindFX.apply(toggle, "switch");
-    return toggle;
-  }
-
-  /**
-   * Creates a disabled switch.
-   *
-   * @param text label text
-   * @return styled ToggleButton (switch style, disabled)
-   */
-  public static ToggleButton disabledSwitch(String text) {
-    ToggleButton toggle = new ToggleButton(text);
-    toggle.setDisable(true);
-    TailwindFX.apply(toggle, "switch", "switch-disabled");
-    return toggle;
-  }
-
-  /**
-   * Creates a small checkbox (compact layout).
-   *
-   * @param text label text
-   * @return styled CheckBox (small)
-   */
-  public static CheckBox small(String text) {
-    CheckBox chk = new CheckBox(text);
-    TailwindFX.apply(chk, "checkbox", "checkbox-sm");
+  public static TwCheckbox small(String text) {
+    TwCheckbox chk = new TwCheckbox(text);
+    chk.setSize("sm");
     return chk;
   }
 
@@ -127,11 +165,11 @@ public final class TwCheckbox {
    * Creates a large checkbox.
    *
    * @param text label text
-   * @return styled CheckBox (large)
+   * @return TwCheckbox instance
    */
-  public static CheckBox large(String text) {
-    CheckBox chk = new CheckBox(text);
-    TailwindFX.apply(chk, "checkbox", "checkbox-lg");
+  public static TwCheckbox large(String text) {
+    TwCheckbox chk = new TwCheckbox(text);
+    chk.setSize("lg");
     return chk;
   }
 }
