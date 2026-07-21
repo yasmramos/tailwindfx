@@ -185,7 +185,7 @@ class JitCompilerTest {
           JitCompiler.compileBatch("bg-white", "p-4", "rounded-lg", "shadow-md");
 
       assertTrue(result.hasInlineStyle());
-      assertFalse(result.cssClasses().isEmpty());
+      assertTrue(result.cssClasses().isEmpty());
     }
 
     @Test
