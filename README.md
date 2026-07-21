@@ -208,12 +208,31 @@ public class MyApp extends Application {
 | `TwTheme` | Dark/light themes, presets, scoped themes | `TwTheme.of(scene).dark().apply()` |
 | `TwLayout` | Flexbox, Grid, layout builders | `TwLayout.of(container).row().gap(16).build()` |
 | `TwAnimation` | Animations, hover effects | `TwAnimation.fadeIn(node).play()` |
-| `TwComponent` | Pre-built components (cards, badges) | `TwComponent.card().title("Hi").build()` |
 | `TwResponsive` | Breakpoint-aware nodes | `TwResponsive.on(region).sm("w-full").install(scene)` |
 | `TwEffect` | Glassmorphism, neumorphism, shadows | `TwEffect.glass(panel)` |
 | `TwMetrics` | Performance monitoring, alerts | `TwMetrics.print()` |
 | `TwConfig` | Global configuration | `TwConfig.unit(Unit.PX)` |
 | `TwBatch` | Batch operations for performance | `TwBatch.run(() -> applyStyles())` |
+
+### Components
+
+TailwindFX provides pre-built components in the `io.github.yasmramos.tailwindfx.components` package:
+
+| Component | Description | Example |
+|-----------|-------------|---------|
+| `TwButton` | Styled button with variants | `new TwButton("Click", ButtonVariant.PRIMARY)` |
+| `TwCard` | Card container | `new TwCard(title, content)` |
+| `TwBadge` | Status badges | `new TwBadge("New", BadgeVariant.SUCCESS)` |
+| `TwAlert` | Alert dialogs | `TwAlert.info("Message").show()` |
+| `TwInput` | Text input field | `new TwInput("Placeholder")` |
+| `TwCheckbox` | Checkbox with label | `new TwCheckbox("Accept terms")` |
+| `TwSelect` | Dropdown selector | `new TwSelect<>(items)` |
+| `TwDataTable` | Sortable table | `new TwDataTable<>(data)` |
+| `TwProgressBar` | Progress indicator | `new TwProgressBar(0.75)` |
+| `TwSpinner` | Loading spinner | `new TwSpinner()` |
+| `TwAvatar` | User avatar | `new TwAvatar(imageUrl)` |
+| `TwVirtualFlow` | Virtualized list | `new TwVirtualFlow<>(items)` |
+| `TWAccordion` | Collapsible sections | `new TWAccordion()` |
 
 ### Usage Examples
 
@@ -238,11 +257,11 @@ TwAnimation.fadeIn(node, 300).play();
 TwAnimation.onHoverScale(btn, 1.05);
 TwAnimation.shake(button).play();
 
-// Component
-TwComponent.card()
-    .title("Welcome")
-    .content("Hello world")
-    .build();
+// Components
+TwCard card = new TwCard("Welcome", "Hello world");
+TwButton btn = new TwButton("Click", ButtonVariant.PRIMARY);
+TwBadge badge = new TwBadge("New", BadgeVariant.SUCCESS);
+TwAlert.info("Operation completed").show();
 
 // Responsive
 TwResponsive.on(sidebar)
