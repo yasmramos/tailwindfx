@@ -106,6 +106,30 @@ public final class CssPropertyMapper {
    * @return Valor CSS o null si no hay mapeo
    */
   public String resolveNamedValue(String prefix, String namedValue) {
+    // Handle background colors: bg-white, bg-black, bg-transparent
+    if ("bg".equals(prefix)) {
+      String color = resolveNamedColor(namedValue);
+      if (color != null) {
+        return color;
+      }
+    }
+
+    // Handle text colors: text-white, text-black, text-transparent
+    if ("text".equals(prefix)) {
+      String color = resolveNamedColor(namedValue);
+      if (color != null) {
+        return color;
+      }
+    }
+
+    // Handle border colors: border-white, border-black, border-transparent
+    if ("border".equals(prefix)) {
+      String color = resolveNamedColor(namedValue);
+      if (color != null) {
+        return color;
+      }
+    }
+
     // Handle border styles: border-solid, border-dashed, border-dotted, border-none
     if ("border".equals(prefix)) {
       return resolveBorderStyle(namedValue);
@@ -169,6 +193,16 @@ public final class CssPropertyMapper {
       case "dashed" -> "dashed";
       case "dotted" -> "dotted";
       case "none" -> "none";
+      default -> null;
+    };
+  }
+
+  /** Resuelve colores nombrados como white, black, transparent */
+  private String resolveNamedColor(String colorName) {
+    return switch (colorName) {
+      case "white" -> "#ffffff";
+      case "black" -> "#000000";
+      case "transparent" -> "transparent";
       default -> null;
     };
   }
