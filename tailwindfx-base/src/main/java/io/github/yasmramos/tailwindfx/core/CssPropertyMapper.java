@@ -36,13 +36,10 @@ public final class CssPropertyMapper {
       case "pb", "bottom" -> "-fx-padding";
       case "pl", "left" -> "-fx-padding";
 
-      case "m" -> "-fx-margin";
-      case "mx" -> "-fx-margin";
-      case "my" -> "-fx-margin";
-      case "mt" -> "-fx-margin";
-      case "mr" -> "-fx-margin";
-      case "mb" -> "-fx-margin";
-      case "ml" -> "-fx-margin";
+      // Margin properties are NOT mapped to CSS because JavaFX doesn't support -fx-margin.
+      // They are handled by Styles.java via HBox.setMargin(), VBox.setMargin(), GridPane.setMargin()
+      // when using TwStyle.apply(). Return null to prevent JIT compilation.
+      case "m", "mx", "my", "mt", "mr", "mb", "ml" -> null;
 
       case "bg" -> "-fx-background-color";
       case "border" -> "-fx-border-color";
