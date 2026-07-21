@@ -14,92 +14,79 @@
 
 TailwindFX brings Tailwind CSS's utility-first approach to JavaFX. Instead of writing boilerplate style code, you compose styles from a comprehensive set of pre-built utility classes — and where CSS falls short, TailwindFX provides equivalent Java APIs.
 
-### Architecture: Hybrid Approach (CSS Static + JIT Compilation) ✅
+### Architecture: Hybrid Approach (CSS Base + JIT Compilation) ✅
 
-TailwindFX uses a **hybrid architecture** that combines the best of both worlds: static CSS for base styles and components, plus JIT compilation for utilities and arbitrary values. This approach mirrors Tailwind CSS v3+ strategy.
+TailwindFX uses a **hybrid architecture** that combines minimal static CSS with Just-In-Time compilation for all utilities and components. This approach maximizes flexibility while minimizing bundle size.
 
-### Current: Hybrid Architecture (v2.0) ✅
+### Current: JIT-First Architecture (v2.0) ✅
 
-TailwindFX features a **Just-In-Time compiler** for dynamic style generation, complemented by essential static CSS files for base styles and component presets.
+TailwindFX features a **Just-In-Time compiler** for dynamic style generation, complemented by a minimal base CSS file for CSS variables and resets.
 
 **Architecture breakdown:**
 
 | Layer | Responsibility | Implementation | Size |
 |-------|---------------|----------------|------|
-| **Base CSS** | CSS variables, reset, base styles | `tailwindfx-base.css` (generated from ThemeConfig) | ~17KB |
-| **Color Palette** | Pre-defined color utilities | `tailwindfx-colors.css` | ~31KB |
-| **Effects** | Shadows, filters, effects | `tailwindfx-effects.css` | ~11KB |
-| **Components** | JavaFX component base styles | `tailwindfx-components.css` | ~297KB |
-| **Utilities** | Common utility classes | `tailwindfx-utilities.css` | ~17KB |
-| **Component Presets** | Pre-styled component templates | `tailwindfx-components-preset.css` | ~13KB |
-| **JIT Compiler** | On-demand compilation for custom/arbitrary values | `JitCompiler` + delegates | Dynamic |
-| **Dark Mode** | Optional dark theme overrides | `tailwindfx-dark.css` | ~20KB |
+| **Base CSS** | CSS variables, reset, base styles | `tailwindfx-base.css` (generated from ThemeConfig) | ~2-5KB |
+| **JIT Compiler** | On-demand compilation for ALL utilities, colors, effects, components | `JitCompiler` + `StyleToken` + `StyleResolver` + `CssPropertyMapper` | Dynamic |
+| **LRU Cache** | High-performance caching for compiled styles | Configurable size (2000 entries max) | In-memory |
 
 **Key features:**
-- **Static CSS for common cases**: ~386KB of pre-generated CSS for instant loading of common utilities
-- **JIT for flexibility**: Compile arbitrary values like `w-[320px]`, `bg-blue-500/80`, `drop-shadow-[#3b82f6]` on-demand
+- **Minimal CSS footprint**: Only ~2-5KB base CSS loaded initially
+- **JIT for everything**: Compile ANY value on-demand: `w-[320px]`, `bg-blue-500/80`, `drop-shadow-2xl`, `btn-primary`, etc.
 - **Dynamic theme generation**: `ThemeCssGenerator` creates `tailwindfx-base.css` from `ThemeConfig` at install time
 - **Refactored architecture**: Separated parsing (`StyleToken`), resolution (`StyleResolver`), and property mapping (`CssPropertyMapper`)
-- **LRU cache**: High-performance caching with configurable size (2000 entries max)
-- **Smart fallback**: Unknown tokens are handled gracefully with warnings in debug mode
+- **Smart fallback**: Unknown tokens handled gracefully with warnings in debug mode
+- **No large CSS bundles**: Unlike traditional approaches, no 300KB+ CSS files to load
 
-**Why hybrid?**
-Unlike web browsers, JavaFX doesn't support CSS custom properties (variables) efficiently. Pre-generating common utilities ensures instant styling, while JIT handles edge cases and customization. This is similar to how Tailwind CSS generates a static CSS file during build-time rather than purely runtime JIT.
+**Why JIT-first?**
+JavaFX doesn't support CSS custom properties (variables) efficiently. Instead of pre-generating thousands of utility classes, TailwindFX compiles styles on-demand and caches them. This results in:
+- Faster initial load (minimal CSS)
+- Unlimited flexibility (any arbitrary value)
+- Smaller memory footprint (only cache what you use)
+- No unused CSS bloat
 
 **Architecture flow:**
 ```
-TwStyle.apply(node, "p-4", "bg-blue-500", "w-[320px]")
+TwStyle.apply(node, "p-4", "bg-blue-500", "w-[320px]", "btn-primary")
     ↓
 ┌─────────────────────────────────────┐
-│ 1. Check static CSS (fast path)     │ ← p-4, bg-blue-500 found in tailwindfx-utilities.css
-│    - tailwindfx-utilities.css       │
-│    - tailwindfx-colors.css          │
-│    - tailwindfx-effects.css         │
+│ 1. Check LRU Cache (fastest path)   │ ← Previously compiled styles
+│    Cache hit? Return cached style   │
 └─────────────────────────────────────┘
-    ↓ (if not found in static CSS)
+    ↓ (cache miss)
 ┌─────────────────────────────────────┐
-│ 2. JIT Compiler (flexible path)     │ ← w-[320px] compiled on-demand
+│ 2. JIT Compiler                     │ ← All tokens compiled on-demand
 │    JitCompiler.compile(token)       │
 │    ↓                                │
-│    StyleToken.parse()               │
+│    StyleToken.parse(token)          │
 │    ↓                                │
-│    StyleResolver.resolve()          │
+│    StyleResolver.resolve(token)     │
 │    ↓                                │
 │    CssPropertyMapper.map()          │
 │    ↓                                │
-│    Generated: -fx-pref-width: 320px │
-│    Cached for reuse                 │
+│    Generated: -fx-padding: 16px;    │
+│    -fx-background-color: #3b82f6;   │
+│    -fx-pref-width: 320px;           │
+│    Cache result for reuse           │
 └─────────────────────────────────────┘
     ↓
-Applied to Node.style or added as style class
+Applied to Node.style (inline) or added as style class
 ```
 
-**Installation comparison:**
+**Installation:**
 ```java
 // Standard installation (recommended)
-// Loads all static CSS + enables JIT for arbitrary values
+// Loads minimal base CSS + enables JIT compiler
 TwInstall.install(scene); 
 // Files loaded:
-// - tailwindfx-base.css (generated dynamically from ThemeConfig)
-// - tailwindfx-colors.css
-// - tailwindfx-effects.css
-// - tailwindfx-utilities.css
-// - tailwindfx-components.css
-// - tailwindfx-components-preset.css
-TwStyle.apply(btn, "btn-primary", "rounded-lg", "px-4", "py-2"); // Found in static CSS
-TwStyle.jit(node, "bg-blue-500/80", "w-[320px]"); // JIT compiled
-
-// Minimal installation (advanced users)
-// Only loads base CSS, everything else is JIT compiled
-TwInstall.installMinimal(scene); 
-// Files loaded:
-// - tailwindfx-base.css (generated dynamically)
+// - tailwindfx-base.css (generated dynamically from ThemeConfig, ~2-5KB)
 // Everything else compiled JIT on-demand
-TwStyle.apply(btn, "p-4", "bg-blue-500"); // JIT compiled
-TwStyle.jit(node, "bg-blue-500/80", "w-[320px]"); // JIT compiled
+
+TwStyle.apply(btn, "btn-primary", "rounded-lg", "px-4", "py-2"); // All JIT compiled
+TwStyle.apply(node, "bg-blue-500/80", "w-[320px]"); // JIT compiled with arbitrary values
 
 // Dark mode support (optional)
-TwInstall.installWithDarkMode(scene); // Also loads tailwindfx-dark.css
+TwInstall.installWithDarkMode(scene); // Also loads dark theme overrides
 ```
 
 ```java
