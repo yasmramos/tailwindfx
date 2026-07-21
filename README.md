@@ -236,7 +236,7 @@ TwTheme.scope(panel).preset("rose").apply();
 
 // Layout
 TwLayout.of(container).row().gap(16).build();
-TwLayout.flexRow().wrap(true).justify(Justify.BETWEEN).build();
+TwLayout.flexRow().wrap(true).justify(TwFlexPane.Justify.BETWEEN).build();
 
 // Animation
 TwAnimation.fadeIn(node, 300).play();
