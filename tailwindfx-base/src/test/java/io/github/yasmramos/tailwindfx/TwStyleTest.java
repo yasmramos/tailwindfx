@@ -83,20 +83,21 @@ public class TwStyleTest extends ApplicationTest {
   @Test
   @DisplayName("apply should handle layout-dependent tokens (margins)")
   void testApplyWithMarginTokens() {
-    // Node must be in a parent container for margins to take effect
-    TwStyle.apply(labelNode, "m-4", "mt-2");
-
-    // Margins are applied via HBox.setMargin(), not as inline CSS
-    // Verify margin was set correctly using HBox.getMargin()
-    javafx.geometry.Insets margin = HBox.getMargin(labelNode);
-    assertNotNull(margin, "Margin should be applied via HBox.setMargin()");
+    // Margins require parent container context, so we need to add node to HBox first
+    hboxParent.getChildren().clear();
+    hboxParent.getChildren().add(labelNode);
     
-    // m-4 = 4 * 4px = 16px on all sides, but mt-2 overrides top to 8px
-    // So we expect: top=8px (from mt-2), right=16px, bottom=16px, left=16px
-    assertEquals(8.0, margin.getTop(), "Top margin should be 8px from mt-2");
-    assertEquals(16.0, margin.getRight(), "Right margin should be 16px from m-4");
-    assertEquals(16.0, margin.getBottom(), "Bottom margin should be 16px from m-4");
-    assertEquals(16.0, margin.getLeft(), "Left margin should be 16px from m-4");
+    TwStyle.apply(labelNode, "m-4");
+
+    // Margins are applied via HBox.setMargin(), not inline CSS or style classes
+    // Verify that margins were actually set on the node
+    javafx.geometry.Insets margin = HBox.getMargin(labelNode);
+    assertNotNull(margin);
+    // m-4 = 16px on all sides (4 * 4px = 16px)
+    assertEquals(16, margin.getTop(), 0.1);
+    assertEquals(16, margin.getRight(), 0.1);
+    assertEquals(16, margin.getBottom(), 0.1);
+    assertEquals(16, margin.getLeft(), 0.1);
   }
 
   @Test

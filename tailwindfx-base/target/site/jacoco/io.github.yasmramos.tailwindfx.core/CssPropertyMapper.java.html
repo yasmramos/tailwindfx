@@ -1,0 +1,605 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CssPropertyMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TailwindFX Base</a> &gt; <a href="index.source.html" class="el_package">io.github.yasmramos.tailwindfx.core</a> &gt; <span class="el_source">CssPropertyMapper.java</span></div><h1>CssPropertyMapper.java</h1><pre class="source lang-java linenums">package io.github.yasmramos.tailwindfx.core;
+
+import io.github.yasmramos.tailwindfx.style.StyleToken;
+import io.github.yasmramos.tailwindfx.theme.ThemeConfig;
+import java.util.Map;
+
+/**
+ * CssPropertyMapper — Mapea prefijos y valores nombrados a propiedades CSS JavaFX.
+ *
+ * &lt;p&gt;Responsabilidad: Traducir tokens Tailwind a propiedades -fx-* específicas. Ej: &quot;p&quot; →
+ * &quot;-fx-padding&quot;, &quot;bg&quot; → &quot;-fx-background-color&quot;, &quot;text&quot; → &quot;-fx-text-fill&quot;
+ *
+ * &lt;p&gt;No hace parsing ni resolución de valores, solo mapeo de propiedades.
+ */
+public final class CssPropertyMapper {
+
+  private final ThemeConfig themeConfig;
+
+<span class="fc" id="L19">  public CssPropertyMapper(ThemeConfig themeConfig) {</span>
+<span class="fc" id="L20">    this.themeConfig = themeConfig;</span>
+<span class="fc" id="L21">  }</span>
+
+  /**
+   * Obtiene la propiedad CSS JavaFX para un prefijo dado.
+   *
+   * @param prefix Prefijo Tailwind (p, bg, text, w, h, etc.)
+   * @return Propiedad -fx-* o null si no hay mapeo
+   */
+  public String mapToCssProperty(String prefix) {
+<span class="pc bpc" id="L30" title="34 of 52 branches missed.">    return switch (prefix) {</span>
+<span class="fc" id="L31">      case &quot;p&quot; -&gt; &quot;-fx-padding&quot;;</span>
+<span class="fc" id="L32">      case &quot;px&quot; -&gt; &quot;-fx-padding&quot;;</span>
+<span class="fc" id="L33">      case &quot;py&quot; -&gt; &quot;-fx-padding&quot;;</span>
+<span class="nc" id="L34">      case &quot;pt&quot;, &quot;top&quot; -&gt; &quot;-fx-padding&quot;;</span>
+<span class="nc" id="L35">      case &quot;pr&quot;, &quot;right&quot; -&gt; &quot;-fx-padding&quot;;</span>
+<span class="nc" id="L36">      case &quot;pb&quot;, &quot;bottom&quot; -&gt; &quot;-fx-padding&quot;;</span>
+<span class="nc" id="L37">      case &quot;pl&quot;, &quot;left&quot; -&gt; &quot;-fx-padding&quot;;</span>
+
+<span class="fc" id="L39">      case &quot;m&quot; -&gt; &quot;-fx-margin&quot;;</span>
+<span class="fc" id="L40">      case &quot;mx&quot; -&gt; &quot;-fx-margin&quot;;</span>
+<span class="nc" id="L41">      case &quot;my&quot; -&gt; &quot;-fx-margin&quot;;</span>
+<span class="fc" id="L42">      case &quot;mt&quot; -&gt; &quot;-fx-margin&quot;;</span>
+<span class="nc" id="L43">      case &quot;mr&quot; -&gt; &quot;-fx-margin&quot;;</span>
+<span class="nc" id="L44">      case &quot;mb&quot; -&gt; &quot;-fx-margin&quot;;</span>
+<span class="nc" id="L45">      case &quot;ml&quot; -&gt; &quot;-fx-margin&quot;;</span>
+
+<span class="fc" id="L47">      case &quot;bg&quot; -&gt; &quot;-fx-background-color&quot;;</span>
+<span class="fc" id="L48">      case &quot;border&quot; -&gt; &quot;-fx-border-color&quot;;</span>
+
+<span class="fc" id="L50">      case &quot;text&quot; -&gt; &quot;-fx-text-fill&quot;;</span>
+<span class="nc" id="L51">      case &quot;font&quot; -&gt; &quot;-fx-font-family&quot;;</span>
+
+<span class="fc" id="L53">      case &quot;w&quot; -&gt; &quot;-fx-pref-width&quot;;</span>
+<span class="fc" id="L54">      case &quot;h&quot; -&gt; &quot;-fx-pref-height&quot;;</span>
+<span class="nc" id="L55">      case &quot;min-w&quot; -&gt; &quot;-fx-min-width&quot;;</span>
+<span class="nc" id="L56">      case &quot;min-h&quot; -&gt; &quot;-fx-min-height&quot;;</span>
+<span class="nc" id="L57">      case &quot;max-w&quot; -&gt; &quot;-fx-max-width&quot;;</span>
+<span class="nc" id="L58">      case &quot;max-h&quot; -&gt; &quot;-fx-max-height&quot;;</span>
+
+<span class="fc" id="L60">      case &quot;opacity&quot; -&gt; &quot;-fx-opacity&quot;;</span>
+<span class="fc" id="L61">      case &quot;rotate&quot; -&gt; &quot;-fx-rotate&quot;;</span>
+<span class="fc" id="L62">      case &quot;scale&quot; -&gt; &quot;-fx-scale-x&quot;;</span>
+<span class="nc" id="L63">      case &quot;scale-x&quot; -&gt; &quot;-fx-scale-x&quot;;</span>
+<span class="nc" id="L64">      case &quot;scale-y&quot; -&gt; &quot;-fx-scale-y&quot;;</span>
+<span class="nc" id="L65">      case &quot;translate-x&quot; -&gt; &quot;-fx-translate-x&quot;;</span>
+<span class="nc" id="L66">      case &quot;translate-y&quot; -&gt; &quot;-fx-translate-y&quot;;</span>
+
+<span class="fc" id="L68">      case &quot;rounded&quot; -&gt; &quot;-fx-background-radius&quot;;</span>
+<span class="fc" id="L69">      case &quot;shadow&quot; -&gt; &quot;-fx-effect&quot;;</span>
+
+<span class="nc" id="L71">      case &quot;visible&quot; -&gt; &quot;-fx-visibility&quot;;</span>
+<span class="nc" id="L72">      case &quot;hidden&quot; -&gt; &quot;-fx-visibility&quot;;</span>
+<span class="nc" id="L73">      case &quot;invisible&quot; -&gt; &quot;-fx-visibility&quot;;</span>
+
+<span class="fc" id="L75">      case &quot;gap&quot; -&gt; &quot;-fx-hgap&quot;;</span>
+<span class="nc" id="L76">      case &quot;gap-x&quot; -&gt; &quot;-fx-hgap&quot;;</span>
+<span class="nc" id="L77">      case &quot;gap-y&quot; -&gt; &quot;-fx-vgap&quot;;</span>
+
+<span class="nc" id="L79">      case &quot;overflow&quot; -&gt; &quot;-fx-overflow&quot;;</span>
+
+<span class="nc" id="L81">      case &quot;cursor&quot; -&gt; &quot;-fx-cursor&quot;;</span>
+
+<span class="nc" id="L83">      case &quot;z&quot; -&gt; &quot;-fx-z-index&quot;;</span>
+
+<span class="nc" id="L85">      case &quot;resize&quot; -&gt; &quot;-fx-resize&quot;;</span>
+
+<span class="nc" id="L87">      case &quot;skew-x&quot; -&gt; &quot;-fx-she-x&quot;;</span>
+<span class="nc" id="L88">      case &quot;skew-y&quot; -&gt; &quot;-fx-she-y&quot;;</span>
+
+<span class="nc" id="L90">      case &quot;blur&quot; -&gt; &quot;-fx-blur&quot;;</span>
+<span class="nc" id="L91">      case &quot;brightness&quot; -&gt; &quot;-fx-brightness&quot;;</span>
+<span class="nc" id="L92">      case &quot;contrast&quot; -&gt; &quot;-fx-contrast&quot;;</span>
+<span class="nc" id="L93">      case &quot;grayscale&quot; -&gt; &quot;-fx-saturation&quot;;</span>
+<span class="nc" id="L94">      case &quot;invert&quot; -&gt; &quot;-fx-invert&quot;;</span>
+<span class="nc" id="L95">      case &quot;sepia&quot; -&gt; &quot;-fx-sepia&quot;;</span>
+
+<span class="fc" id="L97">      default -&gt; null;</span>
+    };
+  }
+
+  /**
+   * Resuelve valores nombrados como sm, md, lg, bold, solid, dashed, etc.
+   *
+   * @param prefix Prefijo del token
+   * @param namedValue Valor nominal (sm, md, lg, bold, solid, dashed, etc.)
+   * @return Valor CSS o null si no hay mapeo
+   */
+  public String resolveNamedValue(String prefix, String namedValue) {
+    // Handle background colors: bg-white, bg-black, bg-transparent
+<span class="fc bfc" id="L110" title="All 2 branches covered.">    if (&quot;bg&quot;.equals(prefix)) {</span>
+<span class="fc" id="L111">      String color = resolveNamedColor(namedValue);</span>
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">      if (color != null) {</span>
+<span class="fc" id="L113">        return color;</span>
+      }
+    }
+
+    // Handle text colors: text-white, text-black, text-transparent
+<span class="fc bfc" id="L118" title="All 2 branches covered.">    if (&quot;text&quot;.equals(prefix)) {</span>
+<span class="fc" id="L119">      String color = resolveNamedColor(namedValue);</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">      if (color != null) {</span>
+<span class="fc" id="L121">        return color;</span>
+      }
+    }
+
+    // Handle border colors: border-white, border-black, border-transparent
+<span class="fc bfc" id="L126" title="All 2 branches covered.">    if (&quot;border&quot;.equals(prefix)) {</span>
+<span class="fc" id="L127">      String color = resolveNamedColor(namedValue);</span>
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">      if (color != null) {</span>
+<span class="nc" id="L129">        return color;</span>
+      }
+    }
+
+    // Handle border styles: border-solid, border-dashed, border-dotted, border-none
+<span class="fc bfc" id="L134" title="All 2 branches covered.">    if (&quot;border&quot;.equals(prefix)) {</span>
+<span class="fc" id="L135">      return resolveBorderStyle(namedValue);</span>
+    }
+
+    // Handle cursor styles: cursor-pointer, cursor-default, etc.
+<span class="pc bpc" id="L139" title="1 of 2 branches missed.">    if (&quot;cursor&quot;.equals(prefix)) {</span>
+<span class="nc" id="L140">      return resolveCursor(namedValue);</span>
+    }
+
+    // Handle overflow styles: overflow-hidden, overflow-visible, etc.
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">    if (&quot;overflow&quot;.equals(prefix)) {</span>
+<span class="nc" id="L145">      return resolveOverflow(namedValue);</span>
+    }
+
+    // Handle visibility: visible, hidden, invisible
+<span class="pc bpc" id="L149" title="3 of 6 branches missed.">    if (&quot;visible&quot;.equals(prefix) || &quot;hidden&quot;.equals(prefix) || &quot;invisible&quot;.equals(prefix)) {</span>
+<span class="nc" id="L150">      return resolveVisibility(prefix);</span>
+    }
+
+    // Handle resize: resize-none, resize-y, etc.
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">    if (&quot;resize&quot;.equals(prefix)) {</span>
+<span class="nc" id="L155">      return resolveResize(namedValue);</span>
+    }
+
+    // Handle width/height special values: w-auto, w-min, w-max, h-auto, h-min, h-max
+<span class="fc bfc" id="L159" title="All 4 branches covered.">    if (&quot;w&quot;.equals(prefix) || &quot;h&quot;.equals(prefix)) {</span>
+<span class="fc" id="L160">      return resolveDimension(namedValue);</span>
+    }
+
+    // Handle max-width named values: max-w-xs, max-w-sm, etc.
+<span class="pc bpc" id="L164" title="1 of 2 branches missed.">    if (&quot;max-w&quot;.equals(prefix)) {</span>
+<span class="nc" id="L165">      return resolveMaxWidth(namedValue);</span>
+    }
+
+    // Handle effects: blur, brightness, contrast, grayscale, invert, sepia, skew
+<span class="pc bpc" id="L169" title="1 of 2 branches missed.">    if (&quot;blur&quot;.equals(prefix)</span>
+<span class="pc bpc" id="L170" title="1 of 2 branches missed.">        || &quot;brightness&quot;.equals(prefix)</span>
+<span class="pc bpc" id="L171" title="1 of 2 branches missed.">        || &quot;contrast&quot;.equals(prefix)</span>
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">        || &quot;grayscale&quot;.equals(prefix)</span>
+<span class="pc bpc" id="L173" title="1 of 2 branches missed.">        || &quot;invert&quot;.equals(prefix)</span>
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">        || &quot;sepia&quot;.equals(prefix)</span>
+<span class="pc bpc" id="L175" title="1 of 2 branches missed.">        || &quot;skew-x&quot;.equals(prefix)</span>
+<span class="pc bpc" id="L176" title="1 of 2 branches missed.">        || &quot;skew-y&quot;.equals(prefix)) {</span>
+<span class="nc" id="L177">      return resolveEffectValue(prefix, namedValue);</span>
+    }
+
+<span class="fc bfc" id="L180" title="All 5 branches covered.">    return switch (prefix) {</span>
+<span class="fc" id="L181">      case &quot;text&quot; -&gt; resolveFontSize(namedValue);</span>
+<span class="fc" id="L182">      case &quot;font&quot; -&gt; resolveFontWeight(namedValue);</span>
+<span class="fc" id="L183">      case &quot;rounded&quot; -&gt; resolveBorderRadius(namedValue);</span>
+<span class="fc" id="L184">      case &quot;shadow&quot; -&gt; resolveShadow(namedValue);</span>
+<span class="fc" id="L185">      default -&gt; null;</span>
+    };
+  }
+
+  /** Resuelve un estilo de borde a su valor CSS. */
+  private String resolveBorderStyle(String style) {
+<span class="pc bpc" id="L191" title="3 of 5 branches missed.">    return switch (style) {</span>
+<span class="fc" id="L192">      case &quot;solid&quot; -&gt; &quot;solid&quot;;</span>
+<span class="fc" id="L193">      case &quot;dashed&quot; -&gt; &quot;dashed&quot;;</span>
+<span class="nc" id="L194">      case &quot;dotted&quot; -&gt; &quot;dotted&quot;;</span>
+<span class="nc" id="L195">      case &quot;none&quot; -&gt; &quot;none&quot;;</span>
+<span class="nc" id="L196">      default -&gt; null;</span>
+    };
+  }
+
+  /** Resuelve colores nombrados como white, black, transparent */
+  private String resolveNamedColor(String colorName) {
+<span class="pc bpc" id="L202" title="2 of 4 branches missed.">    return switch (colorName) {</span>
+<span class="fc" id="L203">      case &quot;white&quot; -&gt; &quot;#ffffff&quot;;</span>
+<span class="nc" id="L204">      case &quot;black&quot; -&gt; &quot;#000000&quot;;</span>
+<span class="nc" id="L205">      case &quot;transparent&quot; -&gt; &quot;transparent&quot;;</span>
+<span class="fc" id="L206">      default -&gt; null;</span>
+    };
+  }
+
+  /** Resuelve un cursor a su valor JavaFX. */
+  private String resolveCursor(String cursor) {
+<span class="nc bnc" id="L212" title="All 28 branches missed.">    return switch (cursor) {</span>
+<span class="nc" id="L213">      case &quot;default&quot; -&gt; &quot;-cursor-default&quot;;</span>
+<span class="nc" id="L214">      case &quot;pointer&quot; -&gt; &quot;-cursor-hand&quot;;</span>
+<span class="nc" id="L215">      case &quot;text&quot; -&gt; &quot;-cursor-text&quot;;</span>
+<span class="nc" id="L216">      case &quot;move&quot; -&gt; &quot;-cursor-move&quot;;</span>
+<span class="nc" id="L217">      case &quot;wait&quot; -&gt; &quot;-cursor-wait&quot;;</span>
+<span class="nc" id="L218">      case &quot;crosshair&quot; -&gt; &quot;-cursor-crosshair&quot;;</span>
+<span class="nc" id="L219">      case &quot;help&quot; -&gt; &quot;-cursor-wait&quot;;</span>
+<span class="nc" id="L220">      case &quot;not-allowed&quot; -&gt; &quot;-cursor-disappear&quot;;</span>
+<span class="nc" id="L221">      case &quot;context-menu&quot; -&gt; &quot;-cursor-default&quot;;</span>
+<span class="nc" id="L222">      case &quot;vertical-text&quot; -&gt; &quot;-cursor-text&quot;;</span>
+<span class="nc" id="L223">      case &quot;alias&quot; -&gt; &quot;-cursor-hand&quot;;</span>
+<span class="nc" id="L224">      case &quot;all-scroll&quot; -&gt; &quot;-cursor-move&quot;;</span>
+<span class="nc" id="L225">      case &quot;grab&quot; -&gt; &quot;-cursor-open-hand&quot;;</span>
+<span class="nc" id="L226">      case &quot;grabbing&quot; -&gt; &quot;-cursor-closed-hand&quot;;</span>
+<span class="nc" id="L227">      case &quot;col-resize&quot; -&gt; &quot;-cursor-h-resize&quot;;</span>
+<span class="nc" id="L228">      case &quot;row-resize&quot; -&gt; &quot;-cursor-v-resize&quot;;</span>
+<span class="nc" id="L229">      case &quot;n-resize&quot; -&gt; &quot;-cursor-n-resize&quot;;</span>
+<span class="nc" id="L230">      case &quot;e-resize&quot; -&gt; &quot;-cursor-e-resize&quot;;</span>
+<span class="nc" id="L231">      case &quot;s-resize&quot; -&gt; &quot;-cursor-s-resize&quot;;</span>
+<span class="nc" id="L232">      case &quot;w-resize&quot; -&gt; &quot;-cursor-w-resize&quot;;</span>
+<span class="nc" id="L233">      case &quot;ne-resize&quot; -&gt; &quot;-cursor-ne-resize&quot;;</span>
+<span class="nc" id="L234">      case &quot;nw-resize&quot; -&gt; &quot;-cursor-nw-resize&quot;;</span>
+<span class="nc" id="L235">      case &quot;se-resize&quot; -&gt; &quot;-cursor-se-resize&quot;;</span>
+<span class="nc" id="L236">      case &quot;sw-resize&quot; -&gt; &quot;-cursor-sw-resize&quot;;</span>
+<span class="nc" id="L237">      case &quot;nesw-resize&quot; -&gt; &quot;-cursor-ne-resize&quot;;</span>
+<span class="nc" id="L238">      case &quot;nwse-resize&quot; -&gt; &quot;-cursor-nw-resize&quot;;</span>
+<span class="nc" id="L239">      case &quot;none&quot; -&gt; &quot;-cursor-none&quot;;</span>
+<span class="nc" id="L240">      default -&gt; null;</span>
+    };
+  }
+
+  /** Resuelve overflow a su valor JavaFX. */
+  private String resolveOverflow(String overflow) {
+<span class="nc bnc" id="L246" title="All 5 branches missed.">    return switch (overflow) {</span>
+<span class="nc" id="L247">      case &quot;visible&quot; -&gt; &quot;visible&quot;;</span>
+<span class="nc" id="L248">      case &quot;hidden&quot; -&gt; &quot;hidden&quot;;</span>
+<span class="nc" id="L249">      case &quot;scroll&quot; -&gt; &quot;scroll&quot;;</span>
+<span class="nc" id="L250">      case &quot;auto&quot; -&gt; &quot;auto&quot;;</span>
+<span class="nc" id="L251">      default -&gt; null;</span>
+    };
+  }
+
+  /** Resuelve visibilidad. */
+  private String resolveVisibility(String visibility) {
+<span class="nc bnc" id="L257" title="All 3 branches missed.">    return switch (visibility) {</span>
+<span class="nc" id="L258">      case &quot;visible&quot; -&gt; &quot;visible&quot;;</span>
+<span class="nc" id="L259">      case &quot;hidden&quot;, &quot;invisible&quot; -&gt; &quot;hidden&quot;;</span>
+<span class="nc" id="L260">      default -&gt; null;</span>
+    };
+  }
+
+  /** Resuelve resize a su valor JavaFX. */
+  private String resolveResize(String resize) {
+<span class="nc bnc" id="L266" title="All 5 branches missed.">    return switch (resize) {</span>
+<span class="nc" id="L267">      case &quot;none&quot; -&gt; &quot;none&quot;;</span>
+<span class="nc" id="L268">      case &quot;x&quot; -&gt; &quot;horizontal&quot;;</span>
+<span class="nc" id="L269">      case &quot;y&quot; -&gt; &quot;vertical&quot;;</span>
+<span class="nc" id="L270">      case &quot;both&quot; -&gt; &quot;both&quot;;</span>
+<span class="nc" id="L271">      default -&gt; null;</span>
+    };
+  }
+
+  /** Resuelve valores especiales de dimensión para JavaFX. */
+  private String resolveDimension(String value) {
+<span class="pc bpc" id="L277" title="2 of 4 branches missed.">    return switch (value) {</span>
+<span class="fc" id="L278">      case &quot;auto&quot; -&gt; &quot;-1&quot;; // JavaFX: -1 means USE_COMPUTED_SIZE (default behavior)</span>
+<span class="nc" id="L279">      case &quot;min&quot; -&gt; &quot;-1&quot;; // JavaFX doesn't support min-content, use computed size</span>
+<span class="nc" id="L280">      case &quot;max&quot; -&gt; &quot;-1&quot;; // JavaFX doesn't support max-content, use computed size</span>
+<span class="fc" id="L281">      default -&gt; null;</span>
+    };
+  }
+
+  /** Resuelve valores nombrados de max-width. */
+  private String resolveMaxWidth(String value) {
+<span class="nc bnc" id="L287" title="All 9 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L288">      case &quot;xs&quot; -&gt; &quot;320px&quot;;</span>
+<span class="nc" id="L289">      case &quot;sm&quot; -&gt; &quot;384px&quot;;</span>
+<span class="nc" id="L290">      case &quot;md&quot; -&gt; &quot;448px&quot;;</span>
+<span class="nc" id="L291">      case &quot;lg&quot; -&gt; &quot;512px&quot;;</span>
+<span class="nc" id="L292">      case &quot;xl&quot; -&gt; &quot;576px&quot;;</span>
+<span class="nc" id="L293">      case &quot;2xl&quot; -&gt; &quot;672px&quot;;</span>
+<span class="nc" id="L294">      case &quot;3xl&quot; -&gt; &quot;768px&quot;;</span>
+<span class="nc" id="L295">      case &quot;full&quot; -&gt; &quot;100%&quot;;</span>
+<span class="nc" id="L296">      default -&gt; null;</span>
+    };
+  }
+
+  /**
+   * Mapea un token completo a una propiedad CSS con su valor.
+   *
+   * @param token Token parseado
+   * @param resolvedValue Valor ya resuelto (ej: &quot;16px&quot;, &quot;rgb(...)&quot;)
+   * @return Propiedad CSS completa o null
+   */
+  public String map(StyleToken token, String resolvedValue) {
+<span class="pc bpc" id="L308" title="2 of 4 branches missed.">    if (token == null || resolvedValue == null) {</span>
+<span class="nc" id="L309">      return null;</span>
+    }
+
+    // Manejo especial para border-* styles (solid, dashed, dotted, none)
+<span class="fc bfc" id="L313" title="All 4 branches covered.">    if (&quot;border&quot;.equals(token.prefix) &amp;&amp; isBorderStyle(token.namedValue)) {</span>
+<span class="fc" id="L314">      return prop(&quot;-fx-border-style&quot;, resolvedValue);</span>
+    }
+
+    // Manejo especial para w-auto, w-min, w-max, h-auto, h-min, h-max
+<span class="fc bfc" id="L318" title="All 4 branches covered.">    if ((&quot;w&quot;.equals(token.prefix) || &quot;h&quot;.equals(token.prefix))</span>
+<span class="fc bfc" id="L319" title="All 2 branches covered.">        &amp;&amp; (&quot;auto&quot;.equals(token.namedValue)</span>
+<span class="pc bpc" id="L320" title="1 of 2 branches missed.">            || &quot;min&quot;.equals(token.namedValue)</span>
+<span class="pc bpc" id="L321" title="1 of 2 branches missed.">            || &quot;max&quot;.equals(token.namedValue))) {</span>
+<span class="fc" id="L322">      String property = mapToCssProperty(token.prefix);</span>
+<span class="fc" id="L323">      return prop(property, resolvedValue);</span>
+    }
+
+    // Manejo especial para max-w-*
+<span class="pc bpc" id="L327" title="3 of 4 branches missed.">    if (&quot;max-w&quot;.equals(token.prefix) &amp;&amp; resolvedValue != null) {</span>
+<span class="nc" id="L328">      return prop(&quot;-fx-max-width&quot;, resolvedValue);</span>
+    }
+
+<span class="fc" id="L331">    String property = mapToCssProperty(token.prefix);</span>
+<span class="fc bfc" id="L332" title="All 2 branches covered.">    if (property == null) {</span>
+<span class="fc" id="L333">      return null;</span>
+    }
+
+    // Manejo especial para propiedades compuestas
+<span class="fc bfc" id="L337" title="All 4 branches covered.">    if (&quot;p&quot;.equals(token.prefix) &amp;&amp; token.subPrefix != null) {</span>
+<span class="pc bpc" id="L338" title="3 of 7 branches missed.">      return switch (token.subPrefix) {</span>
+<span class="nc" id="L339">        case &quot;x&quot; -&gt; px(&quot;padding&quot;, &quot;0px %s 0px %s&quot;.formatted(resolvedValue, resolvedValue));</span>
+<span class="nc" id="L340">        case &quot;y&quot; -&gt; px(&quot;padding&quot;, &quot;%s 0px %s 0px&quot;.formatted(resolvedValue, resolvedValue));</span>
+<span class="fc" id="L341">        case &quot;t&quot; -&gt; px(&quot;padding&quot;, &quot;%s 0px 0px 0px&quot;.formatted(resolvedValue));</span>
+<span class="fc" id="L342">        case &quot;r&quot; -&gt; px(&quot;padding&quot;, &quot;0px %s 0px 0px&quot;.formatted(resolvedValue));</span>
+<span class="fc" id="L343">        case &quot;b&quot; -&gt; px(&quot;padding&quot;, &quot;0px 0px %s 0px&quot;.formatted(resolvedValue));</span>
+<span class="fc" id="L344">        case &quot;l&quot; -&gt; px(&quot;padding&quot;, &quot;0px 0px 0px %s&quot;.formatted(resolvedValue));</span>
+<span class="nc" id="L345">        default -&gt; prop(property, resolvedValue);</span>
+      };
+    }
+
+<span class="fc" id="L349">    return prop(property, resolvedValue);</span>
+  }
+
+  /** Verifica si un valor es un estilo de borde válido. */
+  private boolean isBorderStyle(String value) {
+<span class="fc bfc" id="L354" title="All 2 branches covered.">    return &quot;solid&quot;.equals(value)</span>
+<span class="fc bfc" id="L355" title="All 2 branches covered.">        || &quot;dashed&quot;.equals(value)</span>
+<span class="pc bpc" id="L356" title="1 of 2 branches missed.">        || &quot;dotted&quot;.equals(value)</span>
+<span class="pc bpc" id="L357" title="1 of 2 branches missed.">        || &quot;none&quot;.equals(value);</span>
+  }
+
+  private static String prop(String name, String value) {
+<span class="fc" id="L361">    return name + &quot;: &quot; + value + &quot;;&quot;;</span>
+  }
+
+  private static String px(String name, String value) {
+    // Si el valor ya tiene 'px', usarlo directamente; si no, agregarlo
+<span class="pc bpc" id="L366" title="1 of 2 branches missed.">    String formatted = value.matches(&quot;\\d+$&quot;) ? value + &quot;px&quot; : value;</span>
+<span class="fc" id="L367">    return name + &quot;: &quot; + formatted + &quot;;&quot;;</span>
+  }
+
+  private String resolveFontSize(String size) {
+<span class="fc" id="L371">    Map&lt;String, Double&gt; fontSizes = themeConfig.fontSize();</span>
+<span class="fc" id="L372">    Double value = fontSizes.get(size);</span>
+<span class="pc bpc" id="L373" title="1 of 2 branches missed.">    if (value != null) {</span>
+<span class="fc" id="L374">      return value.intValue() + &quot;px&quot;;</span>
+    }
+
+    // Fallback para tamaños estándar
+<span class="nc bnc" id="L378" title="All 9 branches missed.">    return switch (size) {</span>
+<span class="nc" id="L379">      case &quot;xs&quot; -&gt; &quot;12px&quot;;</span>
+<span class="nc" id="L380">      case &quot;sm&quot; -&gt; &quot;14px&quot;;</span>
+<span class="nc" id="L381">      case &quot;base&quot; -&gt; &quot;16px&quot;;</span>
+<span class="nc" id="L382">      case &quot;lg&quot; -&gt; &quot;18px&quot;;</span>
+<span class="nc" id="L383">      case &quot;xl&quot; -&gt; &quot;20px&quot;;</span>
+<span class="nc" id="L384">      case &quot;2xl&quot; -&gt; &quot;24px&quot;;</span>
+<span class="nc" id="L385">      case &quot;3xl&quot; -&gt; &quot;30px&quot;;</span>
+<span class="nc" id="L386">      case &quot;4xl&quot; -&gt; &quot;36px&quot;;</span>
+<span class="nc" id="L387">      default -&gt; null;</span>
+    };
+  }
+
+  private String resolveFontWeight(String weight) {
+<span class="pc bpc" id="L392" title="8 of 10 branches missed.">    return switch (weight) {</span>
+<span class="nc" id="L393">      case &quot;thin&quot; -&gt; &quot;100&quot;;</span>
+<span class="nc" id="L394">      case &quot;extralight&quot; -&gt; &quot;200&quot;;</span>
+<span class="nc" id="L395">      case &quot;light&quot; -&gt; &quot;300&quot;;</span>
+<span class="fc" id="L396">      case &quot;normal&quot; -&gt; &quot;400&quot;;</span>
+<span class="nc" id="L397">      case &quot;medium&quot; -&gt; &quot;500&quot;;</span>
+<span class="nc" id="L398">      case &quot;semibold&quot; -&gt; &quot;600&quot;;</span>
+<span class="fc" id="L399">      case &quot;bold&quot; -&gt; &quot;700&quot;;</span>
+<span class="nc" id="L400">      case &quot;extrabold&quot; -&gt; &quot;800&quot;;</span>
+<span class="nc" id="L401">      case &quot;black&quot; -&gt; &quot;900&quot;;</span>
+<span class="nc" id="L402">      default -&gt; null;</span>
+    };
+  }
+
+  private String resolveBorderRadius(String radius) {
+<span class="fc" id="L407">    String[] radiusKeys = {&quot;none&quot;, &quot;sm&quot;, &quot;default&quot;, &quot;md&quot;, &quot;lg&quot;, &quot;xl&quot;, &quot;2xl&quot;, &quot;3xl&quot;, &quot;full&quot;};</span>
+
+<span class="pc bpc" id="L409" title="1 of 2 branches missed.">    for (int i = 0; i &lt; radiusKeys.length; i++) {</span>
+<span class="fc bfc" id="L410" title="All 2 branches covered.">      if (radiusKeys[i].equals(radius)) {</span>
+<span class="fc" id="L411">        double value = themeConfig.borderRadius(i);</span>
+<span class="fc" id="L412">        return (int) value + &quot;px&quot;;</span>
+      }
+    }
+
+<span class="nc bnc" id="L416" title="All 9 branches missed.">    return switch (radius) {</span>
+<span class="nc" id="L417">      case &quot;none&quot; -&gt; &quot;0px&quot;;</span>
+<span class="nc" id="L418">      case &quot;sm&quot; -&gt; &quot;2px&quot;;</span>
+<span class="nc" id="L419">      case &quot;md&quot; -&gt; &quot;6px&quot;;</span>
+<span class="nc" id="L420">      case &quot;lg&quot; -&gt; &quot;8px&quot;;</span>
+<span class="nc" id="L421">      case &quot;xl&quot; -&gt; &quot;12px&quot;;</span>
+<span class="nc" id="L422">      case &quot;2xl&quot; -&gt; &quot;16px&quot;;</span>
+<span class="nc" id="L423">      case &quot;3xl&quot; -&gt; &quot;24px&quot;;</span>
+<span class="nc" id="L424">      case &quot;full&quot; -&gt; &quot;9999px&quot;;</span>
+<span class="nc" id="L425">      default -&gt; null;</span>
+    };
+  }
+
+  private String resolveShadow(String shadow) {
+<span class="pc bpc" id="L430" title="6 of 7 branches missed.">    return switch (shadow) {</span>
+<span class="nc" id="L431">      case &quot;sm&quot; -&gt; &quot;0 1px 2px 0 rgba(0, 0, 0, 0.05)&quot;;</span>
+<span class="fc" id="L432">      case &quot;default&quot;, &quot;md&quot; -&gt; &quot;0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)&quot;;</span>
+<span class="nc" id="L433">      case &quot;lg&quot; -&gt; &quot;0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)&quot;;</span>
+<span class="nc" id="L434">      case &quot;xl&quot; -&gt; &quot;0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)&quot;;</span>
+<span class="nc" id="L435">      case &quot;2xl&quot; -&gt; &quot;0 25px 50px -12px rgba(0, 0, 0, 0.25)&quot;;</span>
+<span class="nc" id="L436">      case &quot;none&quot; -&gt; &quot;none&quot;;</span>
+<span class="nc" id="L437">      default -&gt; null;</span>
+    };
+  }
+
+  /** Resuelve valores de efectos: blur, brightness, contrast, grayscale, invert, sepia, skew. */
+  private String resolveEffectValue(String prefix, String value) {
+<span class="nc bnc" id="L443" title="All 2 branches missed.">    if (&quot;blur&quot;.equals(prefix)) {</span>
+<span class="nc" id="L444">      return resolveBlur(value);</span>
+    }
+<span class="nc bnc" id="L446" title="All 2 branches missed.">    if (&quot;brightness&quot;.equals(prefix)) {</span>
+<span class="nc" id="L447">      return resolveBrightness(value);</span>
+    }
+<span class="nc bnc" id="L449" title="All 2 branches missed.">    if (&quot;contrast&quot;.equals(prefix)) {</span>
+<span class="nc" id="L450">      return resolveContrast(value);</span>
+    }
+<span class="nc bnc" id="L452" title="All 2 branches missed.">    if (&quot;grayscale&quot;.equals(prefix)) {</span>
+<span class="nc" id="L453">      return resolveGrayscale(value);</span>
+    }
+<span class="nc bnc" id="L455" title="All 2 branches missed.">    if (&quot;invert&quot;.equals(prefix)) {</span>
+<span class="nc" id="L456">      return resolveInvert(value);</span>
+    }
+<span class="nc bnc" id="L458" title="All 2 branches missed.">    if (&quot;sepia&quot;.equals(prefix)) {</span>
+<span class="nc" id="L459">      return resolveSepia(value);</span>
+    }
+<span class="nc bnc" id="L461" title="All 2 branches missed.">    if (&quot;skew-x&quot;.equals(prefix)) {</span>
+<span class="nc" id="L462">      return resolveSkewX(value);</span>
+    }
+<span class="nc bnc" id="L464" title="All 2 branches missed.">    if (&quot;skew-y&quot;.equals(prefix)) {</span>
+<span class="nc" id="L465">      return resolveSkewY(value);</span>
+    }
+<span class="nc" id="L467">    return null;</span>
+  }
+
+  private String resolveBlur(String value) {
+<span class="nc bnc" id="L471" title="All 9 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L472">      case &quot;none&quot; -&gt; &quot;0px&quot;;</span>
+<span class="nc" id="L473">      case &quot;sm&quot; -&gt; &quot;2px&quot;;</span>
+<span class="nc" id="L474">      case &quot;default&quot; -&gt; &quot;4px&quot;;</span>
+<span class="nc" id="L475">      case &quot;md&quot; -&gt; &quot;8px&quot;;</span>
+<span class="nc" id="L476">      case &quot;lg&quot; -&gt; &quot;12px&quot;;</span>
+<span class="nc" id="L477">      case &quot;xl&quot; -&gt; &quot;16px&quot;;</span>
+<span class="nc" id="L478">      case &quot;2xl&quot; -&gt; &quot;24px&quot;;</span>
+<span class="nc" id="L479">      case &quot;3xl&quot; -&gt; &quot;32px&quot;;</span>
+      default -&gt; {
+        // Handle numeric values like blur-10, blur-20
+        try {
+<span class="nc" id="L483">          int px = Integer.parseInt(value);</span>
+<span class="nc" id="L484">          yield px + &quot;px&quot;;</span>
+<span class="nc" id="L485">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L486">          yield null;</span>
+        }
+      }
+    };
+  }
+
+  private String resolveBrightness(String value) {
+<span class="nc bnc" id="L493" title="All 12 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L494">      case &quot;0&quot; -&gt; &quot;0%&quot;;</span>
+<span class="nc" id="L495">      case &quot;50&quot; -&gt; &quot;50%&quot;;</span>
+<span class="nc" id="L496">      case &quot;75&quot; -&gt; &quot;75%&quot;;</span>
+<span class="nc" id="L497">      case &quot;90&quot; -&gt; &quot;90%&quot;;</span>
+<span class="nc" id="L498">      case &quot;95&quot; -&gt; &quot;95%&quot;;</span>
+<span class="nc" id="L499">      case &quot;100&quot; -&gt; &quot;100%&quot;;</span>
+<span class="nc" id="L500">      case &quot;105&quot; -&gt; &quot;105%&quot;;</span>
+<span class="nc" id="L501">      case &quot;110&quot; -&gt; &quot;110%&quot;;</span>
+<span class="nc" id="L502">      case &quot;125&quot; -&gt; &quot;125%&quot;;</span>
+<span class="nc" id="L503">      case &quot;150&quot; -&gt; &quot;150%&quot;;</span>
+<span class="nc" id="L504">      case &quot;200&quot; -&gt; &quot;200%&quot;;</span>
+<span class="nc" id="L505">      default -&gt; value + &quot;%&quot;;</span>
+    };
+  }
+
+  private String resolveContrast(String value) {
+<span class="nc bnc" id="L510" title="All 8 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L511">      case &quot;0&quot; -&gt; &quot;0%&quot;;</span>
+<span class="nc" id="L512">      case &quot;50&quot; -&gt; &quot;50%&quot;;</span>
+<span class="nc" id="L513">      case &quot;75&quot; -&gt; &quot;75%&quot;;</span>
+<span class="nc" id="L514">      case &quot;100&quot; -&gt; &quot;100%&quot;;</span>
+<span class="nc" id="L515">      case &quot;125&quot; -&gt; &quot;125%&quot;;</span>
+<span class="nc" id="L516">      case &quot;150&quot; -&gt; &quot;150%&quot;;</span>
+<span class="nc" id="L517">      case &quot;200&quot; -&gt; &quot;200%&quot;;</span>
+<span class="nc" id="L518">      default -&gt; value + &quot;%&quot;;</span>
+    };
+  }
+
+  private String resolveGrayscale(String value) {
+<span class="nc bnc" id="L523" title="All 3 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L524">      case &quot;0&quot; -&gt; &quot;0%&quot;;</span>
+<span class="nc" id="L525">      case &quot;100&quot; -&gt; &quot;100%&quot;;</span>
+      default -&gt; {
+        try {
+<span class="nc" id="L528">          int pct = Integer.parseInt(value);</span>
+<span class="nc" id="L529">          yield pct + &quot;%&quot;;</span>
+<span class="nc" id="L530">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L531">          yield null;</span>
+        }
+      }
+    };
+  }
+
+  private String resolveInvert(String value) {
+<span class="nc bnc" id="L538" title="All 3 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L539">      case &quot;0&quot; -&gt; &quot;0%&quot;;</span>
+<span class="nc" id="L540">      case &quot;100&quot; -&gt; &quot;100%&quot;;</span>
+      default -&gt; {
+        try {
+<span class="nc" id="L543">          int pct = Integer.parseInt(value);</span>
+<span class="nc" id="L544">          yield pct + &quot;%&quot;;</span>
+<span class="nc" id="L545">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L546">          yield null;</span>
+        }
+      }
+    };
+  }
+
+  private String resolveSepia(String value) {
+<span class="nc bnc" id="L553" title="All 3 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L554">      case &quot;0&quot; -&gt; &quot;0%&quot;;</span>
+<span class="nc" id="L555">      case &quot;100&quot; -&gt; &quot;100%&quot;;</span>
+      default -&gt; {
+        try {
+<span class="nc" id="L558">          int pct = Integer.parseInt(value);</span>
+<span class="nc" id="L559">          yield pct + &quot;%&quot;;</span>
+<span class="nc" id="L560">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L561">          yield null;</span>
+        }
+      }
+    };
+  }
+
+  private String resolveSkewX(String value) {
+<span class="nc bnc" id="L568" title="All 7 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L569">      case &quot;0&quot; -&gt; &quot;0&quot;;</span>
+<span class="nc" id="L570">      case &quot;1&quot; -&gt; &quot;0.0175&quot;;</span>
+<span class="nc" id="L571">      case &quot;2&quot; -&gt; &quot;0.0349&quot;;</span>
+<span class="nc" id="L572">      case &quot;3&quot; -&gt; &quot;0.0524&quot;;</span>
+<span class="nc" id="L573">      case &quot;6&quot; -&gt; &quot;0.1051&quot;;</span>
+<span class="nc" id="L574">      case &quot;12&quot; -&gt; &quot;0.2126&quot;;</span>
+      default -&gt; {
+        try {
+<span class="nc" id="L577">          double degrees = Double.parseDouble(value);</span>
+<span class="nc" id="L578">          yield String.valueOf(Math.tan(Math.toRadians(degrees)));</span>
+<span class="nc" id="L579">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L580">          yield null;</span>
+        }
+      }
+    };
+  }
+
+  private String resolveSkewY(String value) {
+<span class="nc bnc" id="L587" title="All 7 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L588">      case &quot;0&quot; -&gt; &quot;0&quot;;</span>
+<span class="nc" id="L589">      case &quot;1&quot; -&gt; &quot;0.0175&quot;;</span>
+<span class="nc" id="L590">      case &quot;2&quot; -&gt; &quot;0.0349&quot;;</span>
+<span class="nc" id="L591">      case &quot;3&quot; -&gt; &quot;0.0524&quot;;</span>
+<span class="nc" id="L592">      case &quot;6&quot; -&gt; &quot;0.1051&quot;;</span>
+<span class="nc" id="L593">      case &quot;12&quot; -&gt; &quot;0.2126&quot;;</span>
+      default -&gt; {
+        try {
+<span class="nc" id="L596">          double degrees = Double.parseDouble(value);</span>
+<span class="nc" id="L597">          yield String.valueOf(Math.tan(Math.toRadians(degrees)));</span>
+<span class="nc" id="L598">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L599">          yield null;</span>
+        }
+      }
+    };
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VariantManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TailwindFX Base</a> &gt; <a href="index.source.html" class="el_package">io.github.yasmramos.tailwindfx.core</a> &gt; <span class="el_source">VariantManager.java</span></div><h1>VariantManager.java</h1><pre class="source lang-java linenums">package io.github.yasmramos.tailwindfx.core;
+
+import io.github.yasmramos.tailwindfx.breakpoint.BreakpointManager;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+
+/**
+ * Variant Manager for TailwindFX — Handles variant application to JavaFX nodes.
+ *
+ * &lt;p&gt;This manager applies dynamic styles based on: - State variants (hover, focus, active,
+ * disabled) - Theme variants (dark, light) - Group variants (group-hover, group-focus) - Arbitrary
+ * variants ([&amp;:hover], [@media...])
+ *
+ * &lt;p&gt;IMPORTANT: Responsive breakpoints (sm:, md:, lg:) are NOT handled here. They are managed
+ * centrally by BreakpointManager to avoid O(N) listeners. This class subscribes ONCE per Scene to
+ * breakpoint changes, not per node.
+ *
+ * &lt;p&gt;Architecture: Publisher-Subscriber pattern - BreakpointManager: Single publisher (one listener
+ * per Stage with throttling) - VariantManager: Subscriber (one subscription per Scene, iterates
+ * affected nodes)
+ *
+ * @see BreakpointManager
+ */
+<span class="nc" id="L26">public class VariantManager {</span>
+
+  /** Tracks nodes that need responsive variant updates per Scene */
+<span class="fc" id="L29">  private static final Map&lt;Scene, List&lt;ResponsiveBinding&gt;&gt; responsiveNodes = new WeakHashMap&lt;&gt;();</span>
+
+  /** Cache of compiled styles for responsive utilities */
+<span class="fc" id="L32">  private static final Map&lt;String, JitCompiler.CompileResult&gt; styleCache =</span>
+      new ConcurrentHashMap&lt;&gt;();
+
+  /**
+   * Applies a state variant (hover, focus, active, disabled) to a JavaFX node.
+   *
+   * @param node The target node
+   * @param variant The variant name (e.g., &quot;hover&quot;, &quot;focus&quot;)
+   * @param utility The base utility to apply when variant is active
+   * @param jitCompiler JIT compiler for generating styles
+   */
+  public static void applyStateVariant(
+      Node node, String variant, String utility, JitCompiler jitCompiler) {
+<span class="fc bfc" id="L45" title="All 6 branches covered.">    if (node == null || variant == null || utility == null) {</span>
+<span class="fc" id="L46">      return;</span>
+    }
+
+    // Compile the base utility
+<span class="fc" id="L50">    JitCompiler.CompileResult result = jitCompiler.compile(utility);</span>
+<span class="pc bpc" id="L51" title="1 of 4 branches missed.">    if (result == null || !result.hasInlineStyle()) {</span>
+      // Fallback: try to apply as CSS class for static utilities (e.g., hover:btn-primary)
+<span class="pc bpc" id="L53" title="3 of 6 branches missed.">      if (!utility.contains(&quot;[&quot;) &amp;&amp; !utility.startsWith(&quot;bg-&quot;) &amp;&amp; !utility.startsWith(&quot;text-&quot;)) {</span>
+        // It's likely a CSS class - we'll handle it via styleClass manipulation
+        // This is a limitation: static CSS classes with variants need special handling
+        // For now, log in debug mode and skip
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        if (io.github.yasmramos.tailwindfx.TwConfig.isDebug()) {</span>
+<span class="nc" id="L58">          System.out.println(</span>
+              &quot;[TailwindFX Warning] Variant on non-JIT utility not fully supported: &quot;
+                  + variant
+                  + &quot;:&quot;
+                  + utility);
+        }
+      }
+<span class="fc" id="L65">      return;</span>
+    }
+<span class="fc" id="L67">    String baseStyle = result.inlineStyle();</span>
+
+<span class="pc bpc" id="L69" title="1 of 6 branches missed.">    switch (variant) {</span>
+      case &quot;hover&quot;:
+<span class="fc" id="L71">        node.addEventHandler(</span>
+<span class="nc" id="L72">            javafx.scene.input.MouseEvent.MOUSE_ENTERED, e -&gt; applyStyle(node, baseStyle));</span>
+<span class="fc" id="L73">        node.addEventHandler(</span>
+<span class="nc" id="L74">            javafx.scene.input.MouseEvent.MOUSE_EXITED, e -&gt; removeStyle(node, baseStyle));</span>
+<span class="fc" id="L75">        break;</span>
+
+      case &quot;focus&quot;:
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">        if (node instanceof javafx.scene.control.Control) {</span>
+<span class="fc" id="L79">          javafx.scene.control.Control control = (javafx.scene.control.Control) node;</span>
+<span class="fc" id="L80">          control</span>
+<span class="fc" id="L81">              .focusedProperty()</span>
+<span class="fc" id="L82">              .addListener(</span>
+                  (obs, oldVal, newVal) -&gt; {
+<span class="nc bnc" id="L84" title="All 2 branches missed.">                    if (newVal) {</span>
+<span class="nc" id="L85">                      applyStyle(node, baseStyle);</span>
+                    } else {
+<span class="nc" id="L87">                      removeStyle(node, baseStyle);</span>
+                    }
+<span class="nc" id="L89">                  });</span>
+<span class="fc" id="L90">        }</span>
+        break;
+
+      case &quot;active&quot;:
+<span class="fc" id="L94">        node.addEventHandler(</span>
+<span class="nc" id="L95">            javafx.scene.input.MouseEvent.MOUSE_PRESSED, e -&gt; applyStyle(node, baseStyle));</span>
+<span class="fc" id="L96">        node.addEventHandler(</span>
+<span class="nc" id="L97">            javafx.scene.input.MouseEvent.MOUSE_RELEASED, e -&gt; removeStyle(node, baseStyle));</span>
+<span class="fc" id="L98">        break;</span>
+
+      case &quot;disabled&quot;:
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">        if (node instanceof javafx.scene.control.Control) {</span>
+<span class="fc" id="L102">          javafx.scene.control.Control control = (javafx.scene.control.Control) node;</span>
+<span class="fc" id="L103">          control</span>
+<span class="fc" id="L104">              .disableProperty()</span>
+<span class="fc" id="L105">              .addListener(</span>
+                  (obs, oldVal, newVal) -&gt; {
+<span class="nc bnc" id="L107" title="All 2 branches missed.">                    if (newVal) {</span>
+<span class="nc" id="L108">                      applyStyle(node, baseStyle);</span>
+                    } else {
+<span class="nc" id="L110">                      removeStyle(node, baseStyle);</span>
+                    }
+<span class="nc" id="L112">                  });</span>
+<span class="fc" id="L113">        }</span>
+        break;
+
+      case &quot;checked&quot;:
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">        if (node instanceof javafx.scene.control.CheckBox) {</span>
+<span class="fc" id="L118">          javafx.scene.control.CheckBox checkBox = (javafx.scene.control.CheckBox) node;</span>
+<span class="fc" id="L119">          checkBox</span>
+<span class="fc" id="L120">              .selectedProperty()</span>
+<span class="fc" id="L121">              .addListener(</span>
+                  (obs, oldVal, newVal) -&gt; {
+<span class="nc bnc" id="L123" title="All 2 branches missed.">                    if (newVal) {</span>
+<span class="nc" id="L124">                      applyStyle(node, baseStyle);</span>
+                    } else {
+<span class="nc" id="L126">                      removeStyle(node, baseStyle);</span>
+                    }
+<span class="nc" id="L128">                  });</span>
+        }
+        break;
+    }
+<span class="fc" id="L132">  }</span>
+
+  /**
+   * Registers a node for responsive variant updates.
+   *
+   * &lt;p&gt;This method subscribes ONCE per Scene to breakpoint changes, not per node. When the
+   * breakpoint changes, all registered nodes in that Scene are updated.
+   *
+   * @param node The target node
+   * @param breakpoint The breakpoint name (e.g., &quot;md&quot;, &quot;lg&quot;)
+   * @param utility The base utility to apply when breakpoint is active
+   * @param jitCompiler JIT compiler for generating styles
+   */
+  public static void bindResponsiveVariant(
+      Node node, String breakpoint, String utility, JitCompiler jitCompiler) {
+<span class="fc bfc" id="L147" title="All 6 branches covered.">    if (node == null || breakpoint == null || utility == null) {</span>
+<span class="fc" id="L148">      return;</span>
+    }
+
+    // Cache the compiled style
+<span class="fc" id="L152">    String cacheKey = breakpoint + &quot;:&quot; + utility;</span>
+<span class="fc" id="L153">    JitCompiler.CompileResult result =</span>
+<span class="fc" id="L154">        styleCache.computeIfAbsent(cacheKey, k -&gt; jitCompiler.compile(utility));</span>
+<span class="pc bpc" id="L155" title="1 of 4 branches missed.">    if (result == null || !result.hasInlineStyle()) {</span>
+<span class="fc" id="L156">      return;</span>
+    }
+
+    // Store the binding
+<span class="fc" id="L160">    ResponsiveBinding binding = new ResponsiveBinding(node, breakpoint, result.inlineStyle());</span>
+
+<span class="fc" id="L162">    node.sceneProperty()</span>
+<span class="fc" id="L163">        .addListener(</span>
+            (obs, oldScene, newScene) -&gt; {
+<span class="nc bnc" id="L165" title="All 2 branches missed.">              if (oldScene != null) {</span>
+<span class="nc" id="L166">                unregisterFromScene(oldScene, binding);</span>
+              }
+<span class="nc bnc" id="L168" title="All 2 branches missed.">              if (newScene != null) {</span>
+<span class="nc" id="L169">                registerToScene(newScene, binding);</span>
+              }
+<span class="nc" id="L171">            });</span>
+
+    // Register immediately if already in a scene
+<span class="fc" id="L174">    Scene currentScene = node.getScene();</span>
+<span class="pc bpc" id="L175" title="1 of 2 branches missed.">    if (currentScene != null) {</span>
+<span class="nc" id="L176">      registerToScene(currentScene, binding);</span>
+    }
+<span class="fc" id="L178">  }</span>
+
+  /**
+   * Registers a responsive binding to a Scene. Subscribes to BreakpointManager only once per Scene.
+   */
+  private static void registerToScene(Scene scene, ResponsiveBinding binding) {
+<span class="nc" id="L184">    List&lt;ResponsiveBinding&gt; bindings =</span>
+<span class="nc" id="L185">        responsiveNodes.computeIfAbsent(</span>
+            scene,
+            k -&gt; {
+              // First binding for this Scene — subscribe to breakpoint changes
+<span class="nc" id="L189">              subscribeToBreakpointChanges(scene);</span>
+<span class="nc" id="L190">              return new ArrayList&lt;&gt;();</span>
+            });
+
+    // Avoid duplicate bindings
+<span class="nc bnc" id="L194" title="All 2 branches missed.">    if (!bindings.contains(binding)) {</span>
+<span class="nc" id="L195">      bindings.add(binding);</span>
+    }
+
+    // Apply initial state
+<span class="nc" id="L199">    applyResponsiveStyle(binding);</span>
+<span class="nc" id="L200">  }</span>
+
+  /** Unregisters a responsive binding from a Scene. */
+  private static void unregisterFromScene(Scene scene, ResponsiveBinding binding) {
+<span class="nc" id="L204">    List&lt;ResponsiveBinding&gt; bindings = responsiveNodes.get(scene);</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">    if (bindings != null) {</span>
+<span class="nc" id="L206">      bindings.remove(binding);</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">      if (bindings.isEmpty()) {</span>
+<span class="nc" id="L208">        responsiveNodes.remove(scene);</span>
+      }
+    }
+<span class="nc" id="L211">  }</span>
+
+  /**
+   * Subscribes to breakpoint changes for a Scene. Called only once per Scene to avoid O(N)
+   * listeners.
+   */
+  private static void subscribeToBreakpointChanges(Scene scene) {
+<span class="nc" id="L218">    var window = scene.getWindow();</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">    if (window instanceof javafx.stage.Stage) {</span>
+<span class="nc" id="L220">      BreakpointManager bpm = BreakpointManager.from((javafx.stage.Stage) window);</span>
+
+      // Listen to breakpoint changes and update all nodes in this Scene
+<span class="nc" id="L223">      bpm.activeBreakpointProperty()</span>
+<span class="nc" id="L224">          .addListener(</span>
+              (obs, oldBp, newBp) -&gt; {
+<span class="nc" id="L226">                List&lt;ResponsiveBinding&gt; bindings = responsiveNodes.get(scene);</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">                if (bindings != null) {</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">                  for (ResponsiveBinding binding : bindings) {</span>
+<span class="nc" id="L229">                    applyResponsiveStyle(binding);</span>
+<span class="nc" id="L230">                  }</span>
+                }
+<span class="nc" id="L232">              });</span>
+    }
+<span class="nc" id="L234">  }</span>
+
+  /** Applies or removes responsive style based on current breakpoint. */
+  private static void applyResponsiveStyle(ResponsiveBinding binding) {
+<span class="nc" id="L238">    var scene = binding.node().getScene();</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">    if (scene == null) return;</span>
+
+<span class="nc" id="L241">    var window = scene.getWindow();</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">    if (!(window instanceof javafx.stage.Stage)) return;</span>
+
+<span class="nc" id="L244">    BreakpointManager.Breakpoint currentBp =</span>
+<span class="nc" id="L245">        BreakpointManager.from((javafx.stage.Stage) window).current();</span>
+<span class="nc" id="L246">    int currentMinWidth = (int) currentBp.minWidth;</span>
+<span class="nc" id="L247">    int targetMinWidth = getBreakpointMinWidth(binding.breakpoint());</span>
+
+<span class="nc bnc" id="L249" title="All 2 branches missed.">    boolean isActive = currentMinWidth &gt;= targetMinWidth;</span>
+
+<span class="nc bnc" id="L251" title="All 2 branches missed.">    if (isActive) {</span>
+<span class="nc" id="L252">      applyStyle(binding.node(), binding.style());</span>
+    } else {
+<span class="nc" id="L254">      removeStyle(binding.node(), binding.style());</span>
+    }
+<span class="nc" id="L256">  }</span>
+
+  /** Gets the minimum width for a breakpoint name. */
+  private static int getBreakpointMinWidth(String breakpoint) {
+<span class="nc bnc" id="L260" title="All 6 branches missed.">    return switch (breakpoint) {</span>
+<span class="nc" id="L261">      case &quot;sm&quot; -&gt; 640;</span>
+<span class="nc" id="L262">      case &quot;md&quot; -&gt; 768;</span>
+<span class="nc" id="L263">      case &quot;lg&quot; -&gt; 1024;</span>
+<span class="nc" id="L264">      case &quot;xl&quot; -&gt; 1280;</span>
+<span class="nc" id="L265">      case &quot;2xl&quot; -&gt; 1536;</span>
+<span class="nc" id="L266">      default -&gt; 0;</span>
+    };
+  }
+
+  /** Applies a theme variant (dark, light) to a node. */
+  public static void applyThemeVariant(
+      Node node, String variant, String utility, JitCompiler jitCompiler) {
+<span class="fc" id="L273">    boolean isDark = &quot;dark&quot;.equals(variant);</span>
+
+<span class="fc" id="L275">    node.sceneProperty()</span>
+<span class="fc" id="L276">        .addListener(</span>
+            (obs, oldScene, newScene) -&gt; {
+<span class="nc bnc" id="L278" title="All 4 branches missed.">              if (newScene != null &amp;&amp; newScene.getRoot() != null) {</span>
+<span class="nc" id="L279">                boolean sceneIsDark = newScene.getRoot().getStyleClass().contains(&quot;dark&quot;);</span>
+
+<span class="nc bnc" id="L281" title="All 2 branches missed.">                if (sceneIsDark == isDark) {</span>
+<span class="nc" id="L282">                  JitCompiler.CompileResult result = jitCompiler.compile(utility);</span>
+<span class="nc bnc" id="L283" title="All 4 branches missed.">                  if (result != null &amp;&amp; result.hasInlineStyle()) {</span>
+<span class="nc" id="L284">                    applyStyle(node, result.inlineStyle());</span>
+                  }
+                }
+              }
+<span class="nc" id="L288">            });</span>
+<span class="fc" id="L289">  }</span>
+
+  /**
+   * Applies a group variant (group-hover, group-focus) to a node. Dynamically tracks parent changes
+   * to handle runtime graph modifications.
+   */
+  public static void applyGroupVariant(
+      Node node, String variant, String utility, JitCompiler jitCompiler) {
+<span class="fc" id="L297">    String groupVariant = variant.substring(6); // Remove &quot;group-&quot; prefix</span>
+
+    // Create a listener that searches for .group parent and attaches handlers
+<span class="fc" id="L300">    var parentListener =</span>
+        (javafx.beans.value.ChangeListener&lt;javafx.scene.Parent&gt;)
+            (obs, oldParent, newParent) -&gt; {
+              // Remove listeners from old parent
+<span class="pc bpc" id="L304" title="1 of 2 branches missed.">              if (oldParent != null) {</span>
+<span class="nc" id="L305">                oldParent.setOnMouseEntered(null);</span>
+<span class="nc" id="L306">                oldParent.setOnMouseExited(null);</span>
+              }
+
+              // Search for .group parent in new hierarchy
+<span class="fc" id="L310">              javafx.scene.Parent parent = newParent;</span>
+<span class="pc bpc" id="L311" title="1 of 2 branches missed.">              while (parent != null) {</span>
+<span class="nc bnc" id="L312" title="All 2 branches missed.">                if (parent.getStyleClass().contains(&quot;group&quot;)) {</span>
+<span class="nc bnc" id="L313" title="All 2 branches missed.">                  switch (groupVariant) {</span>
+                    case &quot;hover&quot;:
+<span class="nc" id="L315">                      parent.setOnMouseEntered(</span>
+                          e -&gt; {
+<span class="nc" id="L317">                            JitCompiler.CompileResult result = jitCompiler.compile(utility);</span>
+<span class="nc bnc" id="L318" title="All 4 branches missed.">                            if (result != null &amp;&amp; result.hasInlineStyle()) {</span>
+<span class="nc" id="L319">                              applyStyle(node, result.inlineStyle());</span>
+                            }
+<span class="nc" id="L321">                          });</span>
+<span class="nc" id="L322">                      parent.setOnMouseExited(</span>
+                          e -&gt; {
+<span class="nc" id="L324">                            JitCompiler.CompileResult result = jitCompiler.compile(utility);</span>
+<span class="nc bnc" id="L325" title="All 4 branches missed.">                            if (result != null &amp;&amp; result.hasInlineStyle()) {</span>
+<span class="nc" id="L326">                              removeStyle(node, result.inlineStyle());</span>
+                            }
+<span class="nc" id="L328">                          });</span>
+                      break;
+                  }
+<span class="nc" id="L331">                  break;</span>
+                }
+<span class="nc" id="L333">                parent = parent.getParent();</span>
+              }
+<span class="fc" id="L335">            };</span>
+
+    // Attach listener to parent property
+<span class="fc" id="L338">    node.parentProperty().addListener(parentListener);</span>
+
+    // Trigger initial search
+<span class="fc" id="L341">    parentListener.changed(null, null, node.getParent());</span>
+<span class="fc" id="L342">  }</span>
+
+  /** Applies an arbitrary variant ([@media...], [&amp;:hover]) to a node. */
+  public static void applyArbitraryVariant(
+      Node node, String variant, String utility, JitCompiler jitCompiler) {
+<span class="fc" id="L347">    String content = variant.substring(1, variant.length() - 1);</span>
+
+<span class="fc bfc" id="L349" title="All 2 branches covered.">    if (content.startsWith(&quot;@media&quot;)) {</span>
+      // Handle as responsive variant (simplified)
+<span class="fc" id="L351">      JitCompiler.CompileResult result = jitCompiler.compile(utility);</span>
+<span class="pc bpc" id="L352" title="2 of 4 branches missed.">      if (result != null &amp;&amp; result.hasInlineStyle()) {</span>
+<span class="fc" id="L353">        applyStyle(node, result.inlineStyle());</span>
+      }
+<span class="fc" id="L355">    } else {</span>
+      // Other arbitrary variants
+<span class="fc" id="L357">      JitCompiler.CompileResult result = jitCompiler.compile(utility);</span>
+<span class="pc bpc" id="L358" title="2 of 4 branches missed.">      if (result != null &amp;&amp; result.hasInlineStyle()) {</span>
+<span class="fc" id="L359">        applyStyle(node, result.inlineStyle());</span>
+      }
+    }
+<span class="fc" id="L362">  }</span>
+
+  /** Applies a style to a node, avoiding duplicates. */
+  private static void applyStyle(Node node, String style) {
+<span class="pc bpc" id="L366" title="2 of 4 branches missed.">    if (style == null || style.isEmpty()) {</span>
+<span class="nc" id="L367">      return;</span>
+    }
+
+<span class="fc" id="L370">    String currentStyle = node.getStyle();</span>
+<span class="pc bpc" id="L371" title="1 of 2 branches missed.">    if (!currentStyle.contains(style)) {</span>
+<span class="fc" id="L372">      node.setStyle(currentStyle + style);</span>
+    }
+<span class="fc" id="L374">  }</span>
+
+  /** Removes a style from a node. */
+  private static void removeStyle(Node node, String style) {
+<span class="nc bnc" id="L378" title="All 4 branches missed.">    if (style == null || style.isEmpty()) {</span>
+<span class="nc" id="L379">      return;</span>
+    }
+
+<span class="nc" id="L382">    String currentStyle = node.getStyle();</span>
+<span class="nc" id="L383">    String newStyle = currentStyle.replace(style, &quot;&quot;);</span>
+<span class="nc" id="L384">    node.setStyle(newStyle);</span>
+<span class="nc" id="L385">  }</span>
+
+  /**
+   * Processes a token with variants and applies it to a node. Supports chained variants like
+   * hover:md:bg-blue-500.
+   *
+   * @param node The target node
+   * @param token The full token (e.g., &quot;hover:bg-blue-500&quot;, &quot;md:w-full&quot;, &quot;hover:md:bg-red-500&quot;)
+   * @param jitCompiler JIT compiler
+   */
+  public static void processToken(Node node, String token, JitCompiler jitCompiler) {
+<span class="fc" id="L396">    VariantParser.VariantResult result = VariantParser.parse(token);</span>
+
+<span class="fc bfc" id="L398" title="All 2 branches covered.">    if (!result.hasVariant()) {</span>
+      // No variants, apply directly
+<span class="fc" id="L400">      JitCompiler.CompileResult compileResult = jitCompiler.compile(token);</span>
+<span class="pc bpc" id="L401" title="1 of 4 branches missed.">      if (compileResult != null &amp;&amp; compileResult.hasInlineStyle()) {</span>
+<span class="fc" id="L402">        applyStyle(node, compileResult.inlineStyle());</span>
+      }
+<span class="fc" id="L404">      return;</span>
+    }
+
+<span class="fc" id="L407">    List&lt;String&gt; variants = result.getVariants();</span>
+<span class="fc" id="L408">    String utility = result.getUtility();</span>
+
+    // Process ALL variants in chain, not just the last one
+    // This enables combinations like group-hover:md:hover:bg-blue-500
+<span class="fc bfc" id="L412" title="All 2 branches covered.">    for (String variant : variants) {</span>
+<span class="fc" id="L413">      String variantType = VariantParser.getVariantType(variant);</span>
+
+<span class="pc bpc" id="L415" title="2 of 6 branches missed.">      switch (variantType) {</span>
+        case &quot;state&quot;:
+<span class="fc" id="L417">          applyStateVariant(node, variant, utility, jitCompiler);</span>
+<span class="fc" id="L418">          break;</span>
+        case &quot;screen&quot;:
+<span class="fc" id="L420">          bindResponsiveVariant(node, variant, utility, jitCompiler);</span>
+<span class="fc" id="L421">          break;</span>
+        case &quot;theme&quot;:
+<span class="fc" id="L423">          applyThemeVariant(node, variant, utility, jitCompiler);</span>
+<span class="fc" id="L424">          break;</span>
+        case &quot;group&quot;:
+<span class="fc" id="L426">          applyGroupVariant(node, variant, utility, jitCompiler);</span>
+<span class="fc" id="L427">          break;</span>
+        case &quot;arbitrary&quot;:
+<span class="nc" id="L429">          applyArbitraryVariant(node, variant, utility, jitCompiler);</span>
+<span class="nc" id="L430">          break;</span>
+        default:
+          // Unknown variant, apply directly
+<span class="nc" id="L433">          JitCompiler.CompileResult compileResult = jitCompiler.compile(utility);</span>
+<span class="nc bnc" id="L434" title="All 4 branches missed.">          if (compileResult != null &amp;&amp; compileResult.hasInlineStyle()) {</span>
+<span class="nc" id="L435">            applyStyle(node, compileResult.inlineStyle());</span>
+          }
+      }
+<span class="fc" id="L438">    }</span>
+<span class="fc" id="L439">  }</span>
+
+  /** Record representing a responsive binding between a node and a breakpoint. */
+<span class="fc" id="L442">  private record ResponsiveBinding(Node node, String breakpoint, String style) {}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

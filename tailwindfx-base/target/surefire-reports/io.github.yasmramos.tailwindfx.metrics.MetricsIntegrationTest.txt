@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: io.github.yasmramos.tailwindfx.metrics.MetricsIntegrationTest
+-------------------------------------------------------------------------------
+Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.975 s -- in io.github.yasmramos.tailwindfx.metrics.MetricsIntegrationTest

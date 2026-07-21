@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ThemeCssGenerator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TailwindFX Base</a> &gt; <a href="index.source.html" class="el_package">io.github.yasmramos.tailwindfx.core</a> &gt; <span class="el_source">ThemeCssGenerator.java</span></div><h1>ThemeCssGenerator.java</h1><pre class="source lang-java linenums">package io.github.yasmramos.tailwindfx.core;
+
+import io.github.yasmramos.tailwindfx.theme.ThemeConfig;
+import java.util.Map;
+
+/**
+ * Generates the base CSS variables dynamically from ThemeConfig. Replaces the static
+ * tailwindfx-base.css file.
+ */
+public class ThemeCssGenerator {
+
+  private final ThemeConfig themeConfig;
+
+<span class="fc" id="L14">  public ThemeCssGenerator(ThemeConfig themeConfig) {</span>
+<span class="fc" id="L15">    this.themeConfig = themeConfig;</span>
+<span class="fc" id="L16">  }</span>
+
+  /** Generates the full CSS content for base variables. */
+  public String generateBaseCss() {
+<span class="fc" id="L20">    StringBuilder css = new StringBuilder();</span>
+<span class="fc" id="L21">    css.append(&quot;.root {\n&quot;);</span>
+
+    // Generate Color Variables
+<span class="fc" id="L24">    generateColorVariables(css);</span>
+
+    // Generate Spacing Variables
+<span class="fc" id="L27">    generateSpacingVariables(css);</span>
+
+    // Generate Font Size Variables
+<span class="fc" id="L30">    generateFontSizeVariables(css);</span>
+
+    // Generate Border Radius Variables
+<span class="fc" id="L33">    generateBorderRadiusVariables(css);</span>
+
+    // Generate Opacity Variables
+<span class="fc" id="L36">    generateOpacityVariables(css);</span>
+
+    // Generate Box Shadow Variables (Basic implementation)
+<span class="fc" id="L39">    generateShadowVariables(css);</span>
+
+<span class="fc" id="L41">    css.append(&quot;}\n&quot;);</span>
+
+    // Validate CSS structure
+<span class="fc" id="L44">    String result = css.toString();</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">    if (!result.trim().endsWith(&quot;}&quot;)) {</span>
+<span class="nc" id="L46">      throw new IllegalStateException(&quot;Generated CSS does not end with closing brace&quot;);</span>
+    }
+
+<span class="fc bfc" id="L49" title="All 2 branches covered.">    long openBraces = result.chars().filter(ch -&gt; ch == '{').count();</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">    long closeBraces = result.chars().filter(ch -&gt; ch == '}').count();</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">    if (openBraces != closeBraces) {</span>
+<span class="nc" id="L52">      throw new IllegalStateException(</span>
+          &quot;CSS brace mismatch: &quot;
+              + openBraces
+              + &quot; opening braces, &quot;
+              + closeBraces
+              + &quot; closing braces&quot;);
+    }
+
+<span class="fc" id="L60">    return result;</span>
+  }
+
+  private void generateColorVariables(StringBuilder css) {
+<span class="fc" id="L64">    Map&lt;String, String[]&gt; colors = themeConfig.colors();</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">    for (Map.Entry&lt;String, String[]&gt; entry : colors.entrySet()) {</span>
+<span class="fc" id="L66">      String colorName = entry.getKey();</span>
+<span class="fc" id="L67">      String[] shades = entry.getValue();</span>
+
+      // Map standard Tailwind shades to array indices
+<span class="fc" id="L70">      int[] shadeValues = {50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950};</span>
+
+<span class="pc bpc" id="L72" title="1 of 4 branches missed.">      for (int i = 0; i &lt; shadeValues.length &amp;&amp; i &lt; shades.length; i++) {</span>
+<span class="fc" id="L73">        int shade = shadeValues[i];</span>
+<span class="fc" id="L74">        String varName = &quot;-color-&quot; + colorName + &quot;-&quot; + shade;</span>
+<span class="fc" id="L75">        css.append(&quot;    &quot;).append(varName).append(&quot;: &quot;).append(shades[i]).append(&quot;;\n&quot;);</span>
+      }
+<span class="fc" id="L77">    }</span>
+<span class="fc" id="L78">  }</span>
+
+  private void generateSpacingVariables(StringBuilder css) {
+<span class="fc" id="L81">    double[] spacing = themeConfig.spacing();</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">    for (int i = 0; i &lt; spacing.length; i++) {</span>
+<span class="fc" id="L83">      String varName = &quot;-spacing-&quot; + i;</span>
+<span class="fc" id="L84">      css.append(&quot;    &quot;).append(varName).append(&quot;: &quot;).append((int) spacing[i]).append(&quot;px;\n&quot;);</span>
+    }
+<span class="fc" id="L86">  }</span>
+
+  private void generateFontSizeVariables(StringBuilder css) {
+<span class="fc" id="L89">    Map&lt;String, Double&gt; fontSizes = themeConfig.fontSize();</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">    for (Map.Entry&lt;String, Double&gt; entry : fontSizes.entrySet()) {</span>
+<span class="fc" id="L91">      String key = entry.getKey();</span>
+<span class="fc" id="L92">      Double value = entry.getValue();</span>
+<span class="fc" id="L93">      String varName = &quot;-font-size-&quot; + key;</span>
+<span class="fc" id="L94">      css.append(&quot;    &quot;).append(varName).append(&quot;: &quot;).append(value.intValue()).append(&quot;px;\n&quot;);</span>
+<span class="fc" id="L95">    }</span>
+<span class="fc" id="L96">  }</span>
+
+  private void generateBorderRadiusVariables(StringBuilder css) {
+    // ThemeConfig doesn't expose borderRadius array directly, use indexed access
+<span class="fc" id="L100">    String[] radiusKeys = {&quot;none&quot;, &quot;sm&quot;, &quot;default&quot;, &quot;md&quot;, &quot;lg&quot;, &quot;xl&quot;, &quot;2xl&quot;, &quot;3xl&quot;, &quot;full&quot;};</span>
+
+<span class="fc bfc" id="L102" title="All 2 branches covered.">    for (int i = 0; i &lt; radiusKeys.length; i++) {</span>
+<span class="fc" id="L103">      double value = themeConfig.borderRadius(i);</span>
+<span class="fc" id="L104">      String varName = &quot;-radius-&quot; + radiusKeys[i];</span>
+<span class="fc" id="L105">      css.append(&quot;    &quot;).append(varName).append(&quot;: &quot;).append((int) value).append(&quot;px;\n&quot;);</span>
+    }
+<span class="fc" id="L107">  }</span>
+
+  private void generateOpacityVariables(StringBuilder css) {
+<span class="fc" id="L110">    Map&lt;String, Double&gt; opacity = themeConfig.opacity();</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">    for (Map.Entry&lt;String, Double&gt; entry : opacity.entrySet()) {</span>
+<span class="fc" id="L112">      String key = entry.getKey();</span>
+<span class="fc" id="L113">      Double value = entry.getValue();</span>
+<span class="fc" id="L114">      String varName = &quot;-opacity-&quot; + key;</span>
+<span class="fc" id="L115">      css.append(&quot;    &quot;).append(varName).append(&quot;: &quot;).append(value).append(&quot;;\n&quot;);</span>
+<span class="fc" id="L116">    }</span>
+<span class="fc" id="L117">  }</span>
+
+  private void generateShadowVariables(StringBuilder css) {
+    // JavaFX no soporta box-shadow como CSS web. Las sombras se aplican via -fx-effect.
+    // Estas variables son placeholders para referencia en el código Java.
+<span class="fc" id="L122">    String[] shadows = {&quot;sm&quot;, &quot;default&quot;, &quot;md&quot;, &quot;lg&quot;, &quot;xl&quot;, &quot;2xl&quot;, &quot;none&quot;};</span>
+    // Valores dummy en px para evitar warnings de parsing - las sombras reales se aplican via TwEffect
+<span class="fc" id="L124">    String[] values = {&quot;1px&quot;, &quot;2px&quot;, &quot;4px&quot;, &quot;6px&quot;, &quot;8px&quot;, &quot;10px&quot;, &quot;0px&quot;};</span>
+
+<span class="fc bfc" id="L126" title="All 2 branches covered.">    for (int i = 0; i &lt; shadows.length; i++) {</span>
+<span class="fc" id="L127">      String varName = &quot;-shadow-&quot; + shadows[i];</span>
+<span class="fc" id="L128">      css.append(&quot;    &quot;).append(varName).append(&quot;: &quot;).append(values[i]).append(&quot;;\n&quot;);</span>
+    }
+<span class="fc" id="L130">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: io.github.yasmramos.tailwindfx.AdvancedTestFXIntegrationTest$MouseMovementTests
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.848 s -- in io.github.yasmramos.tailwindfx.AdvancedTestFXIntegrationTest$MouseMovementTests

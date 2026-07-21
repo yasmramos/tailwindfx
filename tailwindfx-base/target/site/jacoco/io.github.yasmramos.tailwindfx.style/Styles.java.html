@@ -1,0 +1,1595 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Styles.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TailwindFX Base</a> &gt; <a href="index.source.html" class="el_package">io.github.yasmramos.tailwindfx.style</a> &gt; <span class="el_source">Styles.java</span></div><h1>Styles.java</h1><pre class="source lang-java linenums">package io.github.yasmramos.tailwindfx.style;
+
+import io.github.yasmramos.tailwindfx.animation.TwAnimation;
+import io.github.yasmramos.tailwindfx.core.Preconditions;
+import javafx.geometry.HPos;
+import javafx.geometry.Insets;
+import javafx.geometry.VPos;
+import javafx.scene.Node;
+import javafx.scene.effect.ColorAdjust;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.scene.transform.Shear;
+
+/**
+ * Styles — API Java para todo lo que CSS no puede hacer en JavaFX.
+ *
+ * &lt;p&gt;Cada método corresponde a una clase Tailwind comentada en tailwindfx.css con &quot;use X in Java&quot;.
+ * La nomenclatura es idéntica a Tailwind para que el mapping sea inmediato:
+ *
+ * &lt;p&gt;CSS class comentada → método Java .col-span-3 → Styles.colSpan(node, 3) .row-span-full →
+ * Styles.rowSpanFull(node) .mx-4 → Styles.mx(node, 4) .z-50 → Styles.z(node, 50) .self-center →
+ * Styles.selfCenter(node) .justify-self-end → Styles.justifySelfEnd(node) .flex-1 →
+ * Styles.flex1(node) .grayscale → Styles.grayscale(node) .brightness-75 → Styles.brightness(node,
+ * 0.75) .skew-x-6 → Styles.skewX(node, 6) .object-cover → Styles.objectCover(imageView)
+ * .order-first → Styles.orderFirst(node)
+ *
+ * &lt;p&gt;Todos los métodos devuelven el nodo recibido para permitir encadenamiento:
+ * Styles.colSpan(Styles.mx(card, 4), 3);
+ */
+public final class Styles {
+
+  // Escala Tailwind: 1 unidad = 4px
+  private static final double UNIT = 4.0;
+
+  private Styles() {}
+
+  // GRIDPANE — col-span-*, row-span-*
+  // Corresponde a: grid-column: span N / grid-row: span N en CSS web
+
+  /**
+   * Sets the column span of a node in a {@link GridPane} (equivalent to {@code .col-span-N}).
+   *
+   * @param node the node to span
+   * @param span number of columns to span (must be &gt;= 1)
+   * @param &lt;T&gt; node type, returned unchanged for chaining
+   * @return the same node
+   * @throws IllegalArgumentException if node is null or span &lt; 1
+   */
+  public static &lt;T extends Node&gt; T colSpan(T node, int span) {
+<span class="nc" id="L55">    Preconditions.requireNode(node, &quot;Styles.colSpan&quot;);</span>
+<span class="nc" id="L56">    Preconditions.requireSpan(span, &quot;Styles.colSpan&quot;);</span>
+<span class="nc" id="L57">    GridPane.setColumnSpan(node, span);</span>
+<span class="nc" id="L58">    return node;</span>
+  }
+
+  /** .col-span-full — spans all columns of the GridPane */
+  public static &lt;T extends Node&gt; T colSpanFull(T node) {
+<span class="nc" id="L63">    Preconditions.requireNode(node, &quot;Styles.colSpanFull&quot;);</span>
+<span class="nc" id="L64">    GridPane.setColumnSpan(node, GridPane.REMAINING);</span>
+<span class="nc" id="L65">    return node;</span>
+  }
+
+  /**
+   * Sets the row span of a node in a {@link GridPane} (equivalent to {@code .row-span-N}).
+   *
+   * @param node the node to span
+   * @param span number of rows to span (must be &gt;= 1)
+   * @param &lt;T&gt; node type, returned unchanged for chaining
+   * @return the same node
+   * @throws IllegalArgumentException if node is null or span &lt; 1
+   */
+  public static &lt;T extends Node&gt; T rowSpan(T node, int span) {
+<span class="nc" id="L78">    Preconditions.requireNode(node, &quot;Styles.rowSpan&quot;);</span>
+<span class="nc" id="L79">    Preconditions.requireSpan(span, &quot;Styles.rowSpan&quot;);</span>
+<span class="nc" id="L80">    GridPane.setRowSpan(node, span);</span>
+<span class="nc" id="L81">    return node;</span>
+  }
+
+  /** .row-span-full — spans all rows of the GridPane */
+  public static &lt;T extends Node&gt; T rowSpanFull(T node) {
+<span class="nc" id="L86">    Preconditions.requireNode(node, &quot;Styles.rowSpanFull&quot;);</span>
+<span class="nc" id="L87">    GridPane.setRowSpan(node, GridPane.REMAINING);</span>
+<span class="nc" id="L88">    return node;</span>
+  }
+
+  /** Atajo: colSpan(2) */
+  public static &lt;T extends Node&gt; T colSpan2(T node) {
+<span class="nc" id="L93">    return colSpan(node, 2);</span>
+  }
+
+  public static &lt;T extends Node&gt; T colSpan3(T node) {
+<span class="nc" id="L97">    return colSpan(node, 3);</span>
+  }
+
+  public static &lt;T extends Node&gt; T colSpan4(T node) {
+<span class="nc" id="L101">    return colSpan(node, 4);</span>
+  }
+
+  public static &lt;T extends Node&gt; T colSpan6(T node) {
+<span class="nc" id="L105">    return colSpan(node, 6);</span>
+  }
+
+  public static &lt;T extends Node&gt; T colSpan8(T node) {
+<span class="nc" id="L109">    return colSpan(node, 8);</span>
+  }
+
+  public static &lt;T extends Node&gt; T colSpan12(T node) {
+<span class="nc" id="L113">    return colSpan(node, 12);</span>
+  }
+
+  public static &lt;T extends Node&gt; T rowSpan2(T node) {
+<span class="nc" id="L117">    return rowSpan(node, 2);</span>
+  }
+
+  public static &lt;T extends Node&gt; T rowSpan3(T node) {
+<span class="nc" id="L121">    return rowSpan(node, 3);</span>
+  }
+
+  public static &lt;T extends Node&gt; T rowSpan4(T node) {
+<span class="nc" id="L125">    return rowSpan(node, 4);</span>
+  }
+
+  public static &lt;T extends Node&gt; T rowSpan6(T node) {
+<span class="nc" id="L129">    return rowSpan(node, 6);</span>
+  }
+
+  // GRIDPANE — posición explícita col-start-*, row-start-*
+
+  /**
+   * Positions a node at a specific cell in a {@link GridPane}.
+   *
+   * @param node the node to position
+   * @param col zero-based column index
+   * @param row zero-based row index
+   * @param &lt;T&gt; node type, returned for chaining
+   * @return the same node
+   * @throws IllegalArgumentException if node is null or col/row are negative
+   */
+  public static &lt;T extends Node&gt; T gridCell(T node, int col, int row) {
+<span class="nc" id="L145">    Preconditions.requireNode(node, &quot;Styles.gridCell&quot;);</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">    if (col &lt; 0)</span>
+<span class="nc" id="L147">      throw new IllegalArgumentException(&quot;Styles.gridCell: col must be &gt;= 0, got: &quot; + col);</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">    if (row &lt; 0)</span>
+<span class="nc" id="L149">      throw new IllegalArgumentException(&quot;Styles.gridCell: row must be &gt;= 0, got: &quot; + row);</span>
+<span class="nc" id="L150">    GridPane.setColumnIndex(node, col);</span>
+<span class="nc" id="L151">    GridPane.setRowIndex(node, row);</span>
+<span class="nc" id="L152">    return node;</span>
+  }
+
+  public static &lt;T extends Node&gt; T colStart(T node, int col) {
+<span class="nc" id="L156">    GridPane.setColumnIndex(node, col);</span>
+<span class="nc" id="L157">    return node;</span>
+  }
+
+  public static &lt;T extends Node&gt; T rowStart(T node, int row) {
+<span class="nc" id="L161">    GridPane.setRowIndex(node, row);</span>
+<span class="nc" id="L162">    return node;</span>
+  }
+
+  // GROW/SHRINK — flex-1, flex-grow, flex-shrink, flex-none
+  // Corresponde a: flex-grow, flex-shrink en CSS web
+
+  /** .flex-1 / .grow — crece para llenar espacio horizontal (HBox) */
+  public static &lt;T extends Node&gt; T flex1(T node) {
+<span class="fc" id="L170">    Preconditions.requireNode(node, &quot;Styles.flex1&quot;);</span>
+<span class="fc" id="L171">    Preconditions.warnNoParent(node, &quot;Styles.flex1&quot;);</span>
+<span class="fc" id="L172">    HBox.setHgrow(node, Priority.ALWAYS);</span>
+<span class="fc" id="L173">    return node;</span>
+  }
+
+  /** .grow — crece para llenar espacio horizontal */
+  public static &lt;T extends Node&gt; T grow(T node) {
+<span class="nc" id="L178">    Preconditions.requireNode(node, &quot;Styles.grow&quot;);</span>
+<span class="nc" id="L179">    Preconditions.warnNoParent(node, &quot;Styles.grow&quot;);</span>
+<span class="nc" id="L180">    HBox.setHgrow(node, Priority.ALWAYS);</span>
+<span class="nc" id="L181">    return node;</span>
+  }
+
+  /** .grow-0 / .flex-none — no crece */
+  public static &lt;T extends Node&gt; T growNone(T node) {
+<span class="fc" id="L186">    HBox.setHgrow(node, Priority.NEVER);</span>
+<span class="fc" id="L187">    VBox.setVgrow(node, Priority.NEVER);</span>
+<span class="fc" id="L188">    return node;</span>
+  }
+
+  /** .flex-auto — crece y encoge según sea necesario */
+  public static &lt;T extends Node&gt; T flexAuto(T node) {
+<span class="nc" id="L193">    HBox.setHgrow(node, Priority.SOMETIMES);</span>
+<span class="nc" id="L194">    return node;</span>
+  }
+
+  /** Crece verticalmente en VBox */
+  public static &lt;T extends Node&gt; T vgrow(T node) {
+<span class="fc" id="L199">    VBox.setVgrow(node, Priority.ALWAYS);</span>
+<span class="fc" id="L200">    return node;</span>
+  }
+
+  /** .hbox-fill-width — el nodo llena el ancho disponible en HBox */
+  public static &lt;T extends Node&gt; T hboxFillWidth(T node) {
+<span class="nc" id="L205">    HBox.setHgrow(node, Priority.ALWAYS);</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">    if (node instanceof Region r) r.setMaxWidth(Double.MAX_VALUE);</span>
+<span class="nc" id="L207">    return node;</span>
+  }
+
+  /** .vbox-fill-height — el nodo llena el alto disponible en VBox */
+  public static &lt;T extends Node&gt; T vboxFillHeight(T node) {
+<span class="nc" id="L212">    VBox.setVgrow(node, Priority.ALWAYS);</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">    if (node instanceof Region r) r.setMaxHeight(Double.MAX_VALUE);</span>
+<span class="nc" id="L214">    return node;</span>
+  }
+
+  // MARGIN — mx-*, my-*, mt-*, mr-*, mb-*, ml-*
+  // Corresponde a: margin en CSS web
+  // NOTA: JavaFX no tiene margin CSS. Se usa setMargin() en el contenedor.
+
+  /**
+   * IMPORTANTE — orden de llamada con métodos de margen.
+   *
+   * &lt;p&gt;JavaFX aplica los constraints ({@code HBox.setMargin}, etc.) en el momento de la llamada. El
+   * nodo debe estar ya añadido al padre para que el margen tenga efecto inmediato.
+   *
+   * &lt;pre&gt;
+   * // Correcto — añadir primero, margen después
+   * parent.getChildren().add(node);
+   * Styles.mx(node, 4);
+   *
+   * // Incorrecto — el constraint se aplica sin padre, sin efecto visible
+   * Styles.mx(node, 4);
+   * parent.getChildren().add(node);
+   * &lt;/pre&gt;
+   *
+   * &lt;p&gt;Para evitar el problema usa los métodos {@code WithParent} que añaden el nodo y aplican el
+   * margen en un único paso:
+   *
+   * &lt;pre&gt;
+   * Styles.mxWithParent(node, hbox, 4);
+   * Styles.addWithMargin(hbox, 2, nodeA, nodeB, nodeC);
+   * &lt;/pre&gt;
+   */
+  /**
+   * Applies uniform margin on all sides (equivalent to {@code .m-N}).
+   *
+   * &lt;p&gt;Sets {@code HBox.setMargin}, {@code VBox.setMargin} and {@code GridPane.setMargin}. The node
+   * must already be added to its parent for the margin to take effect immediately.
+   *
+   * @param node the node to margin (must be in a parent container)
+   * @param n margin in Tailwind units (n × 4px)
+   * @param &lt;T&gt; node type, returned for chaining
+   * @return the same node
+   */
+  public static &lt;T extends Node&gt; T m(T node, int n) {
+<span class="fc" id="L257">    Preconditions.requireNode(node, &quot;Styles.m&quot;);</span>
+<span class="fc" id="L258">    Preconditions.warnNoParent(node, &quot;Styles.m&quot;);</span>
+<span class="fc" id="L259">    Insets insets = new Insets(n * UNIT);</span>
+<span class="fc" id="L260">    HBox.setMargin(node, insets);</span>
+<span class="fc" id="L261">    VBox.setMargin(node, insets);</span>
+<span class="fc" id="L262">    GridPane.setMargin(node, insets);</span>
+<span class="fc" id="L263">    return node;</span>
+  }
+
+  /**
+   * Applies horizontal margin (left + right) equivalent to {@code .mx-N}.
+   *
+   * @param node the node to margin
+   * @param n margin in Tailwind units (n × 4px per side)
+   * @param &lt;T&gt; node type, returned for chaining
+   * @return the same node
+   */
+  public static &lt;T extends Node&gt; T mx(T node, int n) {
+<span class="fc" id="L275">    Preconditions.requireNode(node, &quot;Styles.mx&quot;);</span>
+<span class="fc" id="L276">    Preconditions.warnNoParent(node, &quot;Styles.mx&quot;);</span>
+<span class="fc" id="L277">    double px = n * UNIT;</span>
+<span class="fc" id="L278">    Insets insets = new Insets(0, px, 0, px);</span>
+<span class="fc" id="L279">    HBox.setMargin(node, insets);</span>
+<span class="fc" id="L280">    VBox.setMargin(node, insets);</span>
+<span class="fc" id="L281">    GridPane.setMargin(node, insets);</span>
+<span class="fc" id="L282">    return node;</span>
+  }
+
+  /**
+   * Applies vertical margin (top + bottom) equivalent to {@code .my-N}.
+   *
+   * @param node the node to margin
+   * @param n margin in Tailwind units (n × 4px per side)
+   * @param &lt;T&gt; node type, returned for chaining
+   * @return the same node
+   */
+  public static &lt;T extends Node&gt; T my(T node, int n) {
+<span class="fc" id="L294">    Preconditions.requireNode(node, &quot;Styles.my&quot;);</span>
+<span class="fc" id="L295">    Preconditions.warnNoParent(node, &quot;Styles.my&quot;);</span>
+<span class="fc" id="L296">    double px = n * UNIT;</span>
+<span class="fc" id="L297">    Insets insets = new Insets(px, 0, px, 0);</span>
+<span class="fc" id="L298">    HBox.setMargin(node, insets);</span>
+<span class="fc" id="L299">    VBox.setMargin(node, insets);</span>
+<span class="fc" id="L300">    GridPane.setMargin(node, insets);</span>
+<span class="fc" id="L301">    return node;</span>
+  }
+
+  /** .mt-{n} — margen superior */
+  public static &lt;T extends Node&gt; T mt(T node, int n) {
+<span class="fc" id="L306">    return margin(node, n * UNIT, 0, 0, 0);</span>
+  }
+
+  /** .mr-{n} — margen derecho */
+  public static &lt;T extends Node&gt; T mr(T node, int n) {
+<span class="nc" id="L311">    return margin(node, 0, n * UNIT, 0, 0);</span>
+  }
+
+  /** .mb-{n} — margen inferior */
+  public static &lt;T extends Node&gt; T mb(T node, int n) {
+<span class="nc" id="L316">    return margin(node, 0, 0, n * UNIT, 0);</span>
+  }
+
+  /** .ml-{n} — margen izquierdo */
+  public static &lt;T extends Node&gt; T ml(T node, int n) {
+<span class="nc" id="L321">    return margin(node, 0, 0, 0, n * UNIT);</span>
+  }
+
+  /** .mx-auto — centra horizontalmente en HBox usando espaciadores */
+  public static &lt;T extends Node&gt; T mxAuto(T node) {
+<span class="nc" id="L326">    HBox.setHgrow(node, Priority.ALWAYS);</span>
+<span class="nc" id="L327">    return node;</span>
+  }
+
+  /** Margen con valores exactos en px */
+  public static &lt;T extends Node&gt; T margin(
+      T node, double top, double right, double bottom, double left) {
+<span class="fc" id="L333">    Preconditions.requireNode(node, &quot;Styles.margin&quot;);</span>
+<span class="fc" id="L334">    Preconditions.warnNoParent(node, &quot;Styles.margin&quot;);</span>
+<span class="fc" id="L335">    Insets insets = new Insets(top, right, bottom, left);</span>
+<span class="fc" id="L336">    HBox.setMargin(node, insets);</span>
+<span class="fc" id="L337">    VBox.setMargin(node, insets);</span>
+<span class="fc" id="L338">    GridPane.setMargin(node, insets);</span>
+<span class="fc" id="L339">    return node;</span>
+  }
+
+  // MARGIN WithParent — añaden el nodo Y aplican el margen en un solo paso
+  // Eliminan el problema del orden de llamada descrito en el javadoc de margin.
+
+  /**
+   * Añade {@code node} a {@code parent} y aplica margen en todos los lados.
+   *
+   * &lt;p&gt;Equivale a:
+   *
+   * &lt;pre&gt;
+   * parent.getChildren().add(node);
+   * Styles.m(node, n);
+   * &lt;/pre&gt;
+   */
+  public static &lt;T extends Node&gt; T mWithParent(T node, Pane parent, int n) {
+<span class="nc" id="L356">    Preconditions.requireNode(node, &quot;Styles.mWithParent&quot;);</span>
+<span class="nc" id="L357">    Preconditions.requireNonNull(parent, &quot;Styles.mWithParent&quot;, &quot;parent&quot;);</span>
+<span class="nc bnc" id="L358" title="All 2 branches missed.">    if (!parent.getChildren().contains(node)) parent.getChildren().add(node);</span>
+<span class="nc" id="L359">    return m(node, n);</span>
+  }
+
+  /**
+   * Añade {@code node} a {@code parent} y aplica margen horizontal (n × 4px).
+   *
+   * &lt;p&gt;Equivale a:
+   *
+   * &lt;pre&gt;
+   * parent.getChildren().add(node);
+   * Styles.mx(node, n);
+   * &lt;/pre&gt;
+   */
+  public static &lt;T extends Node&gt; T mxWithParent(T node, Pane parent, int n) {
+<span class="nc" id="L373">    Preconditions.requireNode(node, &quot;Styles.mxWithParent&quot;);</span>
+<span class="nc" id="L374">    Preconditions.requireNonNull(parent, &quot;Styles.mxWithParent&quot;, &quot;parent&quot;);</span>
+<span class="nc bnc" id="L375" title="All 2 branches missed.">    if (!parent.getChildren().contains(node)) parent.getChildren().add(node);</span>
+<span class="nc" id="L376">    return mx(node, n);</span>
+  }
+
+  /** Añade {@code node} a {@code parent} y aplica margen vertical (n × 4px). */
+  public static &lt;T extends Node&gt; T myWithParent(T node, Pane parent, int n) {
+<span class="nc" id="L381">    Preconditions.requireNode(node, &quot;Styles.myWithParent&quot;);</span>
+<span class="nc" id="L382">    Preconditions.requireNonNull(parent, &quot;Styles.myWithParent&quot;, &quot;parent&quot;);</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">    if (!parent.getChildren().contains(node)) parent.getChildren().add(node);</span>
+<span class="nc" id="L384">    return my(node, n);</span>
+  }
+
+  /**
+   * Añade {@code node} a {@code parent} y aplica márgenes individuales en px.
+   *
+   * @param top margen superior en px
+   * @param right margen derecho en px
+   * @param bottom margen inferior en px
+   * @param left margen izquierdo en px
+   */
+  public static &lt;T extends Node&gt; T marginWithParent(
+      T node, Pane parent, double top, double right, double bottom, double left) {
+<span class="nc" id="L397">    Preconditions.requireNode(node, &quot;Styles.marginWithParent&quot;);</span>
+<span class="nc" id="L398">    Preconditions.requireNonNull(parent, &quot;Styles.marginWithParent&quot;, &quot;parent&quot;);</span>
+<span class="nc bnc" id="L399" title="All 2 branches missed.">    if (!parent.getChildren().contains(node)) parent.getChildren().add(node);</span>
+<span class="nc" id="L400">    return margin(node, top, right, bottom, left);</span>
+  }
+
+  /**
+   * Añade varios nodos a un padre con el mismo margen (n × 4px) aplicado a cada uno.
+   *
+   * &lt;pre&gt;
+   * // Añade tres cards a un HBox con 8px de margen cada una
+   * Styles.addWithMargin(hbox, 2, card1, card2, card3);
+   * &lt;/pre&gt;
+   *
+   * @param parent contenedor destino
+   * @param n unidades Tailwind (n × 4px)
+   * @param nodes nodos a añadir
+   */
+  @SafeVarargs
+  public static &lt;T extends Node&gt; void addWithMargin(Pane parent, int n, T... nodes) {
+<span class="nc" id="L417">    Preconditions.requireNonNull(parent, &quot;Styles.addWithMargin&quot;, &quot;parent&quot;);</span>
+<span class="nc bnc" id="L418" title="All 2 branches missed.">    for (T node : nodes) {</span>
+<span class="nc bnc" id="L419" title="All 2 branches missed.">      if (node == null) continue;</span>
+<span class="nc bnc" id="L420" title="All 2 branches missed.">      if (!parent.getChildren().contains(node)) parent.getChildren().add(node);</span>
+<span class="nc" id="L421">      m(node, n);</span>
+    }
+<span class="nc" id="L423">  }</span>
+
+  // Z-ORDER — z-0, z-10, z-20, z-30, z-40, z-50, z-auto
+  // Corresponde a: z-index en CSS web
+  // NOTA: En JavaFX, viewOrder más BAJO = más adelante (al revés que z-index)
+
+  /**
+   * .z-{value} — controla el orden de pintado del nodo. JavaFX viewOrder: 0 = frente, valores
+   * positivos = más atrás. Se invierte respecto a z-index web (donde mayor = más adelante).
+   */
+  public static &lt;T extends Node&gt; T z(T node, int zIndex) {
+<span class="nc" id="L434">    Preconditions.requireNode(node, &quot;Styles.z&quot;);</span>
+    // Invertir: z-50 en Tailwind = más adelante = viewOrder negativo
+<span class="nc" id="L436">    node.setViewOrder(-zIndex);</span>
+<span class="nc" id="L437">    return node;</span>
+  }
+
+  public static &lt;T extends Node&gt; T z0(T node) {
+<span class="nc" id="L441">    return z(node, 0);</span>
+  }
+
+  public static &lt;T extends Node&gt; T z10(T node) {
+<span class="nc" id="L445">    return z(node, 10);</span>
+  }
+
+  public static &lt;T extends Node&gt; T z20(T node) {
+<span class="nc" id="L449">    return z(node, 20);</span>
+  }
+
+  public static &lt;T extends Node&gt; T z30(T node) {
+<span class="nc" id="L453">    return z(node, 30);</span>
+  }
+
+  public static &lt;T extends Node&gt; T z40(T node) {
+<span class="nc" id="L457">    return z(node, 40);</span>
+  }
+
+  public static &lt;T extends Node&gt; T z50(T node) {
+<span class="nc" id="L461">    return z(node, 50);</span>
+  }
+
+  /** .order-first — lleva el nodo al frente */
+  public static &lt;T extends Node&gt; T orderFirst(T node) {
+<span class="nc" id="L466">    node.toFront();</span>
+<span class="nc" id="L467">    return node;</span>
+  }
+
+  /** .order-last — lleva el nodo al fondo */
+  public static &lt;T extends Node&gt; T orderLast(T node) {
+<span class="nc" id="L472">    node.toBack();</span>
+<span class="nc" id="L473">    return node;</span>
+  }
+
+  // SELF ALIGNMENT — self-start, self-center, self-end, self-stretch
+  // Corresponde a: align-self en CSS web (GridPane)
+
+  public static &lt;T extends Node&gt; T selfStart(T node) {
+<span class="nc" id="L480">    GridPane.setValignment(node, VPos.TOP);</span>
+<span class="nc" id="L481">    return node;</span>
+  }
+
+  public static &lt;T extends Node&gt; T selfCenter(T node) {
+<span class="nc" id="L485">    GridPane.setValignment(node, VPos.CENTER);</span>
+<span class="nc" id="L486">    return node;</span>
+  }
+
+  public static &lt;T extends Node&gt; T selfEnd(T node) {
+<span class="nc" id="L490">    GridPane.setValignment(node, VPos.BOTTOM);</span>
+<span class="nc" id="L491">    return node;</span>
+  }
+
+  public static &lt;T extends Node&gt; T selfBaseline(T node) {
+<span class="nc" id="L495">    GridPane.setValignment(node, VPos.BASELINE);</span>
+<span class="nc" id="L496">    return node;</span>
+  }
+
+  // JUSTIFY SELF — justify-self-start, justify-self-center, justify-self-end
+  // Corresponde a: justify-self en CSS web (GridPane)
+
+  public static &lt;T extends Node&gt; T justifySelfStart(T node) {
+<span class="nc" id="L503">    GridPane.setHalignment(node, HPos.LEFT);</span>
+<span class="nc" id="L504">    return node;</span>
+  }
+
+  public static &lt;T extends Node&gt; T justifySelfCenter(T node) {
+<span class="nc" id="L508">    GridPane.setHalignment(node, HPos.CENTER);</span>
+<span class="nc" id="L509">    return node;</span>
+  }
+
+  public static &lt;T extends Node&gt; T justifySelfEnd(T node) {
+<span class="nc" id="L513">    GridPane.setHalignment(node, HPos.RIGHT);</span>
+<span class="nc" id="L514">    return node;</span>
+  }
+
+  // COLORADJUST FILTERS — grayscale, brightness, contrast, saturate,
+  //                        hueRotate, invert, sepia
+  // Corresponde a: filter: grayscale(), brightness(), etc. en CSS web
+
+  /** .grayscale — elimina el color del nodo */
+  public static &lt;T extends Node&gt; T grayscale(T node) {
+<span class="nc" id="L523">    Preconditions.requireNode(node, &quot;Styles.grayscale&quot;);</span>
+<span class="nc" id="L524">    node.setEffect(new ColorAdjust(0, -1, 0, 0));</span>
+<span class="nc" id="L525">    return node;</span>
+  }
+
+  /** .grayscale-0 — elimina el filtro de escala de grises */
+  public static &lt;T extends Node&gt; T grayscale0(T node) {
+<span class="nc bnc" id="L530" title="All 2 branches missed.">    if (node.getEffect() instanceof ColorAdjust) node.setEffect(null);</span>
+<span class="nc" id="L531">    return node;</span>
+  }
+
+  /**
+   * .brightness-{n} — ajusta el brillo (0=negro, 1=normal, 2=doble) Tailwind usa 0-200, aquí recibe
+   * la fracción directamente. brightness(0.5) = oscurecer a la mitad, brightness(1.5) = aclarar 50%
+   */
+  public static &lt;T extends Node&gt; T brightness(T node, double value) {
+<span class="nc" id="L539">    Preconditions.requireNode(node, &quot;Styles.brightness&quot;);</span>
+<span class="nc" id="L540">    Preconditions.warnBrightnessRange(value, &quot;Styles.brightness&quot;);</span>
+    // ColorAdjust brightness: -1 (negro) a 1 (blanco), 0 = normal
+<span class="nc" id="L542">    double adjusted = value - 1.0; // 1.0 → 0, 0.5 → -0.5, 1.5 → 0.5</span>
+<span class="nc" id="L543">    applyOrMergeColorAdjust(node, adjusted, Double.NaN, Double.NaN, Double.NaN);</span>
+<span class="nc" id="L544">    return node;</span>
+  }
+
+  /** .contrast-{n} — ajusta el contraste (1 = normal) */
+  public static &lt;T extends Node&gt; T contrast(T node, double value) {
+<span class="nc" id="L549">    Preconditions.requireNode(node, &quot;Styles.contrast&quot;);</span>
+<span class="nc" id="L550">    double adjusted = value - 1.0;</span>
+<span class="nc" id="L551">    applyOrMergeColorAdjust(node, Double.NaN, Double.NaN, adjusted, Double.NaN);</span>
+<span class="nc" id="L552">    return node;</span>
+  }
+
+  /** .saturate-{n} — ajusta la saturación (0 = gris, 1 = normal, &gt;1 = más vivo) */
+  public static &lt;T extends Node&gt; T saturate(T node, double value) {
+<span class="nc" id="L557">    Preconditions.requireNode(node, &quot;Styles.saturate&quot;);</span>
+<span class="nc" id="L558">    double adjusted = value - 1.0;</span>
+<span class="nc" id="L559">    applyOrMergeColorAdjust(node, Double.NaN, adjusted, Double.NaN, Double.NaN);</span>
+<span class="nc" id="L560">    return node;</span>
+  }
+
+  /** .hue-rotate-{deg} — rota el matiz en grados (0-360) */
+  public static &lt;T extends Node&gt; T hueRotate(T node, double degrees) {
+<span class="nc" id="L565">    Preconditions.requireNode(node, &quot;Styles.hueRotate&quot;);</span>
+    // ColorAdjust hue: -1 a 1 (representa -180° a +180°)
+<span class="nc" id="L567">    double adjusted = degrees / 180.0;</span>
+<span class="nc" id="L568">    applyOrMergeColorAdjust(node, Double.NaN, Double.NaN, Double.NaN, adjusted);</span>
+<span class="nc" id="L569">    return node;</span>
+  }
+
+  /** .invert — invierte los colores del nodo */
+  public static &lt;T extends Node&gt; T invert(T node) {
+<span class="nc" id="L574">    Preconditions.requireNode(node, &quot;Styles.invert&quot;);</span>
+    // No hay propiedad directa en ColorAdjust para invert total
+    // Se aproxima con hue=1 + brightness=-1
+<span class="nc" id="L577">    node.setEffect(new ColorAdjust(1.0, 0, -0.5, 0));</span>
+<span class="nc" id="L578">    return node;</span>
+  }
+
+  /** .sepia — aplica tono sepia al nodo */
+  public static &lt;T extends Node&gt; T sepia(T node) {
+<span class="nc" id="L583">    Preconditions.requireNode(node, &quot;Styles.sepia&quot;);</span>
+    // Sepia: desaturar + shift de tono cálido
+<span class="nc" id="L585">    node.setEffect(new ColorAdjust(0.1, -0.5, 0.1, 0));</span>
+<span class="nc" id="L586">    return node;</span>
+  }
+
+  /** Elimina todos los filtros ColorAdjust del nodo */
+  public static &lt;T extends Node&gt; T filterNone(T node) {
+<span class="nc bnc" id="L591" title="All 2 branches missed.">    if (node.getEffect() instanceof ColorAdjust) node.setEffect(null);</span>
+<span class="nc" id="L592">    return node;</span>
+  }
+
+  // SKEW — skew-x-*, skew-y-*
+  // Corresponde a: transform: skewX(), skewY() en CSS web
+
+  /** .skew-x-{degrees} — inclina el nodo en el eje X */
+  public static &lt;T extends Node&gt; T skewX(T node, double degrees) {
+<span class="nc" id="L600">    Preconditions.requireNode(node, &quot;Styles.skewX&quot;);</span>
+<span class="nc" id="L601">    double kx = Math.tan(Math.toRadians(degrees));</span>
+<span class="nc" id="L602">    applyOrMergeShear(node, kx, 0);</span>
+<span class="nc" id="L603">    return node;</span>
+  }
+
+  /** .skew-y-{degrees} — inclina el nodo en el eje Y */
+  public static &lt;T extends Node&gt; T skewY(T node, double degrees) {
+<span class="nc" id="L608">    Preconditions.requireNode(node, &quot;Styles.skewY&quot;);</span>
+<span class="nc" id="L609">    double ky = Math.tan(Math.toRadians(degrees));</span>
+<span class="nc" id="L610">    applyOrMergeShear(node, 0, ky);</span>
+<span class="nc" id="L611">    return node;</span>
+  }
+
+  /** Atajos para valores Tailwind estándar */
+  public static &lt;T extends Node&gt; T skewX1(T node) {
+<span class="nc" id="L616">    return skewX(node, 1);</span>
+  }
+
+  public static &lt;T extends Node&gt; T skewX2(T node) {
+<span class="nc" id="L620">    return skewX(node, 2);</span>
+  }
+
+  public static &lt;T extends Node&gt; T skewX3(T node) {
+<span class="nc" id="L624">    return skewX(node, 3);</span>
+  }
+
+  public static &lt;T extends Node&gt; T skewX6(T node) {
+<span class="nc" id="L628">    return skewX(node, 6);</span>
+  }
+
+  public static &lt;T extends Node&gt; T skewX12(T node) {
+<span class="nc" id="L632">    return skewX(node, 12);</span>
+  }
+
+  public static &lt;T extends Node&gt; T skewY1(T node) {
+<span class="nc" id="L636">    return skewY(node, 1);</span>
+  }
+
+  public static &lt;T extends Node&gt; T skewY2(T node) {
+<span class="nc" id="L640">    return skewY(node, 2);</span>
+  }
+
+  public static &lt;T extends Node&gt; T skewY3(T node) {
+<span class="nc" id="L644">    return skewY(node, 3);</span>
+  }
+
+  public static &lt;T extends Node&gt; T skewY6(T node) {
+<span class="nc" id="L648">    return skewY(node, 6);</span>
+  }
+
+  public static &lt;T extends Node&gt; T skewY12(T node) {
+<span class="nc" id="L652">    return skewY(node, 12);</span>
+  }
+
+  // IMAGEVIEW — object-fit, object-position, object-cover, object-contain
+  // Corresponde a: object-fit, object-position en CSS web
+
+  /** .object-cover — fills the area by cropping if necessary */
+  public static ImageView objectCover(ImageView iv) {
+<span class="nc" id="L660">    Preconditions.requireNonNull(iv, &quot;Styles.objectCover&quot;, &quot;imageView&quot;);</span>
+<span class="nc" id="L661">    iv.setPreserveRatio(false);</span>
+<span class="nc" id="L662">    return iv;</span>
+  }
+
+  /** .object-contain — encaja la imagen completa preservando proporción */
+  public static ImageView objectContain(ImageView iv) {
+<span class="nc" id="L667">    Preconditions.requireNonNull(iv, &quot;Styles.objectContain&quot;, &quot;imageView&quot;);</span>
+<span class="nc" id="L668">    iv.setPreserveRatio(true);</span>
+<span class="nc" id="L669">    return iv;</span>
+  }
+
+  /** .object-fill — estira para llenar exactamente (distorsiona) */
+  public static ImageView objectFill(ImageView iv) {
+<span class="nc" id="L674">    iv.setPreserveRatio(false);</span>
+<span class="nc" id="L675">    iv.setSmooth(true);</span>
+<span class="nc" id="L676">    return iv;</span>
+  }
+
+  /**
+   * .object-top — muestra la parte superior de la imagen Requiere que fitWidth y fitHeight estén
+   * definidos.
+   */
+  public static ImageView objectTop(ImageView iv) {
+<span class="nc bnc" id="L684" title="All 2 branches missed.">    if (iv.getImage() != null) {</span>
+<span class="nc bnc" id="L685" title="All 2 branches missed.">      double w = iv.getFitWidth() &gt; 0 ? iv.getFitWidth() : iv.getImage().getWidth();</span>
+<span class="nc bnc" id="L686" title="All 2 branches missed.">      double h = iv.getFitHeight() &gt; 0 ? iv.getFitHeight() : iv.getImage().getHeight();</span>
+<span class="nc" id="L687">      iv.setViewport(new javafx.geometry.Rectangle2D(0, 0, iv.getImage().getWidth(), h));</span>
+    }
+<span class="nc" id="L689">    return iv;</span>
+  }
+
+  /** .object-center — muestra el centro de la imagen */
+  public static ImageView objectCenter(ImageView iv) {
+<span class="nc" id="L694">    Preconditions.requireNonNull(iv, &quot;Styles.objectCenter&quot;, &quot;imageView&quot;);</span>
+<span class="nc" id="L695">    Preconditions.warnNoImage(iv, &quot;Styles.objectCenter&quot;);</span>
+<span class="nc bnc" id="L696" title="All 2 branches missed.">    if (iv.getImage() != null) {</span>
+<span class="nc" id="L697">      double iw = iv.getImage().getWidth();</span>
+<span class="nc" id="L698">      double ih = iv.getImage().getHeight();</span>
+<span class="nc bnc" id="L699" title="All 2 branches missed.">      double fw = iv.getFitWidth() &gt; 0 ? iv.getFitWidth() : iw;</span>
+<span class="nc bnc" id="L700" title="All 2 branches missed.">      double fh = iv.getFitHeight() &gt; 0 ? iv.getFitHeight() : ih;</span>
+<span class="nc" id="L701">      double x = Math.max(0, (iw - fw) / 2);</span>
+<span class="nc" id="L702">      double y = Math.max(0, (ih - fh) / 2);</span>
+<span class="nc" id="L703">      iv.setViewport(new javafx.geometry.Rectangle2D(x, y, Math.min(fw, iw), Math.min(fh, ih)));</span>
+    }
+<span class="nc" id="L705">    return iv;</span>
+  }
+
+  /** Establece tamaño del ImageView y modo de ajuste en una sola llamada */
+  public static ImageView imgSize(
+      ImageView iv, double width, double height, boolean preserveRatio) {
+<span class="nc" id="L711">    iv.setFitWidth(width);</span>
+<span class="nc" id="L712">    iv.setFitHeight(height);</span>
+<span class="nc" id="L713">    iv.setPreserveRatio(preserveRatio);</span>
+<span class="nc" id="L714">    return iv;</span>
+  }
+
+  // NODE VISIBILITY — hidden, visible, managed
+
+  /** .hidden — oculta el nodo pero mantiene su espacio en el layout */
+  public static &lt;T extends Node&gt; T invisible(T node) {
+<span class="nc" id="L721">    Preconditions.requireNode(node, &quot;Styles.invisible&quot;);</span>
+<span class="nc" id="L722">    node.setOpacity(0);</span>
+<span class="nc" id="L723">    return node;</span>
+  }
+
+  /** .hidden-node — oculta el nodo Y elimina su espacio del layout */
+  public static &lt;T extends Node&gt; T hiddenNode(T node) {
+<span class="nc" id="L728">    Preconditions.requireNode(node, &quot;Styles.hiddenNode&quot;);</span>
+<span class="nc" id="L729">    node.setVisible(false);</span>
+<span class="nc" id="L730">    node.setManaged(false);</span>
+<span class="nc" id="L731">    return node;</span>
+  }
+
+  /** Restaura visibilidad y espacio en layout */
+  public static &lt;T extends Node&gt; T show(T node) {
+<span class="nc" id="L736">    Preconditions.requireNode(node, &quot;Styles.show&quot;);</span>
+<span class="nc" id="L737">    node.setVisible(true);</span>
+<span class="nc" id="L738">    node.setManaged(true);</span>
+<span class="nc" id="L739">    node.setOpacity(1);</span>
+<span class="nc" id="L740">    return node;</span>
+  }
+
+  // INTERNOS
+
+  private static void applyOrMergeColorAdjust(
+      Node node, double brightness, double saturation, double contrast, double hue) {
+    ColorAdjust ca =
+<span class="nc bnc" id="L748" title="All 2 branches missed.">        (node.getEffect() instanceof ColorAdjust existing) ? existing : new ColorAdjust();</span>
+<span class="nc bnc" id="L749" title="All 2 branches missed.">    if (!Double.isNaN(brightness)) ca.setBrightness(brightness);</span>
+<span class="nc bnc" id="L750" title="All 2 branches missed.">    if (!Double.isNaN(saturation)) ca.setSaturation(saturation);</span>
+<span class="nc bnc" id="L751" title="All 2 branches missed.">    if (!Double.isNaN(contrast)) ca.setContrast(contrast);</span>
+<span class="nc bnc" id="L752" title="All 2 branches missed.">    if (!Double.isNaN(hue)) ca.setHue(hue);</span>
+<span class="nc" id="L753">    node.setEffect(ca);</span>
+<span class="nc" id="L754">  }</span>
+
+  private static void applyOrMergeShear(Node node, double kx, double ky) {
+    // Remove existing Shear if present, then add new one
+<span class="nc" id="L758">    node.getTransforms().removeIf(t -&gt; t instanceof Shear);</span>
+<span class="nc bnc" id="L759" title="All 4 branches missed.">    if (kx != 0 || ky != 0) {</span>
+<span class="nc" id="L760">      node.getTransforms().add(new Shear(kx, ky));</span>
+    }
+<span class="nc" id="L762">  }</span>
+
+  // TEXT-SHADOW — Java API (DropShadow on Text child of Label/Text node)
+
+  /**
+   * Applies a text shadow to a {@link javafx.scene.text.Text} or {@link javafx.scene.control.Label}
+   * node (analogous to CSS {@code text-shadow}).
+   *
+   * &lt;p&gt;Unlike the CSS {@code .text-shadow-*} classes (which apply DropShadow to the whole Label
+   * box), this method targets the {@code Text} child inside a {@code Label} for a true text-only
+   * shadow.
+   *
+   * &lt;pre&gt;
+   * // text-shadow: 0 2px 4px rgba(0,0,0,0.30)
+   * Styles.textShadow(heading, &quot;rgba(0,0,0,0.30)&quot;, 4, 0, 2);
+   *
+   * // Named presets:
+   * Styles.textShadowSm(label);
+   * Styles.textShadowLg(label);
+   * Styles.textShadowColor(label, &quot;#3b82f6&quot;, 6, 0, 2); // colored
+   * &lt;/pre&gt;
+   *
+   * @param node the Text or Label node
+   * @param color CSS color string (hex, rgba, color name)
+   * @param radius blur radius in px
+   * @param offsetX horizontal offset in px
+   * @param offsetY vertical offset in px
+   */
+  public static void textShadow(
+      Node node, String color, double radius, double offsetX, double offsetY) {
+<span class="nc" id="L792">    Preconditions.requireNonNull(node, &quot;Styles.textShadow&quot;, &quot;node&quot;);</span>
+<span class="nc" id="L793">    Preconditions.requireNonBlank(color, &quot;Styles.textShadow&quot;, &quot;color&quot;);</span>
+<span class="nc" id="L794">    javafx.scene.effect.DropShadow ds = new javafx.scene.effect.DropShadow();</span>
+<span class="nc" id="L795">    ds.setColor(javafx.scene.paint.Color.web(color));</span>
+<span class="nc" id="L796">    ds.setRadius(radius);</span>
+<span class="nc" id="L797">    ds.setOffsetX(offsetX);</span>
+<span class="nc" id="L798">    ds.setOffsetY(offsetY);</span>
+<span class="nc" id="L799">    ds.setSpread(0);</span>
+<span class="nc" id="L800">    node.setEffect(ds);</span>
+<span class="nc" id="L801">  }</span>
+
+  /** {@code text-shadow-sm} — subtle shadow. */
+  public static void textShadowSm(Node node) {
+<span class="nc" id="L805">    textShadow(node, &quot;rgba(0,0,0,0.20)&quot;, 2, 0, 1);</span>
+<span class="nc" id="L806">  }</span>
+
+  /** {@code text-shadow} — standard shadow. */
+  public static void textShadowMd(Node node) {
+<span class="nc" id="L810">    textShadow(node, &quot;rgba(0,0,0,0.30)&quot;, 4, 0, 2);</span>
+<span class="nc" id="L811">  }</span>
+
+  /** {@code text-shadow-lg} — large shadow. */
+  public static void textShadowLg(Node node) {
+<span class="nc" id="L815">    textShadow(node, &quot;rgba(0,0,0,0.40)&quot;, 10, 0, 4);</span>
+<span class="nc" id="L816">  }</span>
+
+  /** {@code text-shadow-xl} — extra large shadow. */
+  public static void textShadowXl(Node node) {
+<span class="nc" id="L820">    textShadow(node, &quot;rgba(0,0,0,0.50)&quot;, 16, 0, 6);</span>
+<span class="nc" id="L821">  }</span>
+
+  /**
+   * Colored text shadow — analogous to Tailwind v4.1's arbitrary text-shadow with a named color.
+   *
+   * @param node the Text or Label node
+   * @param color color string (hex, rgba)
+   * @param radius blur radius
+   * @param offsetX horizontal offset
+   * @param offsetY vertical offset
+   */
+  public static void textShadowColor(
+      Node node, String color, double radius, double offsetX, double offsetY) {
+<span class="nc" id="L834">    textShadow(node, color, radius, offsetX, offsetY);</span>
+<span class="nc" id="L835">  }</span>
+
+  /** Removes any text shadow (or other effect) from the node. */
+  public static void textShadowNone(Node node) {
+<span class="nc" id="L839">    Preconditions.requireNonNull(node, &quot;Styles.textShadowNone&quot;, &quot;node&quot;);</span>
+<span class="nc bnc" id="L840" title="All 2 branches missed.">    if (node.getEffect() instanceof javafx.scene.effect.DropShadow) node.setEffect(null);</span>
+<span class="nc" id="L841">  }</span>
+
+  // COLORED DROP-SHADOW — arbitrary color dropshadow
+
+  /**
+   * Applies a colored drop shadow (analogous to Tailwind v4.1's {@code drop-shadow-[color]}
+   * arbitrary utility).
+   *
+   * &lt;pre&gt;
+   * // drop-shadow-blue/50 approximation:
+   * Styles.dropShadow(card, &quot;#3b82f6&quot;, 0.5, 12, 0, 4);
+   *
+   * // drop-shadow-none:
+   * Styles.dropShadowNone(card);
+   * &lt;/pre&gt;
+   *
+   * @param node the node to shadow
+   * @param hexColor hex color (e.g. {@code &quot;#3b82f6&quot;})
+   * @param alpha alpha multiplier [0.0, 1.0]
+   * @param radius blur radius
+   * @param offsetX horizontal offset
+   * @param offsetY vertical offset
+   */
+  public static void dropShadow(
+      Node node, String hexColor, double alpha, double radius, double offsetX, double offsetY) {
+<span class="nc" id="L866">    Preconditions.requireNonNull(node, &quot;Styles.dropShadow&quot;, &quot;node&quot;);</span>
+<span class="nc" id="L867">    Preconditions.requireNonBlank(hexColor, &quot;Styles.dropShadow&quot;, &quot;hexColor&quot;);</span>
+<span class="nc" id="L868">    alpha = Math.max(0, Math.min(1, alpha));</span>
+<span class="nc" id="L869">    javafx.scene.paint.Color base = javafx.scene.paint.Color.web(hexColor);</span>
+<span class="nc" id="L870">    javafx.scene.paint.Color colored =</span>
+<span class="nc" id="L871">        new javafx.scene.paint.Color(base.getRed(), base.getGreen(), base.getBlue(), alpha);</span>
+<span class="nc" id="L872">    javafx.scene.effect.DropShadow ds =</span>
+        new javafx.scene.effect.DropShadow(
+            javafx.scene.effect.BlurType.GAUSSIAN, colored, radius, 0, offsetX, offsetY);
+<span class="nc" id="L875">    node.setEffect(ds);</span>
+<span class="nc" id="L876">  }</span>
+
+  /** Colored drop shadow — presets by semantic color. */
+  public static void dropShadowBlue(Node n) {
+<span class="nc" id="L880">    dropShadow(n, &quot;#3b82f6&quot;, 0.4, 12, 0, 4);</span>
+<span class="nc" id="L881">  }</span>
+
+  public static void dropShadowGreen(Node n) {
+<span class="nc" id="L884">    dropShadow(n, &quot;#22c55e&quot;, 0.4, 12, 0, 4);</span>
+<span class="nc" id="L885">  }</span>
+
+  public static void dropShadowRed(Node n) {
+<span class="nc" id="L888">    dropShadow(n, &quot;#ef4444&quot;, 0.4, 12, 0, 4);</span>
+<span class="nc" id="L889">  }</span>
+
+  public static void dropShadowPurple(Node n) {
+<span class="nc" id="L892">    dropShadow(n, &quot;#a855f7&quot;, 0.4, 12, 0, 4);</span>
+<span class="nc" id="L893">  }</span>
+
+  public static void dropShadowYellow(Node n) {
+<span class="nc" id="L896">    dropShadow(n, &quot;#eab308&quot;, 0.4, 12, 0, 4);</span>
+<span class="nc" id="L897">  }</span>
+
+  /** Removes drop shadow effect from node. */
+  public static void dropShadowNone(Node node) {
+<span class="nc" id="L901">    filterNone(node);</span>
+<span class="nc" id="L902">  }</span>
+
+  // MASK / CLIP UTILITIES
+
+  /**
+   * Clips a node to a rectangle with optional corner rounding (analogous to CSS {@code clip-path:
+   * inset(...)}).
+   *
+   * @param node the node to clip
+   * @param width clip width in px
+   * @param height clip height in px
+   * @param radius corner radius in px (0 = sharp corners)
+   * @return the same node, for chaining
+   */
+  public static &lt;T extends Node&gt; T clipRect(T node, double width, double height, double radius) {
+<span class="nc" id="L917">    Preconditions.requireNonNull(node, &quot;Styles.clipRect&quot;, &quot;node&quot;);</span>
+<span class="nc" id="L918">    javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(width, height);</span>
+<span class="nc" id="L919">    clip.setArcWidth(radius * 2);</span>
+<span class="nc" id="L920">    clip.setArcHeight(radius * 2);</span>
+<span class="nc" id="L921">    node.setClip(clip);</span>
+<span class="nc" id="L922">    return node;</span>
+  }
+
+  /**
+   * Clips a node to a rectangle without corner rounding.
+   *
+   * @param node the node to clip
+   * @param width clip width in px
+   * @param height clip height in px
+   * @return the same node, for chaining
+   */
+  public static &lt;T extends Node&gt; T clipRect(T node, double width, double height) {
+<span class="nc" id="L934">    return clipRect(node, width, height, 0);</span>
+  }
+
+  /**
+   * Clips a node to a circle centered in its bounds (analogous to CSS {@code mask-image:
+   * radial-gradient(circle, ...)}).
+   *
+   * &lt;p&gt;Useful for avatar images and circular buttons.
+   *
+   * &lt;pre&gt;
+   * Styles.clipCircle(avatarImageView);
+   * // The node is now circular. Re-call after resize to update the clip.
+   * &lt;/pre&gt;
+   *
+   * @param node the node to clip
+   */
+  public static void clipCircle(Node node) {
+<span class="nc" id="L951">    Preconditions.requireNonNull(node, &quot;Styles.clipCircle&quot;, &quot;node&quot;);</span>
+<span class="nc" id="L952">    javafx.scene.shape.Circle clip = new javafx.scene.shape.Circle();</span>
+    // Bind radius to half of min(width, height) — updates on resize
+<span class="nc" id="L954">    node.layoutBoundsProperty()</span>
+<span class="nc" id="L955">        .addListener(</span>
+            (obs, ov, nv) -&gt; {
+<span class="nc" id="L957">              double r = Math.min(nv.getWidth(), nv.getHeight()) / 2.0;</span>
+<span class="nc" id="L958">              clip.setCenterX(nv.getWidth() / 2.0);</span>
+<span class="nc" id="L959">              clip.setCenterY(nv.getHeight() / 2.0);</span>
+<span class="nc" id="L960">              clip.setRadius(r);</span>
+<span class="nc" id="L961">            });</span>
+<span class="nc" id="L962">    node.setClip(clip);</span>
+<span class="nc" id="L963">  }</span>
+
+  /**
+   * Clips a node to a rounded rectangle (analogous to CSS {@code overflow: hidden} + {@code
+   * border-radius}).
+   *
+   * &lt;pre&gt;
+   * Styles.clipRounded(imageView, 12); // 12px radius
+   * &lt;/pre&gt;
+   *
+   * @param node the node to clip
+   * @param radius corner radius in px
+   */
+  public static void clipRounded(Node node, double radius) {
+<span class="nc" id="L977">    Preconditions.requireNonNull(node, &quot;Styles.clipRounded&quot;, &quot;node&quot;);</span>
+<span class="nc" id="L978">    javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();</span>
+<span class="nc" id="L979">    clip.setArcWidth(radius * 2);</span>
+<span class="nc" id="L980">    clip.setArcHeight(radius * 2);</span>
+<span class="nc" id="L981">    node.layoutBoundsProperty()</span>
+<span class="nc" id="L982">        .addListener(</span>
+            (obs, ov, nv) -&gt; {
+<span class="nc" id="L984">              clip.setWidth(nv.getWidth());</span>
+<span class="nc" id="L985">              clip.setHeight(nv.getHeight());</span>
+<span class="nc" id="L986">            });</span>
+<span class="nc" id="L987">    node.setClip(clip);</span>
+<span class="nc" id="L988">  }</span>
+
+  /**
+   * Clips a node to an arbitrary {@link javafx.scene.shape.Shape} (analogous to CSS {@code
+   * mask-image} / {@code clip-path}).
+   *
+   * @param node the node to clip
+   * @param shape the clipping shape (coordinates should match node bounds)
+   */
+  public static void clipMask(Node node, javafx.scene.shape.Shape shape) {
+<span class="nc" id="L998">    Preconditions.requireNonNull(node, &quot;Styles.clipMask&quot;, &quot;node&quot;);</span>
+<span class="nc" id="L999">    Preconditions.requireNonNull(shape, &quot;Styles.clipMask&quot;, &quot;shape&quot;);</span>
+<span class="nc" id="L1000">    node.setClip(shape);</span>
+<span class="nc" id="L1001">  }</span>
+
+  /** Removes any clip/mask from the node. */
+  public static void clipNone(Node node) {
+<span class="nc" id="L1005">    Preconditions.requireNonNull(node, &quot;Styles.clipNone&quot;, &quot;node&quot;);</span>
+<span class="nc" id="L1006">    node.setClip(null);</span>
+<span class="nc" id="L1007">  }</span>
+
+  // SVG HELPERS — fill-current, stroke-current
+
+  /**
+   * Sets the fill color of a {@link javafx.scene.shape.Shape} node to match the text color of a
+   * reference node (analogous to CSS {@code fill: currentColor}).
+   *
+   * &lt;pre&gt;
+   * Label label = new Label(&quot;Click me&quot;);
+   * TailwindFX.apply(label, &quot;text-blue-500&quot;);
+   * SVGPath icon = loadIcon();
+   * Styles.fillCurrent(icon, label); // icon fill = label text color
+   * &lt;/pre&gt;
+   *
+   * @param shape the SVG shape whose fill to set
+   * @param reference the node whose text color to read
+   */
+  public static void fillCurrent(javafx.scene.shape.Shape shape, Node reference) {
+<span class="nc" id="L1026">    Preconditions.requireNonNull(shape, &quot;Styles.fillCurrent&quot;, &quot;shape&quot;);</span>
+<span class="nc" id="L1027">    Preconditions.requireNonNull(reference, &quot;Styles.fillCurrent&quot;, &quot;reference&quot;);</span>
+<span class="nc" id="L1028">    javafx.scene.paint.Paint fill =</span>
+        (javafx.scene.paint.Paint)
+            reference
+<span class="nc" id="L1031">                .getProperties()</span>
+<span class="nc" id="L1032">                .getOrDefault(&quot;tailwindfx.text.color&quot;, javafx.scene.paint.Color.BLACK);</span>
+<span class="nc" id="L1033">    shape.setFill(fill);</span>
+<span class="nc" id="L1034">  }</span>
+
+  /**
+   * Sets an SVG shape's fill to an explicit color.
+   *
+   * @param shape the shape to fill
+   * @param hex hex color string (e.g. {@code &quot;#3b82f6&quot;})
+   */
+  public static void fill(javafx.scene.shape.Shape shape, String hex) {
+<span class="nc" id="L1043">    Preconditions.requireNonNull(shape, &quot;Styles.fill&quot;, &quot;shape&quot;);</span>
+<span class="nc" id="L1044">    Preconditions.requireNonBlank(hex, &quot;Styles.fill&quot;, &quot;hex&quot;);</span>
+<span class="nc" id="L1045">    shape.setFill(javafx.scene.paint.Color.web(hex));</span>
+<span class="nc" id="L1046">  }</span>
+
+  /** Sets an SVG shape's stroke to an explicit color. */
+  public static void stroke(javafx.scene.shape.Shape shape, String hex) {
+<span class="nc" id="L1050">    Preconditions.requireNonNull(shape, &quot;Styles.stroke&quot;, &quot;shape&quot;);</span>
+<span class="nc" id="L1051">    Preconditions.requireNonBlank(hex, &quot;Styles.stroke&quot;, &quot;hex&quot;);</span>
+<span class="nc" id="L1052">    shape.setStroke(javafx.scene.paint.Color.web(hex));</span>
+<span class="nc bnc" id="L1053" title="All 2 branches missed.">    if (shape.getStrokeWidth() == 0) shape.setStrokeWidth(1);</span>
+<span class="nc" id="L1054">  }</span>
+
+  /** Sets stroke width. Shorthand for {@code shape.setStrokeWidth(width)}. */
+  public static void strokeWidth(javafx.scene.shape.Shape shape, double width) {
+<span class="nc" id="L1058">    Preconditions.requireNonNull(shape, &quot;Styles.strokeWidth&quot;, &quot;shape&quot;);</span>
+<span class="nc" id="L1059">    shape.setStrokeWidth(width);</span>
+<span class="nc" id="L1060">  }</span>
+
+  // 3D TRANSFORMS (JavaFX Rotate/Translate on 3 axes)
+
+  /**
+   * Rotates a node around the X axis (analogous to CSS {@code rotateX(deg)}).
+   *
+   * @param node the node to rotate
+   * @param degrees angle in degrees
+   */
+  public static void rotateX(Node node, double degrees) {
+<span class="nc" id="L1071">    Preconditions.requireNonNull(node, &quot;Styles.rotateX&quot;, &quot;node&quot;);</span>
+<span class="nc" id="L1072">    javafx.scene.transform.Rotate r =</span>
+        new javafx.scene.transform.Rotate(degrees, javafx.scene.transform.Rotate.X_AXIS);
+<span class="nc" id="L1074">    node.getTransforms()</span>
+<span class="nc" id="L1075">        .removeIf(</span>
+            t -&gt;
+<span class="nc bnc" id="L1077" title="All 2 branches missed.">                t instanceof javafx.scene.transform.Rotate</span>
+                    &amp;&amp; ((javafx.scene.transform.Rotate) t)
+<span class="nc" id="L1079">                        .getAxis()</span>
+<span class="nc bnc" id="L1080" title="All 2 branches missed.">                        .equals(javafx.scene.transform.Rotate.X_AXIS));</span>
+<span class="nc bnc" id="L1081" title="All 2 branches missed.">    if (degrees != 0) node.getTransforms().add(r);</span>
+<span class="nc" id="L1082">  }</span>
+
+  /**
+   * Rotates a node around the Y axis (analogous to CSS {@code rotateY(deg)}).
+   *
+   * @param node the node to rotate
+   * @param degrees angle in degrees
+   */
+  public static void rotateY(Node node, double degrees) {
+<span class="nc" id="L1091">    Preconditions.requireNonNull(node, &quot;Styles.rotateY&quot;, &quot;node&quot;);</span>
+<span class="nc" id="L1092">    javafx.scene.transform.Rotate r =</span>
+        new javafx.scene.transform.Rotate(degrees, javafx.scene.transform.Rotate.Y_AXIS);
+<span class="nc" id="L1094">    node.getTransforms()</span>
+<span class="nc" id="L1095">        .removeIf(</span>
+            t -&gt;
+<span class="nc bnc" id="L1097" title="All 2 branches missed.">                t instanceof javafx.scene.transform.Rotate</span>
+                    &amp;&amp; ((javafx.scene.transform.Rotate) t)
+<span class="nc" id="L1099">                        .getAxis()</span>
+<span class="nc bnc" id="L1100" title="All 2 branches missed.">                        .equals(javafx.scene.transform.Rotate.Y_AXIS));</span>
+<span class="nc bnc" id="L1101" title="All 2 branches missed.">    if (degrees != 0) node.getTransforms().add(r);</span>
+<span class="nc" id="L1102">  }</span>
+
+  /**
+   * Translates a node along the Z axis (analogous to CSS {@code translateZ(px)}). In JavaFX this
+   * changes {@link Node#setTranslateZ(double)}.
+   *
+   * @param node the node to translate
+   * @param px Z offset in px (positive = closer to viewer)
+   */
+  public static void translateZ(Node node, double px) {
+<span class="nc" id="L1112">    Preconditions.requireNonNull(node, &quot;Styles.translateZ&quot;, &quot;node&quot;);</span>
+<span class="nc" id="L1113">    node.setTranslateZ(px);</span>
+<span class="nc" id="L1114">  }</span>
+
+  /**
+   * Applies a perspective camera effect (depth perception).
+   *
+   * &lt;p&gt;Enables 3D depth on the node's parent scene by ensuring the scene uses a {@link
+   * javafx.scene.PerspectiveCamera}. The {@code focalLength} controls the perspective strength —
+   * lower values create more dramatic perspective.
+   *
+   * @param node any node in a Scene
+   * @param focalLength camera focal length (default ≈ 1000)
+   */
+  public static void perspective(Node node, double focalLength) {
+<span class="nc" id="L1127">    Preconditions.requireNonNull(node, &quot;Styles.perspective&quot;, &quot;node&quot;);</span>
+<span class="nc bnc" id="L1128" title="All 2 branches missed.">    if (node.getScene() == null) return;</span>
+<span class="nc" id="L1129">    javafx.scene.PerspectiveCamera cam = new javafx.scene.PerspectiveCamera(false);</span>
+<span class="nc" id="L1130">    cam.setFieldOfView(</span>
+<span class="nc" id="L1131">        Math.toDegrees(2 * Math.atan(node.getScene().getHeight() / 2 / focalLength)));</span>
+<span class="nc" id="L1132">    node.getScene().setCamera(cam);</span>
+<span class="nc" id="L1133">  }</span>
+
+  /** Resets all 3D transforms (rotateX, rotateY, translateZ). */
+  public static void reset3D(Node node) {
+<span class="nc" id="L1137">    Preconditions.requireNonNull(node, &quot;Styles.reset3D&quot;, &quot;node&quot;);</span>
+<span class="nc" id="L1138">    node.getTransforms()</span>
+<span class="nc" id="L1139">        .removeIf(</span>
+            t -&gt;
+<span class="nc bnc" id="L1141" title="All 2 branches missed.">                t instanceof javafx.scene.transform.Rotate</span>
+                    &amp;&amp; !((javafx.scene.transform.Rotate) t)
+<span class="nc" id="L1143">                        .getAxis()</span>
+<span class="nc bnc" id="L1144" title="All 2 branches missed.">                        .equals(javafx.scene.transform.Rotate.Z_AXIS));</span>
+<span class="nc" id="L1145">    node.setTranslateZ(0);</span>
+<span class="nc" id="L1146">  }</span>
+
+  // MOTION-REDUCE — respect prefers-reduced-motion
+
+  /** System property key for reduced motion preference. */
+  private static final String REDUCED_MOTION_KEY = &quot;tailwindfx.motion.reduced&quot;;
+
+  /**
+   * Sets the reduced-motion preference globally. When {@code true}, {@link #shouldAnimate()}
+   * returns {@code false}, allowing callers to skip or shorten animations (analogous to CSS {@code
+   * prefers-reduced-motion}).
+   *
+   * &lt;pre&gt;
+   * // Respect OS reduced-motion setting:
+   * Styles.setReducedMotion(Toolkit.getDefaultToolkit()
+   *     .getDesktopProperty(&quot;gnome.reduceAnimations&quot;) != null);
+   *
+   * // Or force it in tests:
+   * Styles.setReducedMotion(true);
+   * if (Styles.shouldAnimate()) TwAnimation.fadeIn(node).play();
+   * &lt;/pre&gt;
+   *
+   * @param reduced {@code true} to suppress animations
+   */
+  public static void setReducedMotion(boolean reduced) {
+<span class="nc" id="L1171">    System.setProperty(REDUCED_MOTION_KEY, String.valueOf(reduced));</span>
+<span class="nc" id="L1172">  }</span>
+
+  /**
+   * Returns {@code true} if animations should run (motion is NOT reduced). Check this before
+   * starting non-essential animations.
+   *
+   * @return {@code false} when reduced-motion is enabled
+   */
+  public static boolean shouldAnimate() {
+<span class="nc bnc" id="L1181" title="All 2 branches missed.">    return !&quot;true&quot;.equalsIgnoreCase(System.getProperty(REDUCED_MOTION_KEY, &quot;false&quot;));</span>
+  }
+
+  /**
+   * Plays an animation only if motion is not reduced. If reduced, the final state is applied
+   * instantly.
+   *
+   * &lt;pre&gt;
+   * Styles.playIfMotionOk(TwAnimation.fadeIn(node, 300));
+   * &lt;/pre&gt;
+   *
+   * @param animation the animation to conditionally play
+   */
+  public static void playIfMotionOk(TwAnimation animation) {
+<span class="nc" id="L1195">    Preconditions.requireNonNull(animation, &quot;Styles.playIfMotionOk&quot;, &quot;animation&quot;);</span>
+<span class="nc bnc" id="L1196" title="All 2 branches missed.">    if (shouldAnimate()) {</span>
+<span class="nc" id="L1197">      animation.play();</span>
+    } else {
+      // Jump to end state: play at very high speed for 1 frame then stop
+<span class="nc" id="L1200">      animation.speed(100.0).play();</span>
+    }
+<span class="nc" id="L1202">  }</span>
+
+  // GLASSMORPHISM / NEUMORPHISM PRESETS
+
+  /**
+   * Applies a glassmorphism effect to a node.
+   *
+   * &lt;p&gt;Sets semi-transparent background, border, and blur effect. For best results, place the node
+   * over a colorful background.
+   *
+   * &lt;pre&gt;
+   * Styles.glass(panel);
+   * TailwindFX.backdropBlur(panel, 12); // blur the content behind
+   * &lt;/pre&gt;
+   *
+   * @param node the node to style as glass
+   */
+  public static void glass(Region node) {
+<span class="nc" id="L1220">    Preconditions.requireNonNull(node, &quot;Styles.glass&quot;, &quot;node&quot;);</span>
+<span class="nc" id="L1221">    node.setStyle(</span>
+<span class="nc" id="L1222">        node.getStyle()</span>
+            + &quot; -fx-background-color: rgba(255,255,255,0.15);&quot;
+            + &quot; -fx-background-radius: 12;&quot;
+            + &quot; -fx-border-color: rgba(255,255,255,0.30);&quot;
+            + &quot; -fx-border-radius: 12;&quot;
+            + &quot; -fx-border-width: 1;&quot;);
+<span class="nc" id="L1228">    node.setEffect(new javafx.scene.effect.BoxBlur(12, 12, 3));</span>
+<span class="nc" id="L1229">  }</span>
+
+  /** Dark-tinted glass variant (for dark backgrounds). */
+  public static void glassDark(Region node) {
+<span class="nc" id="L1233">    Preconditions.requireNonNull(node, &quot;Styles.glassDark&quot;, &quot;node&quot;);</span>
+<span class="nc" id="L1234">    node.setStyle(</span>
+<span class="nc" id="L1235">        node.getStyle()</span>
+            + &quot; -fx-background-color: rgba(0,0,0,0.20);&quot;
+            + &quot; -fx-background-radius: 12;&quot;
+            + &quot; -fx-border-color: rgba(255,255,255,0.10);&quot;
+            + &quot; -fx-border-radius: 12;&quot;
+            + &quot; -fx-border-width: 1;&quot;);
+<span class="nc" id="L1241">    node.setEffect(new javafx.scene.effect.BoxBlur(12, 12, 3));</span>
+<span class="nc" id="L1242">  }</span>
+
+  /**
+   * Applies a neumorphism (soft-UI) effect to a node.
+   *
+   * &lt;p&gt;Creates the characteristic dual-shadow look. Background color of the node should be {@code
+   * #e0e5ec} for best results.
+   *
+   * @param node the Region to style
+   */
+  public static void neumorph(Region node) {
+<span class="nc" id="L1253">    Preconditions.requireNonNull(node, &quot;Styles.neumorph&quot;, &quot;node&quot;);</span>
+<span class="nc" id="L1254">    node.setStyle(</span>
+<span class="nc" id="L1255">        node.getStyle() + &quot; -fx-background-color: #e0e5ec;&quot; + &quot; -fx-background-radius: 12;&quot;);</span>
+<span class="nc" id="L1256">    node.setEffect(</span>
+        new javafx.scene.effect.DropShadow(
+            javafx.scene.effect.BlurType.GAUSSIAN,
+<span class="nc" id="L1259">            javafx.scene.paint.Color.web(&quot;#a3b1c6&quot;),</span>
+            10,
+            0,
+            -4,
+            -4));
+<span class="nc" id="L1264">  }</span>
+
+  /** Inset neumorphism (pressed state). */
+  public static void neumorphInset(Region node) {
+<span class="nc" id="L1268">    Preconditions.requireNonNull(node, &quot;Styles.neumorphInset&quot;, &quot;node&quot;);</span>
+<span class="nc" id="L1269">    node.setStyle(</span>
+<span class="nc" id="L1270">        node.getStyle() + &quot; -fx-background-color: #e0e5ec;&quot; + &quot; -fx-background-radius: 12;&quot;);</span>
+<span class="nc" id="L1271">    node.setEffect(</span>
+        new javafx.scene.effect.InnerShadow(
+            javafx.scene.effect.BlurType.GAUSSIAN,
+<span class="nc" id="L1274">            javafx.scene.paint.Color.web(&quot;#a3b1c6&quot;),</span>
+            10,
+            0,
+            4,
+            4));
+<span class="nc" id="L1279">  }</span>
+
+  // USER-SELECT — Control de selección de texto
+  // Corresponde a: user-select: none/text/all/auto en CSS web
+
+  /** .select-none — Disables text selection */
+  public static &lt;T extends Node&gt; T selectNone(T node) {
+<span class="nc" id="L1286">    node.setMouseTransparent(true);</span>
+<span class="nc" id="L1287">    return node;</span>
+  }
+
+  /** .select-text — Enables text selection (default behavior) */
+  public static &lt;T extends Node&gt; T selectText(T node) {
+<span class="nc" id="L1292">    node.setMouseTransparent(false);</span>
+<span class="nc" id="L1293">    return node;</span>
+  }
+
+  /** .select-all — Selects all text on click */
+  public static &lt;T extends Node&gt; T selectAll(T node) {
+<span class="nc bnc" id="L1298" title="All 2 branches missed.">    if (node instanceof javafx.scene.control.TextInputControl) {</span>
+<span class="nc" id="L1299">      node.setOnMouseClicked(</span>
+          e -&gt; {
+<span class="nc" id="L1301">            ((javafx.scene.control.TextInputControl) node).selectAll();</span>
+<span class="nc" id="L1302">          });</span>
+    }
+<span class="nc" id="L1304">    return node;</span>
+  }
+
+  /** .select-auto — Automatic selection behavior based on context */
+  public static &lt;T extends Node&gt; T selectAuto(T node) {
+<span class="nc" id="L1309">    node.setMouseTransparent(false);</span>
+<span class="nc" id="L1310">    return node;</span>
+  }
+
+  // TOUCH-ACTION — Control de gestos táctiles
+  // Corresponde a: touch-action: auto/none/pan-x/pan-y/pinch-zoom/manipulation en CSS web
+
+  /** .touch-auto — Default touch gesture handling */
+  public static &lt;T extends Node&gt; T touchAuto(T node) {
+<span class="nc" id="L1318">    node.getProperties().remove(&quot;touch-action&quot;);</span>
+<span class="nc" id="L1319">    return node;</span>
+  }
+
+  /** .touch-none — Disables all touch gestures */
+  @SuppressWarnings(&quot;unchecked&quot;)
+  public static &lt;T extends Node&gt; T touchNone(T node) {
+<span class="nc" id="L1325">    node.getProperties().put(&quot;touch-action&quot;, &quot;none&quot;);</span>
+<span class="nc bnc" id="L1326" title="All 2 branches missed.">    if (node instanceof Region) {</span>
+<span class="nc" id="L1327">      ((Region) node).addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, e -&gt; e.consume());</span>
+<span class="nc" id="L1328">      ((Region) node).addEventFilter(javafx.scene.input.ZoomEvent.ZOOM, e -&gt; e.consume());</span>
+<span class="nc" id="L1329">      ((Region) node).addEventFilter(javafx.scene.input.RotateEvent.ROTATE, e -&gt; e.consume());</span>
+    }
+<span class="nc" id="L1331">    return node;</span>
+  }
+
+  /** .touch-pan-x — Allows only horizontal scrolling */
+  @SuppressWarnings(&quot;unchecked&quot;)
+  public static &lt;T extends Node&gt; T touchPanX(T node) {
+<span class="nc" id="L1337">    node.getProperties().put(&quot;touch-action&quot;, &quot;pan-x&quot;);</span>
+<span class="nc bnc" id="L1338" title="All 2 branches missed.">    if (node instanceof Region) {</span>
+<span class="nc" id="L1339">      ((Region) node)</span>
+<span class="nc" id="L1340">          .addEventFilter(</span>
+              javafx.scene.input.ScrollEvent.SCROLL,
+              e -&gt; {
+<span class="nc bnc" id="L1343" title="All 2 branches missed.">                if (Math.abs(e.getDeltaY()) &gt; Math.abs(e.getDeltaX())) {</span>
+<span class="nc" id="L1344">                  e.consume();</span>
+                }
+<span class="nc" id="L1346">              });</span>
+    }
+<span class="nc" id="L1348">    return node;</span>
+  }
+
+  /** .touch-pan-y — Allows only vertical scrolling */
+  @SuppressWarnings(&quot;unchecked&quot;)
+  public static &lt;T extends Node&gt; T touchPanY(T node) {
+<span class="nc" id="L1354">    node.getProperties().put(&quot;touch-action&quot;, &quot;pan-y&quot;);</span>
+<span class="nc bnc" id="L1355" title="All 2 branches missed.">    if (node instanceof Region) {</span>
+<span class="nc" id="L1356">      ((Region) node)</span>
+<span class="nc" id="L1357">          .addEventFilter(</span>
+              javafx.scene.input.ScrollEvent.SCROLL,
+              e -&gt; {
+<span class="nc bnc" id="L1360" title="All 2 branches missed.">                if (Math.abs(e.getDeltaX()) &gt; Math.abs(e.getDeltaY())) {</span>
+<span class="nc" id="L1361">                  e.consume();</span>
+                }
+<span class="nc" id="L1363">              });</span>
+    }
+<span class="nc" id="L1365">    return node;</span>
+  }
+
+  /** .touch-pinch-zoom — Allows pinch-to-zoom gestures */
+  public static &lt;T extends Node&gt; T touchPinchZoom(T node) {
+<span class="nc" id="L1370">    node.getProperties().put(&quot;touch-action&quot;, &quot;pinch-zoom&quot;);</span>
+<span class="nc" id="L1371">    return node;</span>
+  }
+
+  /** .touch-manipulation — Allows panning without zooming */
+  @SuppressWarnings(&quot;unchecked&quot;)
+  public static &lt;T extends Node&gt; T touchManipulation(T node) {
+<span class="nc" id="L1377">    node.getProperties().put(&quot;touch-action&quot;, &quot;manipulation&quot;);</span>
+<span class="nc bnc" id="L1378" title="All 2 branches missed.">    if (node instanceof Region) {</span>
+<span class="nc" id="L1379">      ((Region) node).addEventFilter(javafx.scene.input.ZoomEvent.ZOOM, e -&gt; e.consume());</span>
+    }
+<span class="nc" id="L1381">    return node;</span>
+  }
+
+  // SCROLL-SNAP — Snap scrolling behavior
+  // Corresponde a: scroll-snap-align/type en CSS web
+
+  /** .snap-start — Snap to start of container */
+  public static &lt;T extends Region&gt; T snapStart(T node) {
+<span class="nc" id="L1389">    node.getProperties().put(&quot;scroll-snap-align&quot;, &quot;start&quot;);</span>
+<span class="nc" id="L1390">    return node;</span>
+  }
+
+  /** .snap-end — Snap to end of container */
+  public static &lt;T extends Region&gt; T snapEnd(T node) {
+<span class="nc" id="L1395">    node.getProperties().put(&quot;scroll-snap-align&quot;, &quot;end&quot;);</span>
+<span class="nc" id="L1396">    return node;</span>
+  }
+
+  /** .snap-center — Snap to center of container */
+  public static &lt;T extends Region&gt; T snapCenter(T node) {
+<span class="nc" id="L1401">    node.getProperties().put(&quot;scroll-snap-align&quot;, &quot;center&quot;);</span>
+<span class="nc" id="L1402">    return node;</span>
+  }
+
+  /** .snap-none — No snapping alignment */
+  public static &lt;T extends Region&gt; T snapAlignNone(T node) {
+<span class="nc" id="L1407">    node.getProperties().put(&quot;scroll-snap-align&quot;, &quot;none&quot;);</span>
+<span class="nc" id="L1408">    return node;</span>
+  }
+
+  /** .snap-x — Enable snapping on X axis */
+  public static &lt;T extends Region&gt; T snapX(T node) {
+<span class="nc" id="L1413">    node.getProperties().put(&quot;scroll-snap-type&quot;, &quot;x&quot;);</span>
+<span class="nc" id="L1414">    return node;</span>
+  }
+
+  /** .snap-y — Enable snapping on Y axis */
+  public static &lt;T extends Region&gt; T snapY(T node) {
+<span class="nc" id="L1419">    node.getProperties().put(&quot;scroll-snap-type&quot;, &quot;y&quot;);</span>
+<span class="nc" id="L1420">    return node;</span>
+  }
+
+  /** .snap-both — Enable snapping on both axes */
+  public static &lt;T extends Region&gt; T snapBoth(T node) {
+<span class="nc" id="L1425">    node.getProperties().put(&quot;scroll-snap-type&quot;, &quot;both&quot;);</span>
+<span class="nc" id="L1426">    return node;</span>
+  }
+
+  /** .snap-mandatory — Always snap to target */
+  public static &lt;T extends Region&gt; T snapMandatory(T node) {
+<span class="nc" id="L1431">    node.getProperties().put(&quot;scroll-snap-stop&quot;, &quot;mandatory&quot;);</span>
+<span class="nc" id="L1432">    return node;</span>
+  }
+
+  /** .snap-proximity — Snap only when close to target */
+  public static &lt;T extends Region&gt; T snapProximity(T node) {
+<span class="nc" id="L1437">    node.getProperties().put(&quot;scroll-snap-stop&quot;, &quot;normal&quot;);</span>
+<span class="nc" id="L1438">    return node;</span>
+  }
+
+  // COLUMNS — Multi-column layout
+  // Corresponde a: columns-N/auto en CSS web
+
+  /** .columns-1 — Single column layout */
+  public static &lt;T extends Pane&gt; T columns1(T node) {
+<span class="nc" id="L1446">    return applyColumns(node, 1);</span>
+  }
+
+  /** .columns-2 — Two column layout */
+  public static &lt;T extends Pane&gt; T columns2(T node) {
+<span class="nc" id="L1451">    return applyColumns(node, 2);</span>
+  }
+
+  /** .columns-3 — Three column layout */
+  public static &lt;T extends Pane&gt; T columns3(T node) {
+<span class="nc" id="L1456">    return applyColumns(node, 3);</span>
+  }
+
+  /** .columns-4 — Four column layout */
+  public static &lt;T extends Pane&gt; T columns4(T node) {
+<span class="nc" id="L1461">    return applyColumns(node, 4);</span>
+  }
+
+  /** .columns-5 — Five column layout */
+  public static &lt;T extends Pane&gt; T columns5(T node) {
+<span class="nc" id="L1466">    return applyColumns(node, 5);</span>
+  }
+
+  /** .columns-6 — Six column layout */
+  public static &lt;T extends Pane&gt; T columns6(T node) {
+<span class="nc" id="L1471">    return applyColumns(node, 6);</span>
+  }
+
+  /** .columns-7 — Seven column layout */
+  public static &lt;T extends Pane&gt; T columns7(T node) {
+<span class="nc" id="L1476">    return applyColumns(node, 7);</span>
+  }
+
+  /** .columns-8 — Eight column layout */
+  public static &lt;T extends Pane&gt; T columns8(T node) {
+<span class="nc" id="L1481">    return applyColumns(node, 8);</span>
+  }
+
+  /** .columns-9 — Nine column layout */
+  public static &lt;T extends Pane&gt; T columns9(T node) {
+<span class="nc" id="L1486">    return applyColumns(node, 9);</span>
+  }
+
+  /** .columns-10 — Ten column layout */
+  public static &lt;T extends Pane&gt; T columns10(T node) {
+<span class="nc" id="L1491">    return applyColumns(node, 10);</span>
+  }
+
+  /** .columns-11 — Eleven column layout */
+  public static &lt;T extends Pane&gt; T columns11(T node) {
+<span class="nc" id="L1496">    return applyColumns(node, 11);</span>
+  }
+
+  /** .columns-12 — Twelve column layout */
+  public static &lt;T extends Pane&gt; T columns12(T node) {
+<span class="nc" id="L1501">    return applyColumns(node, 12);</span>
+  }
+
+  /** .columns-auto — Automatic column layout based on content */
+  public static &lt;T extends Pane&gt; T columnsAuto(T node) {
+<span class="nc" id="L1506">    return applyColumns(node, -1);</span>
+  }
+
+  private static &lt;T extends Pane&gt; T applyColumns(T node, int count) {
+<span class="nc bnc" id="L1510" title="All 2 branches missed.">    if (count &lt;= 0) {</span>
+<span class="nc" id="L1511">      node.getProperties().put(&quot;columns&quot;, &quot;auto&quot;);</span>
+    } else {
+<span class="nc" id="L1513">      node.getProperties().put(&quot;columns&quot;, String.valueOf(count));</span>
+<span class="nc" id="L1514">      node.setPrefWidth(count * 100);</span>
+    }
+<span class="nc" id="L1516">    return node;</span>
+  }
+
+  /**
+   * Checks if a token is a known utility class that can be applied via CSS. Uses regex validation
+   * to detect typos while avoiding false positives. Used for debug warnings on unknown tokens.
+   */
+  public static boolean isKnownUtilityClass(String token) {
+<span class="pc bpc" id="L1524" title="2 of 4 branches missed.">    if (token == null || token.isEmpty()) {</span>
+<span class="nc" id="L1525">      return false;</span>
+    }
+
+    // Component classes - exact prefix match
+<span class="fc" id="L1529">    java.util.Set&lt;String&gt; componentPrefixes = new java.util.HashSet&lt;&gt;();</span>
+<span class="fc" id="L1530">    componentPrefixes.add(&quot;btn&quot;);</span>
+<span class="fc" id="L1531">    componentPrefixes.add(&quot;input&quot;);</span>
+<span class="fc" id="L1532">    componentPrefixes.add(&quot;card&quot;);</span>
+<span class="fc" id="L1533">    componentPrefixes.add(&quot;badge&quot;);</span>
+<span class="fc" id="L1534">    componentPrefixes.add(&quot;avatar&quot;);</span>
+<span class="fc" id="L1535">    componentPrefixes.add(&quot;alert&quot;);</span>
+<span class="fc" id="L1536">    componentPrefixes.add(&quot;spinner&quot;);</span>
+<span class="fc" id="L1537">    componentPrefixes.add(&quot;tooltip&quot;);</span>
+<span class="fc" id="L1538">    componentPrefixes.add(&quot;modal&quot;);</span>
+<span class="fc" id="L1539">    componentPrefixes.add(&quot;group&quot;);</span>
+
+<span class="fc bfc" id="L1541" title="All 2 branches covered.">    for (String prefix : componentPrefixes) {</span>
+<span class="fc bfc" id="L1542" title="All 4 branches covered.">      if (token.equals(prefix) || token.startsWith(prefix + &quot;-&quot;)) {</span>
+<span class="fc" id="L1543">        return true;</span>
+      }
+<span class="fc" id="L1545">    }</span>
+
+    // Theme variants
+<span class="pc bpc" id="L1548" title="1 of 2 branches missed.">    if (token.equals(&quot;dark&quot;)</span>
+<span class="pc bpc" id="L1549" title="1 of 2 branches missed.">        || token.equals(&quot;light&quot;)</span>
+<span class="pc bpc" id="L1550" title="1 of 2 branches missed.">        || token.startsWith(&quot;dark:&quot;)</span>
+<span class="pc bpc" id="L1551" title="1 of 2 branches missed.">        || token.startsWith(&quot;light:&quot;)) {</span>
+<span class="nc" id="L1552">      return true;</span>
+    }
+
+    // Tailwind utility classes with regex validation to catch typos
+    // Pattern: prefix-value (e.g., rounded-lg, p-4, bg-red-500)
+    // This catches typos like &quot;pd-4&quot; (invalid) vs &quot;p-4&quot; (valid)
+<span class="fc" id="L1558">    java.util.regex.Pattern[] validPatterns = {</span>
+<span class="fc" id="L1559">      java.util.regex.Pattern.compile(&quot;^rounded(-[a-zA-Z0-9]+)?$&quot;),</span>
+<span class="fc" id="L1560">      java.util.regex.Pattern.compile(&quot;^font(-[a-zA-Z0-9]+)?$&quot;),</span>
+<span class="fc" id="L1561">      java.util.regex.Pattern.compile(&quot;^shadow(-[a-zA-Z0-9]+)?$&quot;),</span>
+<span class="fc" id="L1562">      java.util.regex.Pattern.compile(&quot;^(flex|hidden|italic)$&quot;),</span>
+<span class="fc" id="L1563">      java.util.regex.Pattern.compile(&quot;^text(-[a-zA-Z0-9]+)?$&quot;),</span>
+<span class="fc" id="L1564">      java.util.regex.Pattern.compile(&quot;^bg(-[a-zA-Z0-9]+)?$&quot;),</span>
+<span class="fc" id="L1565">      java.util.regex.Pattern.compile(&quot;^border(-[a-zA-Z0-9]+)?$&quot;),</span>
+<span class="fc" id="L1566">      java.util.regex.Pattern.compile(&quot;^[pm](t|r|b|l|x|y)?(-[a-zA-Z0-9\\[\\]]+)?$&quot;),</span>
+<span class="fc" id="L1567">      java.util.regex.Pattern.compile(&quot;^(w|h|min|max)(-[a-zA-Z0-9]+)?$&quot;),</span>
+<span class="fc" id="L1568">      java.util.regex.Pattern.compile(&quot;^opacity(-[0-9]+)?$&quot;),</span>
+<span class="fc" id="L1569">      java.util.regex.Pattern.compile(&quot;^rotate(-[0-9]+)?$&quot;),</span>
+<span class="fc" id="L1570">      java.util.regex.Pattern.compile(&quot;^scale(-[0-9]+)?$&quot;),</span>
+<span class="fc" id="L1571">      java.util.regex.Pattern.compile(&quot;^translate(x|y)?(-[a-zA-Z0-9]+)?$&quot;),</span>
+<span class="fc" id="L1572">      java.util.regex.Pattern.compile(&quot;^skew(x|y)?(-[0-9]+)?$&quot;),</span>
+<span class="fc" id="L1573">      java.util.regex.Pattern.compile(&quot;^cursor(-[a-zA-Z]+)?$&quot;),</span>
+<span class="fc" id="L1574">      java.util.regex.Pattern.compile(&quot;^overflow(-[a-zA-Z]+)?$&quot;),</span>
+<span class="fc" id="L1575">      java.util.regex.Pattern.compile(&quot;^resize$&quot;),</span>
+<span class="fc" id="L1576">      java.util.regex.Pattern.compile(&quot;^visible$&quot;),</span>
+<span class="fc" id="L1577">      java.util.regex.Pattern.compile(&quot;^z(-[a-zA-Z0-9]+)?$&quot;),</span>
+<span class="fc" id="L1578">      java.util.regex.Pattern.compile(&quot;^blur(-[a-zA-Z0-9]+)?$&quot;),</span>
+<span class="fc" id="L1579">      java.util.regex.Pattern.compile(&quot;^brightness(-[0-9]+)?$&quot;),</span>
+<span class="fc" id="L1580">      java.util.regex.Pattern.compile(&quot;^contrast(-[0-9]+)?$&quot;),</span>
+<span class="fc" id="L1581">      java.util.regex.Pattern.compile(&quot;^grayscale(-[0-9]+)?$&quot;),</span>
+<span class="fc" id="L1582">      java.util.regex.Pattern.compile(&quot;^invert(-[0-9]+)?$&quot;),</span>
+<span class="fc" id="L1583">      java.util.regex.Pattern.compile(&quot;^sepia(-[0-9]+)?$&quot;)</span>
+    };
+
+<span class="fc bfc" id="L1586" title="All 2 branches covered.">    for (java.util.regex.Pattern pattern : validPatterns) {</span>
+<span class="fc bfc" id="L1587" title="All 2 branches covered.">      if (pattern.matcher(token).matches()) {</span>
+<span class="fc" id="L1588">        return true;</span>
+      }
+    }
+
+<span class="fc" id="L1592">    return false;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

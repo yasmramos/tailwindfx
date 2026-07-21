@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: io.github.yasmramos.tailwindfx.layout.TwLayoutTest
+-------------------------------------------------------------------------------
+Tests run: 26, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.595 s -- in io.github.yasmramos.tailwindfx.layout.TwLayoutTest

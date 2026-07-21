@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TwBadge.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TailwindFX Base</a> &gt; <a href="index.source.html" class="el_package">io.github.yasmramos.tailwindfx.components</a> &gt; <span class="el_source">TwBadge.java</span></div><h1>TwBadge.java</h1><pre class="source lang-java linenums">package io.github.yasmramos.tailwindfx.components;
+
+import io.github.yasmramos.tailwindfx.TailwindFX;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+
+/**
+ * TwBadge — Pre-styled badge and pill components.
+ *
+ * &lt;p&gt;Uses base .badge class from tailwindfx-components.css with utility modifiers.
+ *
+ * &lt;pre&gt;
+ * TwBadge badge = TwBadge.create(&quot;NEW&quot;, &quot;blue&quot;);
+ * TwBadge pill = TwBadge.pill(&quot;Active&quot;, &quot;green&quot;);
+ * TwBadge dot = TwBadge.dot(&quot;Online&quot;, &quot;green&quot;);
+ * &lt;/pre&gt;
+ */
+public class TwBadge extends Label {
+
+  /**
+   * Creates a small badge label (e.g. NEW, BETA, PRO).
+   *
+   * @param text badge text
+   * @return styled TwBadge with default blue color
+   */
+  public static TwBadge create(String text) {
+<span class="fc" id="L29">    return create(text, &quot;blue&quot;);</span>
+  }
+
+  /**
+   * Creates a small badge label with custom color.
+   *
+   * @param text badge text
+   * @param color Tailwind color name (e.g. &quot;blue&quot;, &quot;green&quot;, &quot;red&quot;)
+   * @return styled TwBadge
+   */
+  public static TwBadge create(String text, String color) {
+<span class="fc" id="L40">    TwBadge lbl = new TwBadge();</span>
+<span class="fc" id="L41">    lbl.setText(text.toUpperCase());</span>
+<span class="fc" id="L42">    TailwindFX.apply(lbl, &quot;badge&quot;, &quot;badge-&quot; + color, &quot;badge-md&quot;);</span>
+<span class="fc" id="L43">    return lbl;</span>
+  }
+
+  /**
+   * Creates a rounded pill / chip label.
+   *
+   * @param text pill text
+   * @return styled TwBadge with default blue color
+   */
+  public static TwBadge pill(String text) {
+<span class="fc" id="L53">    return pill(text, &quot;blue&quot;);</span>
+  }
+
+  /**
+   * Creates a rounded pill / chip label with custom color.
+   *
+   * @param text pill text
+   * @param color Tailwind color name
+   * @return styled TwBadge
+   */
+  public static TwBadge pill(String text, String color) {
+<span class="fc" id="L64">    TwBadge lbl = create(text, color);</span>
+<span class="fc" id="L65">    TailwindFX.apply(lbl, &quot;badge-pill&quot;);</span>
+<span class="fc" id="L66">    return lbl;</span>
+  }
+
+  /**
+   * Creates a badge with a status dot indicator.
+   *
+   * @param text badge text
+   * @param color Tailwind color name for the dot
+   * @return TwBadgeDot container with dot and text
+   */
+  public static TwBadgeDot dot(String text, String color) {
+<span class="fc" id="L77">    return dot(text, color, &quot;gray&quot;);</span>
+  }
+
+  /**
+   * Creates a badge with a status dot indicator.
+   *
+   * @param text badge text
+   * @param dotColor Tailwind color name for the dot
+   * @param textColor Tailwind color name for the text
+   * @return TwBadgeDot container with dot and text
+   */
+  public static TwBadgeDot dot(String text, String dotColor, String textColor) {
+<span class="fc" id="L89">    return new TwBadgeDot(text, dotColor, textColor);</span>
+  }
+
+  /**
+   * Creates an outline badge (border only).
+   *
+   * @param text badge text
+   * @return styled TwBadge with default gray color
+   */
+  public static TwBadge outline(String text) {
+<span class="fc" id="L99">    return outline(text, &quot;gray&quot;);</span>
+  }
+
+  /**
+   * Creates an outline badge with custom color.
+   *
+   * @param text badge text
+   * @param color Tailwind color name
+   * @return styled TwBadge
+   */
+  public static TwBadge outline(String text, String color) {
+<span class="fc" id="L110">    TwBadge lbl = new TwBadge();</span>
+<span class="fc" id="L111">    lbl.setText(text.toUpperCase());</span>
+<span class="fc" id="L112">    TailwindFX.apply(lbl, &quot;badge&quot;, &quot;badge-outline&quot;, &quot;badge-&quot; + color, &quot;badge-md&quot;);</span>
+<span class="fc" id="L113">    return lbl;</span>
+  }
+
+  /** Protected constructor for internal usage. */
+  protected TwBadge() {
+<span class="fc" id="L118">    super();</span>
+<span class="fc" id="L119">  }</span>
+
+  /** Container for badge with dot indicator. */
+  public static class TwBadgeDot extends HBox {
+
+    private final Label dot;
+    private final TwBadge label;
+
+    /**
+     * Creates a badge with dot indicator.
+     *
+     * @param text badge text
+     * @param dotColor Tailwind color name for the dot
+     * @param textColor Tailwind color name for the text
+     */
+    public TwBadgeDot(String text, String dotColor, String textColor) {
+<span class="fc" id="L135">      super();</span>
+
+<span class="fc" id="L137">      dot = new Label();</span>
+<span class="fc" id="L138">      TailwindFX.apply(dot, &quot;dot&quot;, &quot;dot-&quot; + dotColor, &quot;dot-sm&quot;);</span>
+
+<span class="fc" id="L140">      label = new TwBadge();</span>
+<span class="fc" id="L141">      label.setText(text);</span>
+<span class="fc" id="L142">      TailwindFX.apply(label, &quot;badge&quot;, &quot;badge-&quot; + textColor, &quot;badge-compact&quot;);</span>
+<span class="fc" id="L143">      label.setPadding(new Insets(0));</span>
+
+<span class="fc" id="L145">      getChildren().addAll(dot, label);</span>
+<span class="fc" id="L146">      setSpacing(4);</span>
+<span class="fc" id="L147">      setAlignment(Pos.CENTER_LEFT);</span>
+<span class="fc" id="L148">    }</span>
+
+    /**
+     * Gets the dot node.
+     *
+     * @return the dot Label
+     */
+    public Label getDot() {
+<span class="fc" id="L156">      return dot;</span>
+    }
+
+    /**
+     * Gets the text label.
+     *
+     * @return the TwBadge label
+     */
+    public TwBadge getLabel() {
+<span class="fc" id="L165">      return label;</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
