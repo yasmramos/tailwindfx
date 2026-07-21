@@ -164,18 +164,17 @@ public class MyApp extends Application {
         // 1. Install (loads CSS + wires breakpoints)
         TwInstall.install(scene);
 
-        // 2. Build UI with utilities
-        VBox card = new VBox(12);
-        TwStyle.apply(card, "card", "w-80");
+        // 2. Build UI with components and utilities
+        TwCard card = new TwCard()
+            .withTitle("Hello TailwindFX")
+            .withContent("Welcome to utility-first JavaFX")
+            .apply("w-80");
 
-        Label title = new Label("Hello TailwindFX");
-        TwStyle.apply(title, "text-2xl", "font-bold", "text-blue-600");
-
-        Button btn = new Button("Get Started");
-        TwStyle.apply(btn, "btn-primary", "rounded-lg");
+        TwButton btn = TwButton.primary("Get Started")
+            .apply("rounded-lg");
         TwAnimation.onHoverScale(btn, 1.05);
 
-        card.getChildren().addAll(title, btn);
+        card.getChildren().add(btn);
         root.getChildren().add(card);
 
         stage.setScene(scene);
