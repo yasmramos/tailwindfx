@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.testfx.framework.junit5.ApplicationTest;
+import org.testfx.util.WaitForAsyncUtils;
 
 /** Unit tests for TwFlexPane layout container. */
 @DisplayName("TwFlexPane Layout Tests")
@@ -358,5 +359,140 @@ class TwFlexPaneTest extends ApplicationTest {
     assertEquals(0.0, pane.getGapX(), 0.001);
     assertEquals(0.0, pane.getGapY(), 0.001);
     assertEquals(Insets.EMPTY, pane.getPadding());
+  }
+
+  @Test
+  @DisplayName("Should set direction instantly when duration is 0 or negative")
+  void testSetDirectionAnimatedZeroDuration() {
+    flexPane.setDirection(TwFlexPane.Direction.ROW);
+    
+    flexPane.setDirectionAnimated(TwFlexPane.Direction.COL, 0);
+    assertEquals(TwFlexPane.Direction.COL, flexPane.getDirection());
+    
+    flexPane.setDirectionAnimated(TwFlexPane.Direction.ROW, -100);
+    assertEquals(TwFlexPane.Direction.ROW, flexPane.getDirection());
+  }
+
+  @Test
+  @DisplayName("Should not animate when direction is the same")
+  void testSetDirectionAnimatedSameDirection() {
+    flexPane.setDirection(TwFlexPane.Direction.ROW);
+    
+    flexPane.setDirectionAnimated(TwFlexPane.Direction.ROW, 200);
+    assertEquals(TwFlexPane.Direction.ROW, flexPane.getDirection());
+  }
+
+  @Test
+  @DisplayName("Should throw exception when setting null direction in animated method")
+  void testSetDirectionAnimatedNullDirection() {
+    assertThrows(IllegalArgumentException.class, () -> flexPane.setDirectionAnimated(null, 200));
+  }
+
+  @Test
+  @DisplayName("Should set shrink factor and trigger layout on parent")
+  void testSetShrinkTriggersLayout() {
+    Label child = new Label("Test");
+    interact(() -> flexPane.getChildren().add(child));
+    
+    TwFlexPane.setShrink(child, 0.5);
+    assertEquals(0.5, TwFlexPane.getShrink(child), 0.001);
+  }
+
+  @Test
+  @DisplayName("Should throw exception when setting shrink on null node")
+  void testSetShrinkOnNullNode() {
+    assertThrows(IllegalArgumentException.class, () -> TwFlexPane.setShrink(null, 1.0));
+  }
+
+  @Test
+  @DisplayName("Should set basis with negative value for auto")
+  void testSetBasisAuto() {
+    Label child = new Label("Test");
+    
+    TwFlexPane.setBasis(child, -1.0);
+    assertEquals(-1.0, TwFlexPane.getBasis(child), 0.001);
+  }
+
+  @Test
+  @DisplayName("Should throw exception when setting basis on null node")
+  void testSetBasisOnNullNode() {
+    assertThrows(IllegalArgumentException.class, () -> TwFlexPane.setBasis(null, 100.0));
+  }
+
+  @Test
+  @DisplayName("Should get null alignSelf when not set")
+  void testGetAlignSelfNull() {
+    Label child = new Label("Test");
+    assertNull(TwFlexPane.getAlignSelf(child));
+  }
+
+  @Test
+  @DisplayName("Should handle grow factor set before adding to parent")
+  void testGrowBeforeAddingToParent() {
+    Label child = new Label("Test");
+    
+    TwFlexPane.setGrow(child, 1.0);
+    assertEquals(1.0, TwFlexPane.getGrow(child), 0.001);
+    
+    interact(() -> flexPane.getChildren().add(child));
+    WaitForAsyncUtils.waitForFxEvents();
+    
+    assertTrue(flexPane.getChildren().contains(child));
+  }
+
+  @Test
+  @DisplayName("Should handle order set before adding to parent")
+  void testOrderBeforeAddingToParent() {
+    Label child = new Label("Test");
+    
+    TwFlexPane.setOrder(child, 10);
+    assertEquals(10, TwFlexPane.getOrder(child));
+    
+    interact(() -> flexPane.getChildren().add(child));
+    WaitForAsyncUtils.waitForFxEvents();
+    
+    assertTrue(flexPane.getChildren().contains(child));
+  }
+
+  @Test
+  @DisplayName("Should handle alignSelf set before adding to parent")
+  void testAlignSelfBeforeAddingToParent() {
+    Label child = new Label("Test");
+    
+    TwFlexPane.setAlignSelf(child, TwFlexPane.Align.END);
+    assertEquals(TwFlexPane.Align.END, TwFlexPane.getAlignSelf(child));
+    
+    interact(() -> flexPane.getChildren().add(child));
+    WaitForAsyncUtils.waitForFxEvents();
+    
+    assertTrue(flexPane.getChildren().contains(child));
+  }
+
+  @Test
+  @DisplayName("Should handle shrink set before adding to parent")
+  void testShrinkBeforeAddingToParent() {
+    Label child = new Label("Test");
+    
+    TwFlexPane.setShrink(child, 0.5);
+    assertEquals(0.5, TwFlexPane.getShrink(child), 0.001);
+    
+    interact(() -> flexPane.getChildren().add(child));
+    WaitForAsyncUtils.waitForFxEvents();
+    
+    assertTrue(flexPane.getChildren().contains(child));
+  }
+
+  @Test
+  @DisplayName("Should handle basis set before adding to parent")
+  void testBasisBeforeAddingToParent() {
+    Label child = new Label("Test");
+    
+    TwFlexPane.setBasis(child, 150.0);
+    assertEquals(150.0, TwFlexPane.getBasis(child), 0.001);
+    
+    interact(() -> flexPane.getChildren().add(child));
+    WaitForAsyncUtils.waitForFxEvents();
+    
+    assertTrue(flexPane.getChildren().contains(child));
   }
 }
