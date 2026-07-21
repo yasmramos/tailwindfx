@@ -146,7 +146,7 @@ TwAnimation.onHoverScale(btn, 1.05);
 | **Tailwind v4.1** | text-shadow, drop-shadow-[color], SVG fill/stroke, 3D transforms, clip/mask |
 | **Glassmorphism** | `TailwindFX.glass()`, `backdropBlur()`, `.glass` CSS class |
 | **Neumorphism** | `TailwindFX.neumorph()`, `.neumorph` CSS class |
-| **ComponentFactory** | Cards, badges, modals, drawers, tooltips |
+| **Pre-built Components** | TwButton, TwCard, TwBadge, TwAlert, TwInput, TwCheckbox, TwSelect, TwDataTable, TwProgressBar, TwSpinner, TwAvatar, TwVirtualFlow, TWAccordion |
 | **Metrics + alerts** | Cache hit ratio, conflict rate, compile time alerts |
 | **Performance** | StyleDiff (skip redundant applies), batch apply, LRU cache |
 
@@ -216,13 +216,13 @@ public class MyApp extends Application {
 
 ### Components
 
-TailwindFX provides pre-built components in the `io.github.yasmramos.tailwindfx.components` package:
+TailwindFX provides pre-built components in the `io.github.yasmramos.tailwindfx.components` package. Use them directly by instantiating the classes:
 
-| Component | Description | Example |
-|-----------|-------------|---------|
-| `TwButton` | Styled button with variants | `new TwButton("Click", ButtonVariant.PRIMARY)` |
-| `TwCard` | Card container | `new TwCard(title, content)` |
-| `TwBadge` | Status badges | `new TwBadge("New", BadgeVariant.SUCCESS)` |
+| Component | Description | Usage Example |
+|-----------|-------------|---------------|
+| `TwButton` | Styled button with variants | `new TwButton("Click")` or `TwButton.primary("Submit")` |
+| `TwCard` | Card container | `new TwCard("Title", "Content")` |
+| `TwBadge` | Status badges | `TwBadge.create("NEW", "blue")` or `TwBadge.pill("Active", "green")` |
 | `TwAlert` | Alert dialogs | `TwAlert.info("Message").show()` |
 | `TwInput` | Text input field | `new TwInput("Placeholder")` |
 | `TwCheckbox` | Checkbox with label | `new TwCheckbox("Accept terms")` |
