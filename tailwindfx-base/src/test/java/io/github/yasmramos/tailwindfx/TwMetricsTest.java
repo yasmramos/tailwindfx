@@ -14,7 +14,7 @@ class TwMetricsTest {
   void setUp() {
     // Reset metrics state before each test
     TailwindFXMetrics.instance().reset();
-    TailwindFXMetrics.instance().setEnabled(true);
+    TwMetrics.setEnabled(true);
   }
 
   @Test
@@ -75,10 +75,10 @@ class TwMetricsTest {
 
   @Test
   void testMetricsCanBeDisabled() {
-    TailwindFXMetrics.instance().setEnabled(false);
-    assertFalse(TailwindFXMetrics.instance().isEnabled());
+    TwMetrics.setEnabled(false);
+    assertFalse(TwMetrics.isEnabled());
 
     // Re-enable for other tests
-    TailwindFXMetrics.instance().setEnabled(true);
+    TwMetrics.setEnabled(true);
   }
 }

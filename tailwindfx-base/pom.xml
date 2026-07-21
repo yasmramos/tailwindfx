@@ -96,7 +96,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire.version}</version>
                 <configuration>
-                    <argLine>${jacoco.argLine}</argLine>
+                    <argLine>${jacoco.argLine} --add-opens javafx.graphics/com.sun.javafx.application=ALL-UNNAMED</argLine>
                     <systemPropertyVariables>
                         <testfx.robot>glass</testfx.robot>
                         <testfx.headless>true</testfx.headless>
