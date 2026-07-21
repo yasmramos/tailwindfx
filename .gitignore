@@ -1,59 +1,33 @@
-# Compiled and build artifacts
+```
+# Java class files
 *.class
-*.o
-*.obj
-*.out
-build/
+
+# Maven build artifacts
 target/
+!target/pom.xml.backup
 
-# Dependencies
-venv/
-.venv/
-__pycache__/
-.mypy_cache/
-.pytest_cache/
-.gradle/
-node_modules/
-
-# Editors
-.vscode/
+# IDE files
 .idea/
-*.swp
-*.swo
+*.iml
+*.ipr
+*.iws
 
-# System
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# OS generated files
 .DS_Store
 Thumbs.db
-.env
-.env.local
-*.env.*
 
-# Logs and coverage
-*.log
-coverage/
-htmlcov/
-.coverage
+# Test reports
+**/surefire-reports/
+**/jacoco/
 
-# Archives
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
+# Coverage reports
+jacoco.exec
+jacoco/
+```

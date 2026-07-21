@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TwInstall.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TailwindFX Base</a> &gt; <a href="index.source.html" class="el_package">io.github.yasmramos.tailwindfx</a> &gt; <span class="el_source">TwInstall.java</span></div><h1>TwInstall.java</h1><pre class="source lang-java linenums">package io.github.yasmramos.tailwindfx;
+
+import io.github.yasmramos.tailwindfx.breakpoint.BreakpointManager;
+import io.github.yasmramos.tailwindfx.core.ThemeCssGenerator;
+import io.github.yasmramos.tailwindfx.theme.ThemeConfig;
+import java.util.Objects;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+/**
+ * TwInstall — Installation facade for CSS stylesheets.
+ *
+ * &lt;p&gt;This class handles installing minimal TailwindFX CSS files into JavaFX scenes. Most utilities
+ * are now JIT-compiled at runtime via JitCompiler. Base variables are generated dynamically from
+ * ThemeConfig.
+ *
+ * &lt;p&gt;Usage:
+ *
+ * &lt;pre&gt;
+ * TwInstall.install(scene);
+ * TwInstall.installMinimal(scene);
+ * &lt;/pre&gt;
+ */
+public final class TwInstall {
+
+  private static final String GENERATED_BASE_CSS_ID = &quot;tailwindfx-base-generated&quot;;
+
+  private TwInstall() {}
+
+  /** Installs minimal CSS (base variables only). All utilities are JIT-compiled. */
+  public static void install(Scene scene) {
+<span class="fc" id="L32">    installMinimal(scene);</span>
+<span class="fc" id="L33">  }</span>
+
+  public static void install(Scene scene, Stage stage) {
+<span class="fc" id="L36">    installMinimal(scene, stage);</span>
+<span class="fc" id="L37">  }</span>
+
+  /** Installs only the base module (variables and reset). Required for JIT compilation. */
+  public static void installBase(Scene scene) {
+<span class="fc" id="L41">    installGeneratedBaseCss(scene, 0);</span>
+<span class="fc" id="L42">  }</span>
+
+  /** Installs dark mode overrides. Optional. */
+  public static void installDark(Scene scene) {
+    // Dark mode is now handled by ThemeManager.theme(scene).dark().apply()
+    // No static CSS file needed
+<span class="fc" id="L48">  }</span>
+
+  /**
+   * Minimal installation: base CSS generated dynamically. All utilities JIT-compiled at runtime.
+   */
+  public static void installMinimal(Scene scene) {
+<span class="fc" id="L54">    installBase(scene);</span>
+    // Optional: uncomment if you need dark mode support
+    // installDark(scene);
+<span class="fc" id="L57">  }</span>
+
+  private static void installMinimal(Scene scene, Stage stage) {
+<span class="fc" id="L60">    installMinimal(scene);</span>
+<span class="fc" id="L61">    BreakpointManager.attach(stage);</span>
+<span class="fc" id="L62">  }</span>
+
+  /**
+   * Installs dynamically generated base CSS from ThemeConfig. Removes any previously installed
+   * static base CSS.
+   */
+  private static void installGeneratedBaseCss(Scene scene, int priority) {
+    // Generate CSS from ThemeConfig
+<span class="fc" id="L70">    ThemeConfig themeConfig = ThemeConfig.defaultConfig();</span>
+<span class="fc" id="L71">    ThemeCssGenerator generator = new ThemeCssGenerator(themeConfig);</span>
+<span class="fc" id="L72">    String generatedCss = generator.generateBaseCss();</span>
+
+    // Properly encode CSS for data URL (RFC 2397)
+<span class="fc" id="L75">    String encodedCss =</span>
+<span class="fc" id="L76">        java.net.URLEncoder.encode(generatedCss, java.nio.charset.StandardCharsets.UTF_8)</span>
+<span class="fc" id="L77">            .replace(&quot;+&quot;, &quot;%20&quot;)</span>
+<span class="fc" id="L78">            .replace(&quot;%3A&quot;, &quot;:&quot;)</span>
+<span class="fc" id="L79">            .replace(&quot;%3B&quot;, &quot;;&quot;)</span>
+<span class="fc" id="L80">            .replace(&quot;%7B&quot;, &quot;{&quot;)</span>
+<span class="fc" id="L81">            .replace(&quot;%7D&quot;, &quot;}&quot;)</span>
+<span class="fc" id="L82">            .replace(&quot;%23&quot;, &quot;#&quot;);</span>
+
+<span class="fc" id="L84">    String dataUrl = &quot;data:text/css;charset=utf-8,&quot; + encodedCss;</span>
+
+<span class="fc" id="L86">    var sheets = scene.getStylesheets();</span>
+
+    // Remove any existing generated base CSS
+<span class="pc" id="L89">    sheets.removeIf(url -&gt; url.contains(GENERATED_BASE_CSS_ID));</span>
+
+    // Also remove static base CSS if it exists
+<span class="pc" id="L92">    sheets.removeIf(url -&gt; url.contains(&quot;tailwindfx-base.css&quot;));</span>
+
+    // Insert at specified priority
+<span class="fc" id="L95">    sheets.add(Math.min(priority, sheets.size()), dataUrl);</span>
+<span class="fc" id="L96">  }</span>
+
+  private static void installCss(Scene scene, String cssPath, int priority) {
+    // ClassLoader.getResource() no acepta &quot;/&quot; inicial; Class.getResource() sí.
+<span class="nc bnc" id="L100" title="All 2 branches missed.">    String normalizedPath = cssPath.startsWith(&quot;/&quot;) ? cssPath.substring(1) : cssPath;</span>
+<span class="nc" id="L101">    java.net.URL url = null;</span>
+
+    // 1. Thread Context ClassLoader: resolve recursos en OSGi bundles, Java Modules o classloaders
+    // delegados
+<span class="nc" id="L105">    ClassLoader tccl = Thread.currentThread().getContextClassLoader();</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">    if (tccl != null) url = tccl.getResource(normalizedPath);</span>
+
+    // 2. ClassLoader de TailwindFX: fallback para entornos donde el TCCL es el del host/app
+<span class="nc bnc" id="L109" title="All 2 branches missed.">    if (url == null) url = TwInstall.class.getClassLoader().getResource(normalizedPath);</span>
+
+    // 3. Resolución relativa a la clase: captura recursos empaquetados junto al framework
+<span class="nc bnc" id="L112" title="All 2 branches missed.">    if (url == null) url = TwInstall.class.getResource(cssPath);</span>
+
+<span class="nc" id="L114">    String urlStr =</span>
+<span class="nc" id="L115">        Objects.requireNonNull(</span>
+                url, cssPath + &quot; not found via TCCL, Framework CL, or class-relative path&quot;)
+<span class="nc" id="L117">            .toExternalForm();</span>
+
+<span class="nc" id="L119">    var sheets = scene.getStylesheets();</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">    if (sheets.contains(urlStr)) sheets.remove(urlStr);</span>
+
+    // Inserción determinista por prioridad (mantiene cascada CSS estable)
+<span class="nc" id="L123">    sheets.add(Math.min(priority, sheets.size()), urlStr);</span>
+<span class="nc" id="L124">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

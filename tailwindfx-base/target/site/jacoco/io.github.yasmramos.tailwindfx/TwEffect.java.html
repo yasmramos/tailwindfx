@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TwEffect.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TailwindFX Base</a> &gt; <a href="index.source.html" class="el_package">io.github.yasmramos.tailwindfx</a> &gt; <span class="el_source">TwEffect.java</span></div><h1>TwEffect.java</h1><pre class="source lang-java linenums">package io.github.yasmramos.tailwindfx;
+
+import javafx.scene.Node;
+import javafx.scene.effect.BoxBlur;
+
+/**
+ * TwEffect — Visual effects facade.
+ *
+ * &lt;p&gt;Provides access to visual effects including blur, shadows, and clipping utilities.
+ *
+ * &lt;pre&gt;
+ * TwEffect.backdropBlur(node, 8);
+ * TwEffect.backdropBlurNone(node);
+ * &lt;/pre&gt;
+ */
+public final class TwEffect {
+
+<span class="fc" id="L18">  private static final TwEffect INSTANCE = new TwEffect();</span>
+
+  private TwEffect() {}
+
+  /**
+   * Apply backdrop blur effect to a node.
+   *
+   * @param node the node
+   * @param radius blur radius
+   */
+  public static void backdropBlur(Node node, double radius) {
+<span class="fc" id="L29">    BoxBlur blur = new BoxBlur(radius, radius, 1);</span>
+<span class="fc" id="L30">    node.setEffect(blur);</span>
+<span class="fc" id="L31">  }</span>
+
+  /**
+   * Remove backdrop blur effect from a node.
+   *
+   * @param node the node
+   */
+  public static void backdropBlurNone(Node node) {
+<span class="fc" id="L39">    node.setEffect(null);</span>
+<span class="fc" id="L40">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

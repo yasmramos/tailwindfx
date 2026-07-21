@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ThemeConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TailwindFX Base</a> &gt; <a href="index.source.html" class="el_package">io.github.yasmramos.tailwindfx.theme</a> &gt; <span class="el_source">ThemeConfig.java</span></div><h1>ThemeConfig.java</h1><pre class="source lang-java linenums">package io.github.yasmramos.tailwindfx.theme;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
+
+/**
+ * ThemeConfig — Configuración centralizada del sistema de diseño.
+ *
+ * &lt;p&gt;Equivalente JavaFX de tailwind.config.js. Define colores, spacing, breakpoints, border-radius,
+ * sombras y otras tokens de diseño.
+ *
+ * &lt;p&gt;Uso:
+ *
+ * &lt;pre&gt;
+ *   ThemeConfig config = ThemeConfig.defaultConfig();
+ *   String color = config.color(&quot;blue&quot;, 500);
+ *   double spacing = config.spacing(4);
+ *   int breakpoint = config.breakpoint(&quot;md&quot;);
+ * &lt;/pre&gt;
+ */
+public final class ThemeConfig {
+
+  private static ThemeConfig instance;
+
+  private final Map&lt;String, String[]&gt; colors;
+  private final double[] spacing;
+  private final Map&lt;String, Integer&gt; breakpoints;
+  private final double[] borderRadius;
+  private final Map&lt;String, String&gt; shadows;
+  private final Map&lt;String, Double&gt; opacity;
+  private final Map&lt;String, String&gt; fontFamily;
+  private final Map&lt;String, Double&gt; fontSize;
+  private final Map&lt;String, String&gt; fontWeight;
+
+<span class="fc" id="L37">  private ThemeConfig(Builder builder) {</span>
+<span class="fc" id="L38">    this.colors = Collections.unmodifiableMap(new HashMap&lt;&gt;(builder.colors));</span>
+<span class="fc" id="L39">    this.spacing = builder.spacing.clone();</span>
+<span class="fc" id="L40">    this.breakpoints = Collections.unmodifiableMap(new TreeMap&lt;&gt;(builder.breakpoints));</span>
+<span class="fc" id="L41">    this.borderRadius = builder.borderRadius.clone();</span>
+<span class="fc" id="L42">    this.shadows = Collections.unmodifiableMap(new HashMap&lt;&gt;(builder.shadows));</span>
+<span class="fc" id="L43">    this.opacity = Collections.unmodifiableMap(new HashMap&lt;&gt;(builder.opacity));</span>
+<span class="fc" id="L44">    this.fontFamily = Collections.unmodifiableMap(new HashMap&lt;&gt;(builder.fontFamily));</span>
+<span class="fc" id="L45">    this.fontSize = Collections.unmodifiableMap(new HashMap&lt;&gt;(builder.fontSize));</span>
+<span class="fc" id="L46">    this.fontWeight = Collections.unmodifiableMap(new HashMap&lt;&gt;(builder.fontWeight));</span>
+<span class="fc" id="L47">  }</span>
+
+  /** Obtiene la instancia singleton de configuración por defecto. */
+  public static ThemeConfig defaultConfig() {
+<span class="fc bfc" id="L51" title="All 2 branches covered.">    if (instance == null) {</span>
+<span class="fc" id="L52">      instance = new Builder().build();</span>
+    }
+<span class="fc" id="L54">    return instance;</span>
+  }
+
+  /** Resetea la instancia singleton (útil para testing). */
+  public static void reset() {
+<span class="nc" id="L59">    instance = null;</span>
+<span class="nc" id="L60">  }</span>
+
+  /** Obtiene un color específico. Ej: color(&quot;blue&quot;, 500) → &quot;#3b82f6&quot; */
+  public String color(String name, int shade) {
+<span class="nc" id="L64">    String[] shades = colors.get(name);</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">    if (shades == null) {</span>
+<span class="nc" id="L66">      return null;</span>
+    }
+    // Mapeo correcto de shade a índice: 50→0, 100→1, 200→2, 300→3, 400→4, 500→5, 600→6, 700→7,
+    // 800→8, 900→9, 950→10
+    int index;
+<span class="nc bnc" id="L71" title="All 2 branches missed.">    if (shade == 50) index = 0;</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">    else if (shade == 100) index = 1;</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">    else if (shade == 200) index = 2;</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">    else if (shade == 300) index = 3;</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">    else if (shade == 400) index = 4;</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">    else if (shade == 500) index = 5;</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">    else if (shade == 600) index = 6;</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">    else if (shade == 700) index = 7;</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">    else if (shade == 800) index = 8;</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">    else if (shade == 900) index = 9;</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">    else if (shade == 950) index = 10;</span>
+<span class="nc" id="L82">    else return null;</span>
+
+<span class="nc bnc" id="L84" title="All 4 branches missed.">    if (index &lt; 0 || index &gt;= shades.length) {</span>
+<span class="nc" id="L85">      return null;</span>
+    }
+<span class="nc" id="L87">    return shades[index];</span>
+  }
+
+  /** Obtiene el array completo de colores para una familia. */
+  public String[] colorFamily(String name) {
+<span class="nc" id="L92">    return colors.get(name);</span>
+  }
+
+  /** Obtiene todos los colores configurados. */
+  public Map&lt;String, String[]&gt; colors() {
+<span class="fc" id="L97">    return colors;</span>
+  }
+
+  /** Obtiene un valor de spacing. Ej: spacing(4) → 16.0 (4 * 4px) */
+  public double spacing(int value) {
+<span class="nc bnc" id="L102" title="All 4 branches missed.">    if (value &lt; 0 || value &gt;= spacing.length) {</span>
+<span class="nc" id="L103">      return value * 4.0; // Fallback: multiplier base</span>
+    }
+<span class="nc" id="L105">    return spacing[value];</span>
+  }
+
+  /** Obtiene el array completo de spacing. */
+  public double[] spacing() {
+<span class="fc" id="L110">    return spacing.clone();</span>
+  }
+
+  /** Obtiene un breakpoint. Ej: breakpoint(&quot;md&quot;) → 768 */
+  public Integer breakpoint(String name) {
+<span class="nc" id="L115">    return breakpoints.get(name);</span>
+  }
+
+  /** Obtiene todos los breakpoints. */
+  public Map&lt;String, Integer&gt; breakpoints() {
+<span class="nc" id="L120">    return breakpoints;</span>
+  }
+
+  /** Obtiene border-radius. Ej: borderRadius(4) → 16.0 */
+  public double borderRadius(int value) {
+<span class="pc bpc" id="L125" title="2 of 4 branches missed.">    if (value &lt; 0 || value &gt;= borderRadius.length) {</span>
+<span class="nc" id="L126">      return value * 4.0;</span>
+    }
+<span class="fc" id="L128">    return borderRadius[value];</span>
+  }
+
+  /** Obtiene un shadow predefinido. Ej: shadow(&quot;md&quot;) → &quot;0 4px 6px -1px rgba(0,0,0,0.1)&quot; */
+  public String shadow(String name) {
+<span class="nc" id="L133">    return shadows.get(name);</span>
+  }
+
+  /** Obtiene todos los shadows. */
+  public Map&lt;String, String&gt; shadows() {
+<span class="nc" id="L138">    return shadows;</span>
+  }
+
+  /** Obtiene opacidad. Ej: opacity(50) → 0.5 */
+  public Double opacity(String name) {
+<span class="nc" id="L143">    return opacity.get(name);</span>
+  }
+
+  /** Obtiene todos los valores de opacidad. */
+  public Map&lt;String, Double&gt; opacity() {
+<span class="fc" id="L148">    return opacity;</span>
+  }
+
+  /** Obtiene una fuente. Ej: fontFamily(&quot;sans&quot;) → &quot;Inter, system-ui, sans-serif&quot; */
+  public String fontFamily(String name) {
+<span class="nc" id="L153">    return fontFamily.get(name);</span>
+  }
+
+  /** Obtiene todas las fuentes. */
+  public Map&lt;String, String&gt; fontFamily() {
+<span class="nc" id="L158">    return fontFamily;</span>
+  }
+
+  /** Obtiene tamaño de fuente. Ej: fontSize(&quot;lg&quot;) → 18.0 */
+  public Double fontSize(String name) {
+<span class="nc" id="L163">    return fontSize.get(name);</span>
+  }
+
+  /** Obtiene todos los tamaños de fuente. */
+  public Map&lt;String, Double&gt; fontSize() {
+<span class="fc" id="L168">    return fontSize;</span>
+  }
+
+  /** Obtiene peso de fuente. Ej: fontWeight(&quot;bold&quot;) → &quot;700&quot; */
+  public String fontWeight(String name) {
+<span class="nc" id="L173">    return fontWeight.get(name);</span>
+  }
+
+  /** Obtiene todos los pesos de fuente. */
+  public Map&lt;String, String&gt; fontWeight() {
+<span class="nc" id="L178">    return fontWeight;</span>
+  }
+
+  /** Builder para crear configuraciones personalizadas. */
+  public static final class Builder {
+<span class="fc" id="L183">    private final Map&lt;String, String[]&gt; colors = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L184">    private double[] spacing = new double[65];</span>
+<span class="fc" id="L185">    private final Map&lt;String, Integer&gt; breakpoints = new TreeMap&lt;&gt;();</span>
+<span class="fc" id="L186">    private double[] borderRadius = new double[17];</span>
+<span class="fc" id="L187">    private final Map&lt;String, String&gt; shadows = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L188">    private final Map&lt;String, Double&gt; opacity = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L189">    private final Map&lt;String, String&gt; fontFamily = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L190">    private final Map&lt;String, Double&gt; fontSize = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L191">    private final Map&lt;String, String&gt; fontWeight = new HashMap&lt;&gt;();</span>
+
+<span class="fc" id="L193">    public Builder() {</span>
+<span class="fc" id="L194">      initDefaults();</span>
+<span class="fc" id="L195">    }</span>
+
+    private void initDefaults() {
+      // Colores Tailwind CSS por defecto
+<span class="fc" id="L199">      colors.put(</span>
+          &quot;slate&quot;,
+          new String[] {
+            &quot;#f8fafc&quot;, &quot;#f1f5f9&quot;, &quot;#e2e8f0&quot;, &quot;#cbd5e1&quot;, &quot;#94a3b8&quot;, &quot;#64748b&quot;, &quot;#475569&quot;, &quot;#334155&quot;,
+            &quot;#1e293b&quot;, &quot;#0f172a&quot;, &quot;#020617&quot;
+          });
+<span class="fc" id="L205">      colors.put(</span>
+          &quot;gray&quot;,
+          new String[] {
+            &quot;#f9fafb&quot;, &quot;#f3f4f6&quot;, &quot;#e5e7eb&quot;, &quot;#d1d5db&quot;, &quot;#9ca3af&quot;, &quot;#6b7280&quot;, &quot;#4b5563&quot;, &quot;#374151&quot;,
+            &quot;#1f2937&quot;, &quot;#111827&quot;, &quot;#030712&quot;
+          });
+<span class="fc" id="L211">      colors.put(</span>
+          &quot;red&quot;,
+          new String[] {
+            &quot;#fef2f2&quot;, &quot;#fee2e2&quot;, &quot;#fecaca&quot;, &quot;#fca5a5&quot;, &quot;#f87171&quot;, &quot;#ef4444&quot;, &quot;#dc2626&quot;, &quot;#b91c1c&quot;,
+            &quot;#991b1b&quot;, &quot;#7f1d1d&quot;, &quot;#450a0a&quot;
+          });
+<span class="fc" id="L217">      colors.put(</span>
+          &quot;orange&quot;,
+          new String[] {
+            &quot;#fff7ed&quot;, &quot;#ffedd5&quot;, &quot;#fed7aa&quot;, &quot;#fdba74&quot;, &quot;#fb923c&quot;, &quot;#f97316&quot;, &quot;#ea580c&quot;, &quot;#c2410c&quot;,
+            &quot;#9a3412&quot;, &quot;#7c2d12&quot;, &quot;#431407&quot;
+          });
+<span class="fc" id="L223">      colors.put(</span>
+          &quot;amber&quot;,
+          new String[] {
+            &quot;#fffbeb&quot;, &quot;#fef3c7&quot;, &quot;#fde68a&quot;, &quot;#fcd34d&quot;, &quot;#fbbf24&quot;, &quot;#f59e0b&quot;, &quot;#d97706&quot;, &quot;#b45309&quot;,
+            &quot;#92400e&quot;, &quot;#78350f&quot;, &quot;#451a03&quot;
+          });
+<span class="fc" id="L229">      colors.put(</span>
+          &quot;yellow&quot;,
+          new String[] {
+            &quot;#fefce8&quot;, &quot;#fef9c3&quot;, &quot;#fef08a&quot;, &quot;#fde047&quot;, &quot;#facc15&quot;, &quot;#eab308&quot;, &quot;#ca8a04&quot;, &quot;#a16207&quot;,
+            &quot;#854d0e&quot;, &quot;#713f12&quot;, &quot;#422006&quot;
+          });
+<span class="fc" id="L235">      colors.put(</span>
+          &quot;lime&quot;,
+          new String[] {
+            &quot;#f7fee7&quot;, &quot;#ecfccb&quot;, &quot;#d9f99d&quot;, &quot;#bef264&quot;, &quot;#a3e635&quot;, &quot;#84cc16&quot;, &quot;#65a30d&quot;, &quot;#4d7c0f&quot;,
+            &quot;#3f6212&quot;, &quot;#365314&quot;, &quot;#1a2e05&quot;
+          });
+<span class="fc" id="L241">      colors.put(</span>
+          &quot;green&quot;,
+          new String[] {
+            &quot;#f0fdf4&quot;, &quot;#dcfce7&quot;, &quot;#bbf7d0&quot;, &quot;#86efac&quot;, &quot;#4ade80&quot;, &quot;#22c55e&quot;, &quot;#16a34a&quot;, &quot;#15803d&quot;,
+            &quot;#166534&quot;, &quot;#14532d&quot;, &quot;#052e16&quot;
+          });
+<span class="fc" id="L247">      colors.put(</span>
+          &quot;emerald&quot;,
+          new String[] {
+            &quot;#ecfdf5&quot;, &quot;#d1fae5&quot;, &quot;#a7f3d0&quot;, &quot;#6ee7b7&quot;, &quot;#34d399&quot;, &quot;#10b981&quot;, &quot;#059669&quot;, &quot;#047857&quot;,
+            &quot;#065f46&quot;, &quot;#064e3b&quot;, &quot;#022c22&quot;
+          });
+<span class="fc" id="L253">      colors.put(</span>
+          &quot;teal&quot;,
+          new String[] {
+            &quot;#f0fdfa&quot;, &quot;#ccfbf1&quot;, &quot;#99f6e4&quot;, &quot;#5eead4&quot;, &quot;#2dd4bf&quot;, &quot;#14b8a6&quot;, &quot;#0d9488&quot;, &quot;#0f766e&quot;,
+            &quot;#115e59&quot;, &quot;#134e4a&quot;, &quot;#042f2e&quot;
+          });
+<span class="fc" id="L259">      colors.put(</span>
+          &quot;cyan&quot;,
+          new String[] {
+            &quot;#ecfeff&quot;, &quot;#cffafe&quot;, &quot;#a5f3fc&quot;, &quot;#67e8f9&quot;, &quot;#22d3ee&quot;, &quot;#06b6d4&quot;, &quot;#0891b2&quot;, &quot;#0e7490&quot;,
+            &quot;#155e75&quot;, &quot;#164e63&quot;, &quot;#083344&quot;
+          });
+<span class="fc" id="L265">      colors.put(</span>
+          &quot;sky&quot;,
+          new String[] {
+            &quot;#f0f9ff&quot;, &quot;#e0f2fe&quot;, &quot;#bae6fd&quot;, &quot;#7dd3fc&quot;, &quot;#38bdf8&quot;, &quot;#0ea5e9&quot;, &quot;#0284c7&quot;, &quot;#0369a1&quot;,
+            &quot;#075985&quot;, &quot;#0c4a6e&quot;, &quot;#082f49&quot;
+          });
+<span class="fc" id="L271">      colors.put(</span>
+          &quot;blue&quot;,
+          new String[] {
+            &quot;#eff6ff&quot;, &quot;#dbeafe&quot;, &quot;#bfdbfe&quot;, &quot;#93c5fd&quot;, &quot;#60a5fa&quot;, &quot;#3b82f6&quot;, &quot;#2563eb&quot;, &quot;#1d4ed8&quot;,
+            &quot;#1e40af&quot;, &quot;#1e3a8a&quot;, &quot;#172554&quot;
+          });
+<span class="fc" id="L277">      colors.put(</span>
+          &quot;indigo&quot;,
+          new String[] {
+            &quot;#eef2ff&quot;, &quot;#e0e7ff&quot;, &quot;#c7d2fe&quot;, &quot;#a5b4fc&quot;, &quot;#818cf8&quot;, &quot;#6366f1&quot;, &quot;#4f46e5&quot;, &quot;#4338ca&quot;,
+            &quot;#3730a3&quot;, &quot;#312e81&quot;, &quot;#1e1b4b&quot;
+          });
+<span class="fc" id="L283">      colors.put(</span>
+          &quot;violet&quot;,
+          new String[] {
+            &quot;#f5f3ff&quot;, &quot;#ede9fe&quot;, &quot;#ddd6fe&quot;, &quot;#c4b5fd&quot;, &quot;#a78bfa&quot;, &quot;#8b5cf6&quot;, &quot;#7c3aed&quot;, &quot;#6d28d9&quot;,
+            &quot;#5b21b6&quot;, &quot;#4c1d95&quot;, &quot;#2e1065&quot;
+          });
+<span class="fc" id="L289">      colors.put(</span>
+          &quot;purple&quot;,
+          new String[] {
+            &quot;#faf5ff&quot;, &quot;#f3e8ff&quot;, &quot;#e9d5ff&quot;, &quot;#d8b4fe&quot;, &quot;#c084fc&quot;, &quot;#a855f7&quot;, &quot;#9333ea&quot;, &quot;#7e22ce&quot;,
+            &quot;#6b21a8&quot;, &quot;#581c87&quot;, &quot;#3b0764&quot;
+          });
+<span class="fc" id="L295">      colors.put(</span>
+          &quot;fuchsia&quot;,
+          new String[] {
+            &quot;#fdf4ff&quot;, &quot;#fae8ff&quot;, &quot;#f5d0fe&quot;, &quot;#f0abfc&quot;, &quot;#e879f9&quot;, &quot;#d946ef&quot;, &quot;#c026d3&quot;, &quot;#a21caf&quot;,
+            &quot;#86198f&quot;, &quot;#701a75&quot;, &quot;#4a044e&quot;
+          });
+<span class="fc" id="L301">      colors.put(</span>
+          &quot;pink&quot;,
+          new String[] {
+            &quot;#fdf2f8&quot;, &quot;#fce7f3&quot;, &quot;#fbcfe8&quot;, &quot;#f9a8d4&quot;, &quot;#f472b6&quot;, &quot;#ec4899&quot;, &quot;#db2777&quot;, &quot;#be185d&quot;,
+            &quot;#9d174d&quot;, &quot;#831843&quot;, &quot;#500724&quot;
+          });
+<span class="fc" id="L307">      colors.put(</span>
+          &quot;rose&quot;,
+          new String[] {
+            &quot;#fff1f2&quot;, &quot;#ffe4e6&quot;, &quot;#fecdd3&quot;, &quot;#fda4af&quot;, &quot;#fb7185&quot;, &quot;#f43f5e&quot;, &quot;#e11d48&quot;, &quot;#be123c&quot;,
+            &quot;#9f1239&quot;, &quot;#881337&quot;, &quot;#4c0519&quot;
+          });
+
+      // Named colors: white, black, transparent
+<span class="fc" id="L315">      colors.put(</span>
+          &quot;white&quot;,
+          new String[] {
+            &quot;#ffffff&quot;, &quot;#ffffff&quot;, &quot;#ffffff&quot;, &quot;#ffffff&quot;, &quot;#ffffff&quot;, &quot;#ffffff&quot;, &quot;#ffffff&quot;, &quot;#ffffff&quot;,
+            &quot;#ffffff&quot;, &quot;#ffffff&quot;, &quot;#ffffff&quot;
+          });
+<span class="fc" id="L321">      colors.put(</span>
+          &quot;black&quot;,
+          new String[] {
+            &quot;#000000&quot;, &quot;#000000&quot;, &quot;#000000&quot;, &quot;#000000&quot;, &quot;#000000&quot;, &quot;#000000&quot;, &quot;#000000&quot;, &quot;#000000&quot;,
+            &quot;#000000&quot;, &quot;#000000&quot;, &quot;#000000&quot;
+          });
+<span class="fc" id="L327">      colors.put(</span>
+          &quot;transparent&quot;,
+          new String[] {
+            &quot;transparent&quot;,
+            &quot;transparent&quot;,
+            &quot;transparent&quot;,
+            &quot;transparent&quot;,
+            &quot;transparent&quot;,
+            &quot;transparent&quot;,
+            &quot;transparent&quot;,
+            &quot;transparent&quot;,
+            &quot;transparent&quot;,
+            &quot;transparent&quot;,
+            &quot;transparent&quot;
+          });
+
+      // Spacing: 0-64 (base 4px)
+<span class="fc bfc" id="L344" title="All 2 branches covered.">      for (int i = 0; i &lt;= 64; i++) {</span>
+<span class="fc" id="L345">        spacing[i] = i * 4.0;</span>
+      }
+      // Ajustes especiales
+<span class="fc" id="L348">      spacing[0] = 0;</span>
+<span class="fc" id="L349">      spacing[1] = 2;</span>
+<span class="fc" id="L350">      spacing[2] = 4;</span>
+<span class="fc" id="L351">      spacing[3] = 6;</span>
+
+      // Breakpoints
+<span class="fc" id="L354">      breakpoints.put(&quot;sm&quot;, 640);</span>
+<span class="fc" id="L355">      breakpoints.put(&quot;md&quot;, 768);</span>
+<span class="fc" id="L356">      breakpoints.put(&quot;lg&quot;, 1024);</span>
+<span class="fc" id="L357">      breakpoints.put(&quot;xl&quot;, 1280);</span>
+<span class="fc" id="L358">      breakpoints.put(&quot;2xl&quot;, 1536);</span>
+
+      // Border radius
+<span class="fc bfc" id="L361" title="All 2 branches covered.">      for (int i = 0; i &lt;= 16; i++) {</span>
+<span class="fc" id="L362">        borderRadius[i] = i * 4.0;</span>
+      }
+<span class="fc" id="L364">      borderRadius[0] = 0;</span>
+<span class="fc" id="L365">      borderRadius[1] = 2;</span>
+<span class="fc" id="L366">      borderRadius[2] = 4;</span>
+<span class="fc" id="L367">      borderRadius[3] = 6;</span>
+<span class="fc" id="L368">      borderRadius[4] = 8;</span>
+
+      // Shadows
+<span class="fc" id="L371">      shadows.put(&quot;sm&quot;, &quot;0 1px 2px 0 rgba(0,0,0,0.05)&quot;);</span>
+<span class="fc" id="L372">      shadows.put(&quot;md&quot;, &quot;0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)&quot;);</span>
+<span class="fc" id="L373">      shadows.put(&quot;lg&quot;, &quot;0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)&quot;);</span>
+<span class="fc" id="L374">      shadows.put(&quot;xl&quot;, &quot;0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)&quot;);</span>
+<span class="fc" id="L375">      shadows.put(&quot;2xl&quot;, &quot;0 25px 50px -12px rgba(0,0,0,0.25)&quot;);</span>
+<span class="fc" id="L376">      shadows.put(&quot;inner&quot;, &quot;inset 0 2px 4px 0 rgba(0,0,0,0.06)&quot;);</span>
+<span class="fc" id="L377">      shadows.put(&quot;none&quot;, &quot;none&quot;);</span>
+
+      // Opacity
+<span class="fc" id="L380">      opacity.put(&quot;0&quot;, 0.0);</span>
+<span class="fc" id="L381">      opacity.put(&quot;5&quot;, 0.05);</span>
+<span class="fc" id="L382">      opacity.put(&quot;10&quot;, 0.1);</span>
+<span class="fc" id="L383">      opacity.put(&quot;20&quot;, 0.2);</span>
+<span class="fc" id="L384">      opacity.put(&quot;25&quot;, 0.25);</span>
+<span class="fc" id="L385">      opacity.put(&quot;30&quot;, 0.3);</span>
+<span class="fc" id="L386">      opacity.put(&quot;40&quot;, 0.4);</span>
+<span class="fc" id="L387">      opacity.put(&quot;50&quot;, 0.5);</span>
+<span class="fc" id="L388">      opacity.put(&quot;60&quot;, 0.6);</span>
+<span class="fc" id="L389">      opacity.put(&quot;70&quot;, 0.7);</span>
+<span class="fc" id="L390">      opacity.put(&quot;75&quot;, 0.75);</span>
+<span class="fc" id="L391">      opacity.put(&quot;80&quot;, 0.8);</span>
+<span class="fc" id="L392">      opacity.put(&quot;90&quot;, 0.9);</span>
+<span class="fc" id="L393">      opacity.put(&quot;95&quot;, 0.95);</span>
+<span class="fc" id="L394">      opacity.put(&quot;100&quot;, 1.0);</span>
+
+      // Font family
+<span class="fc" id="L397">      fontFamily.put(&quot;sans&quot;, &quot;Inter, system-ui, -apple-system, sans-serif&quot;);</span>
+<span class="fc" id="L398">      fontFamily.put(&quot;serif&quot;, &quot;Georgia, Cambria, serif&quot;);</span>
+<span class="fc" id="L399">      fontFamily.put(&quot;mono&quot;, &quot;JetBrains Mono, Consolas, monospace&quot;);</span>
+
+      // Font size (en px)
+<span class="fc" id="L402">      fontSize.put(&quot;xs&quot;, 12.0);</span>
+<span class="fc" id="L403">      fontSize.put(&quot;sm&quot;, 14.0);</span>
+<span class="fc" id="L404">      fontSize.put(&quot;base&quot;, 16.0);</span>
+<span class="fc" id="L405">      fontSize.put(&quot;lg&quot;, 18.0);</span>
+<span class="fc" id="L406">      fontSize.put(&quot;xl&quot;, 20.0);</span>
+<span class="fc" id="L407">      fontSize.put(&quot;2xl&quot;, 24.0);</span>
+<span class="fc" id="L408">      fontSize.put(&quot;3xl&quot;, 30.0);</span>
+<span class="fc" id="L409">      fontSize.put(&quot;4xl&quot;, 36.0);</span>
+<span class="fc" id="L410">      fontSize.put(&quot;5xl&quot;, 48.0);</span>
+<span class="fc" id="L411">      fontSize.put(&quot;6xl&quot;, 60.0);</span>
+<span class="fc" id="L412">      fontSize.put(&quot;7xl&quot;, 72.0);</span>
+<span class="fc" id="L413">      fontSize.put(&quot;8xl&quot;, 96.0);</span>
+<span class="fc" id="L414">      fontSize.put(&quot;9xl&quot;, 128.0);</span>
+
+      // Font weight
+<span class="fc" id="L417">      fontWeight.put(&quot;thin&quot;, &quot;100&quot;);</span>
+<span class="fc" id="L418">      fontWeight.put(&quot;extralight&quot;, &quot;200&quot;);</span>
+<span class="fc" id="L419">      fontWeight.put(&quot;light&quot;, &quot;300&quot;);</span>
+<span class="fc" id="L420">      fontWeight.put(&quot;normal&quot;, &quot;400&quot;);</span>
+<span class="fc" id="L421">      fontWeight.put(&quot;medium&quot;, &quot;500&quot;);</span>
+<span class="fc" id="L422">      fontWeight.put(&quot;semibold&quot;, &quot;600&quot;);</span>
+<span class="fc" id="L423">      fontWeight.put(&quot;bold&quot;, &quot;700&quot;);</span>
+<span class="fc" id="L424">      fontWeight.put(&quot;extrabold&quot;, &quot;800&quot;);</span>
+<span class="fc" id="L425">      fontWeight.put(&quot;black&quot;, &quot;900&quot;);</span>
+<span class="fc" id="L426">    }</span>
+
+    public Builder colors(Map&lt;String, String[]&gt; colors) {
+<span class="nc" id="L429">      this.colors.clear();</span>
+<span class="nc" id="L430">      this.colors.putAll(colors);</span>
+<span class="nc" id="L431">      return this;</span>
+    }
+
+    public Builder addColor(String name, String[] shades) {
+<span class="nc" id="L435">      this.colors.put(name, shades);</span>
+<span class="nc" id="L436">      return this;</span>
+    }
+
+    public Builder spacing(double[] spacing) {
+<span class="nc bnc" id="L440" title="All 2 branches missed.">      if (spacing.length != 65) {</span>
+<span class="nc" id="L441">        throw new IllegalArgumentException(&quot;Spacing array must have 65 elements (0-64)&quot;);</span>
+      }
+<span class="nc" id="L443">      this.spacing = spacing.clone();</span>
+<span class="nc" id="L444">      return this;</span>
+    }
+
+    public Builder breakpoints(Map&lt;String, Integer&gt; breakpoints) {
+<span class="nc" id="L448">      this.breakpoints.clear();</span>
+<span class="nc" id="L449">      this.breakpoints.putAll(breakpoints);</span>
+<span class="nc" id="L450">      return this;</span>
+    }
+
+    public Builder addBreakpoint(String name, int width) {
+<span class="nc" id="L454">      this.breakpoints.put(name, width);</span>
+<span class="nc" id="L455">      return this;</span>
+    }
+
+    public Builder borderRadius(double[] borderRadius) {
+<span class="nc bnc" id="L459" title="All 2 branches missed.">      if (borderRadius.length != 17) {</span>
+<span class="nc" id="L460">        throw new IllegalArgumentException(&quot;Border radius array must have 17 elements (0-16)&quot;);</span>
+      }
+<span class="nc" id="L462">      this.borderRadius = borderRadius.clone();</span>
+<span class="nc" id="L463">      return this;</span>
+    }
+
+    public Builder shadows(Map&lt;String, String&gt; shadows) {
+<span class="nc" id="L467">      this.shadows.clear();</span>
+<span class="nc" id="L468">      this.shadows.putAll(shadows);</span>
+<span class="nc" id="L469">      return this;</span>
+    }
+
+    public Builder addShadow(String name, String value) {
+<span class="nc" id="L473">      this.shadows.put(name, value);</span>
+<span class="nc" id="L474">      return this;</span>
+    }
+
+    public Builder opacity(Map&lt;String, Double&gt; opacity) {
+<span class="nc" id="L478">      this.opacity.clear();</span>
+<span class="nc" id="L479">      this.opacity.putAll(opacity);</span>
+<span class="nc" id="L480">      return this;</span>
+    }
+
+    public Builder addOpacity(String name, double value) {
+<span class="nc" id="L484">      this.opacity.put(name, value);</span>
+<span class="nc" id="L485">      return this;</span>
+    }
+
+    public Builder fontFamily(Map&lt;String, String&gt; fontFamily) {
+<span class="nc" id="L489">      this.fontFamily.clear();</span>
+<span class="nc" id="L490">      this.fontFamily.putAll(fontFamily);</span>
+<span class="nc" id="L491">      return this;</span>
+    }
+
+    public Builder addFontFamily(String name, String value) {
+<span class="nc" id="L495">      this.fontFamily.put(name, value);</span>
+<span class="nc" id="L496">      return this;</span>
+    }
+
+    public Builder fontSize(Map&lt;String, Double&gt; fontSize) {
+<span class="nc" id="L500">      this.fontSize.clear();</span>
+<span class="nc" id="L501">      this.fontSize.putAll(fontSize);</span>
+<span class="nc" id="L502">      return this;</span>
+    }
+
+    public Builder addFontSize(String name, double value) {
+<span class="nc" id="L506">      this.fontSize.put(name, value);</span>
+<span class="nc" id="L507">      return this;</span>
+    }
+
+    public Builder fontWeight(Map&lt;String, String&gt; fontWeight) {
+<span class="nc" id="L511">      this.fontWeight.clear();</span>
+<span class="nc" id="L512">      this.fontWeight.putAll(fontWeight);</span>
+<span class="nc" id="L513">      return this;</span>
+    }
+
+    public Builder addFontWeight(String name, String value) {
+<span class="nc" id="L517">      this.fontWeight.put(name, value);</span>
+<span class="nc" id="L518">      return this;</span>
+    }
+
+    public ThemeConfig build() {
+<span class="fc" id="L522">      return new ThemeConfig(this);</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

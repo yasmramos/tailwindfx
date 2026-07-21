@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TwButton.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TailwindFX Base</a> &gt; <a href="index.source.html" class="el_package">io.github.yasmramos.tailwindfx.components</a> &gt; <span class="el_source">TwButton.java</span></div><h1>TwButton.java</h1><pre class="source lang-java linenums">package io.github.yasmramos.tailwindfx.components;
+
+import javafx.scene.control.Button;
+
+/** TwButton — Custom button component extending JavaFX Button with TailwindCSS variants. */
+public class TwButton extends Button {
+
+<span class="fc" id="L8">  private TwButtonVariant variant = TwButtonVariant.PRIMARY;</span>
+<span class="fc" id="L9">  private String color = &quot;blue&quot;;</span>
+<span class="fc" id="L10">  private String size = &quot;md&quot;;</span>
+<span class="fc" id="L11">  private boolean loading = false;</span>
+
+  public TwButton(String text) {
+<span class="fc" id="L14">    super(text);</span>
+<span class="fc" id="L15">    initialize();</span>
+<span class="fc" id="L16">  }</span>
+
+  private void initialize() {
+<span class="fc" id="L19">    getStyleClass().add(&quot;btn&quot;);</span>
+<span class="fc" id="L20">    applyVariant();</span>
+<span class="fc" id="L21">    setupEventHandlers();</span>
+<span class="fc" id="L22">  }</span>
+
+  private void setupEventHandlers() {
+<span class="fc" id="L25">    hoverProperty()</span>
+<span class="fc" id="L26">        .addListener(</span>
+            (obs, oldVal, newVal) -&gt; {
+<span class="nc bnc" id="L28" title="All 4 branches missed.">              if (newVal &amp;&amp; !isDisabled()) {</span>
+<span class="nc" id="L29">                setScaleX(1.05);</span>
+<span class="nc" id="L30">                setScaleY(1.05);</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">              } else if (!isDisabled()) {</span>
+<span class="nc" id="L32">                setScaleX(1.0);</span>
+<span class="nc" id="L33">                setScaleY(1.0);</span>
+              }
+<span class="nc" id="L35">            });</span>
+<span class="fc" id="L36">  }</span>
+
+  private void applyVariant() {
+    // Remove all variant, color and size classes but preserve special classes like btn-icon,
+    // btn-circle
+<span class="fc" id="L41">    getStyleClass()</span>
+<span class="fc" id="L42">        .removeAll(&quot;btn-primary&quot;, &quot;btn-secondary&quot;, &quot;btn-outline&quot;, &quot;btn-ghost&quot;, &quot;btn-danger&quot;);</span>
+<span class="fc" id="L43">    getStyleClass()</span>
+<span class="fc" id="L44">        .removeIf(</span>
+            cls -&gt;
+<span class="fc bfc" id="L46" title="All 2 branches covered.">                cls.startsWith(&quot;btn-&quot;)</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">                    &amp;&amp; !cls.equals(&quot;btn&quot;)</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">                    &amp;&amp; !cls.equals(&quot;btn-icon&quot;)</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">                    &amp;&amp; !cls.equals(&quot;btn-circle&quot;));</span>
+
+<span class="pc bpc" id="L51" title="1 of 6 branches missed.">    switch (variant) {</span>
+      case PRIMARY:
+<span class="fc" id="L53">        getStyleClass().add(&quot;btn-primary&quot;);</span>
+<span class="fc" id="L54">        break;</span>
+      case SECONDARY:
+<span class="fc" id="L56">        getStyleClass().add(&quot;btn-secondary&quot;);</span>
+<span class="fc" id="L57">        break;</span>
+      case OUTLINE:
+<span class="fc" id="L59">        getStyleClass().add(&quot;btn-outline&quot;);</span>
+<span class="fc" id="L60">        break;</span>
+      case GHOST:
+<span class="fc" id="L62">        getStyleClass().add(&quot;btn-ghost&quot;);</span>
+<span class="fc" id="L63">        break;</span>
+      case DANGER:
+<span class="fc" id="L65">        getStyleClass().add(&quot;btn-danger&quot;);</span>
+        break;
+    }
+
+    // Add color class
+<span class="pc bpc" id="L70" title="2 of 4 branches missed.">    if (color != null &amp;&amp; !color.isEmpty()) {</span>
+<span class="fc" id="L71">      getStyleClass().add(&quot;btn-&quot; + color);</span>
+    }
+
+    // Add size class (only if not an icon button)
+<span class="pc bpc" id="L75" title="2 of 4 branches missed.">    if (size != null &amp;&amp; !size.isEmpty()) {</span>
+<span class="fc" id="L76">      getStyleClass().add(&quot;btn-&quot; + size);</span>
+    }
+<span class="fc" id="L78">  }</span>
+
+  public void setVariant(TwButtonVariant variant) {
+<span class="fc" id="L81">    this.variant = variant;</span>
+<span class="fc" id="L82">    applyVariant();</span>
+<span class="fc" id="L83">  }</span>
+
+  public TwButtonVariant getVariant() {
+<span class="nc" id="L86">    return variant;</span>
+  }
+
+  public void setColor(String color) {
+<span class="fc" id="L90">    this.color = color;</span>
+<span class="fc" id="L91">    applyVariant();</span>
+<span class="fc" id="L92">  }</span>
+
+  public String getColor() {
+<span class="nc" id="L95">    return color;</span>
+  }
+
+  public void setLoading(boolean loading) {
+<span class="nc" id="L99">    this.loading = loading;</span>
+<span class="nc" id="L100">    setDisabled(loading);</span>
+<span class="nc" id="L101">  }</span>
+
+  public boolean isLoading() {
+<span class="nc" id="L104">    return loading;</span>
+  }
+
+  public static TwButton primary(String text) {
+<span class="fc" id="L108">    TwButton btn = new TwButton(text);</span>
+<span class="fc" id="L109">    btn.setVariant(TwButtonVariant.PRIMARY);</span>
+<span class="fc" id="L110">    btn.setColor(&quot;blue&quot;);</span>
+<span class="fc" id="L111">    return btn;</span>
+  }
+
+  public static TwButton primary(String text, String color) {
+<span class="fc" id="L115">    TwButton btn = new TwButton(text);</span>
+<span class="fc" id="L116">    btn.setVariant(TwButtonVariant.PRIMARY);</span>
+<span class="fc" id="L117">    btn.setColor(color);</span>
+<span class="fc" id="L118">    return btn;</span>
+  }
+
+  public static TwButton secondary(String text) {
+<span class="fc" id="L122">    TwButton btn = new TwButton(text);</span>
+<span class="fc" id="L123">    btn.setVariant(TwButtonVariant.SECONDARY);</span>
+<span class="fc" id="L124">    btn.setColor(&quot;gray&quot;);</span>
+<span class="fc" id="L125">    return btn;</span>
+  }
+
+  public static TwButton secondary(String text, String color) {
+<span class="fc" id="L129">    TwButton btn = new TwButton(text);</span>
+<span class="fc" id="L130">    btn.setVariant(TwButtonVariant.SECONDARY);</span>
+<span class="fc" id="L131">    btn.setColor(color);</span>
+<span class="fc" id="L132">    return btn;</span>
+  }
+
+  public static TwButton outline(String text) {
+<span class="fc" id="L136">    TwButton btn = new TwButton(text);</span>
+<span class="fc" id="L137">    btn.setVariant(TwButtonVariant.OUTLINE);</span>
+<span class="fc" id="L138">    btn.setColor(&quot;gray&quot;);</span>
+<span class="fc" id="L139">    return btn;</span>
+  }
+
+  public static TwButton outline(String text, String color) {
+<span class="fc" id="L143">    TwButton btn = new TwButton(text);</span>
+<span class="fc" id="L144">    btn.setVariant(TwButtonVariant.OUTLINE);</span>
+<span class="fc" id="L145">    btn.setColor(color);</span>
+<span class="fc" id="L146">    return btn;</span>
+  }
+
+  public static TwButton ghost(String text) {
+<span class="fc" id="L150">    TwButton btn = new TwButton(text);</span>
+<span class="fc" id="L151">    btn.setVariant(TwButtonVariant.GHOST);</span>
+<span class="fc" id="L152">    btn.setColor(&quot;gray&quot;);</span>
+<span class="fc" id="L153">    return btn;</span>
+  }
+
+  public static TwButton ghost(String text, String color) {
+<span class="fc" id="L157">    TwButton btn = new TwButton(text);</span>
+<span class="fc" id="L158">    btn.setVariant(TwButtonVariant.GHOST);</span>
+<span class="fc" id="L159">    btn.setColor(color);</span>
+<span class="fc" id="L160">    return btn;</span>
+  }
+
+  public static TwButton danger(String text) {
+<span class="fc" id="L164">    TwButton btn = new TwButton(text);</span>
+<span class="fc" id="L165">    btn.setVariant(TwButtonVariant.DANGER);</span>
+<span class="fc" id="L166">    btn.setColor(&quot;red&quot;);</span>
+<span class="fc" id="L167">    return btn;</span>
+  }
+
+  public static TwButton success(String text) {
+<span class="fc" id="L171">    TwButton btn = new TwButton(text);</span>
+<span class="fc" id="L172">    btn.setVariant(TwButtonVariant.PRIMARY);</span>
+<span class="fc" id="L173">    btn.setColor(&quot;green&quot;);</span>
+<span class="fc" id="L174">    return btn;</span>
+  }
+
+  public static TwButton disabled(String text) {
+<span class="fc" id="L178">    TwButton btn = new TwButton(text);</span>
+<span class="fc" id="L179">    btn.setDisable(true);</span>
+<span class="fc" id="L180">    btn.getStyleClass().add(&quot;btn-disabled&quot;);</span>
+<span class="fc" id="L181">    return btn;</span>
+  }
+
+  public static TwButton icon(String icon, String label) {
+<span class="fc" id="L185">    TwButton btn = new TwButton(icon);</span>
+<span class="fc" id="L186">    btn.setAccessibleText(label);</span>
+<span class="fc" id="L187">    btn.setColor(&quot;gray&quot;);</span>
+<span class="fc" id="L188">    btn.size = null; // Remove size class for icon buttons</span>
+    // Add icon-specific classes after setColor to avoid removal
+<span class="fc" id="L190">    getStyleClassStatic(btn).addAll(&quot;btn-icon&quot;, &quot;btn-circle&quot;);</span>
+<span class="fc" id="L191">    return btn;</span>
+  }
+
+  public static TwButton icon(String icon, String label, String color) {
+<span class="fc" id="L195">    TwButton btn = new TwButton(icon);</span>
+<span class="fc" id="L196">    btn.setAccessibleText(label);</span>
+<span class="fc" id="L197">    btn.setColor(color);</span>
+<span class="fc" id="L198">    btn.size = null; // Remove size class for icon buttons</span>
+    // Add icon-specific classes after setColor to avoid removal
+<span class="fc" id="L200">    getStyleClassStatic(btn).addAll(&quot;btn-icon&quot;, &quot;btn-circle&quot;);</span>
+<span class="fc" id="L201">    return btn;</span>
+  }
+
+  private static javafx.collections.ObservableList&lt;String&gt; getStyleClassStatic(
+      javafx.scene.control.Button btn) {
+<span class="fc" id="L206">    return btn.getStyleClass();</span>
+  }
+
+<span class="fc" id="L209">  public enum TwButtonVariant {</span>
+<span class="fc" id="L210">    PRIMARY,</span>
+<span class="fc" id="L211">    SECONDARY,</span>
+<span class="fc" id="L212">    OUTLINE,</span>
+<span class="fc" id="L213">    GHOST,</span>
+<span class="fc" id="L214">    DANGER</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

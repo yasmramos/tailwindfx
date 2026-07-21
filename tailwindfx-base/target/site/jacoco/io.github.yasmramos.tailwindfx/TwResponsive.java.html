@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TwResponsive.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TailwindFX Base</a> &gt; <a href="index.source.html" class="el_package">io.github.yasmramos.tailwindfx</a> &gt; <span class="el_source">TwResponsive.java</span></div><h1>TwResponsive.java</h1><pre class="source lang-java linenums">package io.github.yasmramos.tailwindfx;
+
+import io.github.yasmramos.tailwindfx.breakpoint.BreakpointManager;
+import io.github.yasmramos.tailwindfx.responsive.ResponsiveNode;
+import javafx.scene.Scene;
+import javafx.scene.layout.Region;
+import javafx.stage.Stage;
+
+/**
+ * TwResponsive — Responsive facade for breakpoint management.
+ *
+ * &lt;pre&gt;
+ * TwResponsive.on(stage);
+ * TwResponsive.forRegion(region);
+ * &lt;/pre&gt;
+ */
+public final class TwResponsive {
+
+<span class="fc" id="L19">  private static final TwResponsive INSTANCE = new TwResponsive();</span>
+
+  private TwResponsive() {}
+
+  /** Installs responsive support on a Stage. */
+  public static ResponsiveNode on(Stage stage) {
+<span class="fc" id="L25">    Scene scene = stage.getScene();</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">    if (scene == null) {</span>
+<span class="fc" id="L27">      throw new IllegalArgumentException(&quot;Stage must have a scene attached&quot;);</span>
+    }
+    // Install on the root node of the scene
+<span class="fc" id="L30">    javafx.scene.Parent root = scene.getRoot();</span>
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">    if (root instanceof Region) {</span>
+<span class="fc" id="L32">      return ResponsiveNode.on((Region) root).install(scene);</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">    } else if (root instanceof javafx.scene.Node) {</span>
+<span class="nc" id="L34">      return ResponsiveNode.on(root).install(scene);</span>
+    }
+<span class="nc" id="L36">    throw new IllegalArgumentException(&quot;Scene root must be a Node&quot;);</span>
+  }
+
+  /** Makes a Region responsive to breakpoint changes. */
+  public static ResponsiveNode on(Region region) {
+<span class="fc" id="L41">    return ResponsiveNode.on(region).install(region.getScene());</span>
+  }
+
+  /** Gets the BreakpointManager for a Stage. */
+  public static BreakpointManager forStage(Stage stage) {
+<span class="fc" id="L46">    return BreakpointManager.from(stage);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
