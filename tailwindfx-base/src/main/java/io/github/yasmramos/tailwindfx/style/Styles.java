@@ -332,7 +332,27 @@ public final class Styles {
       T node, double top, double right, double bottom, double left) {
     Preconditions.requireNode(node, "Styles.margin");
     Preconditions.warnNoParent(node, "Styles.margin");
-    Insets insets = new Insets(top, right, bottom, left);
+    
+    // Get existing margins to preserve values not being explicitly set
+    Insets existingHBox = HBox.getMargin(node);
+    Insets existingVBox = VBox.getMargin(node);
+    Insets existingGridPane = GridPane.getMargin(node);
+    
+    // Use existing values as fallback for zero values (preserves previously set margins)
+    double finalTop = (top == 0 && existingHBox != null) ? existingHBox.getTop() : top;
+    double finalRight = (right == 0 && existingHBox != null) ? existingHBox.getRight() : right;
+    double finalBottom = (bottom == 0 && existingHBox != null) ? existingHBox.getBottom() : bottom;
+    double finalLeft = (left == 0 && existingHBox != null) ? existingHBox.getLeft() : left;
+    
+    // If all values are zero and we have existing margins, preserve them
+    if (top == 0 && right == 0 && bottom == 0 && left == 0 && existingHBox != null) {
+      finalTop = existingHBox.getTop();
+      finalRight = existingHBox.getRight();
+      finalBottom = existingHBox.getBottom();
+      finalLeft = existingHBox.getLeft();
+    }
+    
+    Insets insets = new Insets(finalTop, finalRight, finalBottom, finalLeft);
     HBox.setMargin(node, insets);
     VBox.setMargin(node, insets);
     GridPane.setMargin(node, insets);

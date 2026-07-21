@@ -83,10 +83,20 @@ public class TwStyleTest extends ApplicationTest {
   @Test
   @DisplayName("apply should handle layout-dependent tokens (margins)")
   void testApplyWithMarginTokens() {
+    // Node must be in a parent container for margins to take effect
     TwStyle.apply(labelNode, "m-4", "mt-2");
 
-    // Margins should be applied - style string should contain margin properties
-    assertTrue(labelNode.getStyle().contains("-fx-margin") || !labelNode.getStyle().isEmpty());
+    // Margins are applied via HBox.setMargin(), not as inline CSS
+    // Verify margin was set correctly using HBox.getMargin()
+    javafx.geometry.Insets margin = HBox.getMargin(labelNode);
+    assertNotNull(margin, "Margin should be applied via HBox.setMargin()");
+    
+    // m-4 = 4 * 4px = 16px on all sides, but mt-2 overrides top to 8px
+    // So we expect: top=8px (from mt-2), right=16px, bottom=16px, left=16px
+    assertEquals(8.0, margin.getTop(), "Top margin should be 8px from mt-2");
+    assertEquals(16.0, margin.getRight(), "Right margin should be 16px from m-4");
+    assertEquals(16.0, margin.getBottom(), "Bottom margin should be 16px from m-4");
+    assertEquals(16.0, margin.getLeft(), "Left margin should be 16px from m-4");
   }
 
   @Test
