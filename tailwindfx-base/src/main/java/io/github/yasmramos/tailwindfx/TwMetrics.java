@@ -11,6 +11,7 @@ import javafx.scene.Node;
  * <pre>
  * String report = TwMetrics.debugReport(node);
  * TwMetrics.healthCheck();
+ * TwMetrics.setEnabled(true);
  * </pre>
  */
 public final class TwMetrics {
@@ -28,5 +29,15 @@ public final class TwMetrics {
   /** Runs a health check on the TailwindFX system. */
   public static void healthCheck() {
     TailwindFXMetrics.instance().printHealth();
+  }
+
+  /** Enables or disables metrics collection. */
+  public static void setEnabled(boolean enabled) {
+    TailwindFXMetrics.instance().setEnabled(enabled);
+  }
+
+  /** Returns whether metrics collection is enabled. */
+  public static boolean isEnabled() {
+    return TailwindFXMetrics.instance().isEnabled();
   }
 }
