@@ -526,7 +526,7 @@ public final class TailwindFXMetrics {
           new HealthIssue(
               "WARN",
               "No metrics data collected",
-              "Call TailwindFXMetrics.instance().setEnabled(true) before running your app"));
+              "Call TwMetrics.setEnabled(true) before running your app"));
     }
 
     return java.util.Collections.unmodifiableList(issues);
