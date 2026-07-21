@@ -117,17 +117,11 @@ public class ThemeCssGenerator {
   }
 
   private void generateShadowVariables(StringBuilder css) {
-    // Basic shadow mapping - can be expanded based on ThemeConfig if it supports custom shadows
+    // JavaFX no soporta box-shadow como CSS web. Las sombras se aplican via -fx-effect.
+    // Estas variables son placeholders para referencia en el código Java.
     String[] shadows = {"sm", "default", "md", "lg", "xl", "2xl", "none"};
-    String[] values = {
-      "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-      "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)",
-      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)",
-      "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)",
-      "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
-      "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-      "none"
-    };
+    // Valores dummy en px para evitar warnings de parsing - las sombras reales se aplican via TwEffect
+    String[] values = {"1px", "2px", "4px", "6px", "8px", "10px", "0px"};
 
     for (int i = 0; i < shadows.length; i++) {
       String varName = "-shadow-" + shadows[i];
