@@ -1,0 +1,718 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TwVirtualFlow.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TailwindFX Base</a> &gt; <a href="index.source.html" class="el_package">io.github.yasmramos.tailwindfx.components</a> &gt; <span class="el_source">TwVirtualFlow.java</span></div><h1>TwVirtualFlow.java</h1><pre class="source lang-java linenums">package io.github.yasmramos.tailwindfx.components;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+import javafx.beans.property.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
+import javafx.scene.Node;
+import javafx.scene.control.ScrollBar;
+import javafx.scene.input.*;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
+import javafx.util.Duration;
+
+/**
+ * TwVirtualFlow — High-performance virtualized container with selection, drag &amp; drop, and
+ * configurable animated scrolling.
+ *
+ * @param &lt;T&gt; Data type of the items
+ */
+public class TwVirtualFlow&lt;T&gt; extends Region {
+
+  // Enums &amp; Constants
+<span class="nc" id="L35">  public enum SelectionMode {</span>
+<span class="nc" id="L36">    NONE,</span>
+<span class="nc" id="L37">    SINGLE,</span>
+<span class="nc" id="L38">    MULTIPLE</span>
+  }
+
+  // State &amp; Cache
+<span class="nc" id="L42">  private final ObservableList&lt;T&gt; items = FXCollections.observableArrayList();</span>
+<span class="nc" id="L43">  private Function&lt;T, Node&gt; cellFactory =</span>
+      item -&gt; {
+<span class="nc" id="L45">        var label = new javafx.scene.control.Label(String.valueOf(item));</span>
+<span class="nc" id="L46">        label.setStyle(&quot;-fx-padding: 8;&quot;);</span>
+<span class="nc" id="L47">        return label;</span>
+      };
+
+<span class="nc" id="L50">  private Orientation orientation = Orientation.VERTICAL;</span>
+<span class="nc" id="L51">  private final DoubleProperty cellHeight = new SimpleDoubleProperty(48);</span>
+<span class="nc" id="L52">  private final DoubleProperty cellWidth = new SimpleDoubleProperty(200);</span>
+<span class="nc" id="L53">  private Function&lt;T, Double&gt; cellSizeProvider = null;</span>
+
+<span class="nc" id="L55">  private final ObjectProperty&lt;Insets&gt; viewportPadding = new SimpleObjectProperty&lt;&gt;(Insets.EMPTY);</span>
+<span class="nc" id="L56">  private final ObjectProperty&lt;Interpolator&gt; scrollInterpolator =</span>
+      new SimpleObjectProperty&lt;&gt;(Interpolator.EASE_BOTH);
+<span class="nc" id="L58">  private final ObjectProperty&lt;SelectionMode&gt; selectionMode =</span>
+      new SimpleObjectProperty&lt;&gt;(SelectionMode.SINGLE);
+<span class="nc" id="L60">  private final ObservableList&lt;Integer&gt; selectedIndices = FXCollections.observableArrayList();</span>
+
+  // Contenedor interno
+<span class="nc" id="L63">  private final Pane cellContainer = new Pane();</span>
+<span class="nc" id="L64">  private final ScrollBar scrollBar = new ScrollBar();</span>
+<span class="nc" id="L65">  private final Map&lt;Integer, Node&gt; visibleCells = new HashMap&lt;&gt;();</span>
+
+  // Drag &amp; Drop
+<span class="nc" id="L68">  private final Region dropIndicator = new Region();</span>
+<span class="nc" id="L69">  private int dragSourceIndex = -1;</span>
+<span class="nc" id="L70">  private int dragTargetIndex = -1;</span>
+
+  // Size cache
+<span class="nc" id="L73">  private double[] prefixSums = new double[0];</span>
+<span class="nc" id="L74">  private int prefixSumsLength = 0;</span>
+<span class="nc" id="L75">  private boolean sizeCacheDirty = true;</span>
+
+  // Animation &amp; Position
+  private Timeline scrollAnimation;
+<span class="nc" id="L79">  private double scrollPosition = 0;</span>
+<span class="nc" id="L80">  private int firstVisibleIndex = 0;</span>
+<span class="nc" id="L81">  private int lastVisibleIndex = 0;</span>
+
+  // Callbacks
+  private Consumer&lt;Integer&gt; onSelect;
+  private Consumer&lt;Integer&gt; onDoubleClick;
+  private BiConsumer&lt;Integer, Integer&gt; onItemReorder;
+  private Consumer&lt;List&lt;T&gt;&gt; onSelectionChange;
+
+  // Constructor
+<span class="nc" id="L90">  public TwVirtualFlow() {</span>
+    // Setup container
+<span class="nc" id="L92">    dropIndicator.getStyleClass().add(&quot;fx-virtualflow-drop-indicator&quot;);</span>
+<span class="nc" id="L93">    dropIndicator.setStyle(&quot;-fx-background-color: #3b82f6; -fx-pref-height: 2;&quot;);</span>
+<span class="nc" id="L94">    dropIndicator.setVisible(false);</span>
+<span class="nc" id="L95">    dropIndicator.setManaged(false);</span>
+<span class="nc" id="L96">    dropIndicator.setPickOnBounds(true);</span>
+
+<span class="nc" id="L98">    getChildren().addAll(cellContainer, dropIndicator, scrollBar);</span>
+<span class="nc" id="L99">    cellContainer.setMouseTransparent(false); // We handle events here</span>
+<span class="nc" id="L100">    cellContainer.setManaged(false);</span>
+
+    // Scroll config
+<span class="nc" id="L103">    scrollBar.setOrientation(orientation);</span>
+<span class="nc" id="L104">    scrollBar</span>
+<span class="nc" id="L105">        .valueProperty()</span>
+<span class="nc" id="L106">        .addListener(</span>
+            (obs, oldVal, newVal) -&gt; {
+<span class="nc" id="L108">              scrollPosition = newVal.doubleValue();</span>
+<span class="nc" id="L109">              updateVisibleCells();</span>
+<span class="nc" id="L110">            });</span>
+
+    // Data changes
+<span class="nc" id="L113">    items.addListener(</span>
+        (ListChangeListener&lt;T&gt;)
+            c -&gt; {
+<span class="nc" id="L116">              sizeCacheDirty = true;</span>
+<span class="nc" id="L117">              updateScrollBar();</span>
+<span class="nc" id="L118">              updateVisibleCells();</span>
+<span class="nc" id="L119">            });</span>
+
+    // Size changes
+<span class="nc" id="L122">    widthProperty().addListener((obs, o, n) -&gt; updateVisibleCells());</span>
+<span class="nc" id="L123">    heightProperty().addListener((obs, o, n) -&gt; updateVisibleCells());</span>
+<span class="nc" id="L124">    viewportPadding.addListener(</span>
+        (obs, o, n) -&gt; {
+<span class="nc" id="L126">          requestLayout();</span>
+<span class="nc" id="L127">          updateVisibleCells();</span>
+<span class="nc" id="L128">        });</span>
+
+    // EVENT DELEGATION (Container-level)
+<span class="nc" id="L131">    cellContainer.setOnMousePressed(e -&gt; handleSelection(e));</span>
+<span class="nc" id="L132">    cellContainer.setOnMouseClicked(</span>
+        e -&gt; {
+<span class="nc bnc" id="L134" title="All 2 branches missed.">          if (e.getClickCount() == 2) handleDoubleClick(e);</span>
+<span class="nc" id="L135">        });</span>
+
+    // Drag &amp; Drop setup
+<span class="nc" id="L138">    cellContainer.setOnDragDetected(e -&gt; handleDragStart(e));</span>
+<span class="nc" id="L139">    cellContainer.setOnDragOver(e -&gt; handleDragOver(e));</span>
+<span class="nc" id="L140">    cellContainer.setOnDragExited(e -&gt; dropIndicator.setVisible(false));</span>
+<span class="nc" id="L141">    cellContainer.setOnDragDropped(e -&gt; handleDragDrop(e));</span>
+<span class="nc" id="L142">    cellContainer.setOnDragDone(</span>
+        e -&gt; {
+<span class="nc" id="L144">          dropIndicator.setVisible(false);</span>
+<span class="nc" id="L145">          dragSourceIndex = -1;</span>
+<span class="nc" id="L146">        });</span>
+
+<span class="nc" id="L148">    updateScrollBar();</span>
+<span class="nc" id="L149">  }</span>
+
+  // Public API - Core
+  public void setItems(ObservableList&lt;T&gt; items) {
+<span class="nc" id="L153">    Objects.requireNonNull(items, &quot;items cannot be null&quot;);</span>
+<span class="nc" id="L154">    this.items.setAll(items);</span>
+<span class="nc" id="L155">  }</span>
+
+  public ObservableList&lt;T&gt; getItems() {
+<span class="nc" id="L158">    return items;</span>
+  }
+
+  public void setCellFactory(Function&lt;T, Node&gt; factory) {
+<span class="nc" id="L162">    Objects.requireNonNull(factory, &quot;cellFactory cannot be null&quot;);</span>
+<span class="nc" id="L163">    this.cellFactory = factory;</span>
+<span class="nc" id="L164">    visibleCells.values().forEach(cellContainer.getChildren()::remove);</span>
+<span class="nc" id="L165">    visibleCells.clear();</span>
+<span class="nc" id="L166">    updateVisibleCells();</span>
+<span class="nc" id="L167">  }</span>
+
+  public void setCellSizeProvider(Function&lt;T, Double&gt; provider) {
+<span class="nc" id="L170">    this.cellSizeProvider = provider;</span>
+<span class="nc" id="L171">    sizeCacheDirty = true;</span>
+<span class="nc" id="L172">    updateScrollBar();</span>
+<span class="nc" id="L173">    updateVisibleCells();</span>
+<span class="nc" id="L174">  }</span>
+
+  public void setCellHeight(double height) {
+<span class="nc bnc" id="L177" title="All 2 branches missed.">    if (height &lt;= 0) throw new IllegalArgumentException(&quot;cellHeight must be positive&quot;);</span>
+<span class="nc" id="L178">    cellHeight.set(height);</span>
+<span class="nc" id="L179">    sizeCacheDirty = true;</span>
+<span class="nc" id="L180">    updateScrollBar();</span>
+<span class="nc" id="L181">    updateVisibleCells();</span>
+<span class="nc" id="L182">  }</span>
+
+  public double getCellHeight() {
+<span class="nc" id="L185">    return cellHeight.get();</span>
+  }
+
+  public DoubleProperty cellHeightProperty() {
+<span class="nc" id="L189">    return cellHeight;</span>
+  }
+
+  public void setCellWidth(double width) {
+<span class="nc bnc" id="L193" title="All 2 branches missed.">    if (width &lt;= 0) throw new IllegalArgumentException(&quot;cellWidth must be positive&quot;);</span>
+<span class="nc" id="L194">    cellWidth.set(width);</span>
+<span class="nc" id="L195">    sizeCacheDirty = true;</span>
+<span class="nc" id="L196">    updateScrollBar();</span>
+<span class="nc" id="L197">    updateVisibleCells();</span>
+<span class="nc" id="L198">  }</span>
+
+  public double getCellWidth() {
+<span class="nc" id="L201">    return cellWidth.get();</span>
+  }
+
+  public DoubleProperty cellWidthProperty() {
+<span class="nc" id="L205">    return cellWidth;</span>
+  }
+
+  public void setOrientation(Orientation orientation) {
+<span class="nc" id="L209">    Objects.requireNonNull(orientation, &quot;orientation cannot be null&quot;);</span>
+<span class="nc" id="L210">    this.orientation = orientation;</span>
+<span class="nc" id="L211">    scrollBar.setOrientation(orientation);</span>
+<span class="nc" id="L212">    sizeCacheDirty = true;</span>
+<span class="nc" id="L213">    updateScrollBar();</span>
+<span class="nc" id="L214">    updateVisibleCells();</span>
+<span class="nc" id="L215">  }</span>
+
+  public Orientation getOrientation() {
+<span class="nc" id="L218">    return orientation;</span>
+  }
+
+  public void setViewportPadding(Insets padding) {
+<span class="nc" id="L222">    Objects.requireNonNull(padding, &quot;viewportPadding cannot be null&quot;);</span>
+<span class="nc" id="L223">    this.viewportPadding.set(padding);</span>
+<span class="nc" id="L224">  }</span>
+
+  public Insets getViewportPadding() {
+<span class="nc" id="L227">    return viewportPadding.get();</span>
+  }
+
+  public ObjectProperty&lt;Insets&gt; viewportPaddingProperty() {
+<span class="nc" id="L231">    return viewportPadding;</span>
+  }
+
+  // Public API - Selection
+  public void setSelectionMode(SelectionMode mode) {
+<span class="nc" id="L236">    selectionMode.set(mode);</span>
+<span class="nc bnc" id="L237" title="All 2 branches missed.">    if (mode == SelectionMode.NONE) selectedIndices.clear();</span>
+<span class="nc" id="L238">  }</span>
+
+  public SelectionMode getSelectionMode() {
+<span class="nc" id="L241">    return selectionMode.get();</span>
+  }
+
+  public ObjectProperty&lt;SelectionMode&gt; selectionModeProperty() {
+<span class="nc" id="L245">    return selectionMode;</span>
+  }
+
+  public ObservableList&lt;Integer&gt; getSelectedIndices() {
+<span class="nc" id="L249">    return selectedIndices;</span>
+  }
+
+  public List&lt;T&gt; getSelectedItems() {
+<span class="nc" id="L253">    return selectedIndices.stream()</span>
+<span class="nc bnc" id="L254" title="All 4 branches missed.">        .filter(i -&gt; i &gt;= 0 &amp;&amp; i &lt; items.size())</span>
+<span class="nc" id="L255">        .map(items::get)</span>
+<span class="nc" id="L256">        .collect(Collectors.toList());</span>
+  }
+
+  public void clearSelection() {
+<span class="nc" id="L260">    selectedIndices.clear();</span>
+<span class="nc bnc" id="L261" title="All 2 branches missed.">    if (onSelectionChange != null) onSelectionChange.accept(getSelectedItems());</span>
+<span class="nc" id="L262">  }</span>
+
+  public void selectIndex(int index) {
+<span class="nc bnc" id="L265" title="All 4 branches missed.">    if (index &lt; 0 || index &gt;= items.size()) return;</span>
+<span class="nc" id="L266">    selectedIndices.setAll(index);</span>
+<span class="nc bnc" id="L267" title="All 2 branches missed.">    if (onSelectionChange != null) onSelectionChange.accept(getSelectedItems());</span>
+<span class="nc" id="L268">  }</span>
+
+  // Public API - Scrolling &amp; Animation
+  public void scrollToIndex(int index) {
+<span class="nc" id="L272">    scrollToIndex(index, Duration.ZERO);</span>
+<span class="nc" id="L273">  }</span>
+
+  public void scrollToIndex(int index, Duration duration) {
+<span class="nc bnc" id="L276" title="All 6 branches missed.">    if (items.isEmpty() || index &lt; 0 || index &gt;= items.size()) return;</span>
+<span class="nc" id="L277">    ensureSizeCache();</span>
+<span class="nc" id="L278">    animateScrollTo(prefixSums[index], duration);</span>
+<span class="nc" id="L279">  }</span>
+
+  public void scrollBy(double delta, Duration duration) {
+<span class="nc" id="L282">    animateScrollTo(Math.max(0, Math.min(scrollPosition + delta, scrollBar.getMax())), duration);</span>
+<span class="nc" id="L283">  }</span>
+
+  public Interpolator getScrollInterpolator() {
+<span class="nc" id="L286">    return scrollInterpolator.get();</span>
+  }
+
+  public ObjectProperty&lt;Interpolator&gt; scrollInterpolatorProperty() {
+<span class="nc" id="L290">    return scrollInterpolator;</span>
+  }
+
+  public int getFirstVisibleIndex() {
+<span class="nc" id="L294">    return firstVisibleIndex;</span>
+  }
+
+  public int getLastVisibleIndex() {
+<span class="nc" id="L298">    return lastVisibleIndex;</span>
+  }
+
+  public double getScrollPosition() {
+<span class="nc" id="L302">    return scrollPosition;</span>
+  }
+
+  // Public API - Callbacks
+  public void setOnSelect(Consumer&lt;Integer&gt; handler) {
+<span class="nc" id="L307">    this.onSelect = handler;</span>
+<span class="nc" id="L308">  }</span>
+
+  public void setOnDoubleClick(Consumer&lt;Integer&gt; handler) {
+<span class="nc" id="L311">    this.onDoubleClick = handler;</span>
+<span class="nc" id="L312">  }</span>
+
+  public void setOnItemReorder(BiConsumer&lt;Integer, Integer&gt; handler) {
+<span class="nc" id="L315">    this.onItemReorder = handler;</span>
+<span class="nc" id="L316">  }</span>
+
+  public void setOnSelectionChange(Consumer&lt;List&lt;T&gt;&gt; handler) {
+<span class="nc" id="L319">    this.onSelectionChange = handler;</span>
+<span class="nc" id="L320">  }</span>
+
+  // Layout
+  @Override
+  protected void layoutChildren() {
+<span class="nc" id="L325">    double w = getWidth(), h = getHeight();</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">    if (orientation == Orientation.VERTICAL) {</span>
+<span class="nc" id="L327">      double sbW = scrollBar.prefWidth(-1);</span>
+<span class="nc" id="L328">      double vw = Math.max(0, w - sbW);</span>
+<span class="nc" id="L329">      cellContainer.resizeRelocate(0, 0, vw, h);</span>
+<span class="nc" id="L330">      scrollBar.resizeRelocate(vw, 0, sbW, h);</span>
+<span class="nc" id="L331">    } else {</span>
+<span class="nc" id="L332">      double sbH = scrollBar.prefHeight(-1);</span>
+<span class="nc" id="L333">      double vh = Math.max(0, h - sbH);</span>
+<span class="nc" id="L334">      cellContainer.resizeRelocate(0, 0, w, vh);</span>
+<span class="nc" id="L335">      scrollBar.resizeRelocate(0, vh, w, sbH);</span>
+    }
+<span class="nc" id="L337">    updateVisibleCells();</span>
+<span class="nc" id="L338">  }</span>
+
+  @Override
+  protected double computePrefWidth(double h) {
+<span class="nc bnc" id="L342" title="All 2 branches missed.">    return orientation == Orientation.VERTICAL ? 400 : 800;</span>
+  }
+
+  @Override
+  protected double computePrefHeight(double w) {
+<span class="nc bnc" id="L347" title="All 2 branches missed.">    return orientation == Orientation.VERTICAL ? 600 : 200;</span>
+  }
+
+  @Override
+  protected double computeMinWidth(double h) {
+<span class="nc bnc" id="L352" title="All 2 branches missed.">    return orientation == Orientation.VERTICAL ? 100 : 200;</span>
+  }
+
+  @Override
+  protected double computeMinHeight(double w) {
+<span class="nc bnc" id="L357" title="All 2 branches missed.">    return orientation == Orientation.VERTICAL ? 100 : 50;</span>
+  }
+
+  // Internal Logic - Size Cache &amp; Binary Search
+  private void ensureSizeCache() {
+<span class="nc bnc" id="L362" title="All 2 branches missed.">    if (!sizeCacheDirty) return;</span>
+<span class="nc" id="L363">    sizeCacheDirty = false;</span>
+<span class="nc" id="L364">    int n = items.size();</span>
+<span class="nc bnc" id="L365" title="All 2 branches missed.">    if (prefixSums.length != n + 1) prefixSums = new double[n + 1];</span>
+<span class="nc" id="L366">    prefixSums[0] = 0;</span>
+<span class="nc bnc" id="L367" title="All 2 branches missed.">    double def = orientation == Orientation.VERTICAL ? cellHeight.get() : cellWidth.get();</span>
+<span class="nc bnc" id="L368" title="All 2 branches missed.">    for (int i = 0; i &lt; n; i++) {</span>
+<span class="nc bnc" id="L369" title="All 2 branches missed.">      double size = (cellSizeProvider != null) ? cellSizeProvider.apply(items.get(i)) : def;</span>
+<span class="nc" id="L370">      prefixSums[i + 1] = prefixSums[i] + Math.max(1, size);</span>
+    }
+<span class="nc" id="L372">    prefixSumsLength = n + 1;</span>
+<span class="nc" id="L373">  }</span>
+
+  private double getTotalContentSize() {
+<span class="nc" id="L376">    ensureSizeCache();</span>
+<span class="nc bnc" id="L377" title="All 2 branches missed.">    return prefixSumsLength &gt; 0 ? prefixSums[prefixSumsLength - 1] : 0;</span>
+  }
+
+  private int findCellIndexForPosition(double absolutePos) {
+<span class="nc" id="L381">    ensureSizeCache();</span>
+<span class="nc bnc" id="L382" title="All 2 branches missed.">    if (prefixSumsLength &lt;= 1) return 0;</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">    if (absolutePos &lt;= 0) return 0;</span>
+<span class="nc bnc" id="L384" title="All 2 branches missed.">    if (absolutePos &gt;= prefixSums[prefixSumsLength - 1]) return items.size() - 1;</span>
+
+<span class="nc" id="L386">    int low = 0, high = prefixSumsLength - 2;</span>
+<span class="nc bnc" id="L387" title="All 2 branches missed.">    while (low &lt;= high) {</span>
+<span class="nc" id="L388">      int mid = (low + high) &gt;&gt;&gt; 1;</span>
+<span class="nc bnc" id="L389" title="All 4 branches missed.">      if (absolutePos &gt;= prefixSums[mid] &amp;&amp; absolutePos &lt; prefixSums[mid + 1]) return mid;</span>
+<span class="nc bnc" id="L390" title="All 2 branches missed.">      if (absolutePos &lt; prefixSums[mid]) high = mid - 1;</span>
+<span class="nc" id="L391">      else low = mid + 1;</span>
+<span class="nc" id="L392">    }</span>
+<span class="nc" id="L393">    return Math.max(0, Math.min(low, items.size() - 1));</span>
+  }
+
+  // Internal Logic - Scroll &amp; Cells
+  private void updateScrollBar() {
+<span class="nc bnc" id="L398" title="All 2 branches missed.">    if (items.isEmpty()) {</span>
+<span class="nc" id="L399">      scrollBar.setMin(0);</span>
+<span class="nc" id="L400">      scrollBar.setMax(0);</span>
+<span class="nc" id="L401">      scrollBar.setValue(0);</span>
+<span class="nc" id="L402">      scrollBar.setVisibleAmount(1);</span>
+<span class="nc" id="L403">      scrollBar.setDisable(true);</span>
+<span class="nc" id="L404">      return;</span>
+    }
+<span class="nc" id="L406">    double total = getTotalContentSize();</span>
+    double vpSize =
+<span class="nc bnc" id="L408" title="All 2 branches missed.">        orientation == Orientation.VERTICAL</span>
+<span class="nc" id="L409">            ? Math.max(0, cellContainer.getHeight())</span>
+<span class="nc" id="L410">            : Math.max(0, cellContainer.getWidth());</span>
+<span class="nc" id="L411">    double max = Math.max(0, total - vpSize);</span>
+<span class="nc" id="L412">    scrollBar.setMin(0);</span>
+<span class="nc" id="L413">    scrollBar.setMax(max);</span>
+<span class="nc" id="L414">    scrollBar.setVisibleAmount(Math.min(vpSize / total, 1.0));</span>
+<span class="nc" id="L415">    scrollBar.setBlockIncrement(vpSize * 0.9);</span>
+<span class="nc" id="L416">    scrollBar.setUnitIncrement(</span>
+<span class="nc bnc" id="L417" title="All 2 branches missed.">        orientation == Orientation.VERTICAL ? cellHeight.get() : cellWidth.get());</span>
+<span class="nc bnc" id="L418" title="All 2 branches missed.">    scrollBar.setDisable(max &lt;= 0);</span>
+<span class="nc" id="L419">    scrollPosition = Math.min(scrollPosition, max);</span>
+<span class="nc" id="L420">    scrollBar.setValue(scrollPosition);</span>
+<span class="nc" id="L421">  }</span>
+
+  private void animateScrollTo(double target, Duration duration) {
+<span class="nc bnc" id="L424" title="All 2 branches missed.">    if (scrollAnimation != null) scrollAnimation.stop();</span>
+
+    // Fix 1: Use toMillis() instead of isZero() for compatibility
+<span class="nc bnc" id="L427" title="All 4 branches missed.">    if (duration.toMillis() == 0 || duration.toMillis() &lt; 16) {</span>
+<span class="nc" id="L428">      scrollBar.setValue(target);</span>
+<span class="nc" id="L429">      return;</span>
+    }
+
+    // Fix 2 &amp; 3: Correct Timeline construction and Interpolator usage
+    // Timeline takes KeyFrames. Interpolator is applied to KeyValue.
+<span class="nc" id="L434">    scrollAnimation =</span>
+        new Timeline(
+            new KeyFrame(
+                Duration.ZERO,
+<span class="nc" id="L438">                new KeyValue(scrollBar.valueProperty(), scrollPosition, Interpolator.LINEAR)),</span>
+            new KeyFrame(
+                duration,
+<span class="nc" id="L441">                new KeyValue(scrollBar.valueProperty(), target, scrollInterpolator.get())));</span>
+
+<span class="nc" id="L443">    scrollAnimation.play();</span>
+<span class="nc" id="L444">  }</span>
+
+  private void updateVisibleCells() {
+<span class="nc bnc" id="L447" title="All 2 branches missed.">    if (items.isEmpty()) {</span>
+<span class="nc" id="L448">      cellContainer.getChildren().clear();</span>
+<span class="nc" id="L449">      visibleCells.clear();</span>
+<span class="nc" id="L450">      firstVisibleIndex = 0;</span>
+<span class="nc" id="L451">      lastVisibleIndex = -1;</span>
+<span class="nc" id="L452">      return;</span>
+    }
+<span class="nc" id="L454">    ensureSizeCache();</span>
+<span class="nc" id="L455">    Insets pad = viewportPadding.get();</span>
+    double vpSize =
+<span class="nc bnc" id="L457" title="All 2 branches missed.">        orientation == Orientation.VERTICAL</span>
+<span class="nc" id="L458">            ? Math.max(0, cellContainer.getHeight() - pad.getTop() - pad.getBottom())</span>
+<span class="nc" id="L459">            : Math.max(0, cellContainer.getWidth() - pad.getLeft() - pad.getRight());</span>
+<span class="nc bnc" id="L460" title="All 2 branches missed.">    if (vpSize &lt;= 0) return;</span>
+
+<span class="nc" id="L462">    firstVisibleIndex = findCellIndexForPosition(scrollPosition);</span>
+<span class="nc" id="L463">    lastVisibleIndex = firstVisibleIndex;</span>
+<span class="nc" id="L464">    double cur = prefixSums[firstVisibleIndex];</span>
+<span class="nc" id="L465">    int buffer = 3;</span>
+<span class="nc bnc" id="L466" title="All 6 branches missed.">    while (lastVisibleIndex &lt; items.size() - 1 &amp;&amp; (cur &lt; scrollPosition + vpSize || buffer &gt; 0)) {</span>
+<span class="nc" id="L467">      lastVisibleIndex++;</span>
+<span class="nc" id="L468">      cur = prefixSums[lastVisibleIndex];</span>
+<span class="nc" id="L469">      buffer--;</span>
+    }
+<span class="nc bnc" id="L471" title="All 4 branches missed.">    while (firstVisibleIndex &gt; 0 &amp;&amp; buffer &gt; 0) {</span>
+<span class="nc" id="L472">      firstVisibleIndex--;</span>
+<span class="nc" id="L473">      buffer--;</span>
+    }
+
+<span class="nc" id="L476">    visibleCells</span>
+<span class="nc" id="L477">        .keySet()</span>
+<span class="nc" id="L478">        .removeIf(</span>
+            idx -&gt; {
+<span class="nc bnc" id="L480" title="All 4 branches missed.">              if (idx &lt; firstVisibleIndex || idx &gt; lastVisibleIndex) {</span>
+<span class="nc" id="L481">                Node n = visibleCells.get(idx);</span>
+<span class="nc bnc" id="L482" title="All 2 branches missed.">                if (n != null) cellContainer.getChildren().remove(n);</span>
+<span class="nc" id="L483">                return true;</span>
+              }
+<span class="nc" id="L485">              return false;</span>
+            });
+
+<span class="nc bnc" id="L488" title="All 2 branches missed.">    for (int i = firstVisibleIndex; i &lt;= lastVisibleIndex; i++) {</span>
+<span class="nc bnc" id="L489" title="All 2 branches missed.">      if (!visibleCells.containsKey(i)) {</span>
+<span class="nc" id="L490">        T item = items.get(i);</span>
+<span class="nc" id="L491">        Node cell = cellFactory.apply(item);</span>
+<span class="nc bnc" id="L492" title="All 2 branches missed.">        if (cell == null) continue;</span>
+        // Attach visual selection state if needed
+<span class="nc" id="L494">        cell.getStyleClass().add(&quot;fx-virtualflow-cell&quot;);</span>
+<span class="nc" id="L495">        visibleCells.put(i, cell);</span>
+<span class="nc" id="L496">        cellContainer.getChildren().add(cell);</span>
+      }
+<span class="nc" id="L498">      Node cell = visibleCells.get(i);</span>
+<span class="nc bnc" id="L499" title="All 2 branches missed.">      if (cell == null) continue;</span>
+
+<span class="nc" id="L501">      double start = prefixSums[i] - scrollPosition;</span>
+<span class="nc" id="L502">      double size = prefixSums[i + 1] - prefixSums[i];</span>
+<span class="nc" id="L503">      boolean isSelected = selectedIndices.contains(i);</span>
+      // Update visual state
+<span class="nc bnc" id="L505" title="All 2 branches missed.">      if (isSelected) cell.getStyleClass().add(&quot;selected&quot;);</span>
+<span class="nc" id="L506">      else cell.getStyleClass().remove(&quot;selected&quot;);</span>
+
+<span class="nc bnc" id="L508" title="All 2 branches missed.">      if (orientation == Orientation.VERTICAL) {</span>
+<span class="nc" id="L509">        double aw = Math.max(0, cellContainer.getWidth() - pad.getLeft() - pad.getRight());</span>
+<span class="nc" id="L510">        cell.resizeRelocate(pad.getLeft(), start + pad.getTop(), aw, size);</span>
+<span class="nc" id="L511">      } else {</span>
+<span class="nc" id="L512">        double ah = Math.max(0, cellContainer.getHeight() - pad.getTop() - pad.getBottom());</span>
+<span class="nc" id="L513">        cell.resizeRelocate(start + pad.getLeft(), pad.getTop(), size, ah);</span>
+      }
+    }
+<span class="nc" id="L516">  }</span>
+
+  // Internal Logic - Event Delegation
+  private int getIndexAtMouseEvent(MouseEvent e) {
+<span class="nc bnc" id="L520" title="All 2 branches missed.">    double local = orientation == Orientation.VERTICAL ? e.getY() : e.getX();</span>
+<span class="nc" id="L521">    return findCellIndexForPosition(local + scrollPosition);</span>
+  }
+
+  // Helper for DragEvents which don't extend MouseEvent
+  private int getIndexAtDragEvent(DragEvent e) {
+<span class="nc bnc" id="L526" title="All 2 branches missed.">    double local = orientation == Orientation.VERTICAL ? e.getY() : e.getX();</span>
+<span class="nc" id="L527">    return findCellIndexForPosition(local + scrollPosition);</span>
+  }
+
+  private void handleSelection(MouseEvent e) {
+<span class="nc bnc" id="L531" title="All 2 branches missed.">    if (selectionMode.get() == SelectionMode.NONE) return;</span>
+<span class="nc" id="L532">    int idx = getIndexAtMouseEvent(e);</span>
+<span class="nc bnc" id="L533" title="All 4 branches missed.">    if (idx &lt; 0 || idx &gt;= items.size()) {</span>
+<span class="nc" id="L534">      clearSelection();</span>
+<span class="nc" id="L535">      return;</span>
+    }
+
+<span class="nc bnc" id="L538" title="All 2 branches missed.">    if (selectionMode.get() == SelectionMode.SINGLE) {</span>
+<span class="nc" id="L539">      selectIndex(idx);</span>
+<span class="nc bnc" id="L540" title="All 2 branches missed.">    } else if (selectionMode.get() == SelectionMode.MULTIPLE) {</span>
+<span class="nc bnc" id="L541" title="All 4 branches missed.">      if (e.isShiftDown() &amp;&amp; !selectedIndices.isEmpty()) {</span>
+<span class="nc" id="L542">        int last = selectedIndices.get(selectedIndices.size() - 1);</span>
+<span class="nc" id="L543">        int from = Math.min(last, idx), to = Math.max(last, idx);</span>
+<span class="nc" id="L544">        selectedIndices.clear();</span>
+<span class="nc bnc" id="L545" title="All 2 branches missed.">        for (int i = from; i &lt;= to; i++) selectedIndices.add(i);</span>
+<span class="nc bnc" id="L546" title="All 2 branches missed.">      } else if (e.isShortcutDown()) {</span>
+<span class="nc bnc" id="L547" title="All 2 branches missed.">        if (selectedIndices.contains(idx)) selectedIndices.remove(Integer.valueOf(idx));</span>
+<span class="nc" id="L548">        else selectedIndices.add(idx);</span>
+      } else {
+<span class="nc" id="L550">        selectIndex(idx);</span>
+      }
+    }
+<span class="nc bnc" id="L553" title="All 2 branches missed.">    if (onSelect != null) onSelect.accept(idx);</span>
+<span class="nc bnc" id="L554" title="All 2 branches missed.">    if (onSelectionChange != null) onSelectionChange.accept(getSelectedItems());</span>
+<span class="nc" id="L555">  }</span>
+
+  private void handleDoubleClick(MouseEvent e) {
+<span class="nc" id="L558">    int idx = getIndexAtMouseEvent(e);</span>
+<span class="nc bnc" id="L559" title="All 6 branches missed.">    if (idx &gt;= 0 &amp;&amp; idx &lt; items.size() &amp;&amp; onDoubleClick != null) onDoubleClick.accept(idx);</span>
+<span class="nc" id="L560">  }</span>
+
+  // Corrected Signatures:
+
+  private void handleDragStart(MouseEvent e) {
+<span class="nc" id="L565">    int idx = getIndexAtMouseEvent(e);</span>
+<span class="nc bnc" id="L566" title="All 4 branches missed.">    if (idx &lt; 0 || idx &gt;= items.size()) return;</span>
+<span class="nc" id="L567">    dragSourceIndex = idx;</span>
+
+<span class="nc" id="L569">    Dragboard db = cellContainer.startDragAndDrop(TransferMode.MOVE);</span>
+<span class="nc" id="L570">    ClipboardContent content = new ClipboardContent();</span>
+<span class="nc" id="L571">    content.putString(String.valueOf(idx));</span>
+<span class="nc" id="L572">    db.setContent(content);</span>
+<span class="nc" id="L573">    db.setDragView(cellContainer.snapshot(null, null));</span>
+<span class="nc" id="L574">  }</span>
+
+  private void handleDragOver(DragEvent e) {
+<span class="nc bnc" id="L577" title="All 4 branches missed.">    if (dragSourceIndex &lt; 0 || !e.getDragboard().hasString()) return;</span>
+<span class="nc" id="L578">    e.acceptTransferModes(TransferMode.MOVE);</span>
+
+<span class="nc" id="L580">    int idx = getIndexAtDragEvent(e);</span>
+<span class="nc bnc" id="L581" title="All 2 branches missed.">    if (idx == dragSourceIndex) {</span>
+<span class="nc" id="L582">      dropIndicator.setVisible(false);</span>
+<span class="nc" id="L583">      return;</span>
+    }
+<span class="nc" id="L585">    dragTargetIndex = idx;</span>
+
+<span class="nc" id="L587">    double absPos = prefixSums[idx] - scrollPosition;</span>
+<span class="nc bnc" id="L588" title="All 2 branches missed.">    if (orientation == Orientation.VERTICAL) {</span>
+<span class="nc" id="L589">      dropIndicator.resizeRelocate(0, absPos, cellContainer.getWidth(), 2);</span>
+    } else {
+<span class="nc" id="L591">      dropIndicator.resizeRelocate(absPos, 0, 2, cellContainer.getHeight());</span>
+    }
+<span class="nc" id="L593">    dropIndicator.setVisible(true);</span>
+<span class="nc" id="L594">  }</span>
+
+  private void handleDragDrop(DragEvent e) {
+<span class="nc" id="L597">    e.setDropCompleted(true);</span>
+<span class="nc" id="L598">    dropIndicator.setVisible(false);</span>
+<span class="nc bnc" id="L599" title="All 4 branches missed.">    if (dragSourceIndex &lt; 0 || dragTargetIndex &lt; 0) return;</span>
+
+<span class="nc" id="L601">    int from = dragSourceIndex;</span>
+<span class="nc bnc" id="L602" title="All 2 branches missed.">    int to = (dragTargetIndex &lt; from) ? dragTargetIndex : dragTargetIndex - 1;</span>
+<span class="nc bnc" id="L603" title="All 2 branches missed.">    if (onItemReorder != null) onItemReorder.accept(from, to);</span>
+<span class="nc" id="L604">    dragSourceIndex = -1;</span>
+<span class="nc" id="L605">  }</span>
+
+  // Fluent API
+  public TwVirtualFlow&lt;T&gt; items(ObservableList&lt;T&gt; i) {
+<span class="nc" id="L609">    setItems(i);</span>
+<span class="nc" id="L610">    return this;</span>
+  }
+
+  public TwVirtualFlow&lt;T&gt; cellFactory(Function&lt;T, Node&gt; f) {
+<span class="nc" id="L614">    setCellFactory(f);</span>
+<span class="nc" id="L615">    return this;</span>
+  }
+
+  public TwVirtualFlow&lt;T&gt; cellHeight(double h) {
+<span class="nc" id="L619">    setCellHeight(h);</span>
+<span class="nc" id="L620">    return this;</span>
+  }
+
+  public TwVirtualFlow&lt;T&gt; cellWidth(double w) {
+<span class="nc" id="L624">    setCellWidth(w);</span>
+<span class="nc" id="L625">    return this;</span>
+  }
+
+  public TwVirtualFlow&lt;T&gt; cellSizeProvider(Function&lt;T, Double&gt; p) {
+<span class="nc" id="L629">    setCellSizeProvider(p);</span>
+<span class="nc" id="L630">    return this;</span>
+  }
+
+  public TwVirtualFlow&lt;T&gt; orientation(Orientation o) {
+<span class="nc" id="L634">    setOrientation(o);</span>
+<span class="nc" id="L635">    return this;</span>
+  }
+
+  public TwVirtualFlow&lt;T&gt; viewportPadding(Insets p) {
+<span class="nc" id="L639">    setViewportPadding(p);</span>
+<span class="nc" id="L640">    return this;</span>
+  }
+
+  public TwVirtualFlow&lt;T&gt; viewportPadding(double px) {
+<span class="nc" id="L644">    return viewportPadding(new Insets(px));</span>
+  }
+
+  public TwVirtualFlow&lt;T&gt; selectionMode(SelectionMode m) {
+<span class="nc" id="L648">    setSelectionMode(m);</span>
+<span class="nc" id="L649">    return this;</span>
+  }
+
+  public TwVirtualFlow&lt;T&gt; scrollInterpolator(Interpolator i) {
+<span class="nc" id="L653">    scrollInterpolator.set(i);</span>
+<span class="nc" id="L654">    return this;</span>
+  }
+
+  public TwVirtualFlow&lt;T&gt; outerPadding(Insets p) {
+<span class="nc" id="L658">    setPadding(p);</span>
+<span class="nc" id="L659">    return this;</span>
+  }
+
+  public TwVirtualFlow&lt;T&gt; outerPadding(double px) {
+<span class="nc" id="L663">    return outerPadding(new Insets(px));</span>
+  }
+
+  public TwVirtualFlow&lt;T&gt; onSelect(Consumer&lt;Integer&gt; h) {
+<span class="nc" id="L667">    setOnSelect(h);</span>
+<span class="nc" id="L668">    return this;</span>
+  }
+
+  public TwVirtualFlow&lt;T&gt; onDoubleClick(Consumer&lt;Integer&gt; h) {
+<span class="nc" id="L672">    setOnDoubleClick(h);</span>
+<span class="nc" id="L673">    return this;</span>
+  }
+
+  public TwVirtualFlow&lt;T&gt; onItemReorder(BiConsumer&lt;Integer, Integer&gt; h) {
+<span class="nc" id="L677">    setOnItemReorder(h);</span>
+<span class="nc" id="L678">    return this;</span>
+  }
+
+  public TwVirtualFlow&lt;T&gt; onSelectionChange(Consumer&lt;List&lt;T&gt;&gt; h) {
+<span class="nc" id="L682">    setOnSelectionChange(h);</span>
+<span class="nc" id="L683">    return this;</span>
+  }
+
+  /** Safe TailwindFX wrapper (fallback to CSS if not in classpath) */
+  public TwVirtualFlow&lt;T&gt; withTailwindStyling(Function&lt;T, Node&gt; base, String... classes) {
+<span class="nc" id="L688">    Objects.requireNonNull(base);</span>
+<span class="nc" id="L689">    return cellFactory(</span>
+        item -&gt; {
+<span class="nc" id="L691">          Node n = base.apply(item);</span>
+<span class="nc bnc" id="L692" title="All 4 branches missed.">          if (n != null &amp;&amp; classes.length &gt; 0) {</span>
+            try {
+<span class="nc" id="L694">              Class.forName(&quot;tailwindfx.TailwindFX&quot;)</span>
+<span class="nc" id="L695">                  .getMethod(&quot;apply&quot;, Node.class, String[].class)</span>
+<span class="nc" id="L696">                  .invoke(null, n, (Object) classes);</span>
+<span class="nc" id="L697">            } catch (ClassNotFoundException</span>
+                | IllegalAccessException
+                | NoSuchMethodException
+                | InvocationTargetException ex) {
+<span class="nc" id="L701">              n.getStyleClass().addAll(classes);</span>
+<span class="nc" id="L702">            }</span>
+          }
+<span class="nc" id="L704">          return n;</span>
+        });
+  }
+
+  public void dispose() {
+<span class="nc bnc" id="L709" title="All 2 branches missed.">    if (scrollAnimation != null) scrollAnimation.stop();</span>
+<span class="nc" id="L710">    visibleCells.values().forEach(cellContainer.getChildren()::remove);</span>
+<span class="nc" id="L711">    visibleCells.clear();</span>
+<span class="nc" id="L712">    items.clear();</span>
+<span class="nc" id="L713">    selectedIndices.clear();</span>
+<span class="nc" id="L714">    prefixSums = new double[0];</span>
+<span class="nc" id="L715">    prefixSumsLength = 0;</span>
+<span class="nc" id="L716">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

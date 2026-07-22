@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: io.github.yasmramos.tailwindfx.layout.TwGridPaneTest
+-------------------------------------------------------------------------------
+Tests run: 25, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.418 s -- in io.github.yasmramos.tailwindfx.layout.TwGridPaneTest

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StyleMerger.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TailwindFX Base</a> &gt; <a href="index.source.html" class="el_package">io.github.yasmramos.tailwindfx.style</a> &gt; <span class="el_source">StyleMerger.java</span></div><h1>StyleMerger.java</h1><pre class="source lang-java linenums">package io.github.yasmramos.tailwindfx.style;
+
+import io.github.yasmramos.tailwindfx.core.JitCompiler;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javafx.scene.Node;
+
+/**
+ * StyleMerger — Applies JIT inline styles to JavaFX nodes without destroying previous styles.
+ *
+ * &lt;p&gt;Problem: node.setStyle() overwrites ALL existing inline style. Solution: parse current style,
+ * merge by property, and rewrite.
+ *
+ * &lt;p&gt;Merge rules: - JIT wins over previous styles of the same property (developer's intent) -
+ * Properties not affected by JIT are preserved intact - Node's CSS classes are NOT touched here
+ * (handled by TailwindFX.apply)
+ */
+public final class StyleMerger {
+
+  private StyleMerger() {}
+
+  // Regex para parsear &quot;property: value;&quot; de un inline style
+<span class="fc" id="L27">  private static final Pattern PROP_PATTERN = Pattern.compile(&quot;(-fx-[a-z-]+)\\s*:\\s*([^;]+);?&quot;);</span>
+
+  // Public API
+  /**
+   * Aplica tokens JIT a un nodo. Procesa las CSS classes fallback y el inline style merged.
+   *
+   * &lt;p&gt;Ejemplo: StyleMerger.applyJit(button, &quot;p-4&quot;, &quot;bg-blue-500/80&quot;, &quot;rounded-lg&quot;, &quot;font-bold&quot;);
+   */
+  public static void applyJit(Node node, String... tokens) {
+<span class="fc" id="L36">    JitCompiler.BatchResult result = JitCompiler.compileBatch(tokens);</span>
+
+    // 1. Inline styles: merge no destructivo
+<span class="fc bfc" id="L39" title="All 2 branches covered.">    if (result.hasInlineStyle()) {</span>
+<span class="fc" id="L40">      String merged = merge(node.getStyle(), result.inlineStyle());</span>
+<span class="fc" id="L41">      node.setStyle(merged);</span>
+    }
+
+    // 2. CSS classes fallback (tokens desconocidos o que mapean a clases)
+<span class="fc bfc" id="L45" title="All 2 branches covered.">    for (String cls : result.cssClasses()) {</span>
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">      if (!node.getStyleClass().contains(cls)) {</span>
+<span class="fc" id="L47">        node.getStyleClass().add(cls);</span>
+      }
+<span class="fc" id="L49">    }</span>
+<span class="fc" id="L50">  }</span>
+
+  /**
+   * Elimina propiedades JIT del inline style de un nodo. Útil para deshacer estilos aplicados
+   * dinámicamente.
+   */
+  public static void removeJit(Node node, String... tokens) {
+<span class="nc" id="L57">    JitCompiler.BatchResult result = JitCompiler.compileBatch(tokens);</span>
+
+<span class="nc bnc" id="L59" title="All 2 branches missed.">    if (result.hasInlineStyle()) {</span>
+<span class="nc" id="L60">      String cleaned = removeProperties(node.getStyle(), result.inlineStyle());</span>
+<span class="nc" id="L61">      node.setStyle(cleaned);</span>
+    }
+
+<span class="nc bnc" id="L64" title="All 2 branches missed.">    for (String cls : result.cssClasses()) {</span>
+<span class="nc" id="L65">      node.getStyleClass().remove(cls);</span>
+<span class="nc" id="L66">    }</span>
+<span class="nc" id="L67">  }</span>
+
+  /** Reemplaza completamente el inline style JIT (elimina el previo y aplica el nuevo). */
+  public static void replaceJit(Node node, String... tokens) {
+<span class="nc" id="L71">    node.setStyle(&quot;&quot;);</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">    node.getStyleClass().removeIf(cls -&gt; !cls.isBlank());</span>
+<span class="nc" id="L73">    applyJit(node, tokens);</span>
+<span class="nc" id="L74">  }</span>
+
+  // Merge de inline styles
+  /**
+   * Mergea dos bloques de inline style. Las propiedades del bloque 'incoming' sobreescriben las del
+   * 'existing'. Las propiedades en 'existing' que no están en 'incoming' se preservan.
+   *
+   * &lt;p&gt;merge(&quot;-fx-padding: 8px; -fx-opacity: 0.5;&quot;, &quot;-fx-padding: 16px; -fx-font-size: 14px;&quot;) →
+   * &quot;-fx-font-size: 14px; -fx-opacity: 0.5; -fx-padding: 16px;&quot;
+   */
+  public static String merge(String existing, String incoming) {
+<span class="fc" id="L85">    Map&lt;String, String&gt; props = parseStyle(existing);</span>
+<span class="fc" id="L86">    props.putAll(parseStyle(incoming)); // incoming gana en conflictos</span>
+<span class="fc" id="L87">    return buildStyle(props);</span>
+  }
+
+  /** Elimina del 'existing' todas las propiedades presentes en 'toRemove'. */
+  static String removeProperties(String existing, String toRemove) {
+<span class="nc" id="L92">    Map&lt;String, String&gt; props = parseStyle(existing);</span>
+<span class="nc" id="L93">    Set&lt;String&gt; keysToRemove = parseStyle(toRemove).keySet();</span>
+<span class="nc" id="L94">    props.keySet().removeAll(keysToRemove);</span>
+<span class="nc" id="L95">    return buildStyle(props);</span>
+  }
+
+  // Parse y build de inline style string
+  /** Parsea &quot;-fx-padding: 16px; -fx-opacity: 0.5;&quot; → {&quot;fx-padding&quot;:&quot;16px&quot;, ...} */
+  public static Map&lt;String, String&gt; parseStyle(String style) {
+<span class="fc" id="L101">    Map&lt;String, String&gt; map = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L102" title="All 4 branches covered.">    if (style == null || style.isBlank()) {</span>
+<span class="fc" id="L103">      return map;</span>
+    }
+
+<span class="fc" id="L106">    Matcher m = PROP_PATTERN.matcher(style);</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">    while (m.find()) {</span>
+<span class="fc" id="L108">      map.put(m.group(1).trim(), m.group(2).trim());</span>
+    }
+<span class="fc" id="L110">    return map;</span>
+  }
+
+  /** {&quot;fx-padding&quot;:&quot;16px&quot;, &quot;-fx-opacity&quot;:&quot;0.5&quot;} → &quot;-fx-opacity: 0.5; -fx-padding: 16px;&quot; */
+  public static String buildStyle(Map&lt;String, String&gt; props) {
+<span class="fc bfc" id="L115" title="All 2 branches covered.">    if (props.isEmpty()) {</span>
+<span class="fc" id="L116">      return &quot;&quot;;</span>
+    }
+<span class="fc" id="L118">    StringBuilder sb = new StringBuilder();</span>
+    // Orden consistente para facilitar debugging
+<span class="fc" id="L120">    new TreeMap&lt;&gt;(props).forEach((k, v) -&gt; sb.append(k).append(&quot;: &quot;).append(v).append(&quot;; &quot;));</span>
+<span class="fc" id="L121">    return sb.toString().trim();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

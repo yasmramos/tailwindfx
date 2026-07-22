@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Preconditions.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TailwindFX Base</a> &gt; <a href="index.source.html" class="el_package">io.github.yasmramos.tailwindfx.core</a> &gt; <span class="el_source">Preconditions.java</span></div><h1>Preconditions.java</h1><pre class="source lang-java linenums">package io.github.yasmramos.tailwindfx.core;
+
+import io.github.yasmramos.tailwindfx.animation.TwAnimation;
+import java.util.logging.Logger;
+
+/**
+ * Preconditions — Centralized validation for TailwindFX. Three levels: 1. requireNonNull() →
+ * IllegalArgumentException (immediate failure) 2. requireValid() → IllegalArgumentException (out of
+ * range value) 3. warnIf() → LOG WARNING (valid but suspicious)
+ */
+public final class Preconditions {
+
+  // Public logger for use throughout the library
+<span class="fc" id="L14">  public static final Logger LOG = Logger.getLogger(Preconditions.class.getName());</span>
+
+  // Reasonable limits for numeric validations
+  private static final int MAX_SPAN = 1000;
+  private static final int MAX_DURATION_MS = 600_000; // 10 minutes
+  private static final double MAX_SCALE = 100.0;
+  private static final double MAX_SPEED = 100.0;
+
+  private Preconditions() {}
+
+  public static &lt;T&gt; T requireNonNull(T value, String method, String paramName) {
+<span class="fc bfc" id="L25" title="All 2 branches covered.">    if (value == null) {</span>
+<span class="fc" id="L26">      throw new IllegalArgumentException(method + &quot;: '&quot; + paramName + &quot;' cannot be null&quot;);</span>
+    }
+<span class="fc" id="L28">    return value;</span>
+  }
+
+  public static &lt;T extends javafx.scene.Node&gt; T requireNode(T node, String method) {
+<span class="fc" id="L32">    return requireNonNull(node, method, &quot;node&quot;);</span>
+  }
+
+  public static javafx.scene.layout.Pane requirePane(javafx.scene.layout.Pane pane, String method) {
+<span class="nc" id="L36">    return requireNonNull(pane, method, &quot;pane&quot;);</span>
+  }
+
+  public static String requireNonBlank(String value, String method, String paramName) {
+<span class="fc" id="L40">    requireNonNull(value, method, paramName);</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">    if (value.isBlank()) {</span>
+<span class="fc" id="L42">      throw new IllegalArgumentException(method + &quot;: '&quot; + paramName + &quot;' cannot be blank&quot;);</span>
+    }
+<span class="fc" id="L44">    return value;</span>
+  }
+
+  /** GridPane span: must be &gt;= 1 and &lt;= MAX_SPAN */
+  public static int requireSpan(int span, String method) {
+<span class="fc bfc" id="L49" title="All 2 branches covered.">    if (span &lt; 1) {</span>
+<span class="fc" id="L50">      throw new IllegalArgumentException(method + &quot;: span must be &gt;= 1, got: &quot; + span);</span>
+    }
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">    if (span &gt; MAX_SPAN) {</span>
+<span class="nc" id="L53">      throw new IllegalArgumentException(</span>
+          method + &quot;: span exceeds maximum allowed (&quot; + MAX_SPAN + &quot;), got: &quot; + span);
+    }
+<span class="fc" id="L56">    return span;</span>
+  }
+
+  /** Opacity: 0.0 – 1.0 */
+  public static double requireOpacity(double value, String method) {
+<span class="pc bpc" id="L61" title="1 of 4 branches missed.">    if (value &lt; 0.0 || value &gt; 1.0) {</span>
+<span class="fc" id="L62">      throw new IllegalArgumentException(</span>
+          method + &quot;: opacity must be between 0.0 and 1.0, got: &quot; + value);
+    }
+<span class="fc" id="L65">    return value;</span>
+  }
+
+  /** Animation duration: &gt; 0 ms and &lt;= MAX_DURATION_MS */
+  public static int requirePositiveDuration(int ms, String method) {
+<span class="fc bfc" id="L70" title="All 2 branches covered.">    if (ms &lt;= 0) {</span>
+<span class="fc" id="L71">      throw new IllegalArgumentException(method + &quot;: duration must be &gt; 0 ms, got: &quot; + ms);</span>
+    }
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">    if (ms &gt; MAX_DURATION_MS) {</span>
+<span class="nc" id="L74">      throw new IllegalArgumentException(</span>
+          method + &quot;: duration exceeds maximum allowed (&quot; + MAX_DURATION_MS + &quot; ms), got: &quot; + ms);
+    }
+<span class="fc" id="L77">    return ms;</span>
+  }
+
+  /** Animation scale: &gt; 0 and &lt;= MAX_SCALE */
+  public static double requirePositiveScale(double scale, String method) {
+<span class="nc bnc" id="L82" title="All 2 branches missed.">    if (scale &lt;= 0) {</span>
+<span class="nc" id="L83">      throw new IllegalArgumentException(method + &quot;: scale must be &gt; 0, got: &quot; + scale);</span>
+    }
+<span class="nc bnc" id="L85" title="All 2 branches missed.">    if (scale &gt; MAX_SCALE) {</span>
+<span class="nc" id="L86">      throw new IllegalArgumentException(</span>
+          method + &quot;: scale exceeds maximum allowed (&quot; + MAX_SCALE + &quot;), got: &quot; + scale);
+    }
+<span class="nc" id="L89">    return scale;</span>
+  }
+
+  /** Speed multiplier for animations: &gt; 0 and &lt;= MAX_SPEED */
+  public static double requirePositiveSpeed(double speed, String method) {
+<span class="nc bnc" id="L94" title="All 2 branches missed.">    if (speed &lt;= 0) {</span>
+<span class="nc" id="L95">      throw new IllegalArgumentException(method + &quot;: speed must be &gt; 0, got: &quot; + speed);</span>
+    }
+<span class="nc bnc" id="L97" title="All 2 branches missed.">    if (speed &gt; MAX_SPEED) {</span>
+<span class="nc" id="L98">      throw new IllegalArgumentException(</span>
+          method + &quot;: speed exceeds maximum allowed (&quot; + MAX_SPEED + &quot;), got: &quot; + speed);
+    }
+<span class="nc" id="L101">    return speed;</span>
+  }
+
+  /** Alpha/N in JIT: 0–100 */
+  public static int requireAlpha(int alpha, String method) {
+<span class="nc bnc" id="L106" title="All 4 branches missed.">    if (alpha &lt; 0 || alpha &gt; 100) {</span>
+<span class="nc" id="L107">      throw new IllegalArgumentException(</span>
+          method + &quot;: alpha must be between 0 and 100, got: &quot; + alpha);
+    }
+<span class="nc" id="L110">    return alpha;</span>
+  }
+
+  /** Warns if the node has no parent (margin/grow will have no effect) */
+  public static void warnNoParent(javafx.scene.Node node, String method) {
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">    if (node.getParent() == null) {</span>
+<span class="nc" id="L116">      LOG.warning(</span>
+          method
+              + &quot;: node has no parent — constraint will have no effect until added to the scene graph&quot;);
+    }
+<span class="fc" id="L120">  }</span>
+
+  /**
+   * Warns if brightness is out of the recommended range [0.0-2.0]. Values &lt; 0.0 are invalid and
+   * will throw; values &gt; 2.0 trigger a warning only.
+   */
+  public static void warnBrightnessRange(double value, String method) {
+<span class="nc bnc" id="L127" title="All 2 branches missed.">    if (value &lt; 0.0) {</span>
+<span class="nc" id="L128">      throw new IllegalArgumentException(method + &quot;: brightness cannot be negative, got: &quot; + value);</span>
+    }
+<span class="nc bnc" id="L130" title="All 2 branches missed.">    if (value &gt; 2.0) {</span>
+<span class="nc" id="L131">      LOG.warning(</span>
+<span class="nc" id="L132">          String.format(</span>
+              &quot;%s: brightness %.2f exceeds recommended maximum of 2.0 and may produce washed-out colors&quot;,
+<span class="nc" id="L134">              method, value));</span>
+    }
+<span class="nc" id="L136">  }</span>
+
+  /** Warns if ImageView has no image when a viewport is applied */
+  public static void warnNoImage(javafx.scene.image.ImageView iv, String method) {
+<span class="nc bnc" id="L140" title="All 2 branches missed.">    if (iv.getImage() == null) {</span>
+<span class="nc" id="L141">      LOG.warning(method + &quot;: ImageView has no image — viewport will have no effect&quot;);</span>
+    }
+<span class="nc" id="L143">  }</span>
+
+  /**
+   * Warns if a JIT token looks like a known typo. Note: This is a heuristic warning; not all
+   * unrecognized tokens are typos.
+   */
+  public static void warnLikelyTypo(String token, String method) {
+<span class="nc" id="L150">    LOG.warning(</span>
+<span class="nc" id="L151">        String.format(</span>
+            &quot;%s: token '%s' was not recognized as a valid Tailwind utility or CSS class - verify spelling or check documentation&quot;,
+            method, token));
+<span class="nc" id="L154">  }</span>
+
+  /** Warns if an animation is applied to a node that already has one in the same slot */
+  public static void warnAnimationOverride(javafx.scene.Node node, String slot, String method) {
+<span class="nc bnc" id="L158" title="All 2 branches missed.">    if (TwAnimation.AnimationRegistry.isActive(node, slot)) {</span>
+<span class="nc" id="L159">      LOG.warning(</span>
+<span class="nc" id="L160">          String.format(</span>
+              &quot;%s: replacing active animation in slot '%s' on node %s - previous animation will be stopped&quot;,
+              method, slot, node));
+    }
+<span class="nc" id="L164">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

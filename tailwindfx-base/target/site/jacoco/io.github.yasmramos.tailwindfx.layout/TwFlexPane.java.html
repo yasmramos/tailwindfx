@@ -1,0 +1,1160 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TwFlexPane.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TailwindFX Base</a> &gt; <a href="index.source.html" class="el_package">io.github.yasmramos.tailwindfx.layout</a> &gt; <span class="el_source">TwFlexPane.java</span></div><h1>TwFlexPane.java</h1><pre class="source lang-java linenums">package io.github.yasmramos.tailwindfx.layout;
+
+import io.github.yasmramos.tailwindfx.core.Preconditions;
+import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
+import java.util.List;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
+
+/**
+ * TwFlexPane — a Flexbox-model layout container for JavaFX.
+ *
+ * &lt;p&gt;Fills the gap between JavaFX's existing layout panes and the CSS flexbox model. No existing
+ * JavaFX pane supports wrapping + alignment + gap simultaneously. This pane implements all three.
+ *
+ * &lt;h3&gt;What this adds over existing panes&lt;/h3&gt;
+ *
+ * &lt;ul&gt;
+ *   &lt;li&gt;{@code HBox} — row only, no wrap, no align-items control.
+ *   &lt;li&gt;{@code VBox} — column only, no wrap.
+ *   &lt;li&gt;{@code FlowPane} — wraps but has no justify-content or align-items.
+ *   &lt;li&gt;{@code TilePane} — forces equal size on all children.
+ *   &lt;li&gt;&lt;b&gt;TwFlexPane&lt;/b&gt; — direction, wrap, justify, align, gap — all at once.
+ * &lt;/ul&gt;
+ *
+ * &lt;h3&gt;Usage&lt;/h3&gt;
+ *
+ * &lt;pre&gt;
+ * TwFlexPane flex = new TwFlexPane();
+ * flex.setDirection(Direction.ROW);
+ * flex.setWrap(true);
+ * flex.setJustify(Justify.BETWEEN);
+ * flex.setAlign(Align.CENTER);
+ * flex.setGap(16);
+ *
+ * // Or fluent:
+ * TwFlexPane flex = TwFlexPane.row()
+ *     .wrap(true)
+ *     .justify(Justify.BETWEEN)
+ *     .align(Align.CENTER)
+ *     .gap(16);
+ *
+ * // Responsive direction switch:
+ * flex.setDirection(Direction.COL);   // on narrow screen
+ * flex.setDirection(Direction.ROW);   // on wide screen
+ * // TwFlexPane re-layouts immediately — no rebuild needed.
+ *
+ * // Per-child flex-grow:
+ * TwFlexPane.setGrow(child, 1);  // like flex-1
+ * TwFlexPane.setGrow(child, 0);  // like flex-none (default)
+ * &lt;/pre&gt;
+ *
+ * &lt;h3&gt;Integration with TailwindFX&lt;/h3&gt;
+ *
+ * &lt;pre&gt;
+ * TwFlexPane flex = TwFlexPane.row().gap(16).justify(Justify.BETWEEN);
+ * TailwindFX.apply(flex, &quot;p-4&quot;, &quot;bg-white&quot;, &quot;rounded-lg&quot;);
+ *
+ * // Responsive with ResponsiveNode:
+ * ResponsiveNode.on(flex)
+ *     .base(/* direction set via Java )
+ *     .install(scene);
+ * // Then toggle direction:
+ * bpm.onBreakpoint(BreakpointManager.BP.MD, () -&gt; flex.setDirection(Direction.ROW));
+ * &lt;/pre&gt;
+ */
+<span class="fc" id="L69">public class TwFlexPane extends Pane {</span>
+
+  // Enums
+  /** Main axis direction (analogous to {@code flex-direction}). */
+<span class="fc" id="L73">  public enum Direction {</span>
+<span class="fc" id="L74">    ROW,</span>
+<span class="fc" id="L75">    COL</span>
+  }
+
+  /**
+   * Main axis distribution (analogous to {@code justify-content}). Controls how children are spaced
+   * along the main axis.
+   */
+<span class="fc" id="L82">  public enum Justify {</span>
+<span class="fc" id="L83">    START,</span>
+<span class="fc" id="L84">    CENTER,</span>
+<span class="fc" id="L85">    END,</span>
+<span class="fc" id="L86">    BETWEEN, // equal space between items</span>
+<span class="fc" id="L87">    AROUND, // equal space around items</span>
+<span class="fc" id="L88">    EVENLY // equal space between AND before first/after last</span>
+  }
+
+  /**
+   * Cross axis alignment (analogous to {@code align-items}). Controls how children are aligned
+   * perpendicular to the main axis.
+   */
+<span class="fc" id="L95">  public enum Align {</span>
+<span class="fc" id="L96">    START,</span>
+<span class="fc" id="L97">    CENTER,</span>
+<span class="fc" id="L98">    END,</span>
+<span class="fc" id="L99">    STRETCH</span>
+  }
+
+  /**
+   * Multi-line alignment (analogous to {@code align-content}). Controls how multiple lines are
+   * distributed in the cross-axis when there's extra space. Only applies when wrap=true and there
+   * are multiple lines.
+   */
+<span class="fc" id="L107">  public enum AlignContent {</span>
+<span class="fc" id="L108">    START,</span>
+<span class="fc" id="L109">    CENTER,</span>
+<span class="fc" id="L110">    END,</span>
+<span class="fc" id="L111">    BETWEEN, // equal space between lines</span>
+<span class="fc" id="L112">    AROUND, // equal space around lines</span>
+<span class="fc" id="L113">    EVENLY, // equal space between AND before first/after last line</span>
+<span class="fc" id="L114">    STRETCH // lines stretch to fill available space</span>
+  }
+
+  // Properties
+<span class="fc" id="L118">  private Direction direction = Direction.ROW;</span>
+<span class="fc" id="L119">  private boolean wrap = false;</span>
+<span class="fc" id="L120">  private Justify justify = Justify.START;</span>
+<span class="fc" id="L121">  private Align align = Align.START;</span>
+<span class="fc" id="L122">  private AlignContent alignContent = AlignContent.START;</span>
+<span class="fc" id="L123">  private double gapMain = 0; // gap along main axis</span>
+<span class="fc" id="L124">  private double gapCross = 0; // gap along cross axis</span>
+<span class="fc" id="L125">  private Insets padding = Insets.EMPTY;</span>
+
+  /** Node property key for grow factor (analogous to {@code flex-grow}) */
+  private static final String GROW_KEY = &quot;tailwindfx.flex.grow&quot;;
+
+  /** Node property key for shrink factor (analogous to {@code flex-shrink}) */
+  private static final String SHRINK_KEY = &quot;tailwindfx.flex.shrink&quot;;
+
+  /** Node property key for visual order (analogous to {@code order}) */
+  private static final String ORDER_KEY = &quot;tailwindfx.flex.order&quot;;
+
+  /** Node property key for per-child align override (analogous to {@code align-self}) */
+  private static final String SELF_KEY = &quot;tailwindfx.flex.align-self&quot;;
+
+  /**
+   * Internal cache to avoid repeated map lookups and autoboxing during layout. Uses WeakHashMap to
+   * prevent memory leaks.
+   */
+<span class="fc" id="L143">  private static final java.util.WeakHashMap&lt;Node, FlexData&gt; flexDataCache =</span>
+      new java.util.WeakHashMap&lt;&gt;();
+
+  /** Helper class to hold flex properties without autoboxing overhead. */
+<span class="nc" id="L147">  private static class FlexData {</span>
+<span class="nc" id="L148">    double grow = 0.0;</span>
+<span class="nc" id="L149">    double shrink = 1.0;</span>
+<span class="nc" id="L150">    int order = 0;</span>
+<span class="nc" id="L151">    Align selfAlign = null;</span>
+
+    void update(Node node) {
+<span class="nc" id="L154">      Object v = node.getProperties().get(GROW_KEY);</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">      grow = v instanceof Number n ? n.doubleValue() : 0.0;</span>
+
+<span class="nc" id="L157">      v = node.getProperties().get(SHRINK_KEY);</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">      shrink = v instanceof Number n ? n.doubleValue() : 1.0;</span>
+
+<span class="nc" id="L160">      v = node.getProperties().get(ORDER_KEY);</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">      order = v instanceof Number n ? n.intValue() : 0;</span>
+
+<span class="nc" id="L163">      v = node.getProperties().get(SELF_KEY);</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">      selfAlign = v instanceof Align a ? a : null;</span>
+<span class="nc" id="L165">    }</span>
+  }
+
+  /**
+   * Gets cached flex data for a node, updating from properties if needed. This reduces autoboxing
+   * overhead in hot layout loops.
+   */
+  private static FlexData getFlexData(Node node) {
+<span class="nc" id="L173">    return flexDataCache.computeIfAbsent(node, k -&gt; new FlexData());</span>
+  }
+
+  /** Invalidates cached flex data for a node when its properties change. */
+  private static void invalidateFlexData(Node node) {
+<span class="fc" id="L178">    FlexData data = flexDataCache.get(node);</span>
+<span class="pc bpc" id="L179" title="1 of 2 branches missed.">    if (data != null) {</span>
+<span class="nc" id="L180">      data.update(node);</span>
+    }
+<span class="fc" id="L182">  }</span>
+
+  // Static factory methods
+  /** Creates a row-direction TwFlexPane. */
+  public static TwFlexPane row() {
+<span class="fc" id="L187">    return new TwFlexPane();</span>
+  }
+
+  /** Creates a column-direction TwFlexPane. */
+  public static TwFlexPane col() {
+<span class="fc" id="L192">    TwFlexPane f = new TwFlexPane();</span>
+<span class="fc" id="L193">    f.setDirection(Direction.COL);</span>
+<span class="fc" id="L194">    return f;</span>
+  }
+
+  // Fluent setters (return this for chaining)
+  /** Sets the main axis direction. Triggers layout. */
+  public TwFlexPane direction(Direction d) {
+<span class="fc" id="L200">    setDirection(d);</span>
+<span class="fc" id="L201">    return this;</span>
+  }
+
+  /** Enables or disables wrapping. Triggers layout. */
+  public TwFlexPane wrap(boolean w) {
+<span class="fc" id="L206">    setWrap(w);</span>
+<span class="fc" id="L207">    return this;</span>
+  }
+
+  /** Sets justify-content distribution. Triggers layout. */
+  public TwFlexPane justify(Justify j) {
+<span class="fc" id="L212">    setJustify(j);</span>
+<span class="fc" id="L213">    return this;</span>
+  }
+
+  /** Sets align-items. Triggers layout. */
+  public TwFlexPane align(Align a) {
+<span class="fc" id="L218">    setAlign(a);</span>
+<span class="fc" id="L219">    return this;</span>
+  }
+
+  /**
+   * Sets align-content (multi-line alignment). Triggers layout. Only applies when wrap=true and
+   * there are multiple lines.
+   */
+  public TwFlexPane alignContent(AlignContent ac) {
+<span class="fc" id="L227">    setAlignContent(ac);</span>
+<span class="fc" id="L228">    return this;</span>
+  }
+
+  /** Sets uniform gap (both main and cross axes). Triggers layout. */
+  public TwFlexPane gap(double px) {
+<span class="fc bfc" id="L233" title="All 2 branches covered.">    if (px &lt; 0) {</span>
+<span class="fc" id="L234">      throw new IllegalArgumentException(&quot;TwFlexPane.gap: must be &gt;= 0, got: &quot; + px);</span>
+    }
+<span class="fc" id="L236">    gapMain = px;</span>
+<span class="fc" id="L237">    gapCross = px;</span>
+<span class="fc" id="L238">    requestLayout();</span>
+<span class="fc" id="L239">    return this;</span>
+  }
+
+  /** Sets main-axis gap (row gap in row mode, column gap in column mode). */
+  public TwFlexPane gapX(double px) {
+<span class="fc" id="L244">    gapMain = px;</span>
+<span class="fc" id="L245">    requestLayout();</span>
+<span class="fc" id="L246">    return this;</span>
+  }
+
+  /** Sets cross-axis gap. */
+  public TwFlexPane gapY(double px) {
+<span class="fc" id="L251">    gapCross = px;</span>
+<span class="fc" id="L252">    requestLayout();</span>
+<span class="fc" id="L253">    return this;</span>
+  }
+
+  /** Sets padding around the flex container. */
+  public TwFlexPane padding(Insets p) {
+<span class="fc" id="L258">    Preconditions.requireNonNull(p, &quot;TwFlexPane.padding&quot;, &quot;insets&quot;);</span>
+<span class="fc" id="L259">    padding = p;</span>
+<span class="fc" id="L260">    setPadding(p);</span>
+<span class="fc" id="L261">    requestLayout();</span>
+<span class="fc" id="L262">    return this;</span>
+  }
+
+  /** Sets uniform padding. */
+  public TwFlexPane padding(double px) {
+<span class="fc" id="L267">    return padding(new Insets(px));</span>
+  }
+
+  // Standard setters
+  public void setDirection(Direction d) {
+<span class="fc" id="L272">    Preconditions.requireNonNull(d, &quot;TwFlexPane.setDirection&quot;, &quot;direction&quot;);</span>
+<span class="fc" id="L273">    direction = d;</span>
+<span class="fc" id="L274">    requestLayout();</span>
+<span class="fc" id="L275">  }</span>
+
+  /**
+   * Changes the flex direction with an animated fade transition.
+   *
+   * &lt;p&gt;Fades all children out, switches direction, then fades back in. Useful for responsive
+   * breakpoint switches where an abrupt re-layout looks jarring.
+   *
+   * &lt;pre&gt;
+   * // Responsive with smooth direction change:
+   * bpm.onBreakpoint(BreakpointManager.BP.MD, () -&gt;
+   *     container.setDirectionAnimated(Direction.COL, 150));
+   * &lt;/pre&gt;
+   *
+   * @param d the new direction
+   * @param durationMs fade duration in milliseconds (each way); use 0 for instant
+   */
+  public void setDirectionAnimated(Direction d, int durationMs) {
+<span class="fc" id="L293">    Preconditions.requireNonNull(d, &quot;TwFlexPane.setDirectionAnimated&quot;, &quot;direction&quot;);</span>
+<span class="pc bpc" id="L294" title="1 of 4 branches missed.">    if (durationMs &lt;= 0 || d == direction) {</span>
+<span class="fc" id="L295">      setDirection(d);</span>
+<span class="fc" id="L296">      return;</span>
+    }
+<span class="nc" id="L298">    javafx.animation.Timeline fadeOut =</span>
+        new javafx.animation.Timeline(
+            new javafx.animation.KeyFrame(
+<span class="nc" id="L301">                javafx.util.Duration.millis(durationMs),</span>
+                new javafx.animation.KeyValue(
+<span class="nc" id="L303">                    opacityProperty(), 0.0, javafx.animation.Interpolator.EASE_IN)));</span>
+<span class="nc" id="L304">    fadeOut.setOnFinished(</span>
+        e -&gt; {
+<span class="nc" id="L306">          direction = d;</span>
+<span class="nc" id="L307">          requestLayout();</span>
+<span class="nc" id="L308">          javafx.animation.Timeline fadeIn =</span>
+              new javafx.animation.Timeline(
+                  new javafx.animation.KeyFrame(
+<span class="nc" id="L311">                      javafx.util.Duration.millis(durationMs),</span>
+                      new javafx.animation.KeyValue(
+<span class="nc" id="L313">                          opacityProperty(), 1.0, javafx.animation.Interpolator.EASE_OUT)));</span>
+<span class="nc" id="L314">          fadeIn.play();</span>
+<span class="nc" id="L315">        });</span>
+<span class="nc" id="L316">    fadeOut.play();</span>
+<span class="nc" id="L317">  }</span>
+
+  public void setWrap(boolean w) {
+<span class="fc" id="L320">    wrap = w;</span>
+<span class="fc" id="L321">    requestLayout();</span>
+<span class="fc" id="L322">  }</span>
+
+  public void setJustify(Justify j) {
+<span class="fc" id="L325">    Preconditions.requireNonNull(j, &quot;TwFlexPane.setJustify&quot;, &quot;justify&quot;);</span>
+<span class="fc" id="L326">    justify = j;</span>
+<span class="fc" id="L327">    requestLayout();</span>
+<span class="fc" id="L328">  }</span>
+
+  public void setAlign(Align a) {
+<span class="fc" id="L331">    Preconditions.requireNonNull(a, &quot;TwFlexPane.setAlign&quot;, &quot;align&quot;);</span>
+<span class="fc" id="L332">    align = a;</span>
+<span class="fc" id="L333">    requestLayout();</span>
+<span class="fc" id="L334">  }</span>
+
+  public void setAlignContent(AlignContent ac) {
+<span class="fc" id="L337">    Preconditions.requireNonNull(ac, &quot;TwFlexPane.setAlignContent&quot;, &quot;alignContent&quot;);</span>
+<span class="fc" id="L338">    alignContent = ac;</span>
+<span class="fc" id="L339">    requestLayout();</span>
+<span class="fc" id="L340">  }</span>
+
+  public Direction getDirection() {
+<span class="fc" id="L343">    return direction;</span>
+  }
+
+  public boolean isWrap() {
+<span class="fc" id="L347">    return wrap;</span>
+  }
+
+  public Justify getJustify() {
+<span class="fc" id="L351">    return justify;</span>
+  }
+
+  public Align getAlign() {
+<span class="fc" id="L355">    return align;</span>
+  }
+
+  public AlignContent getAlignContent() {
+<span class="fc" id="L359">    return alignContent;</span>
+  }
+
+  public double getGap() {
+<span class="fc" id="L363">    return gapMain;</span>
+  }
+
+  public double getGapX() {
+<span class="fc" id="L367">    return gapMain;</span>
+  }
+
+  public double getGapY() {
+<span class="fc" id="L371">    return gapCross;</span>
+  }
+
+  // Per-child flex-grow
+  /**
+   * Sets the grow factor for a child node (analogous to {@code flex-grow}). A grow factor of 1
+   * means the child takes available space; 0 (default) means it does not grow.
+   *
+   * @param node the child node
+   * @param factor grow factor (&gt;= 0)
+   */
+  /**
+   * Sets the grow factor for a child node (analogous to {@code flex-grow}).
+   *
+   * &lt;p&gt;May be called before or after adding the node to a {@link TwFlexPane}. If called before, a
+   * listener is installed to trigger layout as soon as the node is added to its parent.
+   *
+   * @param node the child node
+   * @param factor grow factor (&gt;= 0; default 0)
+   */
+  public static void setGrow(Node node, double factor) {
+<span class="fc" id="L392">    Preconditions.requireNonNull(node, &quot;TwFlexPane.setGrow&quot;, &quot;node&quot;);</span>
+<span class="fc bfc" id="L393" title="All 2 branches covered.">    if (factor &lt; 0) {</span>
+<span class="fc" id="L394">      throw new IllegalArgumentException(&quot;TwFlexPane.setGrow: factor must be &gt;= 0, got: &quot; + factor);</span>
+    }
+<span class="fc" id="L396">    node.getProperties().put(GROW_KEY, factor);</span>
+<span class="fc" id="L397">    invalidateFlexData(node); // Update cache</span>
+<span class="pc bpc" id="L398" title="1 of 2 branches missed.">    if (node.getParent() instanceof TwFlexPane fp) {</span>
+<span class="nc" id="L399">      fp.requestLayout();</span>
+    } else {
+<span class="fc" id="L401">      ensureLayoutOnParent(node);</span>
+    }
+<span class="fc" id="L403">  }</span>
+
+  /** Returns the grow factor of a child node (default 0). */
+  public static double getGrow(Node node) {
+<span class="fc" id="L407">    Object v = node.getProperties().get(GROW_KEY);</span>
+<span class="fc bfc" id="L408" title="All 2 branches covered.">    return v instanceof Number n ? n.doubleValue() : 0.0;</span>
+  }
+
+  /**
+   * Installs a one-shot {@code parentProperty} listener that calls {@code requestLayout()} on the
+   * parent when the node is first added to a {@link TwFlexPane}. This ensures flex properties
+   * applied before a node is added to its parent take effect immediately.
+   *
+   * &lt;p&gt;The listener removes itself after the first TwFlexPane parent is detected, so it does not
+   * accumulate.
+   */
+  private static void ensureLayoutOnParent(Node node) {
+<span class="fc" id="L420">    final Object KEY = &quot;tailwindfx.flex.parent-listener&quot;;</span>
+<span class="fc bfc" id="L421" title="All 2 branches covered.">    if (node.getProperties().containsKey(KEY)) {</span>
+<span class="fc" id="L422">      return;</span>
+    }
+
+<span class="fc" id="L425">    javafx.beans.value.ChangeListener&lt;Parent&gt; listener =</span>
+<span class="fc" id="L426">        new javafx.beans.value.ChangeListener&lt;Parent&gt;() {</span>
+          @Override
+          public void changed(
+              javafx.beans.value.ObservableValue&lt;? extends Parent&gt; obs, Parent oldP, Parent newP) {
+<span class="pc bpc" id="L430" title="1 of 2 branches missed.">            if (newP instanceof TwFlexPane fp) {</span>
+<span class="fc" id="L431">              fp.requestLayout();</span>
+              // One-shot cleanup
+<span class="fc" id="L433">              node.parentProperty().removeListener(this);</span>
+<span class="fc" id="L434">              node.getProperties().remove(KEY);</span>
+            }
+<span class="fc" id="L436">          }</span>
+        };
+
+<span class="fc" id="L439">    node.parentProperty().addListener(listener);</span>
+<span class="fc" id="L440">    node.getProperties().put(KEY, Boolean.TRUE);</span>
+<span class="fc" id="L441">  }</span>
+
+  /**
+   * Sets the shrink factor for a child node (analogous to {@code flex-shrink}).
+   *
+   * &lt;p&gt;A shrink factor &gt; 0 means the child will shrink proportionally when there is not enough
+   * space. The default is 1 (shrinks if needed). Set to 0 to prevent shrinking (analogous to {@code
+   * flex-shrink: 0}).
+   *
+   * @param node the child node
+   * @param factor shrink factor (&gt;= 0; default 1)
+   */
+  public static void setShrink(Node node, double factor) {
+<span class="fc" id="L454">    Preconditions.requireNonNull(node, &quot;TwFlexPane.setShrink&quot;, &quot;node&quot;);</span>
+<span class="fc bfc" id="L455" title="All 2 branches covered.">    if (factor &lt; 0) {</span>
+<span class="fc" id="L456">      throw new IllegalArgumentException(</span>
+          &quot;TwFlexPane.setShrink: factor must be &gt;= 0, got: &quot; + factor);
+    }
+<span class="fc" id="L459">    node.getProperties().put(SHRINK_KEY, factor);</span>
+<span class="fc" id="L460">    invalidateFlexData(node); // Update cache</span>
+<span class="fc bfc" id="L461" title="All 2 branches covered.">    if (node.getParent() instanceof TwFlexPane fp) {</span>
+<span class="fc" id="L462">      fp.requestLayout();</span>
+    } else {
+<span class="fc" id="L464">      ensureLayoutOnParent(node);</span>
+    }
+<span class="fc" id="L466">  }</span>
+
+  /** Returns the shrink factor of a child node (default 1). */
+  public static double getShrink(Node node) {
+<span class="fc" id="L470">    Object v = node.getProperties().get(SHRINK_KEY);</span>
+<span class="fc bfc" id="L471" title="All 2 branches covered.">    return v instanceof Number n ? n.doubleValue() : 1.0;</span>
+  }
+
+  /**
+   * Sets the visual display order for a child node (analogous to CSS {@code order}).
+   *
+   * &lt;p&gt;Children are sorted by order value before layout. Lower values appear first. The default
+   * order is 0. Negative values are allowed and place the child before all order-0 items.
+   *
+   * &lt;pre&gt;
+   * TwFlexPane.setOrder(footer, 99);   // always last
+   * TwFlexPane.setOrder(header, -1);   // always first
+   * &lt;/pre&gt;
+   *
+   * @param node the child node
+   * @param order display order (default 0)
+   */
+  public static void setOrder(Node node, int order) {
+<span class="fc" id="L489">    Preconditions.requireNonNull(node, &quot;TwFlexPane.setOrder&quot;, &quot;node&quot;);</span>
+<span class="fc" id="L490">    node.getProperties().put(ORDER_KEY, order);</span>
+<span class="fc" id="L491">    invalidateFlexData(node); // Update cache</span>
+<span class="pc bpc" id="L492" title="1 of 2 branches missed.">    if (node.getParent() instanceof TwFlexPane fp) {</span>
+<span class="nc" id="L493">      fp.requestLayout();</span>
+    } else {
+<span class="fc" id="L495">      ensureLayoutOnParent(node);</span>
+    }
+<span class="fc" id="L497">  }</span>
+
+  /** Returns the display order of a child node (default 0). */
+  public static int getOrder(Node node) {
+<span class="fc" id="L501">    Object v = node.getProperties().get(ORDER_KEY);</span>
+<span class="fc bfc" id="L502" title="All 2 branches covered.">    return v instanceof Integer i ? i : 0;</span>
+  }
+
+  /**
+   * Sets a per-child alignment override on the cross axis (analogous to {@code align-self}).
+   *
+   * &lt;p&gt;Overrides the container's {@link #setAlign(Align)} for this specific child. Set to {@code
+   * null} to use the container's default.
+   *
+   * &lt;pre&gt;
+   * flex.setAlign(Align.CENTER);            // default for all children
+   * TwFlexPane.setAlignSelf(specialBtn, Align.END);  // this one goes to end
+   * &lt;/pre&gt;
+   *
+   * @param node the child node
+   * @param align cross-axis alignment for this child, or {@code null} to inherit
+   */
+  public static void setAlignSelf(Node node, Align align) {
+<span class="fc" id="L520">    Preconditions.requireNonNull(node, &quot;TwFlexPane.setAlignSelf&quot;, &quot;node&quot;);</span>
+<span class="fc bfc" id="L521" title="All 2 branches covered.">    if (align == null) {</span>
+<span class="fc" id="L522">      node.getProperties().remove(SELF_KEY);</span>
+    } else {
+<span class="fc" id="L524">      node.getProperties().put(SELF_KEY, align);</span>
+    }
+<span class="fc" id="L526">    invalidateFlexData(node); // Update cache</span>
+<span class="pc bpc" id="L527" title="1 of 2 branches missed.">    if (node.getParent() instanceof TwFlexPane fp) {</span>
+<span class="nc" id="L528">      fp.requestLayout();</span>
+    } else {
+<span class="fc" id="L530">      ensureLayoutOnParent(node);</span>
+    }
+<span class="fc" id="L532">  }</span>
+
+  /** Returns the per-child align-self, or {@code null} if inheriting from the container. */
+  public static Align getAlignSelf(Node node) {
+<span class="fc" id="L536">    Object v = node.getProperties().get(SELF_KEY);</span>
+<span class="fc bfc" id="L537" title="All 2 branches covered.">    return v instanceof Align a ? a : null;</span>
+  }
+
+  /** Node property key for flex-basis (overrides pref size before grow/shrink) */
+  private static final String BASIS_KEY = &quot;tailwindfx.flex.basis&quot;;
+
+  /**
+   * Sets the initial main-axis size for a child before flex-grow and flex-shrink are applied
+   * (analogous to CSS {@code flex-basis}).
+   *
+   * &lt;p&gt;In row direction, this overrides the child's preferred &lt;em&gt;width&lt;/em&gt;. In column direction,
+   * this overrides the child's preferred &lt;em&gt;height&lt;/em&gt;.
+   *
+   * &lt;p&gt;Special values:
+   *
+   * &lt;ul&gt;
+   *   &lt;li&gt;{@code -1} — use the child's natural preferred size (default, same as {@code flex-basis:
+   *       auto})
+   *   &lt;li&gt;{@code 0} — start from zero before distribution ({@code flex-basis: 0})
+   *   &lt;li&gt;{@code &gt; 0} — fixed base size in px before grow/shrink
+   * &lt;/ul&gt;
+   *
+   * &lt;pre&gt;
+   * // flex: 1 1 0 (equal distribution from zero base)
+   * TwFlexPane.setBasis(child, 0);
+   * TwFlexPane.setGrow(child, 1);
+   *
+   * // flex: 0 0 200px (fixed 200px, no grow, no shrink)
+   * TwFlexPane.setBasis(child, 200);
+   * TwFlexPane.setShrink(child, 0);
+   * &lt;/pre&gt;
+   *
+   * @param node the child node
+   * @param basis base size in px, or {@code -1} for auto
+   */
+  public static void setBasis(Node node, double basis) {
+<span class="fc" id="L573">    Preconditions.requireNonNull(node, &quot;TwFlexPane.setBasis&quot;, &quot;node&quot;);</span>
+<span class="fc bfc" id="L574" title="All 2 branches covered.">    if (basis &lt; -1) {</span>
+<span class="fc" id="L575">      throw new IllegalArgumentException(</span>
+          &quot;TwFlexPane.setBasis: basis must be &gt;= -1 (use -1 for auto), got: &quot; + basis);
+    }
+<span class="fc" id="L578">    node.getProperties().put(BASIS_KEY, basis);</span>
+<span class="pc bpc" id="L579" title="1 of 2 branches missed.">    if (node.getParent() instanceof TwFlexPane fp) {</span>
+<span class="nc" id="L580">      fp.requestLayout();</span>
+    } else {
+<span class="fc" id="L582">      ensureLayoutOnParent(node);</span>
+    }
+<span class="fc" id="L584">  }</span>
+
+  /**
+   * Returns the flex-basis for a child, or {@code -1} if using natural pref size.
+   *
+   * @param node the child node
+   * @return the flex-basis in px, or {@code -1} for auto
+   */
+  public static double getBasis(Node node) {
+<span class="fc" id="L593">    Object v = node.getProperties().get(BASIS_KEY);</span>
+<span class="fc bfc" id="L594" title="All 2 branches covered.">    return v instanceof Number n ? n.doubleValue() : -1.0;</span>
+  }
+
+  // Layout engine
+  @Override
+  protected void layoutChildren() {
+<span class="fc" id="L600">    long t0 = System.nanoTime();</span>
+    // Sort by order property (analogous to CSS order) before layout
+<span class="fc" id="L602">    List&lt;Node&gt; children =</span>
+<span class="fc" id="L603">        getManagedChildren().stream()</span>
+<span class="pc" id="L604">            .sorted((a, b) -&gt; Integer.compare(getOrder(a), getOrder(b)))</span>
+<span class="fc" id="L605">            .toList();</span>
+<span class="fc bfc" id="L606" title="All 2 branches covered.">    if (children.isEmpty()) {</span>
+<span class="fc" id="L607">      return;</span>
+    }
+
+<span class="fc" id="L610">    double containerW = getWidth() - padding.getLeft() - padding.getRight();</span>
+<span class="fc" id="L611">    double containerH = getHeight() - padding.getTop() - padding.getBottom();</span>
+<span class="fc" id="L612">    double ox = padding.getLeft();</span>
+<span class="fc" id="L613">    double oy = padding.getTop();</span>
+
+<span class="pc bpc" id="L615" title="1 of 2 branches missed.">    if (direction == Direction.ROW) {</span>
+<span class="fc" id="L616">      layoutRow(children, containerW, containerH, ox, oy);</span>
+    } else {
+<span class="nc" id="L618">      layoutCol(children, containerW, containerH, ox, oy);</span>
+    }
+<span class="fc" id="L620">    TailwindFXMetrics.instance().recordLayoutPass(System.nanoTime() - t0);</span>
+<span class="fc" id="L621">  }</span>
+
+  private void layoutRow(List&lt;Node&gt; children, double w, double h, double ox, double oy) {
+<span class="pc bpc" id="L624" title="1 of 2 branches missed.">    if (wrap) {</span>
+<span class="nc" id="L625">      layoutRowWrap(children, w, h, ox, oy);</span>
+    } else {
+<span class="fc" id="L627">      layoutRowNoWrap(children, w, h, ox, oy);</span>
+    }
+<span class="fc" id="L629">  }</span>
+
+  private void layoutRowNoWrap(List&lt;Node&gt; children, double w, double h, double ox, double oy) {
+<span class="fc" id="L632">    int count = children.size();</span>
+<span class="pc bpc" id="L633" title="1 of 2 branches missed.">    if (count == 0) return;</span>
+
+    // CRITICAL OPTIMIZATION: Pre-calculate ALL sums outside the loop for real O(N)
+<span class="fc" id="L636">    double[] prefs = new double[count];</span>
+<span class="fc" id="L637">    double totalPrefW = 0;</span>
+<span class="fc" id="L638">    double totalGrowWeighted = 0;</span>
+<span class="fc" id="L639">    double totalShrinkWeighted = 0;</span>
+
+<span class="fc bfc" id="L641" title="All 2 branches covered.">    for (int i = 0; i &lt; count; i++) {</span>
+<span class="fc" id="L642">      Node n = children.get(i);</span>
+<span class="fc" id="L643">      double pref = prefW(n);</span>
+<span class="fc" id="L644">      prefs[i] = pref;</span>
+<span class="fc" id="L645">      totalPrefW += pref;</span>
+
+<span class="fc" id="L647">      double grow = getGrow(n);</span>
+<span class="fc" id="L648">      double shrink = getShrink(n);</span>
+
+<span class="fc bfc" id="L650" title="All 2 branches covered.">      if (grow &gt; 0) totalGrowWeighted += grow * pref;</span>
+<span class="pc bpc" id="L651" title="1 of 2 branches missed.">      if (shrink &gt; 0) totalShrinkWeighted += shrink * pref;</span>
+    }
+
+<span class="fc" id="L654">    totalPrefW += gapMain * (count - 1);</span>
+<span class="fc" id="L655">    double overflow = totalPrefW - w; // positive = too wide, need to shrink</span>
+<span class="fc" id="L656">    double extra = Math.max(0, w - (totalPrefW - gapMain * (count - 1))); // free space without gaps</span>
+
+<span class="fc" id="L658">    double[] widths = new double[count];</span>
+<span class="pc bpc" id="L659" title="3 of 4 branches missed.">    if (extra &gt; 0 &amp;&amp; totalGrowWeighted &gt; 0) {</span>
+      // Grow: distribute free space proportionally to (grow × pref)
+<span class="nc bnc" id="L661" title="All 2 branches missed.">      for (int i = 0; i &lt; count; i++) {</span>
+<span class="nc" id="L662">        double grow = getGrow(children.get(i));</span>
+<span class="nc bnc" id="L663" title="All 2 branches missed.">        if (grow &gt; 0) {</span>
+<span class="nc" id="L664">          double factor = (grow * prefs[i]) / totalGrowWeighted;</span>
+<span class="nc" id="L665">          widths[i] = prefs[i] + extra * factor;</span>
+<span class="nc" id="L666">        } else {</span>
+<span class="nc" id="L667">          widths[i] = prefs[i];</span>
+        }
+      }
+<span class="pc bpc" id="L670" title="3 of 4 branches missed.">    } else if (overflow &gt; 0 &amp;&amp; totalShrinkWeighted &gt; 0) {</span>
+      // Shrink: reduce proportionally to (shrink × pref) - CORREGIDO O(N)
+<span class="nc bnc" id="L672" title="All 2 branches missed.">      for (int i = 0; i &lt; count; i++) {</span>
+<span class="nc" id="L673">        double shrink = getShrink(children.get(i));</span>
+<span class="nc bnc" id="L674" title="All 2 branches missed.">        if (shrink &gt; 0) {</span>
+<span class="nc" id="L675">          double factor = (shrink * prefs[i]) / totalShrinkWeighted;</span>
+<span class="nc" id="L676">          widths[i] = Math.max(0, prefs[i] - overflow * factor);</span>
+<span class="nc" id="L677">        } else {</span>
+<span class="nc" id="L678">          widths[i] = prefs[i];</span>
+        }
+      }
+    } else {
+      // No grow/shrink needed or possible
+<span class="fc bfc" id="L683" title="All 2 branches covered.">      for (int i = 0; i &lt; count; i++) {</span>
+<span class="fc" id="L684">        widths[i] = prefs[i];</span>
+      }
+    }
+
+<span class="fc" id="L688">    double[] xs = justifyPositions(widths, gapMain, w, justify);</span>
+
+<span class="fc bfc" id="L690" title="All 2 branches covered.">    for (int i = 0; i &lt; count; i++) {</span>
+<span class="fc" id="L691">      Node c = children.get(i);</span>
+<span class="fc" id="L692">      double ch = alignedH(c, h, align);</span>
+<span class="fc" id="L693">      double cy = alignedY(c, h, ch, align, oy);</span>
+<span class="fc" id="L694">      c.resizeRelocate(ox + xs[i], cy, widths[i], ch);</span>
+    }
+<span class="fc" id="L696">  }</span>
+
+  private void layoutRowWrap(List&lt;Node&gt; children, double w, double h, double ox, double oy) {
+    // CRITICAL FIX: Implement grow/shrink WITHIN each row (missing in original version)
+    // Group children into rows
+<span class="nc" id="L701">    java.util.List&lt;java.util.List&lt;Node&gt;&gt; rows = new java.util.ArrayList&lt;&gt;();</span>
+<span class="nc" id="L702">    java.util.List&lt;Node&gt; currentRow = new java.util.ArrayList&lt;&gt;();</span>
+<span class="nc" id="L703">    double currentWidth = 0;</span>
+
+<span class="nc bnc" id="L705" title="All 2 branches missed.">    for (Node c : children) {</span>
+<span class="nc" id="L706">      double cw = prefW(c);</span>
+<span class="nc bnc" id="L707" title="All 4 branches missed.">      if (!currentRow.isEmpty() &amp;&amp; currentWidth + gapMain + cw &gt; w) {</span>
+<span class="nc" id="L708">        rows.add(currentRow);</span>
+<span class="nc" id="L709">        currentRow = new java.util.ArrayList&lt;&gt;();</span>
+<span class="nc" id="L710">        currentWidth = 0;</span>
+      }
+<span class="nc" id="L712">      currentRow.add(c);</span>
+<span class="nc bnc" id="L713" title="All 2 branches missed.">      currentWidth += (currentRow.size() &gt; 1 ? gapMain : 0) + cw;</span>
+<span class="nc" id="L714">    }</span>
+<span class="nc bnc" id="L715" title="All 2 branches missed.">    if (!currentRow.isEmpty()) {</span>
+<span class="nc" id="L716">      rows.add(currentRow);</span>
+    }
+
+    // Calculate row heights
+<span class="nc" id="L720">    double[] rowHeights = new double[rows.size()];</span>
+<span class="nc" id="L721">    double totalRowsHeight = 0;</span>
+<span class="nc bnc" id="L722" title="All 2 branches missed.">    for (int r = 0; r &lt; rows.size(); r++) {</span>
+<span class="nc" id="L723">      java.util.List&lt;Node&gt; row = rows.get(r);</span>
+<span class="nc" id="L724">      rowHeights[r] = row.stream().mapToDouble(n -&gt; prefH(n)).max().orElse(0);</span>
+<span class="nc" id="L725">      totalRowsHeight += rowHeights[r];</span>
+    }
+
+    // Apply align-content to distribute extra vertical space between rows
+<span class="nc" id="L729">    double[] rowYPositions = alignContentPositions(rowHeights, gapCross, h, alignContent);</span>
+
+    // Lay out each row WITH grow/shrink support
+<span class="nc bnc" id="L732" title="All 2 branches missed.">    for (int r = 0; r &lt; rows.size(); r++) {</span>
+<span class="nc" id="L733">      java.util.List&lt;Node&gt; row = rows.get(r);</span>
+<span class="nc" id="L734">      int count = row.size();</span>
+<span class="nc" id="L735">      double rowH = rowHeights[r];</span>
+<span class="nc" id="L736">      double curY = oy + rowYPositions[r];</span>
+
+      // OPTIMIZATION: Pre-calculate sums for real O(N) within each row
+<span class="nc" id="L739">      double[] prefs = new double[count];</span>
+<span class="nc" id="L740">      double totalPref = 0;</span>
+<span class="nc" id="L741">      double totalGrowWeighted = 0;</span>
+<span class="nc" id="L742">      double totalShrinkWeighted = 0;</span>
+
+<span class="nc bnc" id="L744" title="All 2 branches missed.">      for (int i = 0; i &lt; count; i++) {</span>
+<span class="nc" id="L745">        Node n = row.get(i);</span>
+<span class="nc" id="L746">        double p = prefW(n);</span>
+<span class="nc" id="L747">        prefs[i] = p;</span>
+<span class="nc" id="L748">        totalPref += p;</span>
+
+<span class="nc" id="L750">        double g = getGrow(n);</span>
+<span class="nc" id="L751">        double s = getShrink(n);</span>
+<span class="nc bnc" id="L752" title="All 2 branches missed.">        if (g &gt; 0) totalGrowWeighted += g * p;</span>
+<span class="nc bnc" id="L753" title="All 2 branches missed.">        if (s &gt; 0) totalShrinkWeighted += s * p;</span>
+      }
+
+<span class="nc" id="L756">      double lineAvailable = w - (gapMain * (count - 1));</span>
+<span class="nc" id="L757">      double overflow = totalPref - lineAvailable;</span>
+<span class="nc" id="L758">      double[] finalWidths = new double[count];</span>
+
+<span class="nc bnc" id="L760" title="All 2 branches missed.">      if (overflow &lt;= 0) {</span>
+        // Grow within the row
+<span class="nc" id="L762">        double extra = -overflow;</span>
+<span class="nc bnc" id="L763" title="All 2 branches missed.">        if (totalGrowWeighted &gt; 0) {</span>
+<span class="nc bnc" id="L764" title="All 2 branches missed.">          for (int i = 0; i &lt; count; i++) {</span>
+<span class="nc" id="L765">            double g = getGrow(row.get(i));</span>
+<span class="nc bnc" id="L766" title="All 2 branches missed.">            if (g &gt; 0) {</span>
+<span class="nc" id="L767">              double factor = (g * prefs[i]) / totalGrowWeighted;</span>
+<span class="nc" id="L768">              finalWidths[i] = prefs[i] + extra * factor;</span>
+<span class="nc" id="L769">            } else {</span>
+<span class="nc" id="L770">              finalWidths[i] = prefs[i];</span>
+            }
+          }
+        } else {
+<span class="nc" id="L774">          System.arraycopy(prefs, 0, finalWidths, 0, count);</span>
+        }
+<span class="nc" id="L776">      } else {</span>
+        // Shrink within the row - FIX ADDED
+<span class="nc bnc" id="L778" title="All 2 branches missed.">        if (totalShrinkWeighted &gt; 0) {</span>
+<span class="nc bnc" id="L779" title="All 2 branches missed.">          for (int i = 0; i &lt; count; i++) {</span>
+<span class="nc" id="L780">            double s = getShrink(row.get(i));</span>
+<span class="nc bnc" id="L781" title="All 2 branches missed.">            if (s &gt; 0) {</span>
+<span class="nc" id="L782">              double factor = (s * prefs[i]) / totalShrinkWeighted;</span>
+<span class="nc" id="L783">              finalWidths[i] = Math.max(0, prefs[i] - overflow * factor);</span>
+<span class="nc" id="L784">            } else {</span>
+<span class="nc" id="L785">              finalWidths[i] = prefs[i];</span>
+            }
+          }
+        } else {
+<span class="nc" id="L789">          System.arraycopy(prefs, 0, finalWidths, 0, count);</span>
+        }
+      }
+
+<span class="nc" id="L793">      double[] xs = justifyPositions(finalWidths, gapMain, w, justify);</span>
+<span class="nc bnc" id="L794" title="All 2 branches missed.">      for (int i = 0; i &lt; count; i++) {</span>
+<span class="nc" id="L795">        Node c = row.get(i);</span>
+<span class="nc" id="L796">        double ch = alignedH(c, rowH, align);</span>
+<span class="nc" id="L797">        double cy = alignedY(c, rowH, ch, align, curY);</span>
+<span class="nc" id="L798">        c.resizeRelocate(ox + xs[i], cy, finalWidths[i], ch);</span>
+      }
+    }
+<span class="nc" id="L801">  }</span>
+
+  private void layoutCol(List&lt;Node&gt; children, double w, double h, double ox, double oy) {
+<span class="nc" id="L804">    int count = children.size();</span>
+<span class="nc bnc" id="L805" title="All 2 branches missed.">    if (count == 0) return;</span>
+
+    // CRITICAL FIX: Implement shrink in columns (missing in original version)
+<span class="nc" id="L808">    double[] prefs = new double[count];</span>
+<span class="nc" id="L809">    double totalPrefH = 0;</span>
+<span class="nc" id="L810">    double totalGrowWeighted = 0;</span>
+<span class="nc" id="L811">    double totalShrinkWeighted = 0;</span>
+
+<span class="nc bnc" id="L813" title="All 2 branches missed.">    for (int i = 0; i &lt; count; i++) {</span>
+<span class="nc" id="L814">      Node n = children.get(i);</span>
+<span class="nc" id="L815">      double pref = prefH(n);</span>
+<span class="nc" id="L816">      prefs[i] = pref;</span>
+<span class="nc" id="L817">      totalPrefH += pref;</span>
+
+<span class="nc" id="L819">      double grow = getGrow(n);</span>
+<span class="nc" id="L820">      double shrink = getShrink(n);</span>
+
+<span class="nc bnc" id="L822" title="All 2 branches missed.">      if (grow &gt; 0) totalGrowWeighted += grow * pref;</span>
+<span class="nc bnc" id="L823" title="All 2 branches missed.">      if (shrink &gt; 0) totalShrinkWeighted += shrink * pref;</span>
+    }
+
+<span class="nc" id="L826">    totalPrefH += gapCross * (count - 1);</span>
+<span class="nc" id="L827">    double overflow = totalPrefH - h; // positive = too tall, need to shrink</span>
+<span class="nc" id="L828">    double extra = Math.max(0, h - (totalPrefH - gapCross * (count - 1))); // free space</span>
+
+<span class="nc" id="L830">    double[] heights = new double[count];</span>
+<span class="nc bnc" id="L831" title="All 4 branches missed.">    if (extra &gt; 0 &amp;&amp; totalGrowWeighted &gt; 0) {</span>
+      // Grow: distribute free space proportionally to (grow × pref)
+<span class="nc bnc" id="L833" title="All 2 branches missed.">      for (int i = 0; i &lt; count; i++) {</span>
+<span class="nc" id="L834">        double grow = getGrow(children.get(i));</span>
+<span class="nc bnc" id="L835" title="All 2 branches missed.">        if (grow &gt; 0) {</span>
+<span class="nc" id="L836">          double factor = (grow * prefs[i]) / totalGrowWeighted;</span>
+<span class="nc" id="L837">          heights[i] = prefs[i] + extra * factor;</span>
+<span class="nc" id="L838">        } else {</span>
+<span class="nc" id="L839">          heights[i] = prefs[i];</span>
+        }
+      }
+<span class="nc bnc" id="L842" title="All 4 branches missed.">    } else if (overflow &gt; 0 &amp;&amp; totalShrinkWeighted &gt; 0) {</span>
+      // Shrink: reduce proportionally to (shrink × pref) - FIX ADDED
+<span class="nc bnc" id="L844" title="All 2 branches missed.">      for (int i = 0; i &lt; count; i++) {</span>
+<span class="nc" id="L845">        double shrink = getShrink(children.get(i));</span>
+<span class="nc bnc" id="L846" title="All 2 branches missed.">        if (shrink &gt; 0) {</span>
+<span class="nc" id="L847">          double factor = (shrink * prefs[i]) / totalShrinkWeighted;</span>
+<span class="nc" id="L848">          heights[i] = Math.max(0, prefs[i] - overflow * factor);</span>
+<span class="nc" id="L849">        } else {</span>
+<span class="nc" id="L850">          heights[i] = prefs[i];</span>
+        }
+      }
+    } else {
+      // No grow/shrink needed or possible
+<span class="nc bnc" id="L855" title="All 2 branches missed.">      for (int i = 0; i &lt; count; i++) {</span>
+<span class="nc" id="L856">        heights[i] = prefs[i];</span>
+      }
+    }
+
+<span class="nc" id="L860">    double[] ys = justifyPositions(heights, gapCross, h, justify);</span>
+
+<span class="nc bnc" id="L862" title="All 2 branches missed.">    for (int i = 0; i &lt; count; i++) {</span>
+<span class="nc" id="L863">      Node c = children.get(i);</span>
+<span class="nc" id="L864">      double cw = alignedW(c, w, align);</span>
+<span class="nc" id="L865">      double cx = alignedX(c, w, cw, align, ox);</span>
+<span class="nc" id="L866">      c.resizeRelocate(cx, oy + ys[i], cw, heights[i]);</span>
+    }
+<span class="nc" id="L868">  }</span>
+
+  // Layout math helpers
+  /**
+   * Computes starting positions for items along one axis given justify-content.
+   *
+   * @param sizes sizes of each item along the main axis
+   * @param gap gap between items
+   * @param total total available space
+   * @param j justify-content value
+   * @return array of starting positions (same length as sizes)
+   */
+  static double[] justifyPositions(double[] sizes, double gap, double total, Justify j) {
+<span class="fc" id="L881">    double usedSpace = 0;</span>
+<span class="fc bfc" id="L882" title="All 2 branches covered.">    for (double s : sizes) {</span>
+<span class="fc" id="L883">      usedSpace += s;</span>
+    }
+<span class="fc" id="L885">    double gapTotal = gap * (sizes.length - 1);</span>
+<span class="fc" id="L886">    double free = total - usedSpace - gapTotal;</span>
+<span class="fc" id="L887">    double[] pos = new double[sizes.length];</span>
+
+<span class="pc bpc" id="L889" title="6 of 7 branches missed.">    switch (j) {</span>
+      case START -&gt; {
+<span class="fc" id="L891">        double x = 0;</span>
+<span class="fc bfc" id="L892" title="All 2 branches covered.">        for (int i = 0; i &lt; sizes.length; i++) {</span>
+<span class="fc" id="L893">          pos[i] = x;</span>
+<span class="fc" id="L894">          x += sizes[i] + gap;</span>
+        }
+<span class="fc" id="L896">      }</span>
+      case CENTER -&gt; {
+<span class="nc" id="L898">        double x = Math.max(0, free / 2);</span>
+<span class="nc bnc" id="L899" title="All 2 branches missed.">        for (int i = 0; i &lt; sizes.length; i++) {</span>
+<span class="nc" id="L900">          pos[i] = x;</span>
+<span class="nc" id="L901">          x += sizes[i] + gap;</span>
+        }
+<span class="nc" id="L903">      }</span>
+      case END -&gt; {
+<span class="nc" id="L905">        double x = Math.max(0, free);</span>
+<span class="nc bnc" id="L906" title="All 2 branches missed.">        for (int i = 0; i &lt; sizes.length; i++) {</span>
+<span class="nc" id="L907">          pos[i] = x;</span>
+<span class="nc" id="L908">          x += sizes[i] + gap;</span>
+        }
+<span class="nc" id="L910">      }</span>
+      case BETWEEN -&gt; {
+<span class="nc bnc" id="L912" title="All 2 branches missed.">        if (sizes.length == 1) {</span>
+<span class="nc" id="L913">          pos[0] = 0;</span>
+<span class="nc" id="L914">          break;</span>
+        }
+        double spaceBetween =
+<span class="nc bnc" id="L917" title="All 2 branches missed.">            sizes.length &gt; 1 ? Math.max(gap, (total - usedSpace) / (sizes.length - 1)) : gap;</span>
+<span class="nc" id="L918">        double x = 0;</span>
+<span class="nc bnc" id="L919" title="All 2 branches missed.">        for (int i = 0; i &lt; sizes.length; i++) {</span>
+<span class="nc" id="L920">          pos[i] = x;</span>
+<span class="nc" id="L921">          x += sizes[i] + spaceBetween;</span>
+        }
+<span class="nc" id="L923">      }</span>
+      case AROUND -&gt; {
+<span class="nc" id="L925">        double unit = free / sizes.length;</span>
+<span class="nc" id="L926">        double x = unit / 2;</span>
+<span class="nc bnc" id="L927" title="All 2 branches missed.">        for (int i = 0; i &lt; sizes.length; i++) {</span>
+<span class="nc" id="L928">          pos[i] = x;</span>
+<span class="nc" id="L929">          x += sizes[i] + unit;</span>
+        }
+<span class="nc" id="L931">      }</span>
+      case EVENLY -&gt; {
+<span class="nc" id="L933">        double unit = free / (sizes.length + 1);</span>
+<span class="nc" id="L934">        double x = unit;</span>
+<span class="nc bnc" id="L935" title="All 2 branches missed.">        for (int i = 0; i &lt; sizes.length; i++) {</span>
+<span class="nc" id="L936">          pos[i] = x;</span>
+<span class="nc" id="L937">          x += sizes[i] + unit;</span>
+        }
+      }
+    }
+<span class="fc" id="L941">    return pos;</span>
+  }
+
+  /**
+   * Computes starting Y positions for rows/lines when wrap=true based on align-content. Similar to
+   * justifyPositions but for the cross-axis distribution of multiple lines.
+   *
+   * @param rowHeights heights of each row/line
+   * @param gap gap between rows (gapCross)
+   * @param total total available height
+   * @param ac align-content value
+   * @return array of starting Y positions (same length as rowHeights)
+   */
+  static double[] alignContentPositions(
+      double[] rowHeights, double gap, double total, AlignContent ac) {
+<span class="nc" id="L956">    double usedSpace = 0;</span>
+<span class="nc bnc" id="L957" title="All 2 branches missed.">    for (double h : rowHeights) {</span>
+<span class="nc" id="L958">      usedSpace += h;</span>
+    }
+<span class="nc" id="L960">    double gapTotal = gap * (rowHeights.length - 1);</span>
+<span class="nc" id="L961">    double free = total - usedSpace - gapTotal;</span>
+<span class="nc" id="L962">    double[] pos = new double[rowHeights.length];</span>
+
+<span class="nc bnc" id="L964" title="All 8 branches missed.">    switch (ac) {</span>
+      case START -&gt; {
+<span class="nc" id="L966">        double y = 0;</span>
+<span class="nc bnc" id="L967" title="All 2 branches missed.">        for (int i = 0; i &lt; rowHeights.length; i++) {</span>
+<span class="nc" id="L968">          pos[i] = y;</span>
+<span class="nc" id="L969">          y += rowHeights[i] + gap;</span>
+        }
+<span class="nc" id="L971">      }</span>
+      case CENTER -&gt; {
+<span class="nc" id="L973">        double y = Math.max(0, free / 2);</span>
+<span class="nc bnc" id="L974" title="All 2 branches missed.">        for (int i = 0; i &lt; rowHeights.length; i++) {</span>
+<span class="nc" id="L975">          pos[i] = y;</span>
+<span class="nc" id="L976">          y += rowHeights[i] + gap;</span>
+        }
+<span class="nc" id="L978">      }</span>
+      case END -&gt; {
+<span class="nc" id="L980">        double y = Math.max(0, free);</span>
+<span class="nc bnc" id="L981" title="All 2 branches missed.">        for (int i = 0; i &lt; rowHeights.length; i++) {</span>
+<span class="nc" id="L982">          pos[i] = y;</span>
+<span class="nc" id="L983">          y += rowHeights[i] + gap;</span>
+        }
+<span class="nc" id="L985">      }</span>
+      case BETWEEN -&gt; {
+<span class="nc bnc" id="L987" title="All 2 branches missed.">        if (rowHeights.length == 1) {</span>
+<span class="nc" id="L988">          pos[0] = 0;</span>
+<span class="nc" id="L989">          break;</span>
+        }
+        double spaceBetween =
+<span class="nc bnc" id="L992" title="All 2 branches missed.">            rowHeights.length &gt; 1</span>
+<span class="nc" id="L993">                ? Math.max(gap, (total - usedSpace) / (rowHeights.length - 1))</span>
+<span class="nc" id="L994">                : gap;</span>
+<span class="nc" id="L995">        double y = 0;</span>
+<span class="nc bnc" id="L996" title="All 2 branches missed.">        for (int i = 0; i &lt; rowHeights.length; i++) {</span>
+<span class="nc" id="L997">          pos[i] = y;</span>
+<span class="nc" id="L998">          y += rowHeights[i] + spaceBetween;</span>
+        }
+<span class="nc" id="L1000">      }</span>
+      case AROUND -&gt; {
+<span class="nc" id="L1002">        double unit = free / rowHeights.length;</span>
+<span class="nc" id="L1003">        double y = unit / 2;</span>
+<span class="nc bnc" id="L1004" title="All 2 branches missed.">        for (int i = 0; i &lt; rowHeights.length; i++) {</span>
+<span class="nc" id="L1005">          pos[i] = y;</span>
+<span class="nc" id="L1006">          y += rowHeights[i] + unit;</span>
+        }
+<span class="nc" id="L1008">      }</span>
+      case EVENLY -&gt; {
+<span class="nc" id="L1010">        double unit = free / (rowHeights.length + 1);</span>
+<span class="nc" id="L1011">        double y = unit;</span>
+<span class="nc bnc" id="L1012" title="All 2 branches missed.">        for (int i = 0; i &lt; rowHeights.length; i++) {</span>
+<span class="nc" id="L1013">          pos[i] = y;</span>
+<span class="nc" id="L1014">          y += rowHeights[i] + unit;</span>
+        }
+<span class="nc" id="L1016">      }</span>
+      case STRETCH -&gt; {
+        // Distribute extra space equally to each row
+<span class="nc bnc" id="L1019" title="All 2 branches missed.">        double extraPerRow = rowHeights.length &gt; 0 ? free / rowHeights.length : 0;</span>
+<span class="nc" id="L1020">        double y = 0;</span>
+<span class="nc bnc" id="L1021" title="All 2 branches missed.">        for (int i = 0; i &lt; rowHeights.length; i++) {</span>
+<span class="nc" id="L1022">          pos[i] = y;</span>
+<span class="nc" id="L1023">          y += rowHeights[i] + extraPerRow + gap;</span>
+        }
+      }
+    }
+<span class="nc" id="L1027">    return pos;</span>
+  }
+
+  /**
+   * Returns the main-axis base size for a child, respecting flex-basis. Used in row-direction
+   * layouts.
+   */
+  private double prefW(Node n) {
+<span class="fc" id="L1035">    double basis = getBasis(n);</span>
+<span class="fc bfc" id="L1036" title="All 2 branches covered.">    if (basis &gt;= 0) {</span>
+<span class="fc" id="L1037">      return basis;</span>
+    }
+<span class="pc bpc" id="L1039" title="1 of 2 branches missed.">    return n instanceof Region r ? r.prefWidth(-1) : n.prefWidth(-1);</span>
+  }
+
+  /**
+   * Returns the cross-axis base size for a child, respecting flex-basis. Used in column-direction
+   * layouts.
+   */
+  private double prefH(Node n) {
+<span class="nc" id="L1047">    double basis = getBasis(n);</span>
+<span class="nc bnc" id="L1048" title="All 4 branches missed.">    if (basis &gt;= 0 &amp;&amp; direction == Direction.COL) {</span>
+<span class="nc" id="L1049">      return basis;</span>
+    }
+<span class="nc bnc" id="L1051" title="All 2 branches missed.">    return n instanceof Region r ? r.prefHeight(-1) : n.prefHeight(-1);</span>
+  }
+
+  /**
+   * Returns the natural preferred width (ignoring flex-basis). Used for cross-axis size in column
+   * layouts.
+   */
+  private double naturalPrefW(Node n) {
+<span class="nc bnc" id="L1059" title="All 2 branches missed.">    return n instanceof Region r ? r.prefWidth(-1) : n.prefWidth(-1);</span>
+  }
+
+  /**
+   * Returns the natural preferred height (ignoring flex-basis). Used for cross-axis size in row
+   * layouts.
+   */
+  private double naturalPrefH(Node n) {
+<span class="pc bpc" id="L1067" title="1 of 2 branches missed.">    return n instanceof Region r ? r.prefHeight(-1) : n.prefHeight(-1);</span>
+  }
+
+  private double alignedW(Node n, double axisW, Align a) {
+<span class="nc" id="L1071">    Align eff = getAlignSelf(n);</span>
+<span class="nc bnc" id="L1072" title="All 2 branches missed.">    if (eff != null) {</span>
+<span class="nc" id="L1073">      a = eff;</span>
+    }
+<span class="nc bnc" id="L1075" title="All 2 branches missed.">    return a == Align.STRETCH ? axisW : naturalPrefW(n);</span>
+  }
+
+  /** Returns the effective align for a child, respecting align-self override. */
+  private Align effectiveAlign(Node n) {
+<span class="nc" id="L1080">    Align self = getAlignSelf(n);</span>
+<span class="nc bnc" id="L1081" title="All 2 branches missed.">    return self != null ? self : align;</span>
+  }
+
+  private double alignedH(Node n, double axisH, Align a) {
+<span class="fc" id="L1085">    Align eff = getAlignSelf(n);</span>
+<span class="fc bfc" id="L1086" title="All 2 branches covered.">    if (eff != null) {</span>
+<span class="fc" id="L1087">      a = eff;</span>
+    }
+<span class="pc bpc" id="L1089" title="1 of 2 branches missed.">    return a == Align.STRETCH ? axisH : naturalPrefH(n);</span>
+  }
+
+  private double alignedX(Node n, double axisW, double childW, Align a, double origin) {
+<span class="nc" id="L1093">    Align eff = getAlignSelf(n);</span>
+<span class="nc bnc" id="L1094" title="All 2 branches missed.">    if (eff != null) {</span>
+<span class="nc" id="L1095">      a = eff;</span>
+    }
+<span class="nc bnc" id="L1097" title="All 3 branches missed.">    return switch (a) {</span>
+<span class="nc" id="L1098">      case START, STRETCH -&gt; origin;</span>
+<span class="nc" id="L1099">      case CENTER -&gt; origin + (axisW - childW) / 2;</span>
+<span class="nc" id="L1100">      case END -&gt; origin + (axisW - childW);</span>
+    };
+  }
+
+  private double alignedY(Node n, double axisH, double childH, Align a, double origin) {
+<span class="fc" id="L1105">    Align eff = getAlignSelf(n);</span>
+<span class="fc bfc" id="L1106" title="All 2 branches covered.">    if (eff != null) {</span>
+<span class="fc" id="L1107">      a = eff;</span>
+    }
+<span class="pc bpc" id="L1109" title="1 of 3 branches missed.">    return switch (a) {</span>
+<span class="fc" id="L1110">      case START, STRETCH -&gt; origin;</span>
+<span class="nc" id="L1111">      case CENTER -&gt; origin + (axisH - childH) / 2;</span>
+<span class="fc" id="L1112">      case END -&gt; origin + (axisH - childH);</span>
+    };
+  }
+
+  @Override
+  protected double computePrefWidth(double height) {
+<span class="pc bpc" id="L1118" title="2 of 4 branches missed.">    if (direction == Direction.ROW &amp;&amp; !wrap) {</span>
+<span class="fc" id="L1119">      return getManagedChildren().stream().mapToDouble(this::prefW).sum()</span>
+<span class="fc" id="L1120">          + gapMain * Math.max(0, getManagedChildren().size() - 1)</span>
+<span class="fc" id="L1121">          + padding.getLeft()</span>
+<span class="fc" id="L1122">          + padding.getRight();</span>
+    }
+<span class="nc" id="L1124">    return getManagedChildren().stream().mapToDouble(this::prefW).max().orElse(0)</span>
+<span class="nc" id="L1125">        + padding.getLeft()</span>
+<span class="nc" id="L1126">        + padding.getRight();</span>
+  }
+
+  @Override
+  protected double computePrefHeight(double width) {
+<span class="pc bpc" id="L1131" title="1 of 2 branches missed.">    if (direction == Direction.COL) {</span>
+<span class="nc" id="L1132">      return getManagedChildren().stream().mapToDouble(this::prefH).sum()</span>
+<span class="nc" id="L1133">          + gapCross * Math.max(0, getManagedChildren().size() - 1)</span>
+<span class="nc" id="L1134">          + padding.getTop()</span>
+<span class="nc" id="L1135">          + padding.getBottom();</span>
+    }
+    // ROW + wrap: sum the heights of all rows
+<span class="pc bpc" id="L1138" title="3 of 4 branches missed.">    if (wrap &amp;&amp; width &gt; 0) {</span>
+<span class="nc" id="L1139">      double containerW = width - padding.getLeft() - padding.getRight();</span>
+<span class="nc" id="L1140">      double totalH = 0, rowH = 0, rowW = 0;</span>
+<span class="nc bnc" id="L1141" title="All 2 branches missed.">      for (Node child : getManagedChildren()) {</span>
+<span class="nc" id="L1142">        double cw = prefW(child);</span>
+<span class="nc bnc" id="L1143" title="All 4 branches missed.">        if (rowW &gt; 0 &amp;&amp; rowW + gapMain + cw &gt; containerW) {</span>
+<span class="nc" id="L1144">          totalH += rowH + gapCross;</span>
+<span class="nc" id="L1145">          rowH = 0;</span>
+<span class="nc" id="L1146">          rowW = 0;</span>
+        }
+<span class="nc bnc" id="L1148" title="All 2 branches missed.">        rowW += (rowW &gt; 0 ? gapMain : 0) + cw;</span>
+<span class="nc" id="L1149">        rowH = Math.max(rowH, naturalPrefH(child));</span>
+<span class="nc" id="L1150">      }</span>
+<span class="nc" id="L1151">      totalH += rowH; // last row</span>
+<span class="nc" id="L1152">      return totalH + padding.getTop() + padding.getBottom();</span>
+    }
+    // ROW, no wrap: height = tallest child
+<span class="fc" id="L1155">    return getManagedChildren().stream().mapToDouble(this::naturalPrefH).max().orElse(0)</span>
+<span class="fc" id="L1156">        + padding.getTop()</span>
+<span class="fc" id="L1157">        + padding.getBottom();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

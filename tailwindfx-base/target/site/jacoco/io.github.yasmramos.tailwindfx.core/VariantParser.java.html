@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VariantParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TailwindFX Base</a> &gt; <a href="index.source.html" class="el_package">io.github.yasmramos.tailwindfx.core</a> &gt; <span class="el_source">VariantParser.java</span></div><h1>VariantParser.java</h1><pre class="source lang-java linenums">package io.github.yasmramos.tailwindfx.core;
+
+import java.util.*;
+import java.util.regex.*;
+
+/**
+ * Parser de variantes compatible con Tailwind CSS v4.
+ *
+ * &lt;p&gt;Soporta todas las variantes oficiales: - State: hover:, focus:, active:, disabled:, etc. -
+ * Logical: first:, last:, odd:, even:, etc. - Form: checked:, invalid:, required:, etc. - Content:
+ * empty:, only-child:, etc. - Focus: focus-visible:, focus-within: - Group: group-hover:,
+ * group-focus:, etc. - Responsive: sm:, md:, lg:, xl:, 2xl: - Theme: dark:, light: - Arbitrary:
+ * [@media(min-width:768px)]:, [&amp;:hover]:
+ */
+<span class="nc" id="L15">public class VariantParser {</span>
+
+  // Variantes de estado (state variants)
+<span class="fc" id="L18">  private static final Set&lt;String&gt; STATE_VARIANTS =</span>
+<span class="fc" id="L19">      Set.of(</span>
+          &quot;hover&quot;,
+          &quot;focus&quot;,
+          &quot;active&quot;,
+          &quot;visited&quot;,
+          &quot;link&quot;,
+          &quot;disabled&quot;,
+          &quot;enabled&quot;,
+          &quot;checked&quot;,
+          &quot;indeterminate&quot;,
+          &quot;default&quot;,
+          &quot;target&quot;,
+          &quot;open&quot;);
+
+  // Logical variants
+<span class="fc" id="L34">  private static final Set&lt;String&gt; LOGICAL_VARIANTS =</span>
+<span class="fc" id="L35">      Set.of(</span>
+          &quot;first&quot;,
+          &quot;last&quot;,
+          &quot;only&quot;,
+          &quot;odd&quot;,
+          &quot;even&quot;,
+          &quot;first-of-type&quot;,
+          &quot;last-of-type&quot;,
+          &quot;only-of-type&quot;,
+          &quot;nth-1&quot;,
+          &quot;nth-2&quot;,
+          &quot;nth-3&quot;);
+
+  // Variantes de formulario (form variants)
+<span class="fc" id="L49">  private static final Set&lt;String&gt; FORM_VARIANTS =</span>
+<span class="fc" id="L50">      Set.of(</span>
+          &quot;valid&quot;,
+          &quot;invalid&quot;,
+          &quot;required&quot;,
+          &quot;optional&quot;,
+          &quot;in-range&quot;,
+          &quot;out-of-range&quot;,
+          &quot;read-only&quot;,
+          &quot;read-write&quot;);
+
+  // Variantes de contenido (content variants)
+<span class="fc" id="L61">  private static final Set&lt;String&gt; CONTENT_VARIANTS =</span>
+<span class="fc" id="L62">      Set.of(&quot;empty&quot;, &quot;placeholder-shown&quot;, &quot;autofill&quot;);</span>
+
+  // Variantes de foco (focus variants)
+<span class="fc" id="L65">  private static final Set&lt;String&gt; FOCUS_VARIANTS = Set.of(&quot;focus-visible&quot;, &quot;focus-within&quot;);</span>
+
+  // Variantes de grupo (group variants)
+<span class="fc" id="L68">  private static final Set&lt;String&gt; GROUP_VARIANTS =</span>
+<span class="fc" id="L69">      Set.of(</span>
+          &quot;group-hover&quot;,
+          &quot;group-focus&quot;,
+          &quot;group-active&quot;,
+          &quot;group-focus-visible&quot;,
+          &quot;group-focus-within&quot;);
+
+  // Variantes responsivas (screen variants)
+<span class="fc" id="L77">  private static final Set&lt;String&gt; SCREEN_VARIANTS =</span>
+<span class="fc" id="L78">      Set.of(</span>
+          &quot;sm&quot;, &quot;md&quot;, &quot;lg&quot;, &quot;xl&quot;, &quot;2xl&quot;, &quot;min-sm&quot;, &quot;max-sm&quot;, &quot;min-md&quot;, &quot;max-md&quot;, &quot;min-lg&quot;, &quot;max-lg&quot;,
+          &quot;min-xl&quot;, &quot;max-xl&quot;, &quot;min-2xl&quot;, &quot;max-2xl&quot;);
+
+  // Variantes de tema (theme variants)
+<span class="fc" id="L83">  private static final Set&lt;String&gt; THEME_VARIANTS = Set.of(&quot;dark&quot;, &quot;light&quot;);</span>
+
+  // Todas las variantes conocidas
+<span class="fc" id="L86">  private static final Set&lt;String&gt; ALL_VARIANTS = new HashSet&lt;&gt;();</span>
+
+  static {
+<span class="fc" id="L89">    ALL_VARIANTS.addAll(STATE_VARIANTS);</span>
+<span class="fc" id="L90">    ALL_VARIANTS.addAll(LOGICAL_VARIANTS);</span>
+<span class="fc" id="L91">    ALL_VARIANTS.addAll(FORM_VARIANTS);</span>
+<span class="fc" id="L92">    ALL_VARIANTS.addAll(CONTENT_VARIANTS);</span>
+<span class="fc" id="L93">    ALL_VARIANTS.addAll(FOCUS_VARIANTS);</span>
+<span class="fc" id="L94">    ALL_VARIANTS.addAll(GROUP_VARIANTS);</span>
+<span class="fc" id="L95">    ALL_VARIANTS.addAll(SCREEN_VARIANTS);</span>
+<span class="fc" id="L96">    ALL_VARIANTS.addAll(THEME_VARIANTS);</span>
+<span class="fc" id="L97">  }</span>
+
+  /** Resultado del parseo de un token con variante. */
+  public static class VariantResult {
+    private final List&lt;String&gt; variants;
+    private final String utility;
+    private final boolean hasVariant;
+
+<span class="fc" id="L105">    public VariantResult(List&lt;String&gt; variants, String utility) {</span>
+<span class="fc" id="L106">      this.variants = Collections.unmodifiableList(new ArrayList&lt;&gt;(variants));</span>
+<span class="fc" id="L107">      this.utility = utility;</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">      this.hasVariant = !variants.isEmpty();</span>
+<span class="fc" id="L109">    }</span>
+
+    public List&lt;String&gt; getVariants() {
+<span class="fc" id="L112">      return variants;</span>
+    }
+
+    public String getUtility() {
+<span class="fc" id="L116">      return utility;</span>
+    }
+
+    public boolean hasVariant() {
+<span class="fc" id="L120">      return hasVariant;</span>
+    }
+
+    public String getFirstVariant() {
+<span class="fc bfc" id="L124" title="All 2 branches covered.">      return variants.isEmpty() ? null : variants.get(0);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L129">      return &quot;VariantResult{variants=&quot; + variants + &quot;, utility='&quot; + utility + &quot;'}&quot;;</span>
+    }
+  }
+
+  /**
+   * Parsea un token para extraer variantes y la utilidad base.
+   *
+   * &lt;p&gt;Ejemplos: - &quot;hover:bg-blue-500&quot; → variants=[hover], utility=bg-blue-500 -
+   * &quot;md:hover:focus:bg-blue-700&quot; → variants=[md, hover, focus], utility=bg-blue-700 - &quot;bg-blue-500&quot;
+   * → variants=[], utility=bg-blue-500 - &quot;[@media(min-width:768px)]:w-full&quot; →
+   * variants=[@media(min-width:768px)], utility=w-full
+   *
+   * @param token El token a parsear
+   * @return Resultado con variantes y utilidad
+   */
+  public static VariantResult parse(String token) {
+<span class="fc bfc" id="L145" title="All 4 branches covered.">    if (token == null || token.trim().isEmpty()) {</span>
+<span class="fc" id="L146">      return new VariantResult(Collections.emptyList(), token);</span>
+    }
+
+<span class="fc" id="L149">    token = token.trim();</span>
+<span class="fc" id="L150">    List&lt;String&gt; variants = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L151">    int pos = 0;</span>
+
+<span class="pc bpc" id="L153" title="1 of 2 branches missed.">    while (pos &lt; token.length()) {</span>
+      // Buscar el siguiente ':'
+<span class="fc" id="L155">      int colonPos = token.indexOf(':', pos);</span>
+
+<span class="fc bfc" id="L157" title="All 2 branches covered.">      if (colonPos == -1) {</span>
+        // No more ':', the rest is the utility
+<span class="fc" id="L159">        break;</span>
+      }
+
+      // Extract the part before ':'
+<span class="fc" id="L163">      String potentialVariant = token.substring(pos, colonPos);</span>
+
+      // Check if it's a valid variant or an arbitrary variant
+<span class="fc bfc" id="L166" title="All 2 branches covered.">      if (isValidVariant(potentialVariant)) {</span>
+<span class="fc" id="L167">        variants.add(potentialVariant);</span>
+<span class="fc" id="L168">        pos = colonPos + 1;</span>
+      } else {
+        // Not a valid variant, stop here
+        break;
+      }
+<span class="fc" id="L173">    }</span>
+
+    // The rest of the token is the utility
+<span class="pc bpc" id="L176" title="1 of 2 branches missed.">    String utility = (pos &lt; token.length()) ? token.substring(pos) : &quot;&quot;;</span>
+
+<span class="fc" id="L178">    return new VariantResult(variants, utility);</span>
+  }
+
+  /** Checks if a string is a valid variant. */
+  private static boolean isValidVariant(String variant) {
+<span class="pc bpc" id="L183" title="2 of 4 branches missed.">    if (variant == null || variant.isEmpty()) {</span>
+<span class="nc" id="L184">      return false;</span>
+    }
+
+    // Variante arbitraria: empieza con '[' y termina con ']'
+<span class="pc bpc" id="L188" title="1 of 4 branches missed.">    if (variant.startsWith(&quot;[&quot;) &amp;&amp; variant.endsWith(&quot;]&quot;)) {</span>
+<span class="nc" id="L189">      return true;</span>
+    }
+
+    // Variante conocida
+<span class="fc" id="L193">    return ALL_VARIANTS.contains(variant);</span>
+  }
+
+  /** Extrae solo las variantes de un token. */
+  public static List&lt;String&gt; extractVariants(String token) {
+<span class="fc" id="L198">    return parse(token).getVariants();</span>
+  }
+
+  /** Extrae solo la utilidad base de un token. */
+  public static String extractUtility(String token) {
+<span class="fc" id="L203">    return parse(token).getUtility();</span>
+  }
+
+  /** Reconstruye un token completo a partir de variantes y utilidad. */
+  public static String reconstruct(List&lt;String&gt; variants, String utility) {
+<span class="pc bpc" id="L208" title="1 of 4 branches missed.">    if (variants == null || variants.isEmpty()) {</span>
+<span class="fc" id="L209">      return utility;</span>
+    }
+
+<span class="fc" id="L212">    StringBuilder sb = new StringBuilder();</span>
+<span class="fc bfc" id="L213" title="All 2 branches covered.">    for (String variant : variants) {</span>
+<span class="fc" id="L214">      sb.append(variant).append(':');</span>
+<span class="fc" id="L215">    }</span>
+<span class="fc" id="L216">    sb.append(utility);</span>
+<span class="fc" id="L217">    return sb.toString();</span>
+  }
+
+  /** Verifica si un token tiene alguna variante. */
+  public static boolean hasVariant(String token) {
+<span class="fc" id="L222">    return parse(token).hasVariant();</span>
+  }
+
+  /** Checks if a token has a specific variant. */
+  public static boolean hasVariant(String token, String variantName) {
+<span class="fc" id="L227">    VariantResult result = parse(token);</span>
+<span class="fc" id="L228">    return result.getVariants().contains(variantName);</span>
+  }
+
+  /** Obtiene el tipo de variante (state, screen, theme, etc.) */
+  public static String getVariantType(String variant) {
+<span class="fc bfc" id="L233" title="All 2 branches covered.">    if (variant == null) return &quot;unknown&quot;;</span>
+
+<span class="fc bfc" id="L235" title="All 2 branches covered.">    if (STATE_VARIANTS.contains(variant)) return &quot;state&quot;;</span>
+<span class="fc bfc" id="L236" title="All 2 branches covered.">    if (LOGICAL_VARIANTS.contains(variant)) return &quot;logical&quot;;</span>
+<span class="fc bfc" id="L237" title="All 2 branches covered.">    if (FORM_VARIANTS.contains(variant)) return &quot;form&quot;;</span>
+<span class="pc bpc" id="L238" title="1 of 2 branches missed.">    if (CONTENT_VARIANTS.contains(variant)) return &quot;content&quot;;</span>
+<span class="fc bfc" id="L239" title="All 2 branches covered.">    if (FOCUS_VARIANTS.contains(variant)) return &quot;focus&quot;;</span>
+<span class="fc bfc" id="L240" title="All 2 branches covered.">    if (GROUP_VARIANTS.contains(variant)) return &quot;group&quot;;</span>
+<span class="fc bfc" id="L241" title="All 2 branches covered.">    if (SCREEN_VARIANTS.contains(variant)) return &quot;screen&quot;;</span>
+<span class="fc bfc" id="L242" title="All 2 branches covered.">    if (THEME_VARIANTS.contains(variant)) return &quot;theme&quot;;</span>
+<span class="pc bpc" id="L243" title="1 of 4 branches missed.">    if (variant.startsWith(&quot;[&quot;) &amp;&amp; variant.endsWith(&quot;]&quot;)) return &quot;arbitrary&quot;;</span>
+
+<span class="fc" id="L245">    return &quot;unknown&quot;;</span>
+  }
+
+  /** Convierte una variante a su selector CSS equivalente. */
+  public static String toCssSelector(String variant) {
+<span class="fc bfc" id="L250" title="All 2 branches covered.">    if (variant == null) return &quot;&quot;;</span>
+
+    // Variante arbitraria
+<span class="pc bpc" id="L253" title="1 of 4 branches missed.">    if (variant.startsWith(&quot;[&quot;) &amp;&amp; variant.endsWith(&quot;]&quot;)) {</span>
+<span class="fc" id="L254">      String content = variant.substring(1, variant.length() - 1);</span>
+      // Si es una media query, devolverla directamente
+<span class="pc bpc" id="L256" title="1 of 4 branches missed.">      if (content.startsWith(&quot;@media&quot;) || content.startsWith(&quot;@container&quot;)) {</span>
+<span class="fc" id="L257">        return content;</span>
+      }
+      // Si es un selector, devolverlo
+<span class="fc" id="L260">      return content;</span>
+    }
+
+    // Mapeo de variantes a selectores CSS
+<span class="fc bfc" id="L264" title="All 41 branches covered.">    switch (variant) {</span>
+      case &quot;hover&quot;:
+<span class="fc" id="L266">        return &quot;:hover&quot;;</span>
+      case &quot;focus&quot;:
+<span class="fc" id="L268">        return &quot;:focus&quot;;</span>
+      case &quot;active&quot;:
+<span class="fc" id="L270">        return &quot;:active&quot;;</span>
+      case &quot;visited&quot;:
+<span class="fc" id="L272">        return &quot;:visited&quot;;</span>
+      case &quot;link&quot;:
+<span class="fc" id="L274">        return &quot;:link&quot;;</span>
+      case &quot;disabled&quot;:
+<span class="fc" id="L276">        return &quot;:disabled&quot;;</span>
+      case &quot;enabled&quot;:
+<span class="fc" id="L278">        return &quot;:enabled&quot;;</span>
+      case &quot;checked&quot;:
+<span class="fc" id="L280">        return &quot;:checked&quot;;</span>
+      case &quot;indeterminate&quot;:
+<span class="fc" id="L282">        return &quot;:indeterminate&quot;;</span>
+      case &quot;default&quot;:
+<span class="fc" id="L284">        return &quot;:default&quot;;</span>
+      case &quot;target&quot;:
+<span class="fc" id="L286">        return &quot;:target&quot;;</span>
+      case &quot;open&quot;:
+<span class="fc" id="L288">        return &quot;[open]&quot;;</span>
+
+      case &quot;first&quot;:
+<span class="fc" id="L291">        return &quot;:first-child&quot;;</span>
+      case &quot;last&quot;:
+<span class="fc" id="L293">        return &quot;:last-child&quot;;</span>
+      case &quot;only&quot;:
+<span class="fc" id="L295">        return &quot;:only-child&quot;;</span>
+      case &quot;odd&quot;:
+<span class="fc" id="L297">        return &quot;:nth-child(odd)&quot;;</span>
+      case &quot;even&quot;:
+<span class="fc" id="L299">        return &quot;:nth-child(even)&quot;;</span>
+      case &quot;first-of-type&quot;:
+<span class="fc" id="L301">        return &quot;:first-of-type&quot;;</span>
+      case &quot;last-of-type&quot;:
+<span class="fc" id="L303">        return &quot;:last-of-type&quot;;</span>
+      case &quot;only-of-type&quot;:
+<span class="fc" id="L305">        return &quot;:only-of-type&quot;;</span>
+
+      case &quot;valid&quot;:
+<span class="fc" id="L308">        return &quot;:valid&quot;;</span>
+      case &quot;invalid&quot;:
+<span class="fc" id="L310">        return &quot;:invalid&quot;;</span>
+      case &quot;required&quot;:
+<span class="fc" id="L312">        return &quot;:required&quot;;</span>
+      case &quot;optional&quot;:
+<span class="fc" id="L314">        return &quot;:optional&quot;;</span>
+      case &quot;in-range&quot;:
+<span class="fc" id="L316">        return &quot;:in-range&quot;;</span>
+      case &quot;out-of-range&quot;:
+<span class="fc" id="L318">        return &quot;:out-of-range&quot;;</span>
+      case &quot;read-only&quot;:
+<span class="fc" id="L320">        return &quot;:read-only&quot;;</span>
+      case &quot;read-write&quot;:
+<span class="fc" id="L322">        return &quot;:read-write&quot;;</span>
+
+      case &quot;empty&quot;:
+<span class="fc" id="L325">        return &quot;:empty&quot;;</span>
+      case &quot;placeholder-shown&quot;:
+<span class="fc" id="L327">        return &quot;:placeholder-shown&quot;;</span>
+      case &quot;autofill&quot;:
+<span class="fc" id="L329">        return &quot;:-webkit-autofill&quot;;</span>
+
+      case &quot;focus-visible&quot;:
+<span class="fc" id="L332">        return &quot;:focus-visible&quot;;</span>
+      case &quot;focus-within&quot;:
+<span class="fc" id="L334">        return &quot;:focus-within&quot;;</span>
+
+      case &quot;group-hover&quot;:
+<span class="fc" id="L337">        return &quot;.group:hover &amp;&quot;;</span>
+      case &quot;group-focus&quot;:
+<span class="fc" id="L339">        return &quot;.group:focus &amp;&quot;;</span>
+      case &quot;group-active&quot;:
+<span class="fc" id="L341">        return &quot;.group:active &amp;&quot;;</span>
+      case &quot;group-focus-visible&quot;:
+<span class="fc" id="L343">        return &quot;.group:focus-visible &amp;&quot;;</span>
+      case &quot;group-focus-within&quot;:
+<span class="fc" id="L345">        return &quot;.group:focus-within &amp;&quot;;</span>
+
+      case &quot;dark&quot;:
+<span class="fc" id="L348">        return &quot;@media (prefers-color-scheme: dark)&quot;;</span>
+      case &quot;light&quot;:
+<span class="fc" id="L350">        return &quot;@media (prefers-color-scheme: light)&quot;;</span>
+
+      default:
+        // Breakpoints
+<span class="fc bfc" id="L354" title="All 2 branches covered.">        if (SCREEN_VARIANTS.contains(variant)) {</span>
+<span class="fc" id="L355">          return getBreakpointMediaQuery(variant);</span>
+        }
+
+<span class="fc" id="L358">        return &quot;:&quot; + variant;</span>
+    }
+  }
+
+  /** Obtiene la media query para un breakpoint. */
+  private static String getBreakpointMediaQuery(String breakpoint) {
+<span class="fc" id="L364">    Map&lt;String, String&gt; breakpoints = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L365">    breakpoints.put(&quot;sm&quot;, &quot;(min-width: 640px)&quot;);</span>
+<span class="fc" id="L366">    breakpoints.put(&quot;md&quot;, &quot;(min-width: 768px)&quot;);</span>
+<span class="fc" id="L367">    breakpoints.put(&quot;lg&quot;, &quot;(min-width: 1024px)&quot;);</span>
+<span class="fc" id="L368">    breakpoints.put(&quot;xl&quot;, &quot;(min-width: 1280px)&quot;);</span>
+<span class="fc" id="L369">    breakpoints.put(&quot;2xl&quot;, &quot;(min-width: 1536px)&quot;);</span>
+
+    // Min variants
+<span class="fc" id="L372">    breakpoints.put(&quot;min-sm&quot;, &quot;(min-width: 640px)&quot;);</span>
+<span class="fc" id="L373">    breakpoints.put(&quot;min-md&quot;, &quot;(min-width: 768px)&quot;);</span>
+<span class="fc" id="L374">    breakpoints.put(&quot;min-lg&quot;, &quot;(min-width: 1024px)&quot;);</span>
+<span class="fc" id="L375">    breakpoints.put(&quot;min-xl&quot;, &quot;(min-width: 1280px)&quot;);</span>
+<span class="fc" id="L376">    breakpoints.put(&quot;min-2xl&quot;, &quot;(min-width: 1536px)&quot;);</span>
+
+    // Max variants
+<span class="fc" id="L379">    breakpoints.put(&quot;max-sm&quot;, &quot;(max-width: 639px)&quot;);</span>
+<span class="fc" id="L380">    breakpoints.put(&quot;max-md&quot;, &quot;(max-width: 767px)&quot;);</span>
+<span class="fc" id="L381">    breakpoints.put(&quot;max-lg&quot;, &quot;(max-width: 1023px)&quot;);</span>
+<span class="fc" id="L382">    breakpoints.put(&quot;max-xl&quot;, &quot;(max-width: 1279px)&quot;);</span>
+<span class="fc" id="L383">    breakpoints.put(&quot;max-2xl&quot;, &quot;(max-width: 1535px)&quot;);</span>
+
+<span class="fc" id="L385">    return breakpoints.getOrDefault(breakpoint, &quot;(min-width: 0px)&quot;);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -27,9 +27,14 @@ class CssPropertyMapperTest {
 
   @Test
   void testMapMarginProperty() {
-    assertEquals("-fx-margin", mapper.mapToCssProperty("m"));
-    assertEquals("-fx-margin", mapper.mapToCssProperty("mx"));
-    assertEquals("-fx-margin", mapper.mapToCssProperty("mt"));
+    // Margin properties return null because JavaFX doesn't support -fx-margin CSS property.
+    // They are handled by Styles.java via HBox.setMargin(), VBox.setMargin(), GridPane.setMargin()
+    assertNull(mapper.mapToCssProperty("m"));
+    assertNull(mapper.mapToCssProperty("mx"));
+    assertNull(mapper.mapToCssProperty("mt"));
+    assertNull(mapper.mapToCssProperty("mr"));
+    assertNull(mapper.mapToCssProperty("mb"));
+    assertNull(mapper.mapToCssProperty("ml"));
   }
 
   @Test

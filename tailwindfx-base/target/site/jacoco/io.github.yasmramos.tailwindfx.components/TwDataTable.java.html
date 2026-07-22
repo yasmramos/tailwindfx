@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TwDataTable.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TailwindFX Base</a> &gt; <a href="index.source.html" class="el_package">io.github.yasmramos.tailwindfx.components</a> &gt; <span class="el_source">TwDataTable.java</span></div><h1>TwDataTable.java</h1><pre class="source lang-java linenums">package io.github.yasmramos.tailwindfx.components;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import javafx.animation.PauseTransition;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.util.Callback;
+import javafx.util.Duration;
+
+/**
+ * TwDataTable — a styled, sortable, filterable data table for TailwindFX.
+ *
+ * &lt;p&gt;Extends JavaFX's {@link TableView} with a declarative builder API, built-in sorting, search
+ * filtering, pagination, and TailwindFX utility classes.
+ *
+ * &lt;h3&gt;Usage&lt;/h3&gt;
+ *
+ * &lt;pre&gt;
+ * // Basic table with column definitions:
+ * record User(String name, String email, int age) {}
+ *
+ * TwDataTable&amp;lt;User&amp;gt; table = TwDataTable.of(User.class)
+ *     .column(&quot;Name&quot;,  User::name)
+ *     .column(&quot;Email&quot;, User::email)
+ *     .column(&quot;Age&quot;,   u -&gt; String.valueOf(u.age()))
+ *     .searchable(true)
+ *     .pageSize(20)
+ *     .style(&quot;table-striped&quot;, &quot;table-hover&quot;)
+ *     .build();
+ *
+ * table.setItems(userList);
+ *
+ * // Access the underlying TableView (it IS a TableView):
+ * TableView&amp;lt;User&amp;gt; tv = table; // Direct assignment works
+ *
+ * // Get the full VBox (search bar + table + pagination):
+ * VBox container = table.container();
+ * &lt;/pre&gt;
+ *
+ * &lt;h3&gt;Styles applied automatically&lt;/h3&gt;
+ *
+ * &lt;ul&gt;
+ *   &lt;li&gt;{@code .table-view} — base table style (from tailwindfx.css)
+ *   &lt;li&gt;{@code .table-striped} — alternating row colors
+ *   &lt;li&gt;{@code .table-hover} — hover highlight on rows
+ *   &lt;li&gt;{@code .table-compact} — reduced row height
+ *   &lt;li&gt;{@code .table-bordered}— cell borders
+ * &lt;/ul&gt;
+ *
+ * @param &lt;T&gt; the data item type
+ */
+public final class TwDataTable&lt;T&gt; extends TableView&lt;T&gt; {
+
+  // Builder
+
+  /** Creates a new builder for type {@code T}. */
+  public static &lt;T&gt; Builder&lt;T&gt; of(Class&lt;T&gt; type) {
+<span class="fc" id="L75">    return new Builder&lt;&gt;();</span>
+  }
+
+  public static final class Builder&lt;T&gt; {
+
+<span class="fc" id="L80">    private final List&lt;ColDef&lt;T&gt;&gt; cols = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L81">    private boolean searchable = false;</span>
+<span class="fc" id="L82">    private boolean paginated = false;</span>
+<span class="fc" id="L83">    private int pageSize = 25;</span>
+<span class="fc" id="L84">    private String placeholder = &quot;No data&quot;;</span>
+<span class="fc" id="L85">    private String[] styleClasses = new String[0];</span>
+<span class="fc" id="L86">    private Callback&lt;TableView&lt;T&gt;, TableRow&lt;T&gt;&gt; rowFactory = null;</span>
+
+<span class="fc" id="L88">    private Builder() {}</span>
+
+    /**
+     * Adds a column with a string value extractor.
+     *
+     * @param header column header text
+     * @param value function extracting the display string from T
+     */
+    public Builder&lt;T&gt; column(String header, Function&lt;T, String&gt; value) {
+<span class="fc" id="L97">      cols.add(new ColDef&lt;&gt;(header, value, true));</span>
+<span class="fc" id="L98">      return this;</span>
+    }
+
+    /**
+     * Adds a column with a string extractor and configures sortability.
+     *
+     * @param header column header text
+     * @param value string extractor
+     * @param sortable whether this column is sortable
+     */
+    public Builder&lt;T&gt; column(String header, Function&lt;T, String&gt; value, boolean sortable) {
+<span class="nc" id="L109">      cols.add(new ColDef&lt;&gt;(header, value, sortable));</span>
+<span class="nc" id="L110">      return this;</span>
+    }
+
+    /** Enables or disables the search bar above the table. */
+    public Builder&lt;T&gt; searchable(boolean on) {
+<span class="fc" id="L115">      this.searchable = on;</span>
+<span class="fc" id="L116">      return this;</span>
+    }
+
+    /** Enables pagination with the given page size. */
+    public Builder&lt;T&gt; pageSize(int size) {
+<span class="fc bfc" id="L121" title="All 2 branches covered.">      if (size &lt; 1)</span>
+<span class="fc" id="L122">        throw new IllegalArgumentException(&quot;TwDataTable.pageSize: must be &gt;= 1, got: &quot; + size);</span>
+<span class="fc" id="L123">      this.paginated = true;</span>
+<span class="fc" id="L124">      this.pageSize = size;</span>
+<span class="fc" id="L125">      return this;</span>
+    }
+
+    /** Sets the placeholder text when the table is empty. */
+    public Builder&lt;T&gt; placeholder(String text) {
+<span class="nc" id="L130">      this.placeholder = text;</span>
+<span class="nc" id="L131">      return this;</span>
+    }
+
+    /** Applies additional TailwindFX CSS classes to the TableView. */
+    public Builder&lt;T&gt; style(String... classes) {
+<span class="fc" id="L136">      this.styleClasses = classes;</span>
+<span class="fc" id="L137">      return this;</span>
+    }
+
+    /**
+     * Sets a custom row factory (e.g. for row-level styling or context menus).
+     *
+     * @param factory row factory callback
+     */
+    public Builder&lt;T&gt; rowFactory(Callback&lt;TableView&lt;T&gt;, TableRow&lt;T&gt;&gt; factory) {
+<span class="nc" id="L146">      this.rowFactory = factory;</span>
+<span class="nc" id="L147">      return this;</span>
+    }
+
+    /** Builds the {@link TwDataTable}. */
+    public TwDataTable&lt;T&gt; build() {
+<span class="fc" id="L152">      return new TwDataTable&lt;&gt;(this);</span>
+    }
+  }
+
+  // Column definition
+
+<span class="fc" id="L158">  private record ColDef&lt;T&gt;(String header, Function&lt;T, String&gt; value, boolean sortable) {}</span>
+
+  // State
+
+<span class="fc" id="L162">  private final ObservableList&lt;T&gt; source = FXCollections.observableArrayList();</span>
+  private final FilteredList&lt;T&gt; filtered;
+  private final SortedList&lt;T&gt; sorted;
+  private final VBox container;
+
+  // Pagination state
+  private final boolean paginated;
+  private final int pageSize;
+<span class="fc" id="L170">  private int currentPage = 0;</span>
+
+  // Search
+  private final TextField searchField;
+
+  // Construction
+
+  private TwDataTable(Builder&lt;T&gt; b) {
+<span class="fc" id="L178">    super(); // Initialize TableView</span>
+<span class="fc" id="L179">    this.paginated = b.paginated;</span>
+<span class="fc" id="L180">    this.pageSize = b.pageSize;</span>
+<span class="fc" id="L181">    this.filtered = new FilteredList&lt;&gt;(source, p -&gt; true);</span>
+<span class="fc" id="L182">    this.sorted = new SortedList&lt;&gt;(filtered);</span>
+<span class="fc bfc" id="L183" title="All 2 branches covered.">    this.searchField = b.searchable ? new TextField() : null;</span>
+
+<span class="fc" id="L185">    buildColumns(b.cols);</span>
+<span class="fc" id="L186">    configureTable(b);</span>
+<span class="fc" id="L187">    this.container = buildContainer(b);</span>
+<span class="fc" id="L188">  }</span>
+
+  // Public API
+
+  /**
+   * Sets the data items displayed in the table. Replaces all existing items.
+   *
+   * @param items the new data list
+   */
+  public void setItems(List&lt;T&gt; items) {
+<span class="fc" id="L198">    source.setAll(items);</span>
+<span class="fc bfc" id="L199" title="All 2 branches covered.">    if (paginated) {</span>
+<span class="fc" id="L200">      currentPage = 0;</span>
+<span class="fc" id="L201">      applyPage();</span>
+    } else {
+<span class="fc" id="L203">      super.setItems(sorted);</span>
+    }
+<span class="fc" id="L205">  }</span>
+
+  /**
+   * Adds items to the existing dataset.
+   *
+   * @param items items to add
+   */
+  public void addItems(List&lt;T&gt; items) {
+<span class="fc" id="L213">    source.addAll(items);</span>
+<span class="pc bpc" id="L214" title="1 of 2 branches missed.">    if (paginated) applyPage();</span>
+<span class="fc" id="L215">  }</span>
+
+  /** Returns the currently selected item, or {@code null} if none. */
+  public T selectedItem() {
+<span class="fc" id="L219">    return getSelectionModel().getSelectedItem();</span>
+  }
+
+  /** Clears the current selection. */
+  public void clearSelection() {
+<span class="fc" id="L224">    getSelectionModel().clearSelection();</span>
+<span class="fc" id="L225">  }</span>
+
+  /**
+   * Sets a programmatic filter. Combines with the search bar filter if present.
+   *
+   * @param predicate the filter condition (null = show all)
+   */
+  public void setFilter(Predicate&lt;T&gt; predicate) {
+<span class="fc bfc" id="L233" title="All 2 branches covered.">    filtered.setPredicate(predicate != null ? predicate : p -&gt; true);</span>
+<span class="pc bpc" id="L234" title="1 of 2 branches missed.">    if (paginated) {</span>
+<span class="nc" id="L235">      currentPage = 0;</span>
+<span class="nc" id="L236">      applyPage();</span>
+    }
+<span class="fc" id="L238">  }</span>
+
+  /** Clears any programmatic filter. */
+  public void clearFilter() {
+<span class="fc" id="L242">    setFilter(null);</span>
+<span class="fc" id="L243">  }</span>
+
+  /** Returns the total number of items after filtering. */
+  public int filteredSize() {
+<span class="fc" id="L247">    return filtered.size();</span>
+  }
+
+  /** Returns the total number of source items. */
+  public int totalSize() {
+<span class="fc" id="L252">    return source.size();</span>
+  }
+
+  /**
+   * Navigates to a specific page (0-indexed).
+   *
+   * @param page page index
+   */
+  public void goToPage(int page) {
+<span class="fc bfc" id="L261" title="All 2 branches covered.">    if (!paginated) return;</span>
+<span class="fc" id="L262">    int maxPage = Math.max(0, (filtered.size() - 1) / pageSize);</span>
+<span class="fc" id="L263">    currentPage = Math.max(0, Math.min(page, maxPage));</span>
+<span class="fc" id="L264">    applyPage();</span>
+<span class="fc" id="L265">  }</span>
+
+  /** Navigates to the next page. */
+  public void nextPage() {
+<span class="fc" id="L269">    goToPage(currentPage + 1);</span>
+<span class="fc" id="L270">  }</span>
+
+  /** Navigates to the previous page. */
+  public void prevPage() {
+<span class="fc" id="L274">    goToPage(currentPage - 1);</span>
+<span class="fc" id="L275">  }</span>
+
+  /**
+   * Returns the full container (search bar + table + pagination controls). Add this to your scene.
+   */
+  public VBox container() {
+<span class="fc" id="L281">    return container;</span>
+  }
+
+  /** Returns the current page index (0-based). Always returns 0 if pagination is disabled. */
+  public int currentPage() {
+<span class="fc" id="L286">    return currentPage;</span>
+  }
+
+  /** Returns the total number of pages. Returns 1 if pagination is disabled. */
+  public int pageCount() {
+<span class="fc bfc" id="L291" title="All 4 branches covered.">    if (!paginated || filtered.isEmpty()) return 1;</span>
+<span class="fc" id="L292">    return (int) Math.ceil((double) filtered.size() / pageSize);</span>
+  }
+
+  // Internal construction
+
+  private void buildColumns(List&lt;ColDef&lt;T&gt;&gt; defs) {
+<span class="fc bfc" id="L298" title="All 2 branches covered.">    for (ColDef&lt;T&gt; def : defs) {</span>
+<span class="fc" id="L299">      TableColumn&lt;T, String&gt; col = new TableColumn&lt;&gt;(def.header());</span>
+<span class="fc" id="L300">      col.setCellValueFactory(</span>
+<span class="nc" id="L301">          data -&gt; new ReadOnlyObjectWrapper&lt;&gt;(def.value().apply(data.getValue())));</span>
+<span class="fc" id="L302">      col.setSortable(def.sortable());</span>
+<span class="pc bpc" id="L303" title="1 of 2 branches missed.">      if (def.sortable()) {</span>
+<span class="fc" id="L304">        col.setComparator(Comparator.naturalOrder());</span>
+      }
+<span class="fc" id="L306">      getColumns().add(col);</span>
+<span class="fc" id="L307">    }</span>
+<span class="fc" id="L308">    sorted.comparatorProperty().bind(comparatorProperty());</span>
+<span class="fc" id="L309">  }</span>
+
+  private void configureTable(Builder&lt;T&gt; b) {
+<span class="fc bfc" id="L312" title="All 2 branches covered.">    setItems(paginated ? FXCollections.observableArrayList() : sorted);</span>
+<span class="fc" id="L313">    setPlaceholder(new Label(b.placeholder));</span>
+<span class="fc" id="L314">    getStyleClass().addAll(&quot;table-view&quot;);</span>
+<span class="fc bfc" id="L315" title="All 2 branches covered.">    if (b.styleClasses.length &gt; 0) getStyleClass().addAll(b.styleClasses);</span>
+<span class="pc bpc" id="L316" title="1 of 2 branches missed.">    if (b.rowFactory != null) setRowFactory(b.rowFactory);</span>
+<span class="pc" id="L317">    else setRowFactory(tv -&gt; buildStyledRow());</span>
+<span class="fc" id="L318">    VBox.setVgrow(this, Priority.ALWAYS);</span>
+
+<span class="fc bfc" id="L320" title="All 2 branches covered.">    if (paginated) {</span>
+<span class="fc" id="L321">      filtered.addListener(</span>
+          (javafx.collections.ListChangeListener&lt;T&gt;)
+              c -&gt; {
+<span class="fc" id="L324">                currentPage = 0;</span>
+<span class="fc" id="L325">                applyPage();</span>
+<span class="fc" id="L326">              });</span>
+<span class="fc" id="L327">      applyPage();</span>
+    }
+<span class="fc" id="L329">  }</span>
+
+  private TableRow&lt;T&gt; buildStyledRow() {
+<span class="nc" id="L332">    return new TableRow&lt;&gt;() {</span>
+      @Override
+      protected void updateItem(T item, boolean empty) {
+<span class="nc" id="L335">        super.updateItem(item, empty);</span>
+<span class="nc" id="L336">        getStyleClass().removeIf(s -&gt; s.startsWith(&quot;row-&quot;));</span>
+<span class="nc bnc" id="L337" title="All 4 branches missed.">        if (!empty &amp;&amp; item != null) {</span>
+<span class="nc bnc" id="L338" title="All 2 branches missed.">          if (getIndex() % 2 == 0) getStyleClass().add(&quot;row-even&quot;);</span>
+<span class="nc" id="L339">          else getStyleClass().add(&quot;row-odd&quot;);</span>
+        }
+<span class="nc" id="L341">      }</span>
+    };
+  }
+
+  private VBox buildContainer(Builder&lt;T&gt; b) {
+<span class="fc" id="L346">    List&lt;javafx.scene.Node&gt; nodes = new ArrayList&lt;&gt;();</span>
+
+<span class="pc bpc" id="L348" title="1 of 4 branches missed.">    if (b.searchable &amp;&amp; searchField != null) {</span>
+<span class="fc" id="L349">      searchField.setPromptText(&quot;Search…&quot;);</span>
+<span class="fc" id="L350">      searchField.getStyleClass().add(&quot;search-field&quot;);</span>
+<span class="fc" id="L351">      HBox.setHgrow(searchField, Priority.ALWAYS);</span>
+<span class="fc" id="L352">      HBox searchBar = new HBox(searchField);</span>
+<span class="fc" id="L353">      searchBar.getStyleClass().add(&quot;search-bar&quot;);</span>
+<span class="fc" id="L354">      searchBar.setStyle(&quot;-fx-padding: 0 0 8 0;&quot;);</span>
+<span class="fc" id="L355">      nodes.add(searchBar);</span>
+
+      // Wire search to filter with debounce (250ms)
+      // CRITICAL FIX: Prevents UI blocking on large datasets (10,000+ rows)
+      // The filter recalculation now happens only after user stops typing
+<span class="fc" id="L360">      PauseTransition debounce = new PauseTransition(Duration.millis(250));</span>
+<span class="fc" id="L361">      searchField</span>
+<span class="fc" id="L362">          .textProperty()</span>
+<span class="fc" id="L363">          .addListener(</span>
+              (obs, ov, nv) -&gt; {
+<span class="nc" id="L365">                debounce.setOnFinished(</span>
+                    e -&gt; {
+<span class="nc bnc" id="L367" title="All 2 branches missed.">                      String lower = nv == null ? &quot;&quot; : nv.toLowerCase();</span>
+<span class="nc" id="L368">                      filtered.setPredicate(</span>
+                          item -&gt; {
+<span class="nc bnc" id="L370" title="All 2 branches missed.">                            if (lower.isBlank()) return true;</span>
+                            // Search across all column values
+<span class="nc" id="L372">                            return b.cols.stream()</span>
+<span class="nc" id="L373">                                .map(col -&gt; col.value().apply(item))</span>
+<span class="nc bnc" id="L374" title="All 4 branches missed.">                                .anyMatch(val -&gt; val != null &amp;&amp; val.toLowerCase().contains(lower));</span>
+                          });
+<span class="nc bnc" id="L376" title="All 2 branches missed.">                      if (paginated) {</span>
+<span class="nc" id="L377">                        currentPage = 0;</span>
+<span class="nc" id="L378">                        applyPage();</span>
+                      }
+<span class="nc" id="L380">                    });</span>
+<span class="nc" id="L381">                debounce.playFromStart();</span>
+<span class="nc" id="L382">              });</span>
+    }
+
+<span class="fc" id="L385">    nodes.add(this);</span>
+
+<span class="fc bfc" id="L387" title="All 2 branches covered.">    if (b.paginated) {</span>
+<span class="fc" id="L388">      nodes.add(buildPaginationBar());</span>
+    }
+
+<span class="fc" id="L391">    VBox box = new VBox(nodes.toArray(new javafx.scene.Node[0]));</span>
+<span class="fc" id="L392">    VBox.setVgrow(this, Priority.ALWAYS);</span>
+<span class="fc" id="L393">    return box;</span>
+  }
+
+  private HBox buildPaginationBar() {
+<span class="fc" id="L397">    Label pageLabel = new Label();</span>
+<span class="fc" id="L398">    Button prev = new Button(&quot;‹ Prev&quot;);</span>
+<span class="fc" id="L399">    Button next = new Button(&quot;Next ›&quot;);</span>
+
+<span class="fc" id="L401">    prev.getStyleClass().addAll(&quot;btn&quot;, &quot;btn-secondary&quot;);</span>
+<span class="fc" id="L402">    next.getStyleClass().addAll(&quot;btn&quot;, &quot;btn-secondary&quot;);</span>
+
+<span class="fc" id="L404">    prev.setOnAction(</span>
+        e -&gt; {
+<span class="nc" id="L406">          prevPage();</span>
+<span class="nc" id="L407">          updatePaginationLabel(pageLabel, prev, next);</span>
+<span class="nc" id="L408">        });</span>
+<span class="fc" id="L409">    next.setOnAction(</span>
+        e -&gt; {
+<span class="nc" id="L411">          nextPage();</span>
+<span class="nc" id="L412">          updatePaginationLabel(pageLabel, prev, next);</span>
+<span class="nc" id="L413">        });</span>
+
+<span class="fc" id="L415">    updatePaginationLabel(pageLabel, prev, next);</span>
+<span class="fc" id="L416">    filtered.addListener(</span>
+        (javafx.collections.ListChangeListener&lt;T&gt;)
+<span class="fc" id="L418">            c -&gt; updatePaginationLabel(pageLabel, prev, next));</span>
+
+<span class="fc" id="L420">    Region spacer = new Region();</span>
+<span class="fc" id="L421">    HBox.setHgrow(spacer, Priority.ALWAYS);</span>
+
+<span class="fc" id="L423">    HBox bar = new HBox(8, prev, pageLabel, spacer, next);</span>
+<span class="fc" id="L424">    bar.setStyle(&quot;-fx-padding: 8 0 0 0; -fx-alignment: center-left;&quot;);</span>
+<span class="fc" id="L425">    return bar;</span>
+  }
+
+  private void updatePaginationLabel(Label label, Button prev, Button next) {
+<span class="fc" id="L429">    int total = pageCount();</span>
+<span class="fc" id="L430">    label.setText(&quot;Page &quot; + (currentPage + 1) + &quot; of &quot; + total + &quot; (&quot; + filteredSize() + &quot; items)&quot;);</span>
+<span class="pc bpc" id="L431" title="1 of 2 branches missed.">    prev.setDisable(currentPage == 0);</span>
+<span class="fc bfc" id="L432" title="All 2 branches covered.">    next.setDisable(currentPage &gt;= total - 1);</span>
+<span class="fc" id="L433">  }</span>
+
+  private void applyPage() {
+<span class="pc bpc" id="L436" title="1 of 2 branches missed.">    if (!paginated) return;</span>
+<span class="fc" id="L437">    int from = currentPage * pageSize;</span>
+<span class="fc" id="L438">    int to = Math.min(from + pageSize, filtered.size());</span>
+    ObservableList&lt;T&gt; page =
+<span class="fc" id="L440">        FXCollections.observableArrayList(</span>
+<span class="fc bfc" id="L441" title="All 2 branches covered.">            from &lt; filtered.size() ? sorted.subList(from, to) : List.of());</span>
+<span class="fc" id="L442">    setItems(page);</span>
+<span class="fc" id="L443">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

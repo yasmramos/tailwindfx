@@ -1,0 +1,698 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ThemeCustomizationPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TailwindFX Base</a> &gt; <a href="index.source.html" class="el_package">io.github.yasmramos.tailwindfx.theme</a> &gt; <span class="el_source">ThemeCustomizationPanel.java</span></div><h1>ThemeCustomizationPanel.java</h1><pre class="source lang-java linenums">package io.github.yasmramos.tailwindfx.theme;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.prefs.Preferences;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
+
+/**
+ * Panel de personalización de temas en tiempo real para TailwindFX.
+ *
+ * &lt;p&gt;Permite a los usuarios: - Cambiar colores primarios/secundarios dinámicamente - Ajustar
+ * valores de tema (radius, spacing, etc.) - Ver preview en tiempo real - Guardar/cargar
+ * configuraciones personalizadas - Exportar configuración como archivo JSON/properties
+ *
+ * @author yasmramos
+ * @version 0.1.1
+ */
+public class ThemeCustomizationPanel extends VBox {
+
+  private static final String PREFS_NODE = &quot;tailwindfx/theme/custom&quot;;
+
+  // Secciones del panel
+  private ColorPicker primaryColorPicker;
+  private ColorPicker secondaryColorPicker;
+  private ColorPicker backgroundColorPicker;
+  private ColorPicker textColorPicker;
+
+  private Slider radiusSlider;
+  private Slider spacingSlider;
+  private Slider shadowIntensitySlider;
+
+  private Label previewLabel;
+  private Button previewButton;
+  private StackPane previewBox;
+
+  private ThemeManager themeManager;
+  private Preferences prefs;
+
+  /** Crea un nuevo panel de personalización de temas. */
+  public ThemeCustomizationPanel() {
+<span class="nc" id="L49">    this(null);</span>
+<span class="nc" id="L50">  }</span>
+
+  /**
+   * Crea un nuevo panel con un ThemeManager específico.
+   *
+   * @param themeManager el gestor de temas a utilizar
+   */
+<span class="nc" id="L57">  public ThemeCustomizationPanel(ThemeManager themeManager) {</span>
+<span class="nc" id="L58">    this.themeManager = themeManager;</span>
+<span class="nc" id="L59">    this.prefs = Preferences.userRoot().node(PREFS_NODE);</span>
+
+<span class="nc" id="L61">    initializeUI();</span>
+<span class="nc" id="L62">    loadSavedConfiguration();</span>
+<span class="nc" id="L63">    setupListeners();</span>
+<span class="nc" id="L64">  }</span>
+
+  /** Inicializa la interfaz de usuario del panel. */
+  private void initializeUI() {
+<span class="nc" id="L68">    setSpacing(20);</span>
+<span class="nc" id="L69">    setPadding(new Insets(20));</span>
+<span class="nc" id="L70">    setStyle(&quot;-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8px;&quot;);</span>
+
+    // Título
+<span class="nc" id="L73">    Label titleLabel = new Label(&quot;🎨 Theme Customization&quot;);</span>
+<span class="nc" id="L74">    titleLabel.setStyle(&quot;-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;&quot;);</span>
+
+    // Sección de Colores
+<span class="nc" id="L77">    VBox colorsSection = createColorsSection();</span>
+
+    // Sección de Propiedades
+<span class="nc" id="L80">    VBox propertiesSection = createPropertiesSection();</span>
+
+    // Sección de Preview
+<span class="nc" id="L83">    VBox previewSection = createPreviewSection();</span>
+
+    // Sección de Acciones
+<span class="nc" id="L86">    HBox actionsSection = createActionsSection();</span>
+
+<span class="nc" id="L88">    getChildren()</span>
+<span class="nc" id="L89">        .addAll(</span>
+            titleLabel,
+            new Separator(),
+            colorsSection,
+            new Separator(),
+            propertiesSection,
+            new Separator(),
+            previewSection,
+            new Separator(),
+            actionsSection);
+<span class="nc" id="L99">  }</span>
+
+  /**
+   * Crea la sección de selección de colores.
+   *
+   * @return VBox con los controles de color
+   */
+  private VBox createColorsSection() {
+<span class="nc" id="L107">    VBox section = new VBox(15);</span>
+<span class="nc" id="L108">    section.setPadding(new Insets(10));</span>
+
+<span class="nc" id="L110">    Label title = new Label(&quot;🌈 Colors&quot;);</span>
+<span class="nc" id="L111">    title.setStyle(&quot;-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #475569;&quot;);</span>
+
+<span class="nc" id="L113">    GridPane grid = new GridPane();</span>
+<span class="nc" id="L114">    grid.setHgap(15);</span>
+<span class="nc" id="L115">    grid.setVgap(15);</span>
+
+    // Primary Color
+<span class="nc" id="L118">    Label primaryLabel = createCustomLabel(&quot;Primary Color:&quot;);</span>
+<span class="nc" id="L119">    primaryColorPicker = createColorPicker(Color.valueOf(&quot;#3b82f6&quot;)); // blue-500</span>
+<span class="nc" id="L120">    grid.add(primaryLabel, 0, 0);</span>
+<span class="nc" id="L121">    grid.add(primaryColorPicker, 1, 0);</span>
+
+    // Secondary Color
+<span class="nc" id="L124">    Label secondaryLabel = createCustomLabel(&quot;Secondary Color:&quot;);</span>
+<span class="nc" id="L125">    secondaryColorPicker = createColorPicker(Color.valueOf(&quot;#10b981&quot;)); // emerald-500</span>
+<span class="nc" id="L126">    grid.add(secondaryLabel, 0, 1);</span>
+<span class="nc" id="L127">    grid.add(secondaryColorPicker, 1, 1);</span>
+
+    // Background Color
+<span class="nc" id="L130">    Label bgLabel = createCustomLabel(&quot;Background Color:&quot;);</span>
+<span class="nc" id="L131">    backgroundColorPicker = createColorPicker(Color.valueOf(&quot;#ffffff&quot;));</span>
+<span class="nc" id="L132">    grid.add(bgLabel, 0, 2);</span>
+<span class="nc" id="L133">    grid.add(backgroundColorPicker, 1, 2);</span>
+
+    // Text Color
+<span class="nc" id="L136">    Label textLabel = createCustomLabel(&quot;Text Color:&quot;);</span>
+<span class="nc" id="L137">    textColorPicker = createColorPicker(Color.valueOf(&quot;#1e293b&quot;));</span>
+<span class="nc" id="L138">    grid.add(textLabel, 0, 3);</span>
+<span class="nc" id="L139">    grid.add(textColorPicker, 1, 3);</span>
+
+<span class="nc" id="L141">    section.getChildren().addAll(title, grid);</span>
+<span class="nc" id="L142">    return section;</span>
+  }
+
+  /**
+   * Crea la sección de ajuste de propiedades.
+   *
+   * @return VBox con los sliders de propiedades
+   */
+  private VBox createPropertiesSection() {
+<span class="nc" id="L151">    VBox section = new VBox(15);</span>
+<span class="nc" id="L152">    section.setPadding(new Insets(10));</span>
+
+<span class="nc" id="L154">    Label title = new Label(&quot;⚙️ Properties&quot;);</span>
+<span class="nc" id="L155">    title.setStyle(&quot;-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #475569;&quot;);</span>
+
+<span class="nc" id="L157">    VBox controls = new VBox(12);</span>
+
+    // Border Radius
+<span class="nc" id="L160">    VBox radiusBox = createSliderControl(&quot;Border Radius:&quot;, 0, 24, 8, &quot;px&quot;);</span>
+<span class="nc" id="L161">    radiusSlider = (Slider) ((HBox) radiusBox.getChildren().get(1)).getChildren().get(0);</span>
+<span class="nc" id="L162">    controls.getChildren().add(radiusBox);</span>
+
+    // Spacing Scale
+<span class="nc" id="L165">    VBox spacingBox = createSliderControl(&quot;Spacing Scale:&quot;, 0.5, 2.0, 1.0, &quot;x&quot;);</span>
+<span class="nc" id="L166">    spacingSlider = (Slider) ((HBox) spacingBox.getChildren().get(1)).getChildren().get(0);</span>
+<span class="nc" id="L167">    controls.getChildren().add(spacingBox);</span>
+
+    // Shadow Intensity
+<span class="nc" id="L170">    VBox shadowBox = createSliderControl(&quot;Shadow Intensity:&quot;, 0, 100, 50, &quot;%&quot;);</span>
+<span class="nc" id="L171">    shadowIntensitySlider = (Slider) ((HBox) shadowBox.getChildren().get(1)).getChildren().get(0);</span>
+<span class="nc" id="L172">    controls.getChildren().add(shadowBox);</span>
+
+<span class="nc" id="L174">    section.getChildren().addAll(title, controls);</span>
+<span class="nc" id="L175">    return section;</span>
+  }
+
+  /**
+   * Crea un control slider con etiqueta y valor.
+   *
+   * @param label texto de la etiqueta
+   * @param min valor mínimo
+   * @param max valor máximo
+   * @param value valor inicial
+   * @param unit unidad de medida
+   * @return VBox con el control completo
+   */
+  private VBox createSliderControl(
+      String label, double min, double max, double value, String unit) {
+<span class="nc" id="L190">    VBox container = new VBox(5);</span>
+
+<span class="nc" id="L192">    Label nameLabel = new Label(label);</span>
+<span class="nc" id="L193">    nameLabel.setStyle(&quot;-fx-font-weight: bold; -fx-text-fill: #64748b;&quot;);</span>
+
+<span class="nc" id="L195">    HBox sliderBox = new HBox(10);</span>
+<span class="nc" id="L196">    sliderBox.setAlignment(Pos.CENTER_LEFT);</span>
+
+<span class="nc" id="L198">    Slider slider = new Slider(min, max, value);</span>
+<span class="nc" id="L199">    slider.setPrefWidth(200);</span>
+<span class="nc" id="L200">    slider.setStyle(&quot;-fx-control-inner-background: #3b82f6;&quot;);</span>
+
+<span class="nc" id="L202">    Label valueLabel = new Label(String.format(&quot;%.1f %s&quot;, value, unit));</span>
+<span class="nc" id="L203">    valueLabel.setMinWidth(60);</span>
+<span class="nc" id="L204">    valueLabel.setStyle(&quot;-fx-text-fill: #475569; -fx-font-family: monospace;&quot;);</span>
+
+    // Actualizar etiqueta al cambiar slider
+<span class="nc" id="L207">    slider</span>
+<span class="nc" id="L208">        .valueProperty()</span>
+<span class="nc" id="L209">        .addListener(</span>
+            (obs, oldVal, newVal) -&gt; {
+<span class="nc" id="L211">              valueLabel.setText(String.format(&quot;%.1f %s&quot;, newVal.doubleValue(), unit));</span>
+<span class="nc" id="L212">              applyLiveChanges();</span>
+<span class="nc" id="L213">            });</span>
+
+<span class="nc" id="L215">    sliderBox.getChildren().addAll(slider, valueLabel);</span>
+<span class="nc" id="L216">    container.getChildren().addAll(nameLabel, sliderBox);</span>
+
+<span class="nc" id="L218">    return container;</span>
+  }
+
+  /**
+   * Crea la sección de preview en vivo.
+   *
+   * @return VBox con el preview
+   */
+  private VBox createPreviewSection() {
+<span class="nc" id="L227">    VBox section = new VBox(15);</span>
+<span class="nc" id="L228">    section.setPadding(new Insets(10));</span>
+
+<span class="nc" id="L230">    Label title = new Label(&quot;👁️ Live Preview&quot;);</span>
+<span class="nc" id="L231">    title.setStyle(&quot;-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #475569;&quot;);</span>
+
+    // Área de preview (usamos Pane en lugar de Region para tener getChildren() público)
+<span class="nc" id="L234">    StackPane previewContainer = new StackPane();</span>
+<span class="nc" id="L235">    previewContainer.setPrefHeight(150);</span>
+<span class="nc" id="L236">    previewContainer.setStyle(&quot;-fx-background-color: #e2e8f0; -fx-background-radius: 8px;&quot;);</span>
+<span class="nc" id="L237">    this.previewBox = previewContainer;</span>
+
+    // Elementos de preview
+<span class="nc" id="L240">    previewLabel = new Label(&quot;Sample Text Preview&quot;);</span>
+<span class="nc" id="L241">    previewLabel.setStyle(&quot;-fx-font-size: 18px; -fx-text-fill: #1e293b;&quot;);</span>
+
+<span class="nc" id="L243">    previewButton = new Button(&quot;Preview Button&quot;);</span>
+<span class="nc" id="L244">    previewButton.setStyle(</span>
+        &quot;&quot;&quot;
+            -fx-background-color: #3b82f6;
+            -fx-text-fill: white;
+            -fx-background-radius: 8px;
+            -fx-padding: 8 16;
+            -fx-font-weight: bold;
+        &quot;&quot;&quot;);
+
+<span class="nc" id="L253">    VBox previewContent = new VBox(15, previewLabel, previewButton);</span>
+<span class="nc" id="L254">    previewContent.setAlignment(Pos.CENTER);</span>
+<span class="nc" id="L255">    previewContent.setPadding(new Insets(20));</span>
+
+<span class="nc" id="L257">    previewContainer.getChildren().add(previewContent);</span>
+
+<span class="nc" id="L259">    section.getChildren().addAll(title, previewBox);</span>
+<span class="nc" id="L260">    return section;</span>
+  }
+
+  /**
+   * Crea la sección de botones de acción.
+   *
+   * @return HBox con los botones
+   */
+  private HBox createActionsSection() {
+<span class="nc" id="L269">    HBox box = new HBox(10);</span>
+<span class="nc" id="L270">    box.setAlignment(Pos.CENTER);</span>
+
+<span class="nc" id="L272">    Button saveBtn = new Button(&quot;💾 Save Configuration&quot;);</span>
+<span class="nc" id="L273">    saveBtn.setStyle(getButtonStyle(&quot;#10b981&quot;));</span>
+<span class="nc" id="L274">    saveBtn.setOnAction(e -&gt; saveConfiguration());</span>
+
+<span class="nc" id="L276">    Button loadBtn = new Button(&quot;📂 Load Configuration&quot;);</span>
+<span class="nc" id="L277">    loadBtn.setStyle(getButtonStyle(&quot;#3b82f6&quot;));</span>
+<span class="nc" id="L278">    loadBtn.setOnAction(e -&gt; loadSavedConfiguration());</span>
+
+<span class="nc" id="L280">    Button exportBtn = new Button(&quot;📤 Export to File&quot;);</span>
+<span class="nc" id="L281">    exportBtn.setStyle(getButtonStyle(&quot;#f59e0b&quot;));</span>
+<span class="nc" id="L282">    exportBtn.setOnAction(e -&gt; exportToFile());</span>
+
+<span class="nc" id="L284">    Button importBtn = new Button(&quot;📥 Import from File&quot;);</span>
+<span class="nc" id="L285">    importBtn.setStyle(getButtonStyle(&quot;#8b5cf6&quot;));</span>
+<span class="nc" id="L286">    importBtn.setOnAction(e -&gt; importFromFile());</span>
+
+<span class="nc" id="L288">    Button resetBtn = new Button(&quot;🔄 Reset to Defaults&quot;);</span>
+<span class="nc" id="L289">    resetBtn.setStyle(getButtonStyle(&quot;#ef4444&quot;));</span>
+<span class="nc" id="L290">    resetBtn.setOnAction(e -&gt; resetToDefaults());</span>
+
+<span class="nc" id="L292">    box.getChildren().addAll(saveBtn, loadBtn, exportBtn, importBtn, resetBtn);</span>
+<span class="nc" id="L293">    return box;</span>
+  }
+
+  /**
+   * Crea un ColorPicker estilizado.
+   *
+   * @param defaultColor color por defecto
+   * @return ColorPicker configurado
+   */
+  private ColorPicker createColorPicker(Color defaultColor) {
+<span class="nc" id="L303">    ColorPicker picker = new ColorPicker(defaultColor);</span>
+<span class="nc" id="L304">    picker.setPrefWidth(200);</span>
+<span class="nc" id="L305">    picker.setOnAction(e -&gt; applyLiveChanges());</span>
+<span class="nc" id="L306">    picker.setStyle(&quot;-fx-background-radius: 6px;&quot;);</span>
+<span class="nc" id="L307">    return picker;</span>
+  }
+
+  /**
+   * Crea una etiqueta personalizada.
+   *
+   * @param text texto de la etiqueta
+   * @return Label estilizada
+   */
+  private Label createCustomLabel(String text) {
+<span class="nc" id="L317">    Label label = new Label(text);</span>
+<span class="nc" id="L318">    label.setStyle(&quot;-fx-font-weight: bold; -fx-text-fill: #64748b;&quot;);</span>
+<span class="nc" id="L319">    return label;</span>
+  }
+
+  /**
+   * Obtiene el estilo para botones.
+   *
+   * @param colorHex color en hexadecimal
+   * @return string de estilo CSS
+   */
+  private String getButtonStyle(String colorHex) {
+<span class="nc" id="L329">    return String.format(</span>
+        &quot;&quot;&quot;
+            -fx-background-color: %s;
+            -fx-text-fill: white;
+            -fx-background-radius: 6px;
+            -fx-padding: 8 16;
+            -fx-font-weight: bold;
+            -fx-cursor: hand;
+        &quot;&quot;&quot;,
+        colorHex);
+  }
+
+  /** Configura los listeners para cambios en tiempo real. */
+  private void setupListeners() {
+<span class="nc" id="L343">    primaryColorPicker.valueProperty().addListener(e -&gt; applyLiveChanges());</span>
+<span class="nc" id="L344">    secondaryColorPicker.valueProperty().addListener(e -&gt; applyLiveChanges());</span>
+<span class="nc" id="L345">    backgroundColorPicker.valueProperty().addListener(e -&gt; applyLiveChanges());</span>
+<span class="nc" id="L346">    textColorPicker.valueProperty().addListener(e -&gt; applyLiveChanges());</span>
+<span class="nc" id="L347">  }</span>
+
+  /** Aplica los cambios en tiempo real al preview. */
+  private void applyLiveChanges() {
+    try {
+      // Aplicar colores al preview
+<span class="nc" id="L353">      Color primary = primaryColorPicker.getValue();</span>
+<span class="nc" id="L354">      Color secondary = secondaryColorPicker.getValue();</span>
+<span class="nc" id="L355">      Color bg = backgroundColorPicker.getValue();</span>
+<span class="nc" id="L356">      Color text = textColorPicker.getValue();</span>
+
+<span class="nc" id="L358">      double radius = radiusSlider.getValue();</span>
+<span class="nc" id="L359">      double spacing = spacingSlider.getValue();</span>
+<span class="nc" id="L360">      double shadow = shadowIntensitySlider.getValue();</span>
+
+      // Actualizar preview box
+<span class="nc" id="L363">      previewBox.setStyle(</span>
+<span class="nc" id="L364">          String.format(</span>
+              &quot;&quot;&quot;
+                -fx-background-color: derive(%s, 90%%);
+                -fx-background-radius: %.0f;
+                -fx-border-color: %s;
+                -fx-border-radius: %.0f;
+                -fx-border-width: 2;
+                -fx-effect: dropshadow(gaussian, rgba(0,0,0,%.2f), %.0f, 0, 0, 0);
+            &quot;&quot;&quot;,
+<span class="nc" id="L373">              toCssColor(bg), radius, toCssColor(primary), radius, shadow / 100.0, shadow / 5.0));</span>
+
+      // Actualizar botón de preview
+<span class="nc" id="L376">      previewButton.setStyle(</span>
+<span class="nc" id="L377">          String.format(</span>
+              &quot;&quot;&quot;
+                -fx-background-color: %s;
+                -fx-text-fill: white;
+                -fx-background-radius: %.0f;
+                -fx-padding: %.0f %.0f;
+                -fx-font-weight: bold;
+                -fx-font-size: %.1f;
+            &quot;&quot;&quot;,
+<span class="nc" id="L386">              toCssColor(primary), radius, 8 * spacing, 16 * spacing, 14 * spacing));</span>
+
+      // Actualizar etiqueta de preview
+<span class="nc" id="L389">      previewLabel.setStyle(</span>
+<span class="nc" id="L390">          String.format(</span>
+              &quot;&quot;&quot;
+                -fx-font-size: %.1f;
+                -fx-text-fill: %s;
+                -fx-font-weight: bold;
+            &quot;&quot;&quot;,
+<span class="nc" id="L396">              18 * spacing, toCssColor(text)));</span>
+
+      // Actualizar tema global si está disponible
+<span class="nc bnc" id="L399" title="All 2 branches missed.">      if (themeManager != null) {</span>
+<span class="nc" id="L400">        updateThemeColors(primary, secondary, bg, text);</span>
+      }
+
+<span class="nc" id="L403">    } catch (Exception e) {</span>
+<span class="nc" id="L404">      System.err.println(&quot;Error applying live changes: &quot; + e.getMessage());</span>
+<span class="nc" id="L405">      e.printStackTrace();</span>
+<span class="nc" id="L406">    }</span>
+<span class="nc" id="L407">  }</span>
+
+  /**
+   * Convierte un Color JavaFX a formato CSS.
+   *
+   * @param color color a convertir
+   * @return string en formato CSS rgb/rgba
+   */
+  private String toCssColor(Color color) {
+<span class="nc bnc" id="L416" title="All 2 branches missed.">    if (color == null) {</span>
+<span class="nc" id="L417">      return &quot;#000000&quot;;</span>
+    }
+<span class="nc" id="L419">    int r = (int) (color.getRed() * 255);</span>
+<span class="nc" id="L420">    int g = (int) (color.getGreen() * 255);</span>
+<span class="nc" id="L421">    int b = (int) (color.getBlue() * 255);</span>
+<span class="nc" id="L422">    return String.format(&quot;#%02x%02x%02x&quot;, r, g, b);</span>
+  }
+
+  /**
+   * Actualiza los colores del tema global.
+   *
+   * @param primary color primario
+   * @param secondary color secundario
+   * @param bg color de fondo
+   * @param text color de texto
+   */
+  private void updateThemeColors(Color primary, Color secondary, Color bg, Color text) {
+    try {
+      // Aquí se podría integrar con el sistema de temas existente
+      // Por ahora, solo actualizamos las variables CSS si están disponibles
+<span class="nc" id="L437">      System.out.println(&quot;Theme colors updated:&quot;);</span>
+<span class="nc" id="L438">      System.out.println(&quot;  Primary: &quot; + toCssColor(primary));</span>
+<span class="nc" id="L439">      System.out.println(&quot;  Secondary: &quot; + toCssColor(secondary));</span>
+<span class="nc" id="L440">      System.out.println(&quot;  Background: &quot; + toCssColor(bg));</span>
+<span class="nc" id="L441">      System.out.println(&quot;  Text: &quot; + toCssColor(text));</span>
+<span class="nc" id="L442">    } catch (Exception e) {</span>
+<span class="nc" id="L443">      System.err.println(&quot;Error updating theme colors: &quot; + e.getMessage());</span>
+<span class="nc" id="L444">    }</span>
+<span class="nc" id="L445">  }</span>
+
+  /** Guarda la configuración actual en Preferences. */
+  public void saveConfiguration() {
+    try {
+<span class="nc" id="L450">      prefs.putDouble(&quot;primary.r&quot;, primaryColorPicker.getValue().getRed());</span>
+<span class="nc" id="L451">      prefs.putDouble(&quot;primary.g&quot;, primaryColorPicker.getValue().getGreen());</span>
+<span class="nc" id="L452">      prefs.putDouble(&quot;primary.b&quot;, primaryColorPicker.getValue().getBlue());</span>
+
+<span class="nc" id="L454">      prefs.putDouble(&quot;secondary.r&quot;, secondaryColorPicker.getValue().getRed());</span>
+<span class="nc" id="L455">      prefs.putDouble(&quot;secondary.g&quot;, secondaryColorPicker.getValue().getGreen());</span>
+<span class="nc" id="L456">      prefs.putDouble(&quot;secondary.b&quot;, secondaryColorPicker.getValue().getBlue());</span>
+
+<span class="nc" id="L458">      prefs.putDouble(&quot;background.r&quot;, backgroundColorPicker.getValue().getRed());</span>
+<span class="nc" id="L459">      prefs.putDouble(&quot;background.g&quot;, backgroundColorPicker.getValue().getGreen());</span>
+<span class="nc" id="L460">      prefs.putDouble(&quot;background.b&quot;, backgroundColorPicker.getValue().getBlue());</span>
+
+<span class="nc" id="L462">      prefs.putDouble(&quot;text.r&quot;, textColorPicker.getValue().getRed());</span>
+<span class="nc" id="L463">      prefs.putDouble(&quot;text.g&quot;, textColorPicker.getValue().getGreen());</span>
+<span class="nc" id="L464">      prefs.putDouble(&quot;text.b&quot;, textColorPicker.getValue().getBlue());</span>
+
+<span class="nc" id="L466">      prefs.putDouble(&quot;radius&quot;, radiusSlider.getValue());</span>
+<span class="nc" id="L467">      prefs.putDouble(&quot;spacing&quot;, spacingSlider.getValue());</span>
+<span class="nc" id="L468">      prefs.putDouble(&quot;shadow&quot;, shadowIntensitySlider.getValue());</span>
+
+<span class="nc" id="L470">      showAlert(&quot;Success&quot;, &quot;Configuration saved successfully!&quot;);</span>
+
+<span class="nc" id="L472">    } catch (Exception e) {</span>
+<span class="nc" id="L473">      showAlert(&quot;Error&quot;, &quot;Failed to save configuration: &quot; + e.getMessage());</span>
+<span class="nc" id="L474">    }</span>
+<span class="nc" id="L475">  }</span>
+
+  /** Carga la configuración guardada desde Preferences. */
+  public void loadSavedConfiguration() {
+    try {
+<span class="nc bnc" id="L480" title="All 2 branches missed.">      if (prefs.getDouble(&quot;primary.r&quot;, -1) != -1) {</span>
+<span class="nc" id="L481">        primaryColorPicker.setValue(</span>
+            new Color(
+<span class="nc" id="L483">                prefs.getDouble(&quot;primary.r&quot;, 0.23),</span>
+<span class="nc" id="L484">                prefs.getDouble(&quot;primary.g&quot;, 0.51),</span>
+<span class="nc" id="L485">                prefs.getDouble(&quot;primary.b&quot;, 0.96),</span>
+                1.0));
+
+<span class="nc" id="L488">        secondaryColorPicker.setValue(</span>
+            new Color(
+<span class="nc" id="L490">                prefs.getDouble(&quot;secondary.r&quot;, 0.06),</span>
+<span class="nc" id="L491">                prefs.getDouble(&quot;secondary.g&quot;, 0.73),</span>
+<span class="nc" id="L492">                prefs.getDouble(&quot;secondary.b&quot;, 0.51),</span>
+                1.0));
+
+<span class="nc" id="L495">        backgroundColorPicker.setValue(</span>
+            new Color(
+<span class="nc" id="L497">                prefs.getDouble(&quot;background.r&quot;, 1.0),</span>
+<span class="nc" id="L498">                prefs.getDouble(&quot;background.g&quot;, 1.0),</span>
+<span class="nc" id="L499">                prefs.getDouble(&quot;background.b&quot;, 1.0),</span>
+                1.0));
+
+<span class="nc" id="L502">        textColorPicker.setValue(</span>
+            new Color(
+<span class="nc" id="L504">                prefs.getDouble(&quot;text.r&quot;, 0.12),</span>
+<span class="nc" id="L505">                prefs.getDouble(&quot;text.g&quot;, 0.16),</span>
+<span class="nc" id="L506">                prefs.getDouble(&quot;text.b&quot;, 0.23),</span>
+                1.0));
+
+<span class="nc" id="L509">        radiusSlider.setValue(prefs.getDouble(&quot;radius&quot;, 8.0));</span>
+<span class="nc" id="L510">        spacingSlider.setValue(prefs.getDouble(&quot;spacing&quot;, 1.0));</span>
+<span class="nc" id="L511">        shadowIntensitySlider.setValue(prefs.getDouble(&quot;shadow&quot;, 50.0));</span>
+
+<span class="nc" id="L513">        applyLiveChanges();</span>
+<span class="nc" id="L514">        showAlert(&quot;Success&quot;, &quot;Configuration loaded successfully!&quot;);</span>
+      }
+<span class="nc" id="L516">    } catch (Exception e) {</span>
+<span class="nc" id="L517">      showAlert(&quot;Error&quot;, &quot;Failed to load configuration: &quot; + e.getMessage());</span>
+<span class="nc" id="L518">    }</span>
+<span class="nc" id="L519">  }</span>
+
+  /** Exporta la configuración a un archivo. */
+  public void exportToFile() {
+<span class="nc" id="L523">    FileChooser fileChooser = new FileChooser();</span>
+<span class="nc" id="L524">    fileChooser.setTitle(&quot;Export Theme Configuration&quot;);</span>
+<span class="nc" id="L525">    fileChooser</span>
+<span class="nc" id="L526">        .getExtensionFilters()</span>
+<span class="nc" id="L527">        .add(new FileChooser.ExtensionFilter(&quot;Properties Files&quot;, &quot;*.properties&quot;));</span>
+<span class="nc" id="L528">    fileChooser.setInitialFileName(&quot;theme-config.properties&quot;);</span>
+
+<span class="nc bnc" id="L530" title="All 2 branches missed.">    File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);</span>
+<span class="nc bnc" id="L531" title="All 2 branches missed.">    if (file != null) {</span>
+<span class="nc" id="L532">      try (FileWriter writer = new FileWriter(file)) {</span>
+<span class="nc" id="L533">        writer.write(&quot;# TailwindFX Theme Configuration\n&quot;);</span>
+<span class="nc" id="L534">        writer.write(&quot;# Generated by ThemeCustomizationPanel\n\n&quot;);</span>
+
+<span class="nc" id="L536">        writer.write(</span>
+<span class="nc" id="L537">            String.format(&quot;primary.color=%s\n&quot;, toCssColor(primaryColorPicker.getValue())));</span>
+<span class="nc" id="L538">        writer.write(</span>
+<span class="nc" id="L539">            String.format(&quot;secondary.color=%s\n&quot;, toCssColor(secondaryColorPicker.getValue())));</span>
+<span class="nc" id="L540">        writer.write(</span>
+<span class="nc" id="L541">            String.format(&quot;background.color=%s\n&quot;, toCssColor(backgroundColorPicker.getValue())));</span>
+<span class="nc" id="L542">        writer.write(String.format(&quot;text.color=%s\n&quot;, toCssColor(textColorPicker.getValue())));</span>
+
+<span class="nc" id="L544">        writer.write(String.format(&quot;border.radius=%.1f\n&quot;, radiusSlider.getValue()));</span>
+<span class="nc" id="L545">        writer.write(String.format(&quot;spacing.scale=%.2f\n&quot;, spacingSlider.getValue()));</span>
+<span class="nc" id="L546">        writer.write(String.format(&quot;shadow.intensity=%.1f\n&quot;, shadowIntensitySlider.getValue()));</span>
+
+<span class="nc" id="L548">        showAlert(&quot;Success&quot;, &quot;Configuration exported to:\n&quot; + file.getAbsolutePath());</span>
+
+<span class="nc" id="L550">      } catch (IOException e) {</span>
+<span class="nc" id="L551">        showAlert(&quot;Error&quot;, &quot;Failed to export configuration: &quot; + e.getMessage());</span>
+<span class="nc" id="L552">      }</span>
+    }
+<span class="nc" id="L554">  }</span>
+
+  /** Importa la configuración desde un archivo. */
+  public void importFromFile() {
+<span class="nc" id="L558">    FileChooser fileChooser = new FileChooser();</span>
+<span class="nc" id="L559">    fileChooser.setTitle(&quot;Import Theme Configuration&quot;);</span>
+<span class="nc" id="L560">    fileChooser</span>
+<span class="nc" id="L561">        .getExtensionFilters()</span>
+<span class="nc" id="L562">        .add(new FileChooser.ExtensionFilter(&quot;Properties Files&quot;, &quot;*.properties&quot;));</span>
+
+<span class="nc bnc" id="L564" title="All 2 branches missed.">    File file = fileChooser.showOpenDialog(getScene() != null ? getScene().getWindow() : null);</span>
+<span class="nc bnc" id="L565" title="All 2 branches missed.">    if (file != null) {</span>
+      try {
+<span class="nc" id="L567">        String content = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));</span>
+<span class="nc" id="L568">        parseAndApplyConfig(content);</span>
+<span class="nc" id="L569">        showAlert(&quot;Success&quot;, &quot;Configuration imported from:\n&quot; + file.getAbsolutePath());</span>
+
+<span class="nc" id="L571">      } catch (IOException e) {</span>
+<span class="nc" id="L572">        showAlert(&quot;Error&quot;, &quot;Failed to import configuration: &quot; + e.getMessage());</span>
+<span class="nc" id="L573">      }</span>
+    }
+<span class="nc" id="L575">  }</span>
+
+  /**
+   * Parsea y aplica configuración desde contenido de archivo.
+   *
+   * @param content contenido del archivo
+   */
+  private void parseAndApplyConfig(String content) {
+    try {
+<span class="nc" id="L584">      String[] lines = content.split(&quot;\n&quot;);</span>
+<span class="nc bnc" id="L585" title="All 2 branches missed.">      for (String line : lines) {</span>
+<span class="nc" id="L586">        line = line.trim();</span>
+<span class="nc bnc" id="L587" title="All 4 branches missed.">        if (line.isEmpty() || line.startsWith(&quot;#&quot;)) continue;</span>
+
+<span class="nc" id="L589">        String[] parts = line.split(&quot;=&quot;);</span>
+<span class="nc bnc" id="L590" title="All 2 branches missed.">        if (parts.length != 2) continue;</span>
+
+<span class="nc" id="L592">        String key = parts[0].trim();</span>
+<span class="nc" id="L593">        String value = parts[1].trim();</span>
+
+<span class="nc bnc" id="L595" title="All 8 branches missed.">        switch (key) {</span>
+          case &quot;primary.color&quot;:
+<span class="nc" id="L597">            primaryColorPicker.setValue(Color.web(value));</span>
+<span class="nc" id="L598">            break;</span>
+          case &quot;secondary.color&quot;:
+<span class="nc" id="L600">            secondaryColorPicker.setValue(Color.web(value));</span>
+<span class="nc" id="L601">            break;</span>
+          case &quot;background.color&quot;:
+<span class="nc" id="L603">            backgroundColorPicker.setValue(Color.web(value));</span>
+<span class="nc" id="L604">            break;</span>
+          case &quot;text.color&quot;:
+<span class="nc" id="L606">            textColorPicker.setValue(Color.web(value));</span>
+<span class="nc" id="L607">            break;</span>
+          case &quot;border.radius&quot;:
+<span class="nc" id="L609">            radiusSlider.setValue(Double.parseDouble(value));</span>
+<span class="nc" id="L610">            break;</span>
+          case &quot;spacing.scale&quot;:
+<span class="nc" id="L612">            spacingSlider.setValue(Double.parseDouble(value));</span>
+<span class="nc" id="L613">            break;</span>
+          case &quot;shadow.intensity&quot;:
+<span class="nc" id="L615">            shadowIntensitySlider.setValue(Double.parseDouble(value));</span>
+            break;
+        }
+      }
+<span class="nc" id="L619">      applyLiveChanges();</span>
+
+<span class="nc" id="L621">    } catch (Exception e) {</span>
+<span class="nc" id="L622">      throw new RuntimeException(&quot;Error parsing config: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L623">    }</span>
+<span class="nc" id="L624">  }</span>
+
+  /** Resetea la configuración a los valores por defecto. */
+  public void resetToDefaults() {
+<span class="nc" id="L628">    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);</span>
+<span class="nc" id="L629">    alert.setTitle(&quot;Reset Configuration&quot;);</span>
+<span class="nc" id="L630">    alert.setHeaderText(&quot;Reset to Defaults&quot;);</span>
+<span class="nc" id="L631">    alert.setContentText(&quot;Are you sure you want to reset all settings to default values?&quot;);</span>
+
+<span class="nc" id="L633">    alert</span>
+<span class="nc" id="L634">        .showAndWait()</span>
+<span class="nc" id="L635">        .ifPresent(</span>
+            response -&gt; {
+<span class="nc bnc" id="L637" title="All 2 branches missed.">              if (response == ButtonType.OK) {</span>
+<span class="nc" id="L638">                primaryColorPicker.setValue(Color.valueOf(&quot;#3b82f6&quot;));</span>
+<span class="nc" id="L639">                secondaryColorPicker.setValue(Color.valueOf(&quot;#10b981&quot;));</span>
+<span class="nc" id="L640">                backgroundColorPicker.setValue(Color.valueOf(&quot;#ffffff&quot;));</span>
+<span class="nc" id="L641">                textColorPicker.setValue(Color.valueOf(&quot;#1e293b&quot;));</span>
+
+<span class="nc" id="L643">                radiusSlider.setValue(8.0);</span>
+<span class="nc" id="L644">                spacingSlider.setValue(1.0);</span>
+<span class="nc" id="L645">                shadowIntensitySlider.setValue(50.0);</span>
+
+<span class="nc" id="L647">                applyLiveChanges();</span>
+<span class="nc" id="L648">                showAlert(&quot;Success&quot;, &quot;Configuration reset to defaults!&quot;);</span>
+              }
+<span class="nc" id="L650">            });</span>
+<span class="nc" id="L651">  }</span>
+
+  /**
+   * Muestra una alerta al usuario.
+   *
+   * @param title título de la alerta
+   * @param message mensaje a mostrar
+   */
+  private void showAlert(String title, String message) {
+<span class="nc" id="L660">    Alert alert = new Alert(Alert.AlertType.INFORMATION);</span>
+<span class="nc" id="L661">    alert.setTitle(title);</span>
+<span class="nc" id="L662">    alert.setHeaderText(null);</span>
+<span class="nc" id="L663">    alert.setContentText(message);</span>
+<span class="nc" id="L664">    alert.showAndWait();</span>
+<span class="nc" id="L665">  }</span>
+
+  /**
+   * Obtiene la configuración actual como string JSON.
+   *
+   * @return JSON con la configuración actual
+   */
+  public String getConfigAsJson() {
+<span class="nc" id="L673">    return String.format(</span>
+        &quot;&quot;&quot;
+        {
+            &quot;colors&quot;: {
+                &quot;primary&quot;: &quot;%s&quot;,
+                &quot;secondary&quot;: &quot;%s&quot;,
+                &quot;background&quot;: &quot;%s&quot;,
+                &quot;text&quot;: &quot;%s&quot;
+            },
+            &quot;properties&quot;: {
+                &quot;borderRadius&quot;: %.1f,
+                &quot;spacingScale&quot;: %.2f,
+                &quot;shadowIntensity&quot;: %.1f
+            }
+        }
+        &quot;&quot;&quot;,
+<span class="nc" id="L689">        toCssColor(primaryColorPicker.getValue()),</span>
+<span class="nc" id="L690">        toCssColor(secondaryColorPicker.getValue()),</span>
+<span class="nc" id="L691">        toCssColor(backgroundColorPicker.getValue()),</span>
+<span class="nc" id="L692">        toCssColor(textColorPicker.getValue()),</span>
+<span class="nc" id="L693">        radiusSlider.getValue(),</span>
+<span class="nc" id="L694">        spacingSlider.getValue(),</span>
+<span class="nc" id="L695">        shadowIntensitySlider.getValue());</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

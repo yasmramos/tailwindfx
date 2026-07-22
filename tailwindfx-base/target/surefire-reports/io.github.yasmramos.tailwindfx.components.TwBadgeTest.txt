@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: io.github.yasmramos.tailwindfx.components.TwBadgeTest
+-------------------------------------------------------------------------------
+Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.938 s -- in io.github.yasmramos.tailwindfx.components.TwBadgeTest
