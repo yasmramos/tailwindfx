@@ -1,6 +1,15 @@
-target/
+```
+# Java class files
 *.class
-*.log
-*.exec
-surefire-reports/
-site/
+
+# Maven build artifacts
+target/
+!target/site/jacoco/
+
+# Test reports
+**/surefire-reports/
+
+# Jacoco coverage
+jacoco.exec
+jacoco/
+```

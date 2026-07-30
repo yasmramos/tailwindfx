@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: io.github.yasmramos.tailwindfx.layout.TwFlexPaneTest
--------------------------------------------------------------------------------
-Tests run: 44, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 9.959 s -- in io.github.yasmramos.tailwindfx.layout.TwFlexPaneTest
