@@ -369,8 +369,14 @@ public final class JitCompiler {
    * agregar.
    */
   public static BatchResult compileBatch(String... tokens) {
+    if (tokens == null || tokens.length == 0) {
+      return new BatchResult("", new ArrayList<>(), false, false);
+    }
+    
     StringBuilder inlineStyle = new StringBuilder();
     List<String> cssClasses = new ArrayList<>();
+    boolean hasDarkMode = false;
+    boolean hasImportant = false;
 
     // Delegate gradient processing to GradientProcessor
     GradientProcessor.GradientResult gradientResult =
@@ -395,25 +401,46 @@ public final class JitCompiler {
           continue;
         }
 
-        CompileResult result = compile(t);
+        // Handle modifiers (!important, dark mode)
+        String cleanToken = t;
+        
+        // Check for !important
+        if (t.endsWith("!")) {
+          hasImportant = true;
+          cleanToken = t.substring(0, t.length() - 1);
+          LOG.warning(() -> "JavaFX does not support !important in inline styles. Token: " + t);
+        }
+
+        // Check for dark mode
+        if (cleanToken.startsWith("dark:")) {
+          hasDarkMode = true;
+          cleanToken = cleanToken.substring(5);
+          // Dark mode logic usually requires CSS classes or bindings
+        }
+
+        CompileResult result = compile(cleanToken);
         if (result.hasInlineStyle()) {
           inlineStyle.append(result.inlineStyle()).append(" ");
         }
         if (result.hasCssClass()) {
           cssClasses.add(result.cssClass());
         }
+        
+        // Try specialized processors for unrecognized tokens
         if (!result.isKnown()) {
-          // Heuristic: if it looks like a JIT token (arbitrary values) → warn
-          // If it looks like an intentional CSS class (btn-primary) → silent
-          // Exceptions: unrecognized gradient tokens → silent
-          boolean isGradientRelated = GradientProcessor.isGradientToken(t);
-          if (requiresJitCompilation(t) && !isGradientRelated) {
-            LOG.warning(
-                "TailwindFX JIT: unknown token '"
-                    + t
-                    + "' (looks like a JIT utility but was not recognized)");
-          } else if (DEBUG) {
-            LOG.info("TailwindFX JIT: '" + t + "' → CSS class (fallback to stylesheet)");
+          String specializedStyle = processSpecializedToken(cleanToken);
+          if (specializedStyle != null) {
+            inlineStyle.append(specializedStyle).append(" ");
+          } else {
+            boolean isGradientRelated = GradientProcessor.isGradientToken(t);
+            if (requiresJitCompilation(t) && !isGradientRelated) {
+              LOG.warning(
+                  "TailwindFX JIT: unknown token '"
+                      + t
+                      + "' (looks like a JIT utility but was not recognized)");
+            } else if (DEBUG) {
+              LOG.info("TailwindFX JIT: '" + t + "' → CSS class (fallback to stylesheet)");
+            }
           }
         } else if (DEBUG) {
           String what =
@@ -425,13 +452,46 @@ public final class JitCompiler {
       }
     }
 
-    return new BatchResult(inlineStyle.toString().trim(), cssClasses);
+    return new BatchResult(inlineStyle.toString().trim(), cssClasses, hasDarkMode, hasImportant);
   }
 
-  public record BatchResult(String inlineStyle, List<String> cssClasses) {
+  /**
+   * Delegates token processing to specialized processors (Ring, AspectRatio, ScrollSnap, etc.).
+   */
+  private static String processSpecializedToken(String token) {
+    // Ring Utilities
+    if (RingProcessor.isRingToken(token)) {
+      return RingProcessor.processRingToken(StyleToken.parse(token));
+    }
+
+    // Aspect Ratio Utilities
+    if (AspectRatioProcessor.isAspectRatioToken(token)) {
+      return AspectRatioProcessor.processAspectRatio(token);
+    }
+
+    // Scroll Snap Utilities
+    if (ScrollSnapProcessor.isScrollSnapToken(token)) {
+      return ScrollSnapProcessor.processScrollSnap(token);
+    }
+
+    // Arbitrary properties [...:...]
+    if (token.startsWith("[") && token.endsWith("]")) {
+      // For now, return null - arbitrary properties need instance method
+      // This will be handled by the heuristic below
+      return null;
+    }
+
+    return null;
+  }
+
+  public record BatchResult(String inlineStyle, List<String> cssClasses, boolean hasDarkMode, boolean hasImportant) {
 
     public boolean hasInlineStyle() {
       return !inlineStyle.isBlank();
+    }
+    
+    public boolean success() {
+      return hasInlineStyle() || !cssClasses.isEmpty();
     }
   }
 
