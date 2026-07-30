@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: io.github.yasmramos.tailwindfx.style.StylePerfTest$BenchmarkTests
--------------------------------------------------------------------------------
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.052 s -- in io.github.yasmramos.tailwindfx.style.StylePerfTest$BenchmarkTests

@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: io.github.yasmramos.tailwindfx.components.TwDataTableTest
--------------------------------------------------------------------------------
-Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.119 s -- in io.github.yasmramos.tailwindfx.components.TwDataTableTest
