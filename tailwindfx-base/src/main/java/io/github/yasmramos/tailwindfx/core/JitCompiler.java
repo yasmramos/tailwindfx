@@ -456,7 +456,7 @@ public final class JitCompiler {
   }
 
   /**
-   * Delegates token processing to specialized processors (Ring, AspectRatio, ScrollSnap, etc.).
+   * Delegates token processing to specialized processors (Ring, AspectRatio, ScrollSnap, ContainerQuery, Transition, etc.).
    */
   private static String processSpecializedToken(String token) {
     // Ring Utilities
@@ -472,6 +472,18 @@ public final class JitCompiler {
     // Scroll Snap Utilities
     if (ScrollSnapProcessor.isScrollSnapToken(token)) {
       return ScrollSnapProcessor.processScrollSnap(token);
+    }
+
+    // Container Query Utilities
+    if (ContainerQueryProcessor.isContainerQuery(token)) {
+      ContainerQueryProcessor.ContainerQueryResult result = ContainerQueryProcessor.processContainerQuery(token);
+      return result != null ? result.cssEquivalent() : null;
+    }
+
+    // Transition and Animation Utilities
+    if (TransitionProcessor.isTransitionToken(token)) {
+      TransitionProcessor.TransitionResult result = TransitionProcessor.processTransition(token);
+      return result != null ? result.inlineStyle() : null;
     }
 
     // Arbitrary properties [...:...]
