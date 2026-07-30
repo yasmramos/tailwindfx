@@ -1,7 +1,7 @@
 package io.github.yasmramos.tailwindfx.core;
 
+import io.github.yasmramos.tailwindfx.theme.ThemeConfig;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * ContainerQueryProcessor - Handles container query utilities for Tailwind CSS v4 compatibility.
@@ -29,17 +29,13 @@ public class ContainerQueryProcessor {
     private static final String MAX_PREFIX = "@max-";
     
     /**
-     * Standard container query breakpoints (matching Tailwind CSS v4).
+     * Centralized breakpoints from ThemeConfig (matching Tailwind CSS v4).
+     * sm: 640px, md: 768px, lg: 1024px, xl: 1280px, 2xl: 1536px
+     * Using ConcurrentHashMap to allow dynamic additions while maintaining thread safety.
      */
-    private static final Map<String, Integer> BREAKPOINTS = new ConcurrentHashMap<>();
-    
-    static {
-        BREAKPOINTS.put("sm", 640);
-        BREAKPOINTS.put("md", 768);
-        BREAKPOINTS.put("lg", 1024);
-        BREAKPOINTS.put("xl", 1280);
-        BREAKPOINTS.put("2xl", 1536);
-    }
+    private static final Map<String, Integer> BREAKPOINTS = new java.util.concurrent.ConcurrentHashMap<>(
+        ThemeConfig.defaultConfig().breakpoints()
+    );
 
     /**
      * Result of processing a container query token.
