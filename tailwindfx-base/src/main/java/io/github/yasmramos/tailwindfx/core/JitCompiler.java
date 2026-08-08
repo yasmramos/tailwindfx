@@ -72,6 +72,10 @@ public final class JitCompiler {
   private static final ManualLruCache<String, String[]> PADDING_CACHE =
       new ManualLruCache<>(MAX_CACHE_SIZE);
 
+  // Resultado por conjunto de tokens: los componentes aplican la misma lista muchas veces
+  private static final ManualLruCache<String, BatchResult> BATCH_CACHE =
+      new ManualLruCache<>(MAX_CACHE_SIZE);
+
   // Modo debug: loguea todos los tokens procesados
   private static volatile boolean DEBUG = false;
 
@@ -382,6 +386,14 @@ public final class JitCompiler {
       return new BatchResult("", new ArrayList<>(), false, false);
     }
 
+    String cacheKey = String.join(" ", tokens);
+    BatchResult cached = BATCH_CACHE.get(cacheKey);
+    if (cached != null) {
+      TailwindFXMetrics.instance().recordCacheHit();
+      return cached;
+    }
+    TailwindFXMetrics.instance().recordCacheMiss();
+
     StringBuilder inlineStyle = new StringBuilder();
     List<String> cssClasses = new ArrayList<>();
     boolean hasDarkMode = false;
@@ -475,7 +487,11 @@ public final class JitCompiler {
       inlineStyle.append(padding).append(" ");
     }
 
-    return new BatchResult(inlineStyle.toString().trim(), cssClasses, hasDarkMode, hasImportant);
+    BatchResult result =
+        new BatchResult(
+            inlineStyle.toString().trim(), List.copyOf(cssClasses), hasDarkMode, hasImportant);
+    BATCH_CACHE.put(cacheKey, result);
+    return result;
   }
 
   /** True for p-*, px-*, py-*, pt-*, pr-*, pb-* and pl-* tokens with a resolvable value. */
@@ -612,6 +628,7 @@ public final class JitCompiler {
   public static void clearCache() {
     CACHE.clear();
     PADDING_CACHE.clear();
+    BATCH_CACHE.clear();
   }
 
   /**
