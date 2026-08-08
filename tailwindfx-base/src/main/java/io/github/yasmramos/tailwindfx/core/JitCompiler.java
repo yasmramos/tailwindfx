@@ -4,7 +4,6 @@ import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
 import io.github.yasmramos.tailwindfx.style.StyleToken;
 import io.github.yasmramos.tailwindfx.theme.ThemeConfig;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -67,6 +66,10 @@ public final class JitCompiler {
    * for JIT-compiled arbitrary values while keeping the cache under ~400KB in the worst case.
    */
   private static final ManualLruCache<String, CompileResult> CACHE =
+      new ManualLruCache<>(MAX_CACHE_SIZE);
+
+  // Lados ya resueltos de cada token de padding, para poder fusionarlos sin re-parsear
+  private static final ManualLruCache<String, String[]> PADDING_CACHE =
       new ManualLruCache<>(MAX_CACHE_SIZE);
 
   // Modo debug: loguea todos los tokens procesados
@@ -477,9 +480,41 @@ public final class JitCompiler {
 
   /** True for p-*, px-*, py-*, pt-*, pr-*, pb-* and pl-* tokens with a resolvable value. */
   private static boolean isPaddingToken(String token) {
+    if (token.charAt(0) != 'p' || token.indexOf('-') > 2) {
+      return false;
+    }
     StyleToken t = StyleToken.parse(token);
     return "p".equals(t.prefix)
         && (t.kind == StyleToken.Kind.SCALE || t.kind == StyleToken.Kind.ARBITRARY);
+  }
+
+  /**
+   * Resolves a padding token into its four sides, with null for the sides it does not define.
+   *
+   * @param token a token accepted by {@link #isPaddingToken(String)}
+   * @return the sides, or null if the value could not be resolved
+   */
+  private static String[] paddingSidesOf(String token) {
+    String[] cached = PADDING_CACHE.get(token);
+    if (cached != null) {
+      return cached;
+    }
+
+    StyleToken t = StyleToken.parse(token);
+    String value = INSTANCE.resolver.resolve(t);
+    if (value == null) {
+      return null;
+    }
+    value = CssPropertyMapper.withUnit(value);
+
+    String[] sides =
+        t.subPrefix == null
+            ? new String[] {value, value, value, value}
+            : CssPropertyMapper.paddingSides(t.subPrefix, value);
+    if (sides != null) {
+      PADDING_CACHE.put(token, sides);
+    }
+    return sides;
   }
 
   /**
@@ -499,20 +534,7 @@ public final class JitCompiler {
       if (!compile(token).hasInlineStyle()) {
         continue;
       }
-      StyleToken t = StyleToken.parse(token);
-      String value = INSTANCE.resolver.resolve(t);
-      if (value == null) {
-        continue;
-      }
-      value = CssPropertyMapper.withUnit(value);
-
-      if (t.subPrefix == null) {
-        Arrays.fill(sides, value);
-        any = true;
-        continue;
-      }
-
-      String[] partial = CssPropertyMapper.paddingSides(t.subPrefix, value);
+      String[] partial = paddingSidesOf(token);
       if (partial == null) {
         continue;
       }
@@ -589,6 +611,7 @@ public final class JitCompiler {
    */
   public static void clearCache() {
     CACHE.clear();
+    PADDING_CACHE.clear();
   }
 
   /**
