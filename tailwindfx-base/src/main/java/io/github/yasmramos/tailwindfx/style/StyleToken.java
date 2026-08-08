@@ -18,9 +18,9 @@ public final class StyleToken {
 
   // Regex patterns
 
-  // Arbitrario: prefijo-[valor]  (el valor puede contener #, %, (, ), -, espacio)
+  // Arbitrario: prefijo-[valor] con opacidad opcional (el valor puede contener #, %, (, ), -)
   private static final Pattern ARBITRARY =
-      Pattern.compile("^(-?)([a-z][a-z-]*)(?:-([a-z]+))?-\\[([^\\]]+)]$");
+      Pattern.compile("^(-?)([a-z][a-z-]*)(?:-([a-z]+))?-\\[([^\\]]+)](?:/(\\d+))?$");
 
   // Color con shade y opacidad opcional: bg-blue-500/80
   private static final Pattern COLOR_SHADE_ALPHA =
@@ -77,7 +77,7 @@ public final class StyleToken {
           parts[1],
           null,
           null,
-          null,
+          m.group(5) != null ? Integer.parseInt(m.group(5)) : null, // alpha
           null,
           null,
           m.group(4), // arbitraryVal

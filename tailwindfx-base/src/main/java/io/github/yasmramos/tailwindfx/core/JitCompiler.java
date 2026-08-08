@@ -4,6 +4,7 @@ import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
 import io.github.yasmramos.tailwindfx.style.StyleToken;
 import io.github.yasmramos.tailwindfx.theme.ThemeConfig;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -25,9 +26,12 @@ import java.util.logging.Logger;
  * class Debug mode: JitCompiler.setDebug(true) → log ALL tokens
  *
  * <p>Special modifiers:
+ *
  * <ul>
- *   <li><code>!</code> suffix: Marks property as important (e.g., "p-4!" → padding with !important flag)
- *   <li><code>md:</code>, <code>lg:</code> prefixes: Responsive breakpoints (requires manual handling)
+ *   <li><code>!</code> suffix: Marks property as important (e.g., "p-4!" → padding with !important
+ *       flag)
+ *   <li><code>md:</code>, <code>lg:</code> prefixes: Responsive breakpoints (requires manual
+ *       handling)
  *   <li><code>dark:</code> prefix: Dark mode variant (requires dark mode enabled)
  * </ul>
  */
@@ -277,10 +281,11 @@ public final class JitCompiler {
 
   // Public API
   /**
-   * Compiles a single token. Handles special modifiers like !important and dark mode.
-   * Uses thread-safe LRU cache: compiling the same token N times costs the same as 1.
+   * Compiles a single token. Handles special modifiers like !important and dark mode. Uses
+   * thread-safe LRU cache: compiling the same token N times costs the same as 1.
    *
    * <p>Special modifiers:
+   *
    * <ul>
    *   <li><code>!</code> suffix: Marks property as important (e.g., "p-4!" → adds !important flag)
    *   <li><code>dark:</code> prefix: Dark mode variant (requires manual handling in application)
@@ -348,8 +353,9 @@ public final class JitCompiler {
       // Mark as dark mode variant - this requires manual handling
       // The result should be applied only when dark mode is active
       // For now, we just compile normally but could add metadata
-      result = new CompileResult(
-          result.inlineStyle(), result.cssClass(), result.isKnown(), true /* isDarkMode */);
+      result =
+          new CompileResult(
+              result.inlineStyle(), result.cssClass(), result.isKnown(), true /* isDarkMode */);
     }
 
     // Thread-safe put with atomic operation
@@ -372,7 +378,7 @@ public final class JitCompiler {
     if (tokens == null || tokens.length == 0) {
       return new BatchResult("", new ArrayList<>(), false, false);
     }
-    
+
     StringBuilder inlineStyle = new StringBuilder();
     List<String> cssClasses = new ArrayList<>();
     boolean hasDarkMode = false;
@@ -387,6 +393,8 @@ public final class JitCompiler {
     }
 
     // Process non-gradient tokens normally
+    List<String> paddingTokens = new ArrayList<>();
+
     for (String token : tokens) {
       if (token == null || token.isBlank()) {
         continue;
@@ -403,7 +411,7 @@ public final class JitCompiler {
 
         // Handle modifiers (!important, dark mode)
         String cleanToken = t;
-        
+
         // Check for !important
         if (t.endsWith("!")) {
           hasImportant = true;
@@ -418,6 +426,13 @@ public final class JitCompiler {
           // Dark mode logic usually requires CSS classes or bindings
         }
 
+        // -fx-padding is a shorthand: emitting one declaration per directional token would make
+        // the last one win (px-4 py-2 → py-2 only). Collect them and emit a single declaration.
+        if (isPaddingToken(cleanToken)) {
+          paddingTokens.add(cleanToken);
+          continue;
+        }
+
         CompileResult result = compile(cleanToken);
         if (result.hasInlineStyle()) {
           inlineStyle.append(result.inlineStyle()).append(" ");
@@ -425,7 +440,7 @@ public final class JitCompiler {
         if (result.hasCssClass()) {
           cssClasses.add(result.cssClass());
         }
-        
+
         // Try specialized processors for unrecognized tokens
         if (!result.isKnown()) {
           String specializedStyle = processSpecializedToken(cleanToken);
@@ -452,11 +467,69 @@ public final class JitCompiler {
       }
     }
 
+    String padding = mergePadding(paddingTokens);
+    if (padding != null) {
+      inlineStyle.append(padding).append(" ");
+    }
+
     return new BatchResult(inlineStyle.toString().trim(), cssClasses, hasDarkMode, hasImportant);
   }
 
+  /** True for p-*, px-*, py-*, pt-*, pr-*, pb-* and pl-* tokens with a resolvable value. */
+  private static boolean isPaddingToken(String token) {
+    StyleToken t = StyleToken.parse(token);
+    return "p".equals(t.prefix)
+        && (t.kind == StyleToken.Kind.SCALE || t.kind == StyleToken.Kind.ARBITRARY);
+  }
+
   /**
-   * Delegates token processing to specialized processors (Ring, AspectRatio, ScrollSnap, ContainerQuery, Transition, etc.).
+   * Combines padding tokens into a single {@code -fx-padding} shorthand, applying them in order so
+   * later tokens override the sides they define (Tailwind semantics: {@code p-4 px-2} keeps the
+   * vertical padding from {@code p-4}).
+   *
+   * @param paddingTokens padding tokens in declaration order
+   * @return the merged declaration, or null if none resolved
+   */
+  private static String mergePadding(List<String> paddingTokens) {
+    String[] sides = new String[4];
+    boolean any = false;
+
+    for (String token : paddingTokens) {
+      // Routed through compile() so the LRU cache and metrics see padding like any other token.
+      if (!compile(token).hasInlineStyle()) {
+        continue;
+      }
+      StyleToken t = StyleToken.parse(token);
+      String value = INSTANCE.resolver.resolve(t);
+      if (value == null) {
+        continue;
+      }
+      value = CssPropertyMapper.withUnit(value);
+
+      if (t.subPrefix == null) {
+        Arrays.fill(sides, value);
+        any = true;
+        continue;
+      }
+
+      String[] partial = CssPropertyMapper.paddingSides(t.subPrefix, value);
+      if (partial == null) {
+        continue;
+      }
+      for (int i = 0; i < sides.length; i++) {
+        if (partial[i] != null) {
+          sides[i] = partial[i];
+        }
+      }
+      any = true;
+    }
+
+    return any ? "-fx-padding: " + CssPropertyMapper.formatPadding(sides) + ";" : null;
+  }
+
+  /**
+   * Delegates token processing to specialized processors (Ring, AspectRatio, ScrollSnap,
+   * ContainerQuery, Transition, etc.).
    */
   private static String processSpecializedToken(String token) {
     // Ring Utilities
@@ -476,7 +549,8 @@ public final class JitCompiler {
 
     // Container Query Utilities
     if (ContainerQueryProcessor.isContainerQuery(token)) {
-      ContainerQueryProcessor.ContainerQueryResult result = ContainerQueryProcessor.processContainerQuery(token);
+      ContainerQueryProcessor.ContainerQueryResult result =
+          ContainerQueryProcessor.processContainerQuery(token);
       return result != null ? result.cssEquivalent() : null;
     }
 
@@ -496,12 +570,13 @@ public final class JitCompiler {
     return null;
   }
 
-  public record BatchResult(String inlineStyle, List<String> cssClasses, boolean hasDarkMode, boolean hasImportant) {
+  public record BatchResult(
+      String inlineStyle, List<String> cssClasses, boolean hasDarkMode, boolean hasImportant) {
 
     public boolean hasInlineStyle() {
       return !inlineStyle.isBlank();
     }
-    
+
     public boolean success() {
       return hasInlineStyle() || !cssClasses.isEmpty();
     }

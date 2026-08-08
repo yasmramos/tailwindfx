@@ -340,15 +340,10 @@ public final class ThemeConfig {
             "transparent"
           });
 
-      // Spacing: 0-64 (base 4px)
+      // Spacing: 0-64 (base 4px, igual que Tailwind: spacing-n = n * 4px)
       for (int i = 0; i <= 64; i++) {
         spacing[i] = i * 4.0;
       }
-      // Ajustes especiales
-      spacing[0] = 0;
-      spacing[1] = 2;
-      spacing[2] = 4;
-      spacing[3] = 6;
 
       // Breakpoints
       breakpoints.put("sm", 640);

@@ -43,15 +43,34 @@ public final class StyleResolver {
   }
 
   private String resolveScale(StyleToken token) {
-    double[] spacing = themeConfig.spacing();
-    int scale = token.scale;
+    int signed = token.signedScale();
 
-    if (scale >= 0 && scale < spacing.length) {
-      return (int) spacing[scale] + "px";
+    // Utilidades cuyo numero NO es una medida de la escala de spacing:
+    // opacity-50 es 0.5, rotate-45 son grados, border-2 son 2px y z-10 es un entero.
+    String unitless =
+        switch (token.prefix) {
+          case "opacity", "scale" -> trimZeros(signed / 100.0);
+          case "rotate", "z", "order", "col", "row", "grow", "shrink", "basis", "flex" -> String
+              .valueOf(signed);
+          case "border" -> Math.abs(signed) + "px";
+          default -> null;
+        };
+    if (unitless != null) {
+      return unitless;
     }
 
-    // Fallback para scales fuera de rango
-    return (scale * 4) + "px";
+    double[] spacing = themeConfig.spacing();
+    int scale = Math.abs(signed);
+    double value = scale < spacing.length ? spacing[scale] : scale * 4;
+    return (int) (signed < 0 ? -value : value) + "px";
+  }
+
+  /** 0.5 en vez de 0.50, 1 en vez de 1.0. */
+  private static String trimZeros(double value) {
+    if (value == Math.rint(value)) {
+      return String.valueOf((int) value);
+    }
+    return String.valueOf(value);
   }
 
   private String resolveColor(StyleToken token) {
@@ -87,6 +106,9 @@ public final class StyleResolver {
   }
 
   private String resolveArbitrary(StyleToken token) {
+    if (token.alpha != null) {
+      return applyOpacity(token.arbitraryVal, token.alpha);
+    }
     return token.arbitraryVal;
   }
 

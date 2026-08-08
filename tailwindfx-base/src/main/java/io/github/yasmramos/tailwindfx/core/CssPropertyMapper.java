@@ -36,9 +36,10 @@ public final class CssPropertyMapper {
       case "pb", "bottom" -> "-fx-padding";
       case "pl", "left" -> "-fx-padding";
 
-      // Margin properties are NOT mapped to CSS because JavaFX doesn't support -fx-margin.
-      // They are handled by Styles.java via HBox.setMargin(), VBox.setMargin(), GridPane.setMargin()
-      // when using TwStyle.apply(). Return null to prevent JIT compilation.
+        // Margin properties are NOT mapped to CSS because JavaFX doesn't support -fx-margin.
+        // They are handled by Styles.java via HBox.setMargin(), VBox.setMargin(),
+        // GridPane.setMargin()
+        // when using TwStyle.apply(). Return null to prevent JIT compilation.
       case "m", "mx", "my", "mt", "mr", "mb", "ml" -> null;
 
       case "bg" -> "-fx-background-color";
@@ -65,31 +66,28 @@ public final class CssPropertyMapper {
       case "rounded" -> "-fx-background-radius";
       case "shadow" -> "-fx-effect";
 
-      case "visible" -> "-fx-visibility";
-      case "hidden" -> "-fx-visibility";
-      case "invisible" -> "-fx-visibility";
+        // JavaFX spells visibility without the -fx- prefix.
+      case "visible", "hidden", "invisible" -> "visibility";
 
       case "gap" -> "-fx-hgap";
       case "gap-x" -> "-fx-hgap";
       case "gap-y" -> "-fx-vgap";
 
-      case "overflow" -> "-fx-overflow";
-
       case "cursor" -> "-fx-cursor";
 
-      case "z" -> "-fx-z-index";
-
-      case "resize" -> "-fx-resize";
-
-      case "skew-x" -> "-fx-she-x";
-      case "skew-y" -> "-fx-she-y";
-
-      case "blur" -> "-fx-blur";
-      case "brightness" -> "-fx-brightness";
-      case "contrast" -> "-fx-contrast";
-      case "grayscale" -> "-fx-saturation";
-      case "invert" -> "-fx-invert";
-      case "sepia" -> "-fx-sepia";
+        // Utilities without a JavaFX CSS counterpart. Emitting invented -fx-* properties made
+        // JavaFX log parse warnings and discard the whole declaration block, so they are left to
+        // the stylesheet/Java API path instead (Styles.z, Styles.blur, TwEffect, ...).
+      case "z",
+          "overflow",
+          "resize",
+          "blur",
+          "brightness",
+          "contrast",
+          "grayscale",
+          "invert",
+          "sepia",
+          "skew" -> null;
 
       default -> null;
     };
@@ -130,6 +128,22 @@ public final class CssPropertyMapper {
     // Handle border styles: border-solid, border-dashed, border-dotted, border-none
     if ("border".equals(prefix)) {
       return resolveBorderStyle(namedValue);
+    }
+
+    // Handle font families: font-sans, font-serif, font-mono
+    if ("font".equals(prefix)) {
+      String family = resolveFontFamily(namedValue);
+      if (family != null) {
+        return family;
+      }
+    }
+
+    // Handle text alignment: text-left, text-center, text-right, text-justify
+    if ("text".equals(prefix)) {
+      String alignment = resolveTextAlignment(namedValue);
+      if (alignment != null) {
+        return alignment;
+      }
     }
 
     // Handle cursor styles: cursor-pointer, cursor-default, etc.
@@ -204,36 +218,29 @@ public final class CssPropertyMapper {
     };
   }
 
-  /** Resuelve un cursor a su valor JavaFX. */
+  /** Resuelve un cursor a su valor JavaFX (ver javafx.scene.Cursor). */
   private String resolveCursor(String cursor) {
     return switch (cursor) {
-      case "default" -> "-cursor-default";
-      case "pointer" -> "-cursor-hand";
-      case "text" -> "-cursor-text";
-      case "move" -> "-cursor-move";
-      case "wait" -> "-cursor-wait";
-      case "crosshair" -> "-cursor-crosshair";
-      case "help" -> "-cursor-wait";
-      case "not-allowed" -> "-cursor-disappear";
-      case "context-menu" -> "-cursor-default";
-      case "vertical-text" -> "-cursor-text";
-      case "alias" -> "-cursor-hand";
-      case "all-scroll" -> "-cursor-move";
-      case "grab" -> "-cursor-open-hand";
-      case "grabbing" -> "-cursor-closed-hand";
-      case "col-resize" -> "-cursor-h-resize";
-      case "row-resize" -> "-cursor-v-resize";
-      case "n-resize" -> "-cursor-n-resize";
-      case "e-resize" -> "-cursor-e-resize";
-      case "s-resize" -> "-cursor-s-resize";
-      case "w-resize" -> "-cursor-w-resize";
-      case "ne-resize" -> "-cursor-ne-resize";
-      case "nw-resize" -> "-cursor-nw-resize";
-      case "se-resize" -> "-cursor-se-resize";
-      case "sw-resize" -> "-cursor-sw-resize";
-      case "nesw-resize" -> "-cursor-ne-resize";
-      case "nwse-resize" -> "-cursor-nw-resize";
-      case "none" -> "-cursor-none";
+      case "default", "context-menu" -> "default";
+      case "pointer", "alias" -> "hand";
+      case "text", "vertical-text" -> "text";
+      case "move", "all-scroll" -> "move";
+      case "wait", "help" -> "wait";
+      case "crosshair" -> "crosshair";
+      case "not-allowed" -> "disappear";
+      case "grab" -> "open-hand";
+      case "grabbing" -> "closed-hand";
+      case "col-resize" -> "h-resize";
+      case "row-resize" -> "v-resize";
+      case "n-resize" -> "n-resize";
+      case "e-resize" -> "e-resize";
+      case "s-resize" -> "s-resize";
+      case "w-resize" -> "w-resize";
+      case "ne-resize", "nesw-resize" -> "ne-resize";
+      case "nw-resize", "nwse-resize" -> "nw-resize";
+      case "se-resize" -> "se-resize";
+      case "sw-resize" -> "sw-resize";
+      case "none" -> "none";
       default -> null;
     };
   }
@@ -311,6 +318,31 @@ public final class CssPropertyMapper {
       return prop("-fx-border-style", resolvedValue);
     }
 
+    // border-0, border-2, border-[3px] son anchos de borde, no colores
+    if ("border".equals(token.prefix)
+        && (token.kind == StyleToken.Kind.SCALE
+            || (token.kind == StyleToken.Kind.ARBITRARY && isLength(resolvedValue)))) {
+      return prop("-fx-border-width", resolvedValue);
+    }
+
+    // text-* puede ser color, tamaño de fuente o alineación
+    if ("text".equals(token.prefix)) {
+      return prop(textProperty(token, resolvedValue), resolvedValue);
+    }
+
+    // font-* puede ser peso o familia tipográfica
+    if ("font".equals(token.prefix)) {
+      return prop(
+          isFontWeight(resolvedValue) ? "-fx-font-weight" : "-fx-font-family", resolvedValue);
+    }
+
+    // JavaFX no deriva el radio del borde del fondo: hay que fijar ambos
+    if ("rounded".equals(token.prefix)) {
+      return prop("-fx-background-radius", resolvedValue)
+          + " "
+          + prop("-fx-border-radius", resolvedValue);
+    }
+
     // Manejo especial para w-auto, w-min, w-max, h-auto, h-min, h-max
     if (("w".equals(token.prefix) || "h".equals(token.prefix))
         && ("auto".equals(token.namedValue)
@@ -325,6 +357,20 @@ public final class CssPropertyMapper {
       return prop("-fx-max-width", resolvedValue);
     }
 
+    // translate-x-4 / scale-y-95: StyleToken separa el eje en subPrefix, hay que recomponerlo
+    if (token.subPrefix != null
+        && ("translate".equals(token.prefix) || "scale".equals(token.prefix))) {
+      String axisProperty = mapToCssProperty(token.prefix + "-" + token.subPrefix);
+      if (axisProperty != null) {
+        return prop(axisProperty, resolvedValue);
+      }
+    }
+
+    // scale-95 escala ambos ejes
+    if ("scale".equals(token.prefix) && token.subPrefix == null) {
+      return prop("-fx-scale-x", resolvedValue) + " " + prop("-fx-scale-y", resolvedValue);
+    }
+
     String property = mapToCssProperty(token.prefix);
     if (property == null) {
       return null;
@@ -332,18 +378,95 @@ public final class CssPropertyMapper {
 
     // Manejo especial para propiedades compuestas
     if ("p".equals(token.prefix) && token.subPrefix != null) {
-      return switch (token.subPrefix) {
-        case "x" -> px("padding", "0px %s 0px %s".formatted(resolvedValue, resolvedValue));
-        case "y" -> px("padding", "%s 0px %s 0px".formatted(resolvedValue, resolvedValue));
-        case "t" -> px("padding", "%s 0px 0px 0px".formatted(resolvedValue));
-        case "r" -> px("padding", "0px %s 0px 0px".formatted(resolvedValue));
-        case "b" -> px("padding", "0px 0px %s 0px".formatted(resolvedValue));
-        case "l" -> px("padding", "0px 0px 0px %s".formatted(resolvedValue));
-        default -> prop(property, resolvedValue);
-      };
+      String[] sides = paddingSides(token.subPrefix, withUnit(resolvedValue));
+      if (sides == null) {
+        return prop(property, resolvedValue);
+      }
+      return prop("-fx-padding", formatPadding(sides));
     }
 
     return prop(property, resolvedValue);
+  }
+
+  /**
+   * Devuelve los cuatro lados (top, right, bottom, left) de un padding direccional, usando {@code
+   * null} para los lados que el token no define.
+   *
+   * @param subPrefix x, y, t, r, b o l
+   * @param value valor con unidad ya aplicada
+   * @return arreglo de 4 lados o null si el subPrefix no es direccional
+   */
+  public static String[] paddingSides(String subPrefix, String value) {
+    return switch (subPrefix) {
+      case "x" -> new String[] {null, value, null, value};
+      case "y" -> new String[] {value, null, value, null};
+      case "t" -> new String[] {value, null, null, null};
+      case "r" -> new String[] {null, value, null, null};
+      case "b" -> new String[] {null, null, value, null};
+      case "l" -> new String[] {null, null, null, value};
+      default -> null;
+    };
+  }
+
+  /** Formatea los cuatro lados como shorthand de -fx-padding, con 0px para los lados sin valor. */
+  public static String formatPadding(String[] sides) {
+    StringBuilder sb = new StringBuilder();
+    for (String side : sides) {
+      if (sb.length() > 0) {
+        sb.append(' ');
+      }
+      sb.append(side == null ? "0px" : side);
+    }
+    return sb.toString();
+  }
+
+  /** Elige la propiedad JavaFX para un token text-*: color, tamaño o alineación. */
+  private static String textProperty(StyleToken token, String resolvedValue) {
+    if (isTextAlignment(resolvedValue)) {
+      return "-fx-text-alignment";
+    }
+    if (token.kind == StyleToken.Kind.COLOR_SHADE || isColor(resolvedValue)) {
+      return "-fx-text-fill";
+    }
+    return isLength(resolvedValue) ? "-fx-font-size" : "-fx-text-fill";
+  }
+
+  private static boolean isTextAlignment(String value) {
+    return "left".equals(value)
+        || "center".equals(value)
+        || "right".equals(value)
+        || "justify".equals(value);
+  }
+
+  private static boolean isColor(String value) {
+    return value.startsWith("#")
+        || value.startsWith("rgb")
+        || value.startsWith("hsl")
+        || "transparent".equals(value);
+  }
+
+  private static boolean isLength(String value) {
+    return value.matches("-?\\d+(\\.\\d+)?(px|pt|em|rem|%)?");
+  }
+
+  private static boolean isFontWeight(String value) {
+    return value.matches("[1-9]00") || "normal".equals(value) || "bold".equals(value);
+  }
+
+  private String resolveFontFamily(String name) {
+    return switch (name) {
+      case "sans" -> "System";
+      case "serif" -> "Serif";
+      case "mono" -> "Monospaced";
+      default -> null;
+    };
+  }
+
+  private String resolveTextAlignment(String value) {
+    return switch (value) {
+      case "left", "center", "right", "justify" -> value;
+      default -> null;
+    };
   }
 
   /** Verifica si un valor es un estilo de borde válido. */
@@ -358,10 +481,9 @@ public final class CssPropertyMapper {
     return name + ": " + value + ";";
   }
 
-  private static String px(String name, String value) {
-    // Si el valor ya tiene 'px', usarlo directamente; si no, agregarlo
-    String formatted = value.matches("\\d+$") ? value + "px" : value;
-    return name + ": " + formatted + ";";
+  /** Agrega 'px' a valores numéricos sin unidad. */
+  public static String withUnit(String value) {
+    return value.matches("-?\\d+(\\.\\d+)?") ? value + "px" : value;
   }
 
   private String resolveFontSize(String size) {
