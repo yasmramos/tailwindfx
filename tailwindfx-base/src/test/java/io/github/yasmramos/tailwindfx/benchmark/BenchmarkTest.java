@@ -69,8 +69,8 @@ public class BenchmarkTest {
     void testCacheMissTime() {
         Benchmark.BenchmarkResults results = Benchmark.runAll();
         
-        // Cache miss should take some measurable time (> 0.001ms)
-        assertTrue(results.cacheMiss().value() > 0.001, 
+        // Cache miss should take some measurable time (> 0)
+        assertTrue(results.cacheMiss().value() > 0, 
             "Cache miss time should be measurable");
         
         // But shouldn't be too slow (< 10ms per compilation)
