@@ -156,39 +156,12 @@ public final class JitCompiler {
    *
    * @param base the token before the '/' modifier
    * @return true if this is a valid color utility base
+   * @deprecated Use {@link ColorUtilityValidator#isValidColorUtilityBase(String)} instead.
    */
+  @Deprecated(since = "1.0.0", forRemoval = true)
   private static boolean isValidColorUtilityBase(String base) {
-    if (base == null || base.isEmpty()) return false;
-
-    // Known color utility prefixes
-    String[] colorPrefixes = {
-      "bg", "text", "border", "fill", "stroke", "shadow", "ring", "outline"
-    };
-
-    for (String prefix : colorPrefixes) {
-      if (base.startsWith(prefix + "-")) {
-        // Extract the rest after prefix-
-        String rest = base.substring(prefix.length() + 1);
-        // Should have at least one more dash for color-shade (e.g., red-500)
-        int lastDash = rest.lastIndexOf('-');
-        if (lastDash > 0) {
-          String shadeStr = rest.substring(lastDash + 1);
-          // Validate that the last part is a number (shade)
-          try {
-            Integer.parseInt(shadeStr);
-            return true;
-          } catch (NumberFormatException e) {
-            // Not a valid shade number
-            return false;
-          }
-        }
-        // Named colors without shade (e.g., bg-transparent)
-        if (!rest.contains("-")) {
-          return true;
-        }
-      }
-    }
-    return false;
+    // Delegate to shared utility class
+    return ColorUtilityValidator.isValidColorUtilityBase(base);
   }
 
   /**
