@@ -123,6 +123,7 @@ public final class TwStyle {
     java.util.List<String> layoutDependentTokens = new java.util.ArrayList<>();
     java.util.List<String> layoutMigrationTokens = new java.util.ArrayList<>();
     java.util.List<String> variantTokens = new java.util.ArrayList<>();
+    java.util.List<String> effectTokens = new java.util.ArrayList<>();
     java.util.Set<String> unknownTokens = new java.util.HashSet<>();
 
     for (String token : tokens) {
@@ -151,6 +152,12 @@ public final class TwStyle {
           continue;
         }
 
+        // Handle filter/effect tokens via TwEffect (blur, brightness, contrast, etc.)
+        if (isEffectToken(baseUtility)) {
+          effectTokens.add(hasVariant ? t : baseUtility);
+          continue;
+        }
+
         if (hasVariant) {
           // Tokens with variants need special handling via VariantManager
           variantTokens.add(t);
@@ -170,6 +177,13 @@ public final class TwStyle {
             unknownTokens.add(t);
           }
         }
+      }
+    }
+
+    // Apply effect tokens via TwEffect
+    if (!effectTokens.isEmpty()) {
+      for (String effectToken : effectTokens) {
+        applyEffectToken(node, effectToken);
       }
     }
 
@@ -769,5 +783,80 @@ public final class TwStyle {
    */
   private static boolean isValidColorUtilityBase(String base) {
     return ColorUtilityValidator.isValidColorUtilityBase(base);
+  }
+
+  /**
+   * Checks if a token is a filter/effect token that should be handled via TwEffect.
+   * Effect tokens include: blur, brightness, contrast, grayscale, invert, sepia, hue-rotate,
+   * saturate, drop-shadow, backdrop-blur.
+   *
+   * @param token the base token (without variant prefix)
+   * @return true if this token should be applied via TwEffect instead of CSS
+   */
+  private static boolean isEffectToken(String token) {
+    if (token == null || token.isEmpty()) {
+      return false;
+    }
+    // Effect prefixes that map to JavaFX effects instead of CSS
+    return token.startsWith("blur")
+        || token.startsWith("brightness")
+        || token.startsWith("contrast")
+        || token.startsWith("grayscale")
+        || token.startsWith("invert")
+        || token.startsWith("sepia")
+        || token.startsWith("hue-rotate")
+        || token.startsWith("saturate")
+        || token.startsWith("drop-shadow")
+        || token.startsWith("backdrop-blur");
+  }
+
+  /**
+   * Applies an effect token to a node via TwEffect.
+   * Parses the token and calls the appropriate TwEffect method.
+   *
+   * @param node the node to apply the effect to
+   * @param token the effect token (e.g., "blur-sm", "brightness-125", "grayscale")
+   */
+  private static void applyEffectToken(javafx.scene.Node node, String token) {
+    try {
+      if (token.startsWith("blur-")) {
+        String size = token.substring(5);
+        if ("none".equals(size)) {
+          TwEffect.blurNone(node);
+        } else {
+          TwEffect.blurWithSize(node, size);
+        }
+      } else if (token.equals("blur")) {
+        TwEffect.blur(node, 0); // default blur
+      } else if (token.startsWith("brightness-")) {
+        String percentage = token.substring(11);
+        TwEffect.brightnessWithPercentage(node, percentage);
+      } else if (token.equals("brightness")) {
+        TwEffect.brightness(node, 1.0); // default no change
+      } else if (token.startsWith("contrast-")) {
+        String percentage = token.substring(9);
+        TwEffect.contrastWithPercentage(node, percentage);
+      } else if (token.equals("contrast")) {
+        TwEffect.contrast(node, 1.0); // default no change
+      } else if (token.equals("grayscale")) {
+        TwEffect.grayscale(node);
+      } else if (token.equals("grayscale-0")) {
+        TwEffect.grayscaleNone(node);
+      } else if (token.equals("invert")) {
+        TwEffect.invert(node);
+      } else if (token.equals("invert-0")) {
+        TwEffect.invertNone(node);
+      } else if (token.equals("sepia")) {
+        TwEffect.sepia(node);
+      } else if (token.equals("sepia-0")) {
+        TwEffect.sepiaNone(node);
+      } else if (TwConfig.isDebug()) {
+        System.out.println("[TailwindFX Warning] Unsupported effect token: " + token);
+      }
+    } catch (Exception e) {
+      if (TwConfig.isDebug()) {
+        System.out.println("[TailwindFX Warning] Failed to apply effect \"" + token + "\": " + e.getMessage());
+      }
+    }
   }
 }
