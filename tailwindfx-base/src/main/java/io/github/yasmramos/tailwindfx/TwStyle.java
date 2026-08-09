@@ -1,5 +1,6 @@
 package io.github.yasmramos.tailwindfx;
 
+import io.github.yasmramos.tailwindfx.core.ColorUtilityValidator;
 import io.github.yasmramos.tailwindfx.core.Preconditions;
 import io.github.yasmramos.tailwindfx.core.UtilityConflictResolver;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
@@ -122,6 +123,7 @@ public final class TwStyle {
     java.util.List<String> layoutDependentTokens = new java.util.ArrayList<>();
     java.util.List<String> layoutMigrationTokens = new java.util.ArrayList<>();
     java.util.List<String> variantTokens = new java.util.ArrayList<>();
+    java.util.Set<String> unknownTokens = new java.util.HashSet<>();
 
     for (String token : tokens) {
       if (token == null || token.isBlank()) continue;
@@ -141,11 +143,12 @@ public final class TwStyle {
         String baseUtility = hasVariant ? stripVariantPrefix(t) : t;
 
         // Check for unsupported variants (responsive/state) on layout-dependent properties
+        // Instead of throwing exception, delegate to VariantManager for automatic handling
         if (hasVariant && isLayoutDependent(baseUtility)) {
-          throw new UnsupportedOperationException(
-              "Layout-dependent properties do not support responsive or state variants: "
-                  + t
-                  + ". Use programmatic logic instead.");
+          // Delegate to VariantManager for automatic handling instead of throwing exception
+          // This enables responsive layout properties like md:gap-4, hover:p-2, etc.
+          variantTokens.add(t);
+          continue;
         }
 
         if (hasVariant) {
@@ -162,6 +165,10 @@ public final class TwStyle {
           }
         } else {
           cssClasses.add(t);
+          // Track unknown tokens for warning (single pass)
+          if (!io.github.yasmramos.tailwindfx.style.Styles.isKnownUtilityClass(t)) {
+            unknownTokens.add(t);
+          }
         }
       }
     }
@@ -193,23 +200,10 @@ public final class TwStyle {
     }
 
     // Handle unknown tokens with debug warning (Smart fallback as documented in README)
-    // Only check non-variant, non-JIT tokens to avoid false positives
-    for (String token : tokens) {
-      if (token == null || token.isBlank()) continue;
-      for (String t : token.split("\\s+")) {
-        if (t.isBlank()) continue;
-        // Skip variant tokens (hover:, focus:, etc.) and arbitrary properties ([color:red])
-        // Also skip arbitrary variants ([&:hover]:utility, [@media...]:utility)
-        boolean isArbitraryProperty = t.startsWith("[") && !t.contains("]:");
-        boolean hasVariant = t.contains(":") && !isArbitraryProperty;
-        if (!hasVariant && !isJitToken(t)) {
-          // Check if it's a known CSS class or an unknown token
-          if (!io.github.yasmramos.tailwindfx.style.Styles.isKnownUtilityClass(t)) {
-            if (io.github.yasmramos.tailwindfx.TwConfig.isDebug()) {
-              System.out.println("[TailwindFX Warning] Unknown token ignored: " + t);
-            }
-          }
-        }
+    // Warnings collected during single pass to avoid redundant iteration
+    if (!unknownTokens.isEmpty() && io.github.yasmramos.tailwindfx.TwConfig.isDebug()) {
+      for (String t : unknownTokens) {
+        System.out.println("[TailwindFX Warning] Unknown token ignored: " + t);
       }
     }
 
@@ -481,78 +475,45 @@ public final class TwStyle {
     }
   }
 
-  /** Parses a CSS value string (e.g., "20px", "2.5rem", "10") to pixels. */
+  /** Parses CSS value string to pixels using configured unit size. */
   private static double parseCssValue(String value) {
     if (value.endsWith("px")) {
       try {
         return Double.parseDouble(value.substring(0, value.length() - 2));
       } catch (NumberFormatException e) {
+        if (TwConfig.isDebug()) {
+          System.out.println("[TailwindFX Warning] Invalid px value: " + value);
+        }
         return 0;
       }
     } else if (value.endsWith("rem")) {
       try {
         double rem = Double.parseDouble(value.substring(0, value.length() - 3));
-        return rem * 16.0; // Assuming 1rem = 16px
+        return rem * TwConfig.unit();
       } catch (NumberFormatException e) {
+        if (TwConfig.isDebug()) {
+          System.out.println("[TailwindFX Warning] Invalid rem value: " + value);
+        }
         return 0;
       }
     } else if (value.endsWith("em")) {
       try {
         double em = Double.parseDouble(value.substring(0, value.length() - 2));
-        return em * 16.0; // Assuming 1em = 16px
+        return em * TwConfig.unit();
       } catch (NumberFormatException e) {
+        if (TwConfig.isDebug()) {
+          System.out.println("[TailwindFX Warning] Invalid em value: " + value);
+        }
         return 0;
       }
     } else {
       try {
         return Double.parseDouble(value);
       } catch (NumberFormatException e) {
+        if (TwConfig.isDebug()) {
+          System.out.println("[TailwindFX Warning] Invalid numeric value: " + value);
+        }
         return 0;
-      }
-    }
-  }
-
-  /** Applies flex-related styles (flex-*, grow, shrink). */
-  private static void applyFlexStyle(Node node, javafx.scene.layout.Pane parent, String token) {
-    if (token.equals("grow") || token.equals("flex-1")) {
-      if (parent instanceof HBox) {
-        HBox.setHgrow(node, Priority.ALWAYS);
-      } else if (parent instanceof VBox) {
-        VBox.setVgrow(node, Priority.ALWAYS);
-      }
-    } else if (token.equals("shrink") || token.equals("flex-none")) {
-      if (parent instanceof HBox) {
-        HBox.setHgrow(node, Priority.NEVER);
-      } else if (parent instanceof VBox) {
-        VBox.setVgrow(node, Priority.NEVER);
-      }
-    } else if (token.equals("flex-auto")) {
-      if (parent instanceof HBox) {
-        HBox.setHgrow(node, Priority.ALWAYS);
-      } else if (parent instanceof VBox) {
-        VBox.setVgrow(node, Priority.ALWAYS);
-      }
-    } else if (token.equals("flex-initial")) {
-      if (parent instanceof HBox) {
-        HBox.setHgrow(node, Priority.SOMETIMES);
-      } else if (parent instanceof VBox) {
-        VBox.setVgrow(node, Priority.SOMETIMES);
-      }
-    } else if (token.startsWith("flex-")) {
-      // Handle arbitrary flex values like flex-[2]
-      try {
-        String value = token.substring(5);
-        if (value.startsWith("[") && value.endsWith("]")) {
-          value = value.substring(1, value.length() - 1);
-        }
-        double flexValue = Double.parseDouble(value);
-        if (parent instanceof HBox) {
-          HBox.setHgrow(node, Priority.ALWAYS);
-        } else if (parent instanceof VBox) {
-          VBox.setVgrow(node, Priority.ALWAYS);
-        }
-      } catch (NumberFormatException e) {
-        // Ignore invalid flex values
       }
     }
   }
@@ -565,9 +526,23 @@ public final class TwStyle {
       int end = token.indexOf(']');
       String value = token.substring(start, end);
       if (value.endsWith("px")) {
-        return Integer.parseInt(value.substring(0, value.length() - 2)) / 4;
+        try {
+          return Integer.parseInt(value.substring(0, value.length() - 2)) / 4;
+        } catch (NumberFormatException e) {
+          if (TwConfig.isDebug()) {
+            System.out.println("[TailwindFX Warning] Invalid px value in token: " + token);
+          }
+          return 0;
+        }
       }
-      return Integer.parseInt(value);
+      try {
+        return Integer.parseInt(value);
+      } catch (NumberFormatException e) {
+        if (TwConfig.isDebug()) {
+          System.out.println("[TailwindFX Warning] Invalid numeric value in token: " + token);
+        }
+        return 0;
+      }
     }
 
     // Handle negative values
@@ -583,6 +558,9 @@ public final class TwStyle {
         return negative ? -value : value;
       } catch (NumberFormatException e) {
         // Handle non-numeric values like "auto", "full"
+        if (TwConfig.isDebug()) {
+          System.out.println("[TailwindFX Warning] Non-numeric value in token: " + token);
+        }
         return 0;
       }
     }
@@ -636,12 +614,6 @@ public final class TwStyle {
         };
 
     node.parentProperty().addListener(wrapper.listener);
-  }
-
-  /** Checks if a token has unsupported variants (responsive or state prefixes). */
-  private static boolean hasUnsupportedVariant(String token) {
-    return RESPONSIVE_PREFIXES.stream().anyMatch(token::startsWith)
-        || STATE_PREFIXES.stream().anyMatch(token::startsWith);
   }
 
   /** Checks if a token requires layout context (parent container) to be applied. */
@@ -790,19 +762,12 @@ public final class TwStyle {
   /**
    * Validates if a base token (before /) is a valid color utility that can have opacity. Prevents
    * false positives like "icon/large" being treated as JIT.
+   *
+   * @param base the token before the '/' modifier
+   * @return true if this is a valid color utility base
+   * @see ColorUtilityValidator#isValidColorUtilityBase(String)
    */
   private static boolean isValidColorUtilityBase(String base) {
-    // Color utilities that support opacity: bg-*, text-*, border-*, ring-*, shadow-*
-    String[] colorPrefixes = {"bg-", "text-", "border-", "ring-", "shadow-"};
-
-    for (String prefix : colorPrefixes) {
-      if (base.startsWith(prefix) && base.length() > prefix.length()) {
-        String colorPart = base.substring(prefix.length());
-        // Valid color patterns: blue-500, red-900, gray-50, custom-color
-        // Must contain at least one hyphen or be a simple color name
-        return colorPart.contains("-") || colorPart.matches("[a-zA-Z]+");
-      }
-    }
-    return false;
+    return ColorUtilityValidator.isValidColorUtilityBase(base);
   }
 }

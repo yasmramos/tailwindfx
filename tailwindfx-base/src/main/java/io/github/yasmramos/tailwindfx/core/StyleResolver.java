@@ -5,12 +5,12 @@ import io.github.yasmramos.tailwindfx.theme.ThemeConfig;
 import java.util.Map;
 
 /**
- * StyleResolver — Resuelve tokens Tailwind en valores de estilo.
+ * StyleResolver — Resolves Tailwind tokens into style values.
  *
- * <p>Responsabilidad: Convertir StyleTokens en valores CSS concretos. No maneja cache, ni logging,
- * ni métricas. Solo resolución pura.
+ * <p>Responsibility: Convert StyleTokens into concrete CSS values. Does not handle caching, logging,
+ * or metrics. Only pure resolution.
  *
- * <p>Ejemplos: - Token(p-4, scale=4) → "16px" - Token(bg-blue-500) → "rgb(59,130,246)" -
+ * <p>Examples: - Token(p-4, scale=4) → "16px" - Token(bg-blue-500) → "rgb(59,130,246)" -
  * Token(w-[320px]) → "320px"
  */
 public final class StyleResolver {
@@ -24,9 +24,9 @@ public final class StyleResolver {
   }
 
   /**
-   * Resuelve un token en un valor de propiedad CSS.
+   * Resolves a token into a CSS property value.
    *
-   * @return Valor CSS o null si el token no se puede resolver
+   * @return CSS value or null if the token cannot be resolved
    */
   public String resolve(StyleToken token) {
     if (token == null || token.kind == StyleToken.Kind.UNKNOWN) {
@@ -50,7 +50,7 @@ public final class StyleResolver {
       return (int) spacing[scale] + "px";
     }
 
-    // Fallback para scales fuera de rango
+    // Fallback for scales out of range
     return (scale * 4) + "px";
   }
 
