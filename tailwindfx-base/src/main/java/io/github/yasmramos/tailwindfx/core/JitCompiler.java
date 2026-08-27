@@ -533,7 +533,7 @@ public final class JitCompiler {
   /**
    * @deprecated Use {@link GradientProcessor#processGradientTokens(String[])} instead.
    */
-  @Deprecated(since = "1.0.0", forRemoval = true)
+  @Deprecated(since = "0.1.0", forRemoval = true)
   private static String resolveGradientColor(String colorToken) {
     // Delegate to GradientProcessor for consistency
     return null; // This method is no longer used internally
@@ -542,7 +542,7 @@ public final class JitCompiler {
   /**
    * @deprecated Use {@link GradientProcessor#processGradientTokens(String[])} instead.
    */
-  @Deprecated(since = "1.0.0", forRemoval = true)
+  @Deprecated(since = "0.1.0", forRemoval = true)
   private static String buildGradient(String direction, String from, String via, String to) {
     // Delegate to GradientProcessor for consistency
     return null; // This method is no longer used internally

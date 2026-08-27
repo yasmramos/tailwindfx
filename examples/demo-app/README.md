@@ -58,7 +58,7 @@ The Maven plugin is configured in `pom.xml`:
 <plugin>
     <groupId>io.github.yasmramos.tailwindfx</groupId>
     <artifactId>tailwindfx-maven-plugin</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
     <executions>
         <execution>
             <goals>

@@ -146,9 +146,23 @@ TwAnimation.onHoverScale(btn, 1.05);
 ```xml
 <dependency>
     <groupId>io.github.yasmramos</groupId>
-    <artifactId>tailwindfx</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>tailwindfx-base</artifactId>
+    <version>0.1.0</version>
+    <note>This is an early preview release. The artifact is published to OSSRH/Sonatype snapshot repository.</note>
 </dependency>
+```
+
+**Note:** This is an **early preview** version (`0.1.0`). To use snapshot versions, add the following repository to your `pom.xml`:
+
+```xml
+<repositories>
+    <repository>
+        <id>ossrh-snapshots</id>
+        <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        <releases><enabled>false</enabled></releases>
+        <snapshots><enabled>true</enabled></snapshots>
+    </repository>
+</repositories>
 ```
 ---
 
@@ -299,6 +313,31 @@ TwTheme.of(scene).dark().apply();
 ## License
 
 MIT — see [LICENSE](LICENSE) for details.
+
+---
+
+## Known Limitations
+
+TailwindFX is designed to bring Tailwind CSS concepts to JavaFX, but JavaFX has inherent limitations compared to web browsers. Please be aware of the following:
+
+### Partial Implementation ⚠️
+The following features detect tokens but require manual handling in your application:
+
+- **Responsive Design**: Tokens like `sm:`, `md:`, `lg:` are detected but require manual implementation using `ResponsiveNode` or scene width bindings
+- **Dark Mode**: The `dark:` prefix is recognized but requires manual theme switching via `TwTheme.of(scene).dark().apply()`
+- **Transitions**: CSS transition properties are generated but require JavaFX `Timeline` for actual animation effects
+- **Animations**: `animate-*` classes are detected but should use `TwAnimation` API for proper JavaFX animations
+
+### Not Supported (JavaFX Limitations) ❌
+The following CSS features are **not supported** due to JavaFX platform limitations:
+
+- **`!important` in inline styles**: JavaFX does not support the `!important` modifier in inline styles. Tokens with `!` suffix will compile but the importance flag is ignored
+- **CSS custom properties**: Variables like `--my-color` are not supported in JavaFX CSS
+- **CSS keyframe animations**: Use `TwAnimation` API instead (`fadeIn()`, `slideUp()`, etc.)
+- **Advanced selectors**: Pseudo-selectors like `:has()`, `:where()`, `:is()` are not supported
+- **Pseudo-elements**: `::before` and `::after` are not available in JavaFX
+
+These are **platform limitations**, not bugs. Report only issues related to TailwindFX's own logic and implementation.
 
 ---
 

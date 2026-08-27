@@ -5,7 +5,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [1.0-SNAPSHOT] - Unreleased
+## [0.1.0] - 2025-01-XX
+
+> **Early Preview Release** — This is an initial preview version intended for testing and feedback. Some features may be incomplete or subject to change.
 
 ### Added
 - **Comprehensive Javadoc for `FxAnimation`** — Complete API documentation with examples, parameter descriptions, and usage guidelines (PR #69)
@@ -76,7 +78,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Java 17 Migration** — Project migrated from Java 21 to Java 17 for broader compatibility
 - **`FxAnimation` as Public API** — Extracted `FxAnimation` as public class, deprecated `AnimationUtil`
 - **Unified `apply()` method** — Enhanced to auto-detect CSS classes and JIT tokens
-- **Examples refactored** — Moved to separate `tailwindfx-examples` Maven project
+- **Examples refactored** — Example applications moved to `examples/` directory (standalone projects, not part of main build)
 - **TestFX integration** — Comprehensive headless testing with Monocle and xvfb
 - **Documentation overhaul** — Added CONTRIBUTING.md, CODE_OF_CONDUCT.md, updated README
 - **MIT License** — Added LICENSE file with 2026 copyright
@@ -125,4 +127,4 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Java 17 required** — Update your JDK from Java 21 to Java 17
 - **`jit()` method deprecated** — Use `apply()` which now auto-detects JIT tokens
 - **`applyDiff()` made private** — Internal optimization, use `apply()` instead
-- **Examples moved** — Example applications now in separate `tailwindfx-examples` module
+- **Examples are standalone** — Example applications in `examples/` directory are separate projects for demonstration purposes only
