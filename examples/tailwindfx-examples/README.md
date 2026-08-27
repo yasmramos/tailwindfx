@@ -68,7 +68,7 @@ tailwindfx-examples/
     <version>1.0.0</version>
     
     <properties>
-        <tailwindfx.version>1.0-SNAPSHOT</tailwindfx.version>
+        <tailwindfx.version>0.1.0</tailwindfx.version>
         <javafx.version>25.0.1</javafx.version>
     </properties>
     
