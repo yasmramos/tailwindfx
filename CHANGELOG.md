@@ -10,121 +10,138 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 > **Early Preview Release** — This is an initial preview version intended for testing and feedback. Some features may be incomplete or subject to change.
 
 ### Added
-- **Comprehensive Javadoc for `FxAnimation`** — Complete API documentation with examples, parameter descriptions, and usage guidelines (PR #69)
-- **Tailwind v4.1 CSS utilities** — `overflow-wrap`, `word-break`, `whitespace` classes
-- **SVG utilities** — `.fill-*`, `.stroke-*`, `.stroke-width-*`, `.stroke-dashed`, `.stroke-dotted`
-- **Text-shadow** — `.text-shadow-sm/md/lg/xl/2xl` + colored variants (`.text-shadow-blue`, etc.)
-- **Component presets** — `.card`, `.card-dark`, `.card-elevated`, `.badge-*`, `.modal-*`, `.drawer`, `.tooltip-*`, `.glass`, `.neumorph`
-- **`FxDataTable<T>`** — declarative, sortable, filterable, paginated TableView wrapper
-- **`Styles.textShadow*()`** — Java API for text-shadow (DropShadow on Text/Label)
-- **`Styles.dropShadow()`** — colored drop-shadow with arbitrary color + alpha
-- **`Styles.clipCircle/Rounded/Mask()`** — clip and mask utilities
-- **`Styles.rotateX/Y()`**, **`Styles.translateZ()`**, **`Styles.perspective()`** — 3D transforms
-- **`Styles.glass/glassDark/neumorph/neumorphInset()`** — effect presets
-- **`Styles.setReducedMotion/shouldAnimate/playIfMotionOk()`** — motion-reduce support
-- **`Styles.fill/stroke/strokeWidth()`** — SVG shape helpers
-- **`TailwindFXMetrics` alert system** — `onAlert()`, `alertOnLowCacheHitRatio()`, `alertOnHighConflictRate()`, `alertOnSlowCompile()`
-- **`JitCompiler`** — `drop-shadow-[#hex]`, `text-shadow-[rgba]`, `stroke-[n]`, `fill-[#hex]`, `aspect-ratio-[w/h]` arbitrary tokens
-- **`FxDataTable` CSS** — `.table-striped`, `.table-hover`, `.table-compact`, `.table-bordered`, `.table-dark`, `.search-field`, `.row-even/odd`
-- **`UtilityConflictResolver`** — v4.1 categories: `text-shadow`, `drop-shadow`, `fill`, `stroke`, `clip`, `break`, `skew-x/y`, `aspect`, `rotate-x/y`, `translate-z`, component categories
-- **`FxFlexPane.computePrefHeight`** — correct wrap=true height computation
-- **`FxFlexPane.flex-basis`** — `setBasis/getBasis()`
-- **`FxFlexPane.setDirectionAnimated()`** — animated direction change
-- **`TailwindFX.dataTable()`**, **`flexBasis()`**, **`flexDirection()`** — new entry-point shortcuts
-- **Module descriptor** — `module-info.java` for modular projects
-- **Package Javadoc** — `package-info.java` with class overview
-- **Build file** — `pom.xml` (Maven, JavaFX 21, shade plugin)
-- **Comprehensive example** — `TailwindFXExample` updated to demo all major features
-- **`ResponsiveNode`** — per-node responsive utility rules driven by `Scene.widthProperty()`
-- **`FxFlexPane`** — full Flexbox model: direction, wrap, justify-content (6), align-items (4), gap, flex-grow, flex-shrink, order, align-self
-- **`StylePerf`** — StyleDiff cache (skip redundant applies), batch apply, auto-batch threshold
-- **`TailwindFXMetrics`** — AtomicLong counters for cache hits/misses, compilations, conflicts, themes, animations, layout passes
-- **`BreakpointManager`** — responsive-aware category detection (`md:w-4` scoped to `md:w` category)
-- **`ThemeScopeManager`** — `findClosestScope()`, `inheritScope()`, `refreshScope()`
-- **`AnimationUtil`** — `removeHoverEffects()`, auto-cancel on scene detach, `storeHoverHandlers()`
-- **`JitCompiler`** — LRU eviction at `MAX_CACHE_SIZE=2000`, thread-safe `synchronized(CACHE)`
-- **`UtilityConflictResolver`** — `cleanupNode()`, `autoCleanup()`, `invalidateCategoryCache()`
-- **`TailwindFX.Config`** — `autoBatch(threshold)` configuration
-- Specific imports replacing wildcards across all 13 files
-- **`TailwindFX.aspectRatio/Square()`** — Java equivalent of CSS `aspect-ratio`
-- **`TailwindFX.backdropBlur*()`** — BoxBlur glassmorphism helpers
-- **`TailwindFX.transition()`** — CSS `transition` equivalent via Timeline
-- **`TailwindFX.cleanupNode/autoCleanup()`** — cache cleanup + memory management
-- **`TailwindFX.applyDiff()`** — StyleDiff entry-point shortcut
-- **`TailwindFX.batch/batchAsync()`** — batch apply entry-point
-- **`FxFlexPane.setBasis/getShrink/setOrder/setAlignSelf()`** — flex parity features
-- **`FxFlexPane.ensureLayoutOnParent()`** — deferred `requestLayout()` for pre-parenting
-- **`TailwindFXMetrics.recordLayoutPass()`** — layout timing for FxFlexPane
-- **`TailwindFX.metrics()`** — entry-point access to `TailwindFXMetrics`
-- **`FxGridPane`** — grid-template-areas, auto-flow, masonry layout
-- **`ComponentFactory`** — high-level card, badge, modal, drawer, tooltip, datatable builders
-- **`FxLayout` TilePane** — tile layout support in FxLayout builder
-- **`Styles.java`** — skewX/Y, objectCover/Contain, imgSize, 40+ grid/margin/filter methods
-- **`JitCompiler`** — gradient parsing, hex validation, negative translate, arbitrary values
-- **`ThemeManager`** — save/load/delete theme persistence via `java.util.prefs.Preferences`
-- **`ThemeScopeManager`** — scoped themes for any Pane subtree
-- **`AnimationUtil`** — 14 animations, FxAnimation fluent API, AnimationRegistry, ResponsiveAnimationGuard
-- **`TailwindFX.Config`** — unit, breakpoints, debug, warnOnParent
-- **`TailwindFX.watch()`** — hot-reload CSS in development
-- **`TailwindFX.debugReport()`** — runtime node inspection
-- CSS: 11 900+ lines, 1 400+ utility classes
-- CSS utility framework: layout, typography, colors, borders, effects, transforms
-- `TailwindFX.install()`, `apply()`, `jit()`, `jitApply()`
-- `ColorPalette` — 209 Tailwind colors
-- `BreakpointManager` — SM/MD/LG/XL/XXL breakpoints
-- `ThemeManager` — dark/light/blue/green/purple/rose/slate presets
 
-### Changed
-- **Java 17 Migration** — Project migrated from Java 21 to Java 17 for broader compatibility
-- **`FxAnimation` as Public API** — Extracted `FxAnimation` as public class, deprecated `AnimationUtil`
-- **Unified `apply()` method** — Enhanced to auto-detect CSS classes and JIT tokens
-- **Examples refactored** — Example applications moved to `examples/` directory (standalone projects, not part of main build)
-- **TestFX integration** — Comprehensive headless testing with Monocle and xvfb
-- **Documentation overhaul** — Added CONTRIBUTING.md, CODE_OF_CONDUCT.md, updated README
-- **MIT License** — Added LICENSE file with 2026 copyright
+#### Core API — Static Facade Entry Point
+- **`TailwindFX`** — Main static facade delegating to specialized facades: `TwStyle`, `TwInstall`, `TwTheme`, `TwLayout`, `TwResponsive`, `TwEffect`, `TwMetrics`, `TwBatch`, `TwConfig`, `TwAnimation`
+- Key methods: `apply()`, `jit()`, `remove()`, `toggle()`, `install()`, `installBase()`, `installDark()`, `theme()`, `layout()`
 
-### Fixed
-- `JitCompiler` regex patterns to prevent false positives in arbitrary value parsing
-- `FxFlexPane.computePrefHeight` returned wrong height for `wrap=true` rows
-- `UtilityConflictResolver` — skew, aspect, 3D transform categories were missing, causing classes to accumulate instead of replace
-- Spanish strings remaining in log messages (complete sweep)
-- Hover effects (`onHoverScale/Lift/Dim`) used `setOnMouseEntered` (overwrites) → replaced with `addEventHandler` (chains)
-- `JitCompiler` alpha clamp: was warning-only, now actually clamps to `[0, 100]`
-- `UtilityConflictResolver.invalidateCache(null)` — added null safety
-- All log/exception/comment strings normalized to English
-- Wildcard imports replaced with specific imports in all Java files
-- TestFX tests fixed for JavaFX 17 compatibility (disabled module-info)
-- Avatar component test updated for Java 17
-- Documentation typos and grammatical errors corrected
-- README updated to reflect Java 17 requirement
+#### Style System (`style` package)
+- **`Styles`** — Comprehensive utility class for applying Tailwind-like styles programmatically
+- **`StyleMerger`** — Merges multiple style maps with conflict resolution
+- **`StylePerf`** — Performance optimization with style diff caching and batch apply
+- **`StyleToken`** — Represents parsed style tokens
+- **`TypeHint`** — Type hints for style resolution
 
-### Removed
-- **`AnimationUtil.java`** — Removed dead code, functionality fully migrated to `FxAnimation`
-- **Deprecated JIT methods** — Cleaned up legacy API surface
-- **Old documentation files** — Removed outdated docs, keeping `docs/` folder empty for comprehensive rewrite
-- **Preview features** — Removed Java 21 preview features for Java 17 compatibility
-- **`TailwindFXExample.java`** — Moved to examples module
-- **Obsolete test suites** — Removed deprecated ComponentFactory, TailwindFXMain, and ThemeManagerRefresh tests
+#### Theme System (`theme` package)
+- **`ThemeManager`** — Manages light/dark/custom themes with persistence via `java.util.prefs.Preferences`
+- **`ThemeScopeManager`** — Scoped themes for any Pane subtree with `findClosestScope()`, `inheritScope()`, `refreshScope()`
+- **`ThemeConfig`** — Theme configuration options
+- **`ThemeCustomizationPanel`** — UI panel for runtime theme customization
+
+#### Layout Components (`layout` package)
+- **`TwFlexPane`** — Full Flexbox model: direction, wrap, justify-content (6 variants), align-items (4 variants), gap, flex-grow, flex-shrink, order, align-self, flex-basis
+- **`TwGridPane`** — Grid layout with grid-template-areas, auto-flow, and masonry support
+
+#### UI Components (`components` package)
+- **`TwAlert`** — Alert/notification component
+- **`TwAvatar`** — Avatar image component
+- **`TwBadge`** — Badge/label component with variants
+- **`TwButton`** — Styled button component
+- **`TwCard`** — Card container component
+- **`TwCheckbox`** — Checkbox component
+- **`TwDataTable<T>`** — Declarative, sortable, filterable, paginated TableView wrapper
+- **`TwInput`** — Text input component
+- **`TwProgressBar`** — Progress indicator component
+- **`TwSelect`** — Dropdown selection component
+- **`TwSpinner`** — Loading spinner component
+- **`TwVirtualFlow`** — Virtualized list component
+- **`TWAccordion`** — Accordion/collapsible panel component
+- **`TWTitledPane`** — Titled pane component
+
+#### Animation System (`animation` package)
+- **`TwAnimation`** — Fluent animation API with 14+ built-in animations, animation registry, and responsive animation guard
+
+#### Core Engine (`core` package)
+- **`JitCompiler`** — Just-in-time CSS compiler with LRU cache (2000 entries), thread-safe operations, supports arbitrary values like `drop-shadow-[#hex]`, `text-shadow-[rgba]`, `stroke-[n]`, `fill-[#hex]`, `aspect-ratio-[w/h]`
+- **`StyleResolver`** — Resolves style tokens to CSS properties
+- **`UtilityConflictResolver`** — Handles v4.1 categories including text-shadow, drop-shadow, fill, stroke, clip, break, skew-x/y, aspect, rotate-x/y, translate-z, and component categories; includes `cleanupNode()`, `autoCleanup()`, `invalidateCategoryCache()`
+- **`VariantManager`** — Manages state variants (hover, focus, active, etc.)
+- **`VariantParser`** — Parses variant prefixes from utility classes
+- **`GradientProcessor`** — Processes gradient utilities
+- **`RingProcessor`** — Processes ring/border utilities
+- **`ScrollSnapProcessor`** — Processes scroll-snap utilities
+- **`AspectRatioProcessor`** — Processes aspect-ratio utilities
+- **`ContainerQueryProcessor`** — Processes container query utilities
+- **`TransitionProcessor`** — Processes CSS transition utilities
+- **`TypeHintProcessor`** — Processes type hints for style resolution
+- **`CssPropertyMapper`** — Maps utility classes to CSS properties
+- **`ThemeCssGenerator`** — Generates theme-specific CSS
+- **`ComponentStyles`** — Predefined component style presets
+- **`ColorUtilityValidator`** — Validates color utility classes
+- **`ManualLruCache`** — Thread-safe LRU cache implementation
+- **`Preconditions`** — Utility for argument validation
+
+#### Responsive & Breakpoint System
+- **`BreakpointManager`** (`breakpoint` package) — Responsive-aware category detection with SM/MD/LG/XL/XXL breakpoints
+- **`ResponsiveNode`** (`responsive` package) — Per-node responsive utility rules driven by `Scene.widthProperty()`
+- **`ContainerQuery`** (`responsive` package) — Container query support
+
+#### Color System (`color` package)
+- **`ColorPalette`** — 209 Tailwind colors with programmatic access
+
+#### Internationalization (`i18n` package)
+- **`TwI18n`** — Internationalization support for components
+
+#### Metrics & Monitoring (`metrics` package)
+- **`TailwindFXMetrics`** — AtomicLong counters for cache hits/misses, compilations, conflicts, themes, animations, layout passes; alert system with `onAlert()`, `alertOnLowCacheHitRatio()`, `alertOnHighConflictRate()`, `alertOnSlowCompile()`
+
+#### Benchmarking (`benchmark` package)
+- **`Benchmark`** — Performance benchmarking utilities
+
+#### Configuration & Batch Operations
+- **`TwConfig`** — Configuration options including unit, breakpoints, debug mode, warn-on-parent, auto-batch threshold
+- **`TwBatch`** — Batch style application with `batch()` and `batchAsync()` methods
+
+#### Maven Plugin
+- **`tailwindfx-maven-plugin`** — Maven plugin for TailwindFX integration
+- **`TailwindCssMojo`** — Mojo for processing Tailwind CSS during build
+
+#### Module Support
+- **`module-info.java`** — Java module descriptor for modular projects
+- **`package-info.java`** — Package-level Javadoc documentation
+
+### Tests
+
+Comprehensive test suite with 59+ test classes covering:
+
+#### Component Tests
+- `TwAlertTest`, `TwAvatarTest`, `TwBadgeTest`, `TwButtonTest`, `TwCardTest`, `TwCheckboxTest`, `TwDataTableTest`, `TwInputTest`, `TwFlexPaneTest`
+
+#### Layout Tests
+- `TwFlexPaneTest`, `TwGridPaneTest`, `TwLayoutTest`
+
+#### Core Engine Tests
+- `JitCompilerTest`, `JitCompilerExtendedTest`, `VariantManagerTest`, `VariantParserTest`, `GradientProcessorTest`, `RingProcessorTest`, `AspectRatioProcessorTest`, `ContainerQueryProcessorTest`, `TransitionProcessorTest`, `TypeHintProcessorTest`, `UtilityConflictResolverTest`, `StyleResolverTest`, `CssPropertyMapperTest`, `ThemeCssGeneratorTest`, `LruCacheTest`, `PreconditionsTest`
+
+#### Style System Tests
+- `StylesTest`, `StyleTokenTest`, `StyleTokenExtendedTest`, `StyleMergerTest`, `StylePerfTest`, `StylePerfAdditionalTest`, `TypeHintTest`
+
+#### Theme System Tests
+- `ThemeManagerTest`, `ThemeScopeManagerTest`
+
+#### Integration Tests
+- `TailwindFXTest`, `TailwindFXIntegrationTest`, `AdvancedTestFXIntegrationTest`, `IntegrationTest`, `MetricsIntegrationTest`
+
+#### Responsive & Breakpoint Tests
+- `BreakpointManagerTest`, `ResponsiveNodeTest`, `ContainerQueryTest`
+
+#### Color & i18n Tests
+- `ColorPaletteTest`, `TwI18nTest`
+
+#### Configuration & Batch Tests
+- `TwConfigTest`, `TwBatchTest`, `TwMetricsTest`, `TwResponsiveTest`, `TwStyleTest`, `TwStyleLayoutTest`, `TwThemeTest`, `TwEffectTest`
+
+#### Benchmark Tests
+- `BenchmarkTest`
+
+#### CSS Utilities Tests
+- `CssUtilitiesTest`
 
 ### Documentation
-- **`FxAnimation`** — comprehensive JavaDoc added to all methods with detailed descriptions, parameters, return values, and usage examples
 
-### Tests added
-- `FxDataTableTest` — 21 tests covering builder, filter, pagination, search, style
-- `StylesTest` — 13 new tests for v4.1 APIs (textShadow, dropShadow, clip, 3D, glass, neumorph, SVG)
-- `TailwindFXTest` — JIT v4.1 token tests + `TailwindFXMetrics` alert system tests
-- `TestRunner` — `FxDataTableTest` wired in
-- `FxAnimationTest` — Comprehensive animation API tests
-- `ThemeManagerTest` — Theme persistence and propagation tests
-- `AdvancedTestFXIntegrationTest` — Advanced UI integration tests with Monocle
-- `TailwindFXUnifiedApplyTest` — Tests for unified apply() method with JIT detection
-- `FxI18nTest` — Internationalization tests
-- `FxFlexPaneTest` — Flexbox layout tests
-- `EdgeCaseTests` — Edge case handling tests
-
-### Breaking Changes
-- **`AnimationUtil` deprecated** — Migrate to `FxAnimation` fluent API
-- **Java 17 required** — Update your JDK from Java 21 to Java 17
-- **`jit()` method deprecated** — Use `apply()` which now auto-detects JIT tokens
-- **`applyDiff()` made private** — Internal optimization, use `apply()` instead
-- **Examples are standalone** — Example applications in `examples/` directory are separate projects for demonstration purposes only
+- Complete Javadoc for all public APIs including `TwAnimation` with examples, parameter descriptions, and usage guidelines
+- Package-level documentation via `package-info.java` files
+- README.md with setup and usage instructions
+- CONTRIBUTING.md with contribution guidelines
+- CODE_OF_CONDUCT.md with community standards
+- MIT License with 2026 copyright
