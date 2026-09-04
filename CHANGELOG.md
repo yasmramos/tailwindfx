@@ -5,7 +5,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [0.1.0] - 2025-01-XX
+## [0.1.0] - 2026-09-04
 
 > **Early Preview Release** — This is an initial preview version intended for testing and feedback. Some features may be incomplete or subject to change.
 
