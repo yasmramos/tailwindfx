@@ -142,65 +142,24 @@ public final class TransitionProcessor {
   }
 
   private static TransitionResult processTransitionProperty(String token) {
-    String cssProperty;
-
-    switch (token) {
-      case TRANSITION_NONE:
-        cssProperty = "-fx-transition: none;";
-        break;
-      case TRANSITION_ALL:
-        cssProperty =
-            "-fx-transition: -fx-background-color, -fx-text-fill, -fx-opacity, -fx-scale-x, -fx-scale-y;";
-        break;
-      case TRANSITION_COLORS:
-        cssProperty = "-fx-transition: -fx-background-color, -fx-text-fill, -fx-border-color;";
-        break;
-      case TRANSITION_OPACITY:
-        cssProperty = "-fx-transition: -fx-opacity;";
-        break;
-      case TRANSITION_TRANSFORM:
-        cssProperty =
-            "-fx-transition: -fx-scale-x, -fx-scale-y, -fx-rotate, -fx-translate-x, -fx-translate-y;";
-        break;
-      default:
-        return null;
-    }
-
-    return new TransitionResult(cssProperty, "transition", null, null);
+    // JavaFX does not support -fx-transition properties via CSS inline styles.
+    // Transitions should be handled programmatically with Timeline/TwAnimation.
+    // Return null to prevent invalid -fx-transition-* properties from being injected.
+    return null;
   }
 
   private static TransitionResult processDuration(String token) {
-    String durationValue = token.substring(DURATION_PREFIX.length());
-    Integer durationMs = DURATIONS.get(durationValue);
-
-    if (durationMs == null) {
-      // Try parsing as arbitrary value
-      if (durationValue.startsWith("[") && durationValue.endsWith("]")) {
-        String arbitraryValue = durationValue.substring(1, durationValue.length() - 1);
-        try {
-          durationMs = Integer.parseInt(arbitraryValue);
-        } catch (NumberFormatException e) {
-          return null;
-        }
-      } else {
-        return null;
-      }
-    }
-
-    String cssProperty = "-fx-transition-duration: " + durationMs + "ms;";
-    return new TransitionResult(cssProperty, "duration", durationMs, null);
+    // JavaFX does not support -fx-transition-duration via CSS inline styles.
+    // Duration should be handled programmatically with Timeline/TwAnimation.
+    // Return null to prevent invalid properties from being injected.
+    return null;
   }
 
   private static TransitionResult processEasing(String token) {
-    String easingName = token.substring(EASE_PREFIX.length());
-    String cubicBezier = EASINGS.get(easingName);
-
-    if (cubicBezier == null) {
-      return null;
-    }
-
-    String cssProperty = "-fx-transition-timing-function: " + cubicBezier + ";";
-    return new TransitionResult(cssProperty, "ease", null, easingName);
+    // JavaFX does not support -fx-transition-timing-function via CSS inline styles.
+    // Easing should be handled programmatically with Interpolator in Timeline/TwAnimation.
+    // Return null to prevent invalid properties from being injected.
+    return null;
   }
 
   private static TransitionResult processAnimation(String token) {

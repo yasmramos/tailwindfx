@@ -80,17 +80,11 @@ public final class AspectRatioProcessor {
   }
 
   private static String buildAspectRatio(String ratio) {
-    // JavaFX doesn't have native aspect-ratio support in inline styles
-    // We use a marker property that can be interpreted by layout managers
-    // Format: -fx-aspect-ratio: width / height;
-
-    // Normalize the ratio
-    String normalized = normalizeRatio(ratio);
-    if (normalized == null) {
-      return null;
-    }
-
-    return "-fx-aspect-ratio: " + normalized + ";";
+    // JavaFX doesn't have native aspect-ratio support in inline styles.
+    // Only aspect-auto is handled with valid CSS (-fx-pref-width: -1; -fx-pref-height: -1;).
+    // For explicit ratios, return null to prevent invalid -fx-aspect-ratio property injection.
+    // Aspect ratios should be handled programmatically via layout bindings.
+    return null;
   }
 
   private static String normalizeRatio(String ratio) {

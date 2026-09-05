@@ -310,7 +310,10 @@ public final class CssPropertyMapper {
       case "xl" -> "576px";
       case "2xl" -> "672px";
       case "3xl" -> "768px";
-      case "full" -> "100%";
+      // JavaFX does not support percentage values in -fx-max-width/-fx-pref-width properties.
+      // "full" should be handled programmatically via maxWidth(Double.MAX_VALUE) or layout managers.
+      // Return null to prevent invalid CSS injection.
+      case "full" -> null;
       default -> null;
     };
   }

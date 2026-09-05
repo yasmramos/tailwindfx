@@ -161,7 +161,9 @@ public final class RingProcessor {
 
   private static String buildRingWidth(int widthInPx) {
     if (widthInPx == 0) {
-      return "-fx-border-width: 0px; -fx-effect: null;";
+      // For ring-0, only set border-width to 0, do not emit -fx-effect: null;
+      // as "null" is not a valid CSS value for -fx-effect.
+      return "-fx-border-width: 0px;";
     }
     // Standard ring widths from Tailwind: 1→1px, 2→2px, 4→4px, 8→8px
     return buildRingWidthCss(widthInPx + "px");
