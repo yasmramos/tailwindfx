@@ -5,12 +5,12 @@ import io.github.yasmramos.tailwindfx.theme.ThemeConfig;
 import java.util.Map;
 
 /**
- * CssPropertyMapper — Mapea prefijos y valores nombrados a propiedades CSS JavaFX.
+ * CssPropertyMapper — Maps prefixes and named values to JavaFX CSS properties.
  *
- * <p>Responsabilidad: Traducir tokens Tailwind a propiedades -fx-* específicas. Ej: "p" →
+ * <p>Responsibility: Translate Tailwind tokens to specific -fx-* properties. Example: "p" →
  * "-fx-padding", "bg" → "-fx-background-color", "text" → "-fx-text-fill"
  *
- * <p>No hace parsing ni resolución de valores, solo mapeo de propiedades.
+ * <p>Does not parse or resolve values, only property mapping.
  */
 public final class CssPropertyMapper {
 
@@ -21,10 +21,10 @@ public final class CssPropertyMapper {
   }
 
   /**
-   * Obtiene la propiedad CSS JavaFX para un prefijo dado.
+   * Gets the JavaFX CSS property for a given prefix.
    *
-   * @param prefix Prefijo Tailwind (p, bg, text, w, h, etc.)
-   * @return Propiedad -fx-* o null si no hay mapeo
+   * @param prefix Tailwind prefix (p, bg, text, w, h, etc.)
+   * @return -fx-* property or null if no mapping
    */
   public String mapToCssProperty(String prefix) {
     return switch (prefix) {
@@ -66,42 +66,53 @@ public final class CssPropertyMapper {
       case "rounded" -> "-fx-background-radius";
       case "shadow" -> "-fx-effect";
 
-      case "visible" -> "-fx-visibility";
-      case "hidden" -> "-fx-visibility";
-      case "invisible" -> "-fx-visibility";
+      // Visibility is NOT mapped to CSS because JavaFX doesn't support -fx-visibility.
+      // It is controlled via Node.setVisible() and Node.setManaged().
+      // Return null to prevent JIT compilation of invalid CSS.
+      case "visible", "hidden", "invisible" -> null;
 
       case "gap" -> "-fx-hgap";
       case "gap-x" -> "-fx-hgap";
       case "gap-y" -> "-fx-vgap";
 
-      case "overflow" -> "-fx-overflow";
+      // Overflow is NOT mapped to CSS because JavaFX doesn't support -fx-overflow.
+      // Clipping is controlled via Node.setClip().
+      // Return null to prevent JIT compilation of invalid CSS.
+      case "overflow" -> null;
 
       case "cursor" -> "-fx-cursor";
 
-      case "z" -> "-fx-z-index";
+      // Z-index is NOT mapped to CSS because JavaFX doesn't support -fx-z-index.
+      // Z-order is controlled via Node.toFront() and Node.toBack().
+      // Return null to prevent JIT compilation of invalid CSS.
+      case "z" -> null;
 
-      case "resize" -> "-fx-resize";
+      // Resize is NOT mapped to CSS because JavaFX doesn't support -fx-resize.
+      // Resizing is controlled programmatically or via layout panes.
+      // Return null to prevent JIT compilation of invalid CSS.
+      case "resize" -> null;
 
-      case "skew-x" -> "-fx-she-x";
-      case "skew-y" -> "-fx-she-y";
+      // Skew is NOT supported in JavaFX CSS. There is no -fx-she-x or -fx-she-y property.
+      // Skew transforms must be applied via Node.getTransforms().add(new Shear(...)).
+      // Return null to prevent JIT compilation of invalid CSS.
+      case "skew-x", "skew-y" -> null;
 
-      case "blur" -> "-fx-blur";
-      case "brightness" -> "-fx-brightness";
-      case "contrast" -> "-fx-contrast";
-      case "grayscale" -> "-fx-saturation";
-      case "invert" -> "-fx-invert";
-      case "sepia" -> "-fx-sepia";
+      // Blur, brightness, contrast, grayscale, invert, sepia are NOT mapped to CSS
+      // because JavaFX doesn't have corresponding -fx-* CSS properties for these filters.
+      // These effects are implemented via javafx.scene.effect.* classes (e.g., Blur, ColorAdjust).
+      // Return null to prevent JIT compilation of invalid CSS.
+      case "blur", "brightness", "contrast", "grayscale", "invert", "sepia" -> null;
 
       default -> null;
     };
   }
 
   /**
-   * Resuelve valores nombrados como sm, md, lg, bold, solid, dashed, etc.
+   * Resolves named values like sm, md, lg, bold, solid, dashed, etc.
    *
-   * @param prefix Prefijo del token
-   * @param namedValue Valor nominal (sm, md, lg, bold, solid, dashed, etc.)
-   * @return Valor CSS o null si no hay mapeo
+   * @param prefix Token prefix
+   * @param namedValue Nominal value (sm, md, lg, bold, solid, dashed, etc.)
+   * @return CSS value or null if no mapping
    */
   public String resolveNamedValue(String prefix, String namedValue) {
     // Handle background colors: bg-white, bg-black, bg-transparent
@@ -138,16 +149,22 @@ public final class CssPropertyMapper {
       return resolveCursor(namedValue);
     }
 
+    // Note: overflow is not mapped to CSS (returns null in mapToCssProperty),
+    // so this code path will not produce valid inline CSS. Kept for completeness.
     // Handle overflow styles: overflow-hidden, overflow-visible, etc.
     if ("overflow".equals(prefix)) {
       return resolveOverflow(namedValue);
     }
 
+    // Note: visibility is not mapped to CSS (returns null in mapToCssProperty),
+    // so this code path will not produce valid inline CSS. Kept for completeness.
     // Handle visibility: visible, hidden, invisible
     if ("visible".equals(prefix) || "hidden".equals(prefix) || "invisible".equals(prefix)) {
       return resolveVisibility(prefix);
     }
 
+    // Note: resize is not mapped to CSS (returns null in mapToCssProperty),
+    // so this code path will not produce valid inline CSS. Kept for completeness.
     // Handle resize: resize-none, resize-y, etc.
     if ("resize".equals(prefix)) {
       return resolveResize(namedValue);
@@ -163,6 +180,9 @@ public final class CssPropertyMapper {
       return resolveMaxWidth(namedValue);
     }
 
+    // Note: blur, brightness, contrast, grayscale, invert, sepia, skew are not mapped to CSS
+    // (return null in mapToCssProperty), so this code path will not produce valid inline CSS.
+    // Kept for completeness.
     // Handle effects: blur, brightness, contrast, grayscale, invert, sepia, skew
     if ("blur".equals(prefix)
         || "brightness".equals(prefix)
@@ -184,7 +204,7 @@ public final class CssPropertyMapper {
     };
   }
 
-  /** Resuelve un estilo de borde a su valor CSS. */
+  /** Resolves a border style to its CSS value. */
   private String resolveBorderStyle(String style) {
     return switch (style) {
       case "solid" -> "solid";
@@ -195,7 +215,7 @@ public final class CssPropertyMapper {
     };
   }
 
-  /** Resuelve colores nombrados como white, black, transparent */
+  /** Resolves named colors like white, black, transparent. */
   private String resolveNamedColor(String colorName) {
     return switch (colorName) {
       case "white" -> "#ffffff";
@@ -205,41 +225,41 @@ public final class CssPropertyMapper {
     };
   }
 
-  /** Resuelve un cursor a su valor JavaFX. */
+  /** Resolves a cursor to its JavaFX value. */
   private String resolveCursor(String cursor) {
     return switch (cursor) {
-      case "default" -> "-cursor-default";
-      case "pointer" -> "-cursor-hand";
-      case "text" -> "-cursor-text";
-      case "move" -> "-cursor-move";
-      case "wait" -> "-cursor-wait";
-      case "crosshair" -> "-cursor-crosshair";
-      case "help" -> "-cursor-wait";
-      case "not-allowed" -> "-cursor-disappear";
-      case "context-menu" -> "-cursor-default";
-      case "vertical-text" -> "-cursor-text";
-      case "alias" -> "-cursor-hand";
-      case "all-scroll" -> "-cursor-move";
-      case "grab" -> "-cursor-open-hand";
-      case "grabbing" -> "-cursor-closed-hand";
-      case "col-resize" -> "-cursor-h-resize";
-      case "row-resize" -> "-cursor-v-resize";
-      case "n-resize" -> "-cursor-n-resize";
-      case "e-resize" -> "-cursor-e-resize";
-      case "s-resize" -> "-cursor-s-resize";
-      case "w-resize" -> "-cursor-w-resize";
-      case "ne-resize" -> "-cursor-ne-resize";
-      case "nw-resize" -> "-cursor-nw-resize";
-      case "se-resize" -> "-cursor-se-resize";
-      case "sw-resize" -> "-cursor-sw-resize";
-      case "nesw-resize" -> "-cursor-ne-resize";
-      case "nwse-resize" -> "-cursor-nw-resize";
-      case "none" -> "-cursor-none";
+      case "default" -> "default";
+      case "pointer" -> "hand";
+      case "text" -> "text";
+      case "move" -> "move";
+      case "wait" -> "wait";
+      case "crosshair" -> "crosshair";
+      case "help" -> "wait"; // fallback: no direct equivalent in JavaFX
+      case "not-allowed" -> "disappear";
+      case "context-menu" -> "default"; // fallback: no direct equivalent in JavaFX
+      case "vertical-text" -> "text"; // fallback: no direct equivalent in JavaFX
+      case "alias" -> "hand"; // fallback: no direct equivalent in JavaFX
+      case "all-scroll" -> "move"; // fallback: no direct equivalent in JavaFX
+      case "grab" -> "open-hand";
+      case "grabbing" -> "closed-hand";
+      case "col-resize" -> "h-resize";
+      case "row-resize" -> "v-resize";
+      case "n-resize" -> "n-resize";
+      case "e-resize" -> "e-resize";
+      case "s-resize" -> "s-resize";
+      case "w-resize" -> "w-resize";
+      case "ne-resize" -> "ne-resize";
+      case "nw-resize" -> "nw-resize";
+      case "se-resize" -> "se-resize";
+      case "sw-resize" -> "sw-resize";
+      case "nesw-resize" -> "ne-resize"; // fallback to nearest equivalent
+      case "nwse-resize" -> "nw-resize"; // fallback to nearest equivalent
+      case "none" -> "none";
       default -> null;
     };
   }
 
-  /** Resuelve overflow a su valor JavaFX. */
+  /** Resolves overflow to its JavaFX value. */
   private String resolveOverflow(String overflow) {
     return switch (overflow) {
       case "visible" -> "visible";
@@ -250,7 +270,7 @@ public final class CssPropertyMapper {
     };
   }
 
-  /** Resuelve visibilidad. */
+  /** Resolves visibility. */
   private String resolveVisibility(String visibility) {
     return switch (visibility) {
       case "visible" -> "visible";
@@ -259,7 +279,7 @@ public final class CssPropertyMapper {
     };
   }
 
-  /** Resuelve resize a su valor JavaFX. */
+  /** Resolves resize to its JavaFX value. */
   private String resolveResize(String resize) {
     return switch (resize) {
       case "none" -> "none";
@@ -270,7 +290,7 @@ public final class CssPropertyMapper {
     };
   }
 
-  /** Resuelve valores especiales de dimensión para JavaFX. */
+  /** Resolves special dimension values for JavaFX. */
   private String resolveDimension(String value) {
     return switch (value) {
       case "auto" -> "-1"; // JavaFX: -1 means USE_COMPUTED_SIZE (default behavior)
@@ -280,7 +300,7 @@ public final class CssPropertyMapper {
     };
   }
 
-  /** Resuelve valores nombrados de max-width. */
+  /** Resolves named max-width values. */
   private String resolveMaxWidth(String value) {
     return switch (value) {
       case "xs" -> "320px";
@@ -296,23 +316,23 @@ public final class CssPropertyMapper {
   }
 
   /**
-   * Mapea un token completo a una propiedad CSS con su valor.
+   * Maps a complete token to a CSS property with its value.
    *
-   * @param token Token parseado
-   * @param resolvedValue Valor ya resuelto (ej: "16px", "rgb(...)")
-   * @return Propiedad CSS completa o null
+   * @param token Parsed token
+   * @param resolvedValue Already resolved value (e.g., "16px", "rgb(...)")
+   * @return Complete CSS property or null
    */
   public String map(StyleToken token, String resolvedValue) {
     if (token == null || resolvedValue == null) {
       return null;
     }
 
-    // Manejo especial para border-* styles (solid, dashed, dotted, none)
+    // Special handling for border-* styles (solid, dashed, dotted, none)
     if ("border".equals(token.prefix) && isBorderStyle(token.namedValue)) {
       return prop("-fx-border-style", resolvedValue);
     }
 
-    // Manejo especial para w-auto, w-min, w-max, h-auto, h-min, h-max
+    // Special handling for w-auto, w-min, w-max, h-auto, h-min, h-max
     if (("w".equals(token.prefix) || "h".equals(token.prefix))
         && ("auto".equals(token.namedValue)
             || "min".equals(token.namedValue)
@@ -321,7 +341,7 @@ public final class CssPropertyMapper {
       return prop(property, resolvedValue);
     }
 
-    // Manejo especial para max-w-*
+    // Special handling for max-w-*
     if ("max-w".equals(token.prefix) && resolvedValue != null) {
       return prop("-fx-max-width", resolvedValue);
     }
@@ -331,7 +351,7 @@ public final class CssPropertyMapper {
       return null;
     }
 
-    // Manejo especial para propiedades compuestas
+    // Special handling for composite properties
     if ("p".equals(token.prefix) && token.subPrefix != null) {
       return switch (token.subPrefix) {
         case "x" -> px("padding", "0px %s 0px %s".formatted(resolvedValue, resolvedValue));
@@ -347,7 +367,7 @@ public final class CssPropertyMapper {
     return prop(property, resolvedValue);
   }
 
-  /** Verifica si un valor es un estilo de borde válido. */
+  /** Checks if a value is a valid border style. */
   private boolean isBorderStyle(String value) {
     return "solid".equals(value)
         || "dashed".equals(value)
@@ -360,7 +380,7 @@ public final class CssPropertyMapper {
   }
 
   private static String px(String name, String value) {
-    // Si el valor ya tiene 'px', usarlo directamente; si no, agregarlo
+    // If value already has 'px', use it directly; otherwise add it
     String formatted = value.matches("\\d+$") ? value + "px" : value;
     return name + ": " + formatted + ";";
   }
@@ -372,7 +392,7 @@ public final class CssPropertyMapper {
       return value.intValue() + "px";
     }
 
-    // Fallback para tamaños estándar
+    // Fallback for standard sizes
     return switch (size) {
       case "xs" -> "12px";
       case "sm" -> "14px";
@@ -436,7 +456,7 @@ public final class CssPropertyMapper {
     };
   }
 
-  /** Resuelve valores de efectos: blur, brightness, contrast, grayscale, invert, sepia, skew. */
+  /** Resolves effect values: blur, brightness, contrast, grayscale, invert, sepia, skew. */
   private String resolveEffectValue(String prefix, String value) {
     if ("blur".equals(prefix)) {
       return resolveBlur(value);
