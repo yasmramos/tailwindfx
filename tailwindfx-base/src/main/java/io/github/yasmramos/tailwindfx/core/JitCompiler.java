@@ -25,9 +25,12 @@ import java.util.logging.Logger;
  * class Debug mode: JitCompiler.setDebug(true) → log ALL tokens
  *
  * <p>Special modifiers:
+ *
  * <ul>
- *   <li><code>!</code> suffix: Marks property as important (e.g., "p-4!" → padding with !important flag)
- *   <li><code>md:</code>, <code>lg:</code> prefixes: Responsive breakpoints (requires manual handling)
+ *   <li><code>!</code> suffix: Marks property as important (e.g., "p-4!" → padding with !important
+ *       flag)
+ *   <li><code>md:</code>, <code>lg:</code> prefixes: Responsive breakpoints (requires manual
+ *       handling)
  *   <li><code>dark:</code> prefix: Dark mode variant (requires dark mode enabled)
  * </ul>
  */
@@ -277,10 +280,11 @@ public final class JitCompiler {
 
   // Public API
   /**
-   * Compiles a single token. Handles special modifiers like !important and dark mode.
-   * Uses thread-safe LRU cache: compiling the same token N times costs the same as 1.
+   * Compiles a single token. Handles special modifiers like !important and dark mode. Uses
+   * thread-safe LRU cache: compiling the same token N times costs the same as 1.
    *
    * <p>Special modifiers:
+   *
    * <ul>
    *   <li><code>!</code> suffix: Marks property as important (e.g., "p-4!" → adds !important flag)
    *   <li><code>dark:</code> prefix: Dark mode variant (requires manual handling in application)
@@ -348,8 +352,9 @@ public final class JitCompiler {
       // Mark as dark mode variant - this requires manual handling
       // The result should be applied only when dark mode is active
       // For now, we just compile normally but could add metadata
-      result = new CompileResult(
-          result.inlineStyle(), result.cssClass(), result.isKnown(), true /* isDarkMode */);
+      result =
+          new CompileResult(
+              result.inlineStyle(), result.cssClass(), result.isKnown(), true /* isDarkMode */);
     }
 
     // Thread-safe put with atomic operation
@@ -372,7 +377,7 @@ public final class JitCompiler {
     if (tokens == null || tokens.length == 0) {
       return new BatchResult("", new ArrayList<>(), false, false);
     }
-    
+
     StringBuilder inlineStyle = new StringBuilder();
     List<String> cssClasses = new ArrayList<>();
     boolean hasDarkMode = false;
@@ -403,7 +408,7 @@ public final class JitCompiler {
 
         // Handle modifiers (!important, dark mode)
         String cleanToken = t;
-        
+
         // Check for !important
         if (t.endsWith("!")) {
           hasImportant = true;
@@ -425,7 +430,7 @@ public final class JitCompiler {
         if (result.hasCssClass()) {
           cssClasses.add(result.cssClass());
         }
-        
+
         // Try specialized processors for unrecognized tokens
         if (!result.isKnown()) {
           String specializedStyle = processSpecializedToken(cleanToken);
@@ -456,7 +461,8 @@ public final class JitCompiler {
   }
 
   /**
-   * Delegates token processing to specialized processors (Ring, AspectRatio, ScrollSnap, ContainerQuery, Transition, etc.).
+   * Delegates token processing to specialized processors (Ring, AspectRatio, ScrollSnap,
+   * ContainerQuery, Transition, etc.).
    */
   private static String processSpecializedToken(String token) {
     // Ring Utilities
@@ -476,7 +482,8 @@ public final class JitCompiler {
 
     // Container Query Utilities
     if (ContainerQueryProcessor.isContainerQuery(token)) {
-      ContainerQueryProcessor.ContainerQueryResult result = ContainerQueryProcessor.processContainerQuery(token);
+      ContainerQueryProcessor.ContainerQueryResult result =
+          ContainerQueryProcessor.processContainerQuery(token);
       return result != null ? result.cssEquivalent() : null;
     }
 
@@ -496,12 +503,13 @@ public final class JitCompiler {
     return null;
   }
 
-  public record BatchResult(String inlineStyle, List<String> cssClasses, boolean hasDarkMode, boolean hasImportant) {
+  public record BatchResult(
+      String inlineStyle, List<String> cssClasses, boolean hasDarkMode, boolean hasImportant) {
 
     public boolean hasInlineStyle() {
       return !inlineStyle.isBlank();
     }
-    
+
     public boolean success() {
       return hasInlineStyle() || !cssClasses.isEmpty();
     }

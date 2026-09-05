@@ -178,7 +178,7 @@ class LruCacheTest {
       // After cleanup triggered by put(), cache should be at or below max size
       // Note: cleanup is async via maybeCleanup() on gets, so we trigger it manually
       cache.get(0); // Trigger potential cleanup
-      
+
       assertTrue(cache.size() <= 10, "Cache should be cleaned up to max size: " + cache.size());
     }
 

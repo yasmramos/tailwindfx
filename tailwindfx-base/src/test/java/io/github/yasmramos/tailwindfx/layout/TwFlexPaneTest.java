@@ -365,10 +365,10 @@ class TwFlexPaneTest extends ApplicationTest {
   @DisplayName("Should set direction instantly when duration is 0 or negative")
   void testSetDirectionAnimatedZeroDuration() {
     flexPane.setDirection(TwFlexPane.Direction.ROW);
-    
+
     flexPane.setDirectionAnimated(TwFlexPane.Direction.COL, 0);
     assertEquals(TwFlexPane.Direction.COL, flexPane.getDirection());
-    
+
     flexPane.setDirectionAnimated(TwFlexPane.Direction.ROW, -100);
     assertEquals(TwFlexPane.Direction.ROW, flexPane.getDirection());
   }
@@ -377,7 +377,7 @@ class TwFlexPaneTest extends ApplicationTest {
   @DisplayName("Should not animate when direction is the same")
   void testSetDirectionAnimatedSameDirection() {
     flexPane.setDirection(TwFlexPane.Direction.ROW);
-    
+
     flexPane.setDirectionAnimated(TwFlexPane.Direction.ROW, 200);
     assertEquals(TwFlexPane.Direction.ROW, flexPane.getDirection());
   }
@@ -393,7 +393,7 @@ class TwFlexPaneTest extends ApplicationTest {
   void testSetShrinkTriggersLayout() {
     Label child = new Label("Test");
     interact(() -> flexPane.getChildren().add(child));
-    
+
     TwFlexPane.setShrink(child, 0.5);
     assertEquals(0.5, TwFlexPane.getShrink(child), 0.001);
   }
@@ -408,7 +408,7 @@ class TwFlexPaneTest extends ApplicationTest {
   @DisplayName("Should set basis with negative value for auto")
   void testSetBasisAuto() {
     Label child = new Label("Test");
-    
+
     TwFlexPane.setBasis(child, -1.0);
     assertEquals(-1.0, TwFlexPane.getBasis(child), 0.001);
   }
@@ -430,13 +430,13 @@ class TwFlexPaneTest extends ApplicationTest {
   @DisplayName("Should handle grow factor set before adding to parent")
   void testGrowBeforeAddingToParent() {
     Label child = new Label("Test");
-    
+
     TwFlexPane.setGrow(child, 1.0);
     assertEquals(1.0, TwFlexPane.getGrow(child), 0.001);
-    
+
     interact(() -> flexPane.getChildren().add(child));
     WaitForAsyncUtils.waitForFxEvents();
-    
+
     assertTrue(flexPane.getChildren().contains(child));
   }
 
@@ -444,13 +444,13 @@ class TwFlexPaneTest extends ApplicationTest {
   @DisplayName("Should handle order set before adding to parent")
   void testOrderBeforeAddingToParent() {
     Label child = new Label("Test");
-    
+
     TwFlexPane.setOrder(child, 10);
     assertEquals(10, TwFlexPane.getOrder(child));
-    
+
     interact(() -> flexPane.getChildren().add(child));
     WaitForAsyncUtils.waitForFxEvents();
-    
+
     assertTrue(flexPane.getChildren().contains(child));
   }
 
@@ -458,13 +458,13 @@ class TwFlexPaneTest extends ApplicationTest {
   @DisplayName("Should handle alignSelf set before adding to parent")
   void testAlignSelfBeforeAddingToParent() {
     Label child = new Label("Test");
-    
+
     TwFlexPane.setAlignSelf(child, TwFlexPane.Align.END);
     assertEquals(TwFlexPane.Align.END, TwFlexPane.getAlignSelf(child));
-    
+
     interact(() -> flexPane.getChildren().add(child));
     WaitForAsyncUtils.waitForFxEvents();
-    
+
     assertTrue(flexPane.getChildren().contains(child));
   }
 
@@ -472,13 +472,13 @@ class TwFlexPaneTest extends ApplicationTest {
   @DisplayName("Should handle shrink set before adding to parent")
   void testShrinkBeforeAddingToParent() {
     Label child = new Label("Test");
-    
+
     TwFlexPane.setShrink(child, 0.5);
     assertEquals(0.5, TwFlexPane.getShrink(child), 0.001);
-    
+
     interact(() -> flexPane.getChildren().add(child));
     WaitForAsyncUtils.waitForFxEvents();
-    
+
     assertTrue(flexPane.getChildren().contains(child));
   }
 
@@ -486,13 +486,13 @@ class TwFlexPaneTest extends ApplicationTest {
   @DisplayName("Should handle basis set before adding to parent")
   void testBasisBeforeAddingToParent() {
     Label child = new Label("Test");
-    
+
     TwFlexPane.setBasis(child, 150.0);
     assertEquals(150.0, TwFlexPane.getBasis(child), 0.001);
-    
+
     interact(() -> flexPane.getChildren().add(child));
     WaitForAsyncUtils.waitForFxEvents();
-    
+
     assertTrue(flexPane.getChildren().contains(child));
   }
 }
