@@ -1,15 +1,15 @@
 package io.github.yasmramos.tailwindfx.benchmark;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 /**
  * BenchmarkTest — Unit tests for Benchmark class.
  *
- * <p>Verifies that benchmark measurements are accurate and within expected ranges.</p>
+ * <p>Verifies that benchmark measurements are accurate and within expected ranges.
  *
  * @author yasmramos
  * @since 1.0.0
@@ -129,59 +129,49 @@ public class BenchmarkTest {
         System.out.println(String.format(
             "Benchmark consistency check - Run1: %.2fx, Run2: %.2fx (variance expected in CI)",
             run1.getSpeedupFactor(), run2.getSpeedupFactor()));
-    }
+  }
 
-    @Test
-    @DisplayName("Benchmark metric formatting should work correctly")
-    void testMetricFormatting() {
-        Benchmark.BenchmarkMetric metric = new Benchmark.BenchmarkMetric(
-            "Test", 0.1234, 100);
-        
-        String formatted = metric.toFormattedString();
-        assertTrue(formatted.contains("Test"), 
-            "Formatted string should contain metric name");
-        assertTrue(formatted.contains("ms"), 
-            "Formatted string should contain unit");
-        assertTrue(formatted.contains("100"), 
-            "Formatted string should contain iteration count");
-    }
+  @Test
+  @DisplayName("Benchmark metric formatting should work correctly")
+  void testMetricFormatting() {
+    Benchmark.BenchmarkMetric metric = new Benchmark.BenchmarkMetric("Test", 0.1234, 100);
 
-    @Test
-    @DisplayName("Throughput metric formatting should use correct unit")
-    void testThroughputFormatting() {
-        Benchmark.BenchmarkMetric throughput = new Benchmark.BenchmarkMetric(
-            "Throughput", 50000, 1000, "compilations/sec");
-        
-        String formatted = throughput.toFormattedString();
-        assertTrue(formatted.contains("compilations/sec"), 
-            "Throughput should use compilations/sec unit");
-    }
+    String formatted = metric.toFormattedString();
+    assertTrue(formatted.contains("Test"), "Formatted string should contain metric name");
+    assertTrue(formatted.contains("ms"), "Formatted string should contain unit");
+    assertTrue(formatted.contains("100"), "Formatted string should contain iteration count");
+  }
 
-    @Test
-    @DisplayName("Benchmark results markdown should be well-formatted")
-    void testMarkdownOutput() {
-        Benchmark.BenchmarkResults results = Benchmark.runAll();
-        
-        String markdown = results.toMarkdown();
-        
-        assertTrue(markdown.contains("Benchmark Results"), 
-            "Markdown should contain header");
-        assertTrue(markdown.contains("|"), 
-            "Markdown should contain table formatting");
-        assertTrue(markdown.contains("Cache Speedup"), 
-            "Markdown should contain speedup summary");
-    }
+  @Test
+  @DisplayName("Throughput metric formatting should use correct unit")
+  void testThroughputFormatting() {
+    Benchmark.BenchmarkMetric throughput =
+        new Benchmark.BenchmarkMetric("Throughput", 50000, 1000, "compilations/sec");
 
-    @Test
-    @DisplayName("Comparison result formatting should be accurate")
-    void testComparisonFormatting() {
-        Benchmark.ComparisonResult comparison = new Benchmark.ComparisonResult(
-            95.5, 955, 1000);
-        
-        String formatted = comparison.toFormattedString();
-        assertTrue(formatted.contains("95.50%"), 
-            "Should format percentage with 2 decimals");
-        assertTrue(formatted.contains("955/1000"), 
-            "Should show hit/total operations");
-    }
+    String formatted = throughput.toFormattedString();
+    assertTrue(
+        formatted.contains("compilations/sec"), "Throughput should use compilations/sec unit");
+  }
+
+  @Test
+  @DisplayName("Benchmark results markdown should be well-formatted")
+  void testMarkdownOutput() {
+    Benchmark.BenchmarkResults results = Benchmark.runAll();
+
+    String markdown = results.toMarkdown();
+
+    assertTrue(markdown.contains("Benchmark Results"), "Markdown should contain header");
+    assertTrue(markdown.contains("|"), "Markdown should contain table formatting");
+    assertTrue(markdown.contains("Cache Speedup"), "Markdown should contain speedup summary");
+  }
+
+  @Test
+  @DisplayName("Comparison result formatting should be accurate")
+  void testComparisonFormatting() {
+    Benchmark.ComparisonResult comparison = new Benchmark.ComparisonResult(95.5, 955, 1000);
+
+    String formatted = comparison.toFormattedString();
+    assertTrue(formatted.contains("95.50%"), "Should format percentage with 2 decimals");
+    assertTrue(formatted.contains("955/1000"), "Should show hit/total operations");
+  }
 }

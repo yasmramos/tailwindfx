@@ -1,7 +1,6 @@
 package io.github.yasmramos.tailwindfx.animation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -19,7 +18,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.testfx.framework.junit5.ApplicationTest;
-import org.testfx.util.WaitForAsyncUtils;
 
 /**
  * Tests for {@link TwAnimation} — requires JavaFX Application Thread.
@@ -105,7 +103,8 @@ public class TwAnimationTest extends ApplicationTest {
     }
 
     @Test
-    @DisplayName("fadeIn with interpolator should throw IllegalArgumentException for null interpolator")
+    @DisplayName(
+        "fadeIn with interpolator should throw IllegalArgumentException for null interpolator")
     void testFadeInNullInterpolator() {
       assertThrows(
           IllegalArgumentException.class, () -> TwAnimation.fadeIn(new Region(), 100, null));
@@ -381,7 +380,8 @@ public class TwAnimationTest extends ApplicationTest {
             // Different slots — both should coexist
             TwAnimation.AnimationRegistry.play(n, "enter", enter.raw());
             TwAnimation.AnimationRegistry.play(n, "loop", loop.raw());
-            assertTrue(TwAnimation.AnimationRegistry.isActive(n, "enter"), "enter should be active");
+            assertTrue(
+                TwAnimation.AnimationRegistry.isActive(n, "enter"), "enter should be active");
             assertTrue(TwAnimation.AnimationRegistry.isActive(n, "loop"), "loop should be active");
             TwAnimation.AnimationRegistry.cancelAll(n);
           });
@@ -394,27 +394,24 @@ public class TwAnimationTest extends ApplicationTest {
           () -> {
             try {
               Region n = new Region();
-              javafx.animation.Timeline t1 = new javafx.animation.Timeline(
-                  new javafx.animation.KeyFrame(
-                      javafx.util.Duration.millis(1000),
-                      e -> {}
-                  )
-              );
-              javafx.animation.Timeline t2 = new javafx.animation.Timeline(
-                  new javafx.animation.KeyFrame(
-                      javafx.util.Duration.millis(1000),
-                      e -> {}
-                  )
-              );
+              javafx.animation.Timeline t1 =
+                  new javafx.animation.Timeline(
+                      new javafx.animation.KeyFrame(javafx.util.Duration.millis(1000), e -> {}));
+              javafx.animation.Timeline t2 =
+                  new javafx.animation.Timeline(
+                      new javafx.animation.KeyFrame(javafx.util.Duration.millis(1000), e -> {}));
               TwAnimation.AnimationRegistry.play(n, "enter", t1);
               // Give it a moment to start
               Thread.sleep(50);
-              assertEquals(Animation.Status.RUNNING, t1.getStatus(), "t1 should be running after play()");
+              assertEquals(
+                  Animation.Status.RUNNING, t1.getStatus(), "t1 should be running after play()");
               TwAnimation.AnimationRegistry.play(n, "enter", t2);
               // Give it a moment to stop
               Thread.sleep(50);
-              assertEquals(Animation.Status.STOPPED, t1.getStatus(), "t1 should be stopped after replace");
-              assertEquals(Animation.Status.RUNNING, t2.getStatus(), "t2 should be running after play()");
+              assertEquals(
+                  Animation.Status.STOPPED, t1.getStatus(), "t1 should be stopped after replace");
+              assertEquals(
+                  Animation.Status.RUNNING, t2.getStatus(), "t2 should be running after play()");
               TwAnimation.AnimationRegistry.cancelAll(n);
             } catch (InterruptedException e) {
               Thread.currentThread().interrupt();

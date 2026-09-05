@@ -86,7 +86,7 @@ public class TwStyleTest extends ApplicationTest {
     // Margins require parent container context, so we need to add node to HBox first
     hboxParent.getChildren().clear();
     hboxParent.getChildren().add(labelNode);
-    
+
     TwStyle.apply(labelNode, "m-4");
 
     // Margins are applied via HBox.setMargin(), not inline CSS or style classes
@@ -250,7 +250,7 @@ public class TwStyleTest extends ApplicationTest {
   void testApplyWithNegativeMargin() {
     // Negative margins should not cause exceptions
     assertDoesNotThrow(() -> TwStyle.apply(labelNode, "-m-4", "-mt-2"));
-    
+
     // Note: Negative margins are handled by Styles.margin() which requires
     // the node to be in a parent container (HBox/VBox/GridPane) to apply setMargin().
     // When applied to an isolated node, no inline style is generated because

@@ -5,8 +5,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 /** Unit tests for GradientProcessor. */
 @DisplayName("GradientProcessor Tests")
@@ -82,9 +80,7 @@ class GradientProcessorTest {
     @Test
     @DisplayName("Should process gradient with via color")
     void testProcessGradientWithVia() {
-      String[] tokens = {
-        "bg-gradient-to-r", "from-blue-500", "via-purple-500", "to-pink-500"
-      };
+      String[] tokens = {"bg-gradient-to-r", "from-blue-500", "via-purple-500", "to-pink-500"};
       GradientProcessor.GradientResult result = GradientProcessor.processGradientTokens(tokens);
 
       assertTrue(result.isGradient());
@@ -350,8 +346,7 @@ class GradientProcessorTest {
     @Test
     @DisplayName("Should create GradientResult with null style for non-gradients")
     void testNonGradientResult() {
-      GradientProcessor.GradientResult result =
-          new GradientProcessor.GradientResult(null, false);
+      GradientProcessor.GradientResult result = new GradientProcessor.GradientResult(null, false);
 
       assertNull(result.inlineStyle());
       assertFalse(result.isGradient());
@@ -381,8 +376,7 @@ class GradientProcessorTest {
     @DisplayName("Should work with JitCompiler.compileBatch")
     void testIntegrationWithJitCompiler() {
       JitCompiler.BatchResult result =
-          JitCompiler.compileBatch(
-              "bg-gradient-to-r", "from-blue-500", "to-purple-600", "p-4");
+          JitCompiler.compileBatch("bg-gradient-to-r", "from-blue-500", "to-purple-600", "p-4");
 
       assertTrue(result.hasInlineStyle());
       assertTrue(result.inlineStyle().contains("linear-gradient"));

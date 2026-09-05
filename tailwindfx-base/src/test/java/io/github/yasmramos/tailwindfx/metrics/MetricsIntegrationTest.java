@@ -17,8 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.testfx.framework.junit5.ApplicationTest;
 
 /**
- * Integration tests for TwMetrics — verifies that metrics are properly recorded when
- * TailwindFX operations are performed with metrics enabled.
+ * Integration tests for TwMetrics — verifies that metrics are properly recorded when TailwindFX
+ * operations are performed with metrics enabled.
  */
 @DisplayName("TwMetrics Integration Tests")
 class MetricsIntegrationTest extends ApplicationTest {
@@ -75,7 +75,8 @@ class MetricsIntegrationTest extends ApplicationTest {
           long cacheMisses = TailwindFXMetrics.instance().cacheMisses();
 
           // At least one operation should have been recorded
-          assertTrue(cacheHits + cacheMisses > 0, "Should have recorded at least one cache operation");
+          assertTrue(
+              cacheHits + cacheMisses > 0, "Should have recorded at least one cache operation");
         });
   }
 
@@ -94,7 +95,7 @@ class MetricsIntegrationTest extends ApplicationTest {
 
           // Verify we can still get metrics (no exception)
           assertNotNull(TailwindFXMetrics.instance().report());
-          
+
           // Re-enable for other tests
           TwMetrics.setEnabled(true);
         });
@@ -115,7 +116,8 @@ class MetricsIntegrationTest extends ApplicationTest {
           TwStyle.apply(node, "p-4");
 
           // Verify operations were recorded
-          long totalOps = TailwindFXMetrics.instance().cacheHits() + TailwindFXMetrics.instance().cacheMisses();
+          long totalOps =
+              TailwindFXMetrics.instance().cacheHits() + TailwindFXMetrics.instance().cacheMisses();
           assertTrue(totalOps > 0, "Should have recorded at least one operation");
         });
   }

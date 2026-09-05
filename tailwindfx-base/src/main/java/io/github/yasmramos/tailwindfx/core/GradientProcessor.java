@@ -7,12 +7,13 @@ import javafx.scene.paint.Color;
  * GradientProcessor — Dedicated processor for Tailwind gradient utilities.
  *
  * <p>Handles parsing and building of linear gradients from tokens like:
+ *
  * <ul>
- *   <li>{@code bg-gradient-to-r} → direction</li>
- *   <li>{@code from-blue-500} → start color</li>
- *   <li>{@code via-purple-500} → middle color (optional)</li>
- *   <li>{@code to-pink-500} → end color</li>
- *   <li>{@code from-blue-500/80} → color with opacity</li>
+ *   <li>{@code bg-gradient-to-r} → direction
+ *   <li>{@code from-blue-500} → start color
+ *   <li>{@code via-purple-500} → middle color (optional)
+ *   <li>{@code to-pink-500} → end color
+ *   <li>{@code from-blue-500/80} → color with opacity
  * </ul>
  *
  * <p>Output: CSS-ready {@code linear-gradient(...)} for JavaFX {@code -fx-background-color}.
@@ -31,7 +32,8 @@ public final class GradientProcessor {
   /**
    * Result of gradient processing.
    *
-   * @param inlineStyle CSS inline style string (e.g., "-fx-background-color: linear-gradient(...);")
+   * @param inlineStyle CSS inline style string (e.g., "-fx-background-color:
+   *     linear-gradient(...);")
    * @param isGradient true if gradient tokens were found and processed
    */
   public record GradientResult(String inlineStyle, boolean isGradient) {}
@@ -118,11 +120,12 @@ public final class GradientProcessor {
    * Resolves a color token to its hex/rgba value.
    *
    * <p>Supports:
+   *
    * <ul>
-   *   <li>Standard colors: {@code blue-500}, {@code gray-800}</li>
-   *   <li>Colors with opacity: {@code blue-500/80} → rgba(59,130,246,0.80)</li>
-   *   <li>Named colors: {@code transparent}, {@code white}, {@code black}</li>
-   *   <li>Arbitrary values: {@code [#fff]}, {@code [rgb(255,0,0)]}</li>
+   *   <li>Standard colors: {@code blue-500}, {@code gray-800}
+   *   <li>Colors with opacity: {@code blue-500/80} → rgba(59,130,246,0.80)
+   *   <li>Named colors: {@code transparent}, {@code white}, {@code black}
+   *   <li>Arbitrary values: {@code [#fff]}, {@code [rgb(255,0,0)]}
    * </ul>
    *
    * @param colorToken the color token to resolve
@@ -338,6 +341,7 @@ public final class GradientProcessor {
 
   // Private constructor to prevent instantiation
   private GradientProcessor() {
-    throw new UnsupportedOperationException("GradientProcessor is a utility class and cannot be instantiated");
+    throw new UnsupportedOperationException(
+        "GradientProcessor is a utility class and cannot be instantiated");
   }
 }

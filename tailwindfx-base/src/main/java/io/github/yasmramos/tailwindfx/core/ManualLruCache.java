@@ -6,19 +6,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * ManualLruCache — A thread-safe, lock-free LRU cache implementation with bounded size.
  *
- * <p>This cache uses a combination of ConcurrentHashMap for storage and a secondary
- * access-order tracking map to implement LRU eviction without external dependencies.
+ * <p>This cache uses a combination of ConcurrentHashMap for storage and a secondary access-order
+ * tracking map to implement LRU eviction without external dependencies.
  *
  * <p>Features:
+ *
  * <ul>
- *   <li>Thread-safe concurrent reads and writes</li>
- *   <li>Automatic LRU eviction when size exceeds maximum</li>
- *   <li>Lock-free reads for optimal performance</li>
- *   <li>Bounded memory usage for long-running applications</li>
- *   <li>No external dependencies (pure Java)</li>
+ *   <li>Thread-safe concurrent reads and writes
+ *   <li>Automatic LRU eviction when size exceeds maximum
+ *   <li>Lock-free reads for optimal performance
+ *   <li>Bounded memory usage for long-running applications
+ *   <li>No external dependencies (pure Java)
  * </ul>
  *
  * <p>Usage example:
+ *
  * <pre>{@code
  * ManualLruCache<String, CompileResult> cache = new ManualLruCache<>(2000);
  * cache.put("p-4", result);
@@ -65,8 +67,8 @@ public class ManualLruCache<K, V> {
   /**
    * Gets a value from the cache by key.
    *
-   * <p>This method updates the access order for LRU tracking and may trigger
-   * a cleanup if the cache has grown too large.
+   * <p>This method updates the access order for LRU tracking and may trigger a cleanup if the cache
+   * has grown too large.
    *
    * @param key the key whose associated value is to be returned
    * @return the value associated with the key, or null if not present
@@ -85,8 +87,8 @@ public class ManualLruCache<K, V> {
   /**
    * Puts a key-value pair into the cache.
    *
-   * <p>If the key already exists, the value is updated and access order is refreshed.
-   * If the cache exceeds its maximum size after this operation, cleanup is triggered.
+   * <p>If the key already exists, the value is updated and access order is refreshed. If the cache
+   * exceeds its maximum size after this operation, cleanup is triggered.
    *
    * @param key the key to associate with the value
    * @param value the value to store
@@ -169,9 +171,7 @@ public class ManualLruCache<K, V> {
     return maxSize;
   }
 
-  /**
-   * Clears all entries from the cache.
-   */
+  /** Clears all entries from the cache. */
   public void clear() {
     storage.clear();
     accessCounter.set(0);
@@ -187,8 +187,8 @@ public class ManualLruCache<K, V> {
   }
 
   /**
-   * Triggers cleanup if enough accesses have occurred since the last check.
-   * This is a lightweight check that avoids unnecessary synchronization.
+   * Triggers cleanup if enough accesses have occurred since the last check. This is a lightweight
+   * check that avoids unnecessary synchronization.
    */
   private void maybeCleanup() {
     int count = accessCounter.incrementAndGet();
@@ -200,9 +200,8 @@ public class ManualLruCache<K, V> {
   /**
    * Performs LRU eviction to bring the cache size back under the maximum.
    *
-   * <p>This method removes the least recently accessed entries until the cache
-   * size is within the limit. It uses a snapshot-based approach to avoid
-   * holding locks during iteration.
+   * <p>This method removes the least recently accessed entries until the cache size is within the
+   * limit. It uses a snapshot-based approach to avoid holding locks during iteration.
    */
   private void cleanup() {
     if (storage.size() <= maxSize) {
@@ -215,7 +214,8 @@ public class ManualLruCache<K, V> {
 
     // Get a snapshot of entries sorted by access time
     storage.entrySet().stream()
-        .sorted((e1, e2) -> Long.compare(e1.getValue().lastAccessTime, e2.getValue().lastAccessTime))
+        .sorted(
+            (e1, e2) -> Long.compare(e1.getValue().lastAccessTime, e2.getValue().lastAccessTime))
         .limit(toRemove)
         .forEach(entry -> storage.remove(entry.getKey()));
   }

@@ -138,10 +138,11 @@ class StylePerfTest extends ApplicationTest {
           () -> {
             assertDoesNotThrow(
                 () -> {
-                  StylePerf.batch(() -> {
-                    TailwindFX.apply(button, "btn-primary");
-                    TailwindFX.apply(container, "v-box", "p-4");
-                  });
+                  StylePerf.batch(
+                      () -> {
+                        TailwindFX.apply(button, "btn-primary");
+                        TailwindFX.apply(container, "v-box", "p-4");
+                      });
                 },
                 "Batch execution should not throw");
           });
@@ -378,14 +379,14 @@ class StylePerfTest extends ApplicationTest {
     @DisplayName("Should maintain cache across multiple nodes")
     void testMultipleNodesCache() {
       Button button2 = new Button("Button 2");
-      
+
       StylePerf.apply(button, "btn-primary");
       StylePerf.apply(button2, "btn-primary");
-      
+
       // Both should have cache now
       assertNotNull(StylePerf.currentHash(button));
       assertNotNull(StylePerf.currentHash(button2));
-      
+
       // Redundant applies should be skipped
       assertFalse(StylePerf.apply(button, "btn-primary"));
       assertFalse(StylePerf.apply(button2, "btn-primary"));
@@ -397,10 +398,10 @@ class StylePerfTest extends ApplicationTest {
       String[] classes = {
         "btn-primary", "rounded-lg", "shadow-md", "text-white", "font-bold", "p-4", "m-2"
       };
-      
+
       assertTrue(StylePerf.apply(button, classes), "First apply should succeed");
       assertFalse(StylePerf.apply(button, classes), "Redundant apply should be skipped");
-      
+
       // Change one class
       classes[3] = "text-black";
       assertTrue(StylePerf.apply(button, classes), "Apply with changed class should succeed");
