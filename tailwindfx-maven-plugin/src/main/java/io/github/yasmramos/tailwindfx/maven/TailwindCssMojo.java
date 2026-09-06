@@ -569,12 +569,12 @@ public class TailwindCssMojo extends AbstractMojo {
       int lastColon = className.lastIndexOf(':');
       baseClass = className.substring(lastColon + 1);
     }
-    
+
     // Remove arbitrary value syntax for prefix checking
     if (baseClass.contains("[")) {
       baseClass = baseClass.substring(0, baseClass.indexOf("["));
     }
-    
+
     // Known Tailwind utility prefixes
     // Layout: flex, grid, block, hidden, inline, flow-root, contents
     // Spacing: p-, m-, gap-, space-x, space-y
@@ -582,7 +582,8 @@ public class TailwindCssMojo extends AbstractMojo {
     // Typography: text-, font-, leading-, tracking-, list-, placeholder-
     // Background: bg-, opacity-
     // Border: border-, rounded-, divide-
-    // Effects: shadow-, blur-, brightness-, contrast-, drop-shadow-, grayscale-, hue-rotate-, invert-, saturate-, sepia-
+    // Effects: shadow-, blur-, brightness-, contrast-, drop-shadow-, grayscale-, hue-rotate-,
+    // invert-, saturate-, sepia-
     // Transform: scale-, rotate-, translate-, skew-
     // Transition: transition-, duration-, ease-, delay-
     // Interactivity: cursor-, pointer-events-, select-, resize-, user-select-
@@ -596,58 +597,163 @@ public class TailwindCssMojo extends AbstractMojo {
     // Ring: ring-, ring-offset-
     // Divide: divide-
     // Screen: screen-
-    
+
     String[] knownPrefixes = {
-      "p", "px", "py", "pt", "pr", "pb", "pl",
-      "m", "mx", "my", "mt", "mr", "mb", "ml",
-      "gap", "space",
-      "w", "h", "min-w", "max-w", "min-h", "max-h",
-      "text", "font", "leading", "tracking", "list", "placeholder",
-      "bg", "opacity",
-      "border", "rounded", "divide",
-      "shadow", "blur", "brightness", "contrast", "drop-shadow", "grayscale", "hue-rotate", "invert", "saturate", "sepia",
-      "scale", "rotate", "translate", "skew",
-      "transition", "duration", "ease", "delay",
-      "cursor", "pointer-events", "select", "resize", "user-select",
-      "fill", "stroke",
-      "sr-only", "not-sr-only",
-      "static", "fixed", "absolute", "relative", "sticky", "inset", "top", "right", "bottom", "left", "z",
-      "visible", "invisible", "collapse",
-      "overflow", "overscroll",
-      "scroll", "scrollbar",
+      "p",
+      "px",
+      "py",
+      "pt",
+      "pr",
+      "pb",
+      "pl",
+      "m",
+      "mx",
+      "my",
+      "mt",
+      "mr",
+      "mb",
+      "ml",
+      "gap",
+      "space",
+      "w",
+      "h",
+      "min-w",
+      "max-w",
+      "min-h",
+      "max-h",
+      "text",
+      "font",
+      "leading",
+      "tracking",
+      "list",
+      "placeholder",
+      "bg",
+      "opacity",
+      "border",
+      "rounded",
+      "divide",
+      "shadow",
+      "blur",
+      "brightness",
+      "contrast",
+      "drop-shadow",
+      "grayscale",
+      "hue-rotate",
+      "invert",
+      "saturate",
+      "sepia",
+      "scale",
+      "rotate",
+      "translate",
+      "skew",
+      "transition",
+      "duration",
+      "ease",
+      "delay",
+      "cursor",
+      "pointer-events",
+      "select",
+      "resize",
+      "user-select",
+      "fill",
+      "stroke",
+      "sr-only",
+      "not-sr-only",
+      "static",
+      "fixed",
+      "absolute",
+      "relative",
+      "sticky",
+      "inset",
+      "top",
+      "right",
+      "bottom",
+      "left",
+      "z",
+      "visible",
+      "invisible",
+      "collapse",
+      "overflow",
+      "overscroll",
+      "scroll",
+      "scrollbar",
       "container",
-      "ring", "ring-offset",
-      "flex", "grid", "block", "hidden", "inline", "flow-root", "contents",
-      "table", "inline-block", "inline-flex", "inline-grid",
-      "aspect", "object", "align", "justify", "place",
-      "padding", "margin"
+      "ring",
+      "ring-offset",
+      "flex",
+      "grid",
+      "block",
+      "hidden",
+      "inline",
+      "flow-root",
+      "contents",
+      "table",
+      "inline-block",
+      "inline-flex",
+      "inline-grid",
+      "aspect",
+      "object",
+      "align",
+      "justify",
+      "place",
+      "padding",
+      "margin"
     };
-    
+
     for (String prefix : knownPrefixes) {
-      if (baseClass.equals(prefix) || baseClass.startsWith(prefix + "-") || baseClass.startsWith(prefix + "/")) {
+      if (baseClass.equals(prefix)
+          || baseClass.startsWith(prefix + "-")
+          || baseClass.startsWith(prefix + "/")) {
         return true;
       }
     }
-    
+
     // Also accept standalone utilities without hyphens
     String[] standaloneUtilities = {
-      "flex", "grid", "block", "hidden", "inline", "contents", "flow-root",
-      "visible", "invisible", "collapse",
-      "static", "fixed", "absolute", "relative", "sticky",
-      "italic", "antialiased", "subpixel-antialiased",
-      "normal", "bold", "uppercase", "lowercase", "capitalize",
-      "truncate", "break-words", "break-all",
-      "underline", "line-through", "no-underline",
-      "checked", "focus-within", "focus-visible", "hover", "focus", "active", "disabled"
+      "flex",
+      "grid",
+      "block",
+      "hidden",
+      "inline",
+      "contents",
+      "flow-root",
+      "visible",
+      "invisible",
+      "collapse",
+      "static",
+      "fixed",
+      "absolute",
+      "relative",
+      "sticky",
+      "italic",
+      "antialiased",
+      "subpixel-antialiased",
+      "normal",
+      "bold",
+      "uppercase",
+      "lowercase",
+      "capitalize",
+      "truncate",
+      "break-words",
+      "break-all",
+      "underline",
+      "line-through",
+      "no-underline",
+      "checked",
+      "focus-within",
+      "focus-visible",
+      "hover",
+      "focus",
+      "active",
+      "disabled"
     };
-    
+
     for (String utility : standaloneUtilities) {
       if (baseClass.equals(utility)) {
         return true;
       }
     }
-    
+
     return false;
   }
-
 }
