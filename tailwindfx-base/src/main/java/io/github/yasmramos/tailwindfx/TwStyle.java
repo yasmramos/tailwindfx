@@ -786,9 +786,9 @@ public final class TwStyle {
   }
 
   /**
-   * Checks if a token is a filter/effect token that should be handled via TwEffect.
-   * Effect tokens include: blur, brightness, contrast, grayscale, invert, sepia, hue-rotate,
-   * saturate, drop-shadow, backdrop-blur.
+   * Checks if a token is a filter/effect token that should be handled via TwEffect. Effect tokens
+   * include: blur, brightness, contrast, grayscale, invert, sepia, hue-rotate, saturate,
+   * drop-shadow, backdrop-blur.
    *
    * @param token the base token (without variant prefix)
    * @return true if this token should be applied via TwEffect instead of CSS
@@ -811,8 +811,8 @@ public final class TwStyle {
   }
 
   /**
-   * Applies an effect token to a node via TwEffect.
-   * Parses the token and calls the appropriate TwEffect method.
+   * Applies an effect token to a node via TwEffect. Parses the token and calls the appropriate
+   * TwEffect method.
    *
    * @param node the node to apply the effect to
    * @param token the effect token (e.g., "blur-sm", "brightness-125", "grayscale")
@@ -855,7 +855,8 @@ public final class TwStyle {
       }
     } catch (Exception e) {
       if (TwConfig.isDebug()) {
-        System.out.println("[TailwindFX Warning] Failed to apply effect \"" + token + "\": " + e.getMessage());
+        System.out.println(
+            "[TailwindFX Warning] Failed to apply effect \"" + token + "\": " + e.getMessage());
       }
     }
   }

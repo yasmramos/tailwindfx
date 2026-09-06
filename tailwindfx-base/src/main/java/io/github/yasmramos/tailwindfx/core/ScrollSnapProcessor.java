@@ -30,7 +30,8 @@ public final class ScrollSnapProcessor {
    * Processes a scroll-snap token and returns the corresponding CSS.
    *
    * @param tokenRaw The raw token string
-   * @return CSS string or null if not a scroll-snap token (JavaFX doesn't support scroll-snap via CSS)
+   * @return CSS string or null if not a scroll-snap token (JavaFX doesn't support scroll-snap via
+   *     CSS)
    */
   public static String processScrollSnap(String tokenRaw) {
     // JavaFX does not support scroll-snap via CSS properties.

@@ -2,9 +2,9 @@ package io.github.yasmramos.tailwindfx.core;
 
 /**
  * Utility class for validating Tailwind color utility tokens.
- * 
- * <p>This class provides shared validation logic for color utilities that support
- * opacity modifiers (e.g., bg-red-500/80).
+ *
+ * <p>This class provides shared validation logic for color utilities that support opacity modifiers
+ * (e.g., bg-red-500/80).
  */
 public final class ColorUtilityValidator {
 
@@ -13,10 +13,10 @@ public final class ColorUtilityValidator {
   }
 
   /**
-   * Validates if a base token (before /) is a valid color utility that can have opacity.
-   * Supports the 8 color utility prefixes: bg, text, border, fill, stroke, shadow, ring, outline.
-   * Validates that the shade is numeric (e.g., blue-500) or recognizes named colors without shade
-   * (e.g., bg-transparent).
+   * Validates if a base token (before /) is a valid color utility that can have opacity. Supports
+   * the 8 color utility prefixes: bg, text, border, fill, stroke, shadow, ring, outline. Validates
+   * that the shade is numeric (e.g., blue-500) or recognizes named colors without shade (e.g.,
+   * bg-transparent).
    *
    * @param base the token before the '/' modifier
    * @return true if this is a valid color utility base

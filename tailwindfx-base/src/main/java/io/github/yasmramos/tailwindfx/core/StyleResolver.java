@@ -7,8 +7,8 @@ import java.util.Map;
 /**
  * StyleResolver — Resolves Tailwind tokens into style values.
  *
- * <p>Responsibility: Convert StyleTokens into concrete CSS values. Does not handle caching, logging,
- * or metrics. Only pure resolution.
+ * <p>Responsibility: Convert StyleTokens into concrete CSS values. Does not handle caching,
+ * logging, or metrics. Only pure resolution.
  *
  * <p>Examples: - Token(p-4, scale=4) → "16px" - Token(bg-blue-500) → "rgb(59,130,246)" -
  * Token(w-[320px]) → "320px"
