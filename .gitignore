@@ -1,15 +1,37 @@
 ```
-# Java class files
+# Compiled and build artifacts
 *.class
-
-# Maven build artifacts
+*.o
+*.obj
+*.out
+build/
 target/
-!target/site/jacoco/
 
-# Test reports
-**/surefire-reports/
+# Dependencies
+.gradle/
+.mypy_cache/
+.pytest_cache/
+__pycache__/
+dist/
+node_modules/
+venv/
+.venv/
 
-# Jacoco coverage
-jacoco.exec
-jacoco/
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# OS specific
+.DS_Store
+Thumbs.db
 ```

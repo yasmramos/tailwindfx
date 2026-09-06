@@ -64,9 +64,9 @@ public final class TwConfig {
   }
 
   /**
-   * Check if stylesheet-based styling is preferred over inline JIT.
-   * When enabled, TailwindFX will apply CSS classes from the generated stylesheet
-   * instead of compiling inline styles, for tokens that exist in the AOT stylesheet.
+   * Check if stylesheet-based styling is preferred over inline JIT. When enabled, TailwindFX will
+   * apply CSS classes from the generated stylesheet instead of compiling inline styles, for tokens
+   * that exist in the AOT stylesheet.
    *
    * @return true if preferStylesheet mode is enabled
    */
@@ -75,9 +75,8 @@ public final class TwConfig {
   }
 
   /**
-   * Enable or disable preferStylesheet mode.
-   * When enabled, TailwindFX applies CSS classes from the build-time generated
-   * stylesheet instead of compiling inline JIT styles, for tokens that exist
+   * Enable or disable preferStylesheet mode. When enabled, TailwindFX applies CSS classes from the
+   * build-time generated stylesheet instead of compiling inline JIT styles, for tokens that exist
    * in the AOT stylesheet. Dynamic/arbitrary values still use JIT fallback.
    *
    * @param enabled true to enable stylesheet-based styling

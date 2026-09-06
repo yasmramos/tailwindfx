@@ -294,4 +294,111 @@ public class TwStyleTest extends ApplicationTest {
     assertTrue(labelNode.getStyleClass().contains("rounded-lg"));
     assertFalse(labelNode.getStyle().isEmpty());
   }
+
+  @Test
+  @DisplayName("applyWithStylesheetPreference should add static tokens as CSS classes")
+  void testApplyWithStylesheetPreferenceStaticTokens() {
+    // Enable preferStylesheet mode
+    TwConfig.preferStylesheet(true);
+
+    try {
+      TwStyle.apply(labelNode, "p-4", "bg-blue-500", "rounded-lg");
+
+      // Static tokens should be added as CSS classes
+      assertTrue(labelNode.getStyleClass().contains("p-4"), "Should add p-4 as CSS class");
+      assertTrue(
+          labelNode.getStyleClass().contains("bg-blue-500"), "Should add bg-blue-500 as CSS class");
+      assertTrue(
+          labelNode.getStyleClass().contains("rounded-lg"), "Should add rounded-lg as CSS class");
+    } finally {
+      // Reset to default
+      TwConfig.preferStylesheet(false);
+    }
+  }
+
+  @Test
+  @DisplayName("applyWithStylesheetPreference should use JIT fallback for arbitrary values")
+  void testApplyWithStylesheetPreferenceArbitraryValues() {
+    // Enable preferStylesheet mode
+    TwConfig.preferStylesheet(true);
+
+    try {
+      TwStyle.apply(labelNode, "w-[320px]", "h-[200px]", "bg-[#ff0000]");
+
+      // Arbitrary values should trigger JIT inline compilation
+      assertFalse(labelNode.getStyle().isEmpty(), "Should use JIT inline for arbitrary values");
+      assertTrue(
+          labelNode.getStyle().contains("-fx-pref-width: 320px")
+              || labelNode.getStyle().contains("320"),
+          "Should contain width value from JIT compilation");
+    } finally {
+      // Reset to default
+      TwConfig.preferStylesheet(false);
+    }
+  }
+
+  @Test
+  @DisplayName("applyWithStylesheetPreference should handle mixed static and dynamic tokens")
+  void testApplyWithStylesheetPreferenceMixed() {
+    // Enable preferStylesheet mode
+    TwConfig.preferStylesheet(true);
+
+    try {
+      TwStyle.apply(labelNode, "p-4", "w-[320px]", "bg-blue-500", "h-[auto]");
+
+      // Static tokens should be CSS classes
+      assertTrue(labelNode.getStyleClass().contains("p-4"), "Should add static token as CSS class");
+      assertTrue(
+          labelNode.getStyleClass().contains("bg-blue-500"),
+          "Should add static token as CSS class");
+
+      // Dynamic tokens should trigger JIT
+      assertFalse(labelNode.getStyle().isEmpty(), "Should use JIT for arbitrary values");
+    } finally {
+      // Reset to default
+      TwConfig.preferStylesheet(false);
+    }
+  }
+
+  @Test
+  @DisplayName("applyWithStylesheetPreference should handle opacity modifiers as dynamic")
+  void testApplyWithStylesheetPreferenceOpacityModifier() {
+    // Enable preferStylesheet mode
+    TwConfig.preferStylesheet(true);
+
+    try {
+      TwStyle.apply(labelNode, "bg-blue-500/80", "text-red-500/50");
+
+      // Opacity modifiers should trigger JIT fallback
+      assertFalse(labelNode.getStyle().isEmpty(), "Should use JIT for opacity modifier tokens");
+    } finally {
+      // Reset to default
+      TwConfig.preferStylesheet(false);
+    }
+  }
+
+  @Test
+  @DisplayName("preferStylesheet config should be toggleable")
+  void testPreferStylesheetConfigToggle() {
+    // Verify default is false
+    assertFalse(TwConfig.isPreferStylesheet(), "Default should be false");
+
+    // Enable
+    TwConfig.preferStylesheet(true);
+    assertTrue(TwConfig.isPreferStylesheet(), "Should be enabled after setting true");
+
+    // Disable
+    TwConfig.preferStylesheet(false);
+    assertFalse(TwConfig.isPreferStylesheet(), "Should be disabled after setting false");
+  }
+
+  @Test
+  @DisplayName("reset should clear preferStylesheet setting")
+  void testResetClearsPreferStylesheet() {
+    TwConfig.preferStylesheet(true);
+    assertTrue(TwConfig.isPreferStylesheet());
+
+    TwConfig.reset();
+    assertFalse(TwConfig.isPreferStylesheet(), "Reset should clear preferStylesheet");
+  }
 }

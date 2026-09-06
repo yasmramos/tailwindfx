@@ -222,7 +222,60 @@ public final class TwStyle {
     }
 
     if (!jitTokens.isEmpty()) {
-      StyleMerger.applyJit(node, jitTokens.toArray(new String[0]));
+      // Check preferStylesheet mode: apply classes from AOT stylesheet when available,
+      // fallback to JIT inline for dynamic/arbitrary values
+      if (io.github.yasmramos.tailwindfx.TwConfig.isPreferStylesheet()) {
+        applyWithStylesheetPreference(node, jitTokens.toArray(new String[0]));
+      } else {
+        StyleMerger.applyJit(node, jitTokens.toArray(new String[0]));
+      }
+    }
+  }
+
+  /**
+   * Applies tokens with stylesheet preference mode. When preferStylesheet is enabled, this method
+   * adds CSS classes for tokens that exist in the AOT-generated stylesheet, and only uses JIT
+   * inline compilation as fallback for dynamic/arbitrary values not resolved at build-time.
+   *
+   * @param node the target node
+   * @param tokens the tokens to apply
+   */
+  private static void applyWithStylesheetPreference(Node node, String... tokens) {
+    // Separate tokens into:
+    // 1. Static tokens (no arbitrary values) → apply as CSS class
+    // 2. Dynamic/arbitrary tokens ([...], /opacity) → fallback to JIT inline
+    java.util.List<String> staticTokens = new java.util.ArrayList<>();
+    java.util.List<String> dynamicTokens = new java.util.ArrayList<>();
+
+    for (String token : tokens) {
+      if (token == null || token.isBlank()) continue;
+
+      // Check if token contains arbitrary value syntax [...] or opacity modifier /
+      // Opacity modifier: any token with '/' followed by content (e.g., bg-blue-500/80)
+      boolean hasArbitraryValue = token.contains("[") && token.contains("]");
+      boolean hasOpacityModifier = token.indexOf('/') > 0;
+
+      if (hasArbitraryValue || hasOpacityModifier) {
+        dynamicTokens.add(token);
+      } else {
+        staticTokens.add(token);
+      }
+    }
+
+    // Apply static tokens as CSS classes (AOT stylesheet will handle them)
+    if (!staticTokens.isEmpty()) {
+      for (String cls : staticTokens) {
+        if (!node.getStyleClass().contains(cls)) {
+          node.getStyleClass().add(cls);
+        }
+      }
+      // Use UtilityConflictResolver for conflict resolution between classes of same category
+      UtilityConflictResolver.applyAll(node, staticTokens.toArray(new String[0]));
+    }
+
+    // Fallback to JIT inline for dynamic/arbitrary values
+    if (!dynamicTokens.isEmpty()) {
+      StyleMerger.applyJit(node, dynamicTokens.toArray(new String[0]));
     }
   }
 

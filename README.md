@@ -14,63 +14,86 @@
 
 TailwindFX brings Tailwind CSS's utility-first approach to JavaFX. Instead of writing boilerplate style code, you compose styles from a comprehensive set of pre-built utility classes — and where CSS falls short, TailwindFX provides equivalent Java APIs.
 
-### Architecture: Hybrid Approach (CSS Base + JIT Compilation) ✅
+### Architecture: TailwindCSS-Style Build-Time Generation + Runtime Class-Based Application ✅
 
-TailwindFX uses a **hybrid architecture** that combines minimal static CSS with Just-In-Time compilation for all utilities and components. This approach maximizes flexibility while minimizing bundle size.
-
-### Current: JIT-First Architecture (v2.0) ✅
-
-TailwindFX features a **Just-In-Time compiler** for dynamic style generation, complemented by a minimal base CSS file for CSS variables and resets.
+TailwindFX now follows the **TailwindCSS approach**: scan source files at build-time, generate a stylesheet with utility classes, and apply them by name at runtime. JIT inline compilation remains as a fallback for dynamic/arbitrary values not resolved at build-time.
 
 **Architecture breakdown:**
 
 | Layer | Responsibility | Implementation | Size |
 |-------|---------------|----------------|------|
 | **Base CSS** | CSS variables, reset, base styles | `tailwindfx-base.css` (generated from ThemeConfig) | ~2-5KB |
-| **JIT Compiler** | On-demand compilation for ALL utilities, colors, effects, components | `JitCompiler` + `StyleToken` + `StyleResolver` + `CssPropertyMapper` | Dynamic |
-| **LRU Cache** | High-performance caching for compiled styles | Configurable size (2000 entries max) | In-memory |
+| **Generated Stylesheet (AOT)** | Build-time scanned utility classes | `tailwindfx-generated.css` (Maven plugin) | Variable |
+| **JIT Compiler (Fallback)** | Runtime compilation for dynamic/arbitrary values | `JitCompiler` + `StyleToken` + `StyleResolver` | Dynamic |
+| **LRU Cache** | High-performance caching for JIT compiled styles | Configurable size (2000 entries max) | In-memory |
 
 **Key features:**
-- **Minimal CSS footprint**: Only ~2-5KB base CSS loaded initially
-- **JIT for everything**: Compile ANY value on-demand: `w-[320px]`, `bg-blue-500/80`, `drop-shadow-2xl`, `btn-primary`, etc.
-- **Dynamic theme generation**: `ThemeCssGenerator` creates `tailwindfx-base.css` from `ThemeConfig` at install time
-- **Refactored architecture**: Separated parsing (`StyleToken`), resolution (`StyleResolver`), and property mapping (`CssPropertyMapper`)
-- **Smart fallback**: Unknown tokens handled gracefully with warnings in debug mode
-- **No large CSS bundles**: Unlike traditional approaches, no 300KB+ CSS files to load
+- **Build-time scanning**: Maven plugin scans `.java` and `.fxml` files for Tailwind classes
+- **AOT stylesheet generation**: Generates `tailwindfx-generated.css` with utility classes and translated variants
+- **Class-based runtime**: When `preferStylesheet` is enabled, applies CSS classes instead of inline styles
+- **JIT fallback**: Dynamic/arbitrary values (`w-[<calculated>]`, `bg-[#rgb]/opacity`) still compile inline
+- **Variant translation**: `hover:X` → `.X:hover`, `focus:X` → `.X:focused`, `md:X` → `.bp-md .X`, `dark:X` → `.dark .X`
+- **!important filtering**: JavaFX doesn't support `!important`, automatically filtered during generation
+- **Specialized processors**: `RingProcessor`, `GradientProcessor`, etc. captured via `compileBatch()`
+- **Unsupported properties filtered**: `aspect-ratio`, `scroll-snap`, `transition`, `container-query` return `null` (handled programmatically)
 
-**Why JIT-first?**
-JavaFX doesn't support CSS custom properties (variables) efficiently. Instead of pre-generating thousands of utility classes, TailwindFX compiles styles on-demand and caches them. This results in:
-- Faster initial load (minimal CSS)
-- Unlimited flexibility (any arbitrary value)
-- Smaller memory footprint (only cache what you use)
-- No unused CSS bloat
+**Why TailwindCSS-style?**
+- **Better performance**: CSS classes are faster than inline style manipulation
+- **Smaller runtime footprint**: Styles loaded once via stylesheet, not compiled per-node
+- **Easier debugging**: Inspect `node.getStyleClass()` instead of inline `node.getStyle()`
+- **Familiar workflow**: Same developer experience as TailwindCSS on the web
+- **Optimized bundles**: Only generate CSS for classes actually used in your codebase
 
 **Architecture flow:**
 ```
-TwStyle.apply(node, "p-4", "bg-blue-500", "w-[320px]", "btn-primary")
+┌─────────────────────────────────────────────────────────────┐
+│ BUILD-TIME (Maven Plugin: tailwindfx:generate)              │
+├─────────────────────────────────────────────────────────────┤
+│ 1. Scan source files (.java, .fxml) for Tailwind classes    │
+│ 2. For each class:                                           │
+│    - JitCompiler.compileBatch(className)                    │
+│    - Capture inlineStyle output                             │
+│    - Translate variants (hover:, md:, dark:, etc.)          │
+│    - Filter !important                                      │
+│    - Skip unsupported properties (aspect-ratio, etc.)       │
+│ 3. Generate tailwindfx-generated.css                        │
+│    Example output:                                          │
+│    .btn-primary { -fx-background-color: #3b82f6; }          │
+│    .btn-primary:hover { -fx-background-color: #2563eb; }    │
+│    .bp-md .p-4 { -fx-padding: 16px; }                       │
+│    .dark .text-white { -fx-text-fill: #ffffff; }            │
+└─────────────────────────────────────────────────────────────┘
     ↓
-┌─────────────────────────────────────┐
-│ 1. Check LRU Cache (fastest path)   │ ← Previously compiled styles
-│    Cache hit? Return cached style   │
-└─────────────────────────────────────┘
-    ↓ (cache miss)
-┌─────────────────────────────────────┐
-│ 2. JIT Compiler                     │ ← All tokens compiled on-demand
-│    JitCompiler.compile(token)       │
-│    ↓                                │
-│    StyleToken.parse(token)          │
-│    ↓                                │
-│    StyleResolver.resolve(token)     │
-│    ↓                                │
-│    CssPropertyMapper.map()          │
-│    ↓                                │
-│    Generated: -fx-padding: 16px;    │
-│    -fx-background-color: #3b82f6;   │
-│    -fx-pref-width: 320px;           │
-│    Cache result for reuse           │
-└─────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│ RUNTIME (Application Startup)                               │
+├─────────────────────────────────────────────────────────────┤
+│ 1. TwInstall.install(scene)                                 │
+│    - Load tailwindfx-base.css (~2-5KB)                      │
+│ 2. TwInstall.installGenerated(scene, "css/tailwindfx-generated.css") │
+│    - Load generated stylesheet                              │
+│ 3. TwConfig.preferStylesheet(true)                          │
+│    - Enable class-based application mode                    │
+└─────────────────────────────────────────────────────────────┘
     ↓
-Applied to Node.style (inline) or added as style class
+┌─────────────────────────────────────────────────────────────┐
+│ RUNTIME (Applying Styles)                                   │
+├─────────────────────────────────────────────────────────────┤
+│ TwStyle.apply(node, "p-4", "bg-blue-500", "w-[320px]")      │
+│    ↓                                                        │
+│ ┌───────────────────────────────────────────────────────┐   │
+│ │ preferStylesheet = true                               │   │
+│ │                                                       │   │
+│ │ Static tokens (p-4, bg-blue-500):                     │   │
+│ │   → node.getStyleClass().add("p-4")                   │   │
+│ │   → node.getStyleClass().add("bg-blue-500")           │   │
+│ │   → CSS stylesheet handles the rest                   │   │
+│ │                                                       │   │
+│ │ Dynamic/arbitrary tokens (w-[320px]):                 │   │
+│ │   → Fallback to JIT inline compilation                │   │
+│ │   → JitCompiler.compile("w-[320px]")                  │   │
+│ │   → node.setStyle("-fx-pref-width: 320px;")           │   │
+│ └───────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 **Installation:**
@@ -78,12 +101,22 @@ Applied to Node.style (inline) or added as style class
 // Standard installation (recommended)
 // Loads minimal base CSS + enables JIT compiler
 TwInstall.install(scene); 
-// Files loaded:
-// - tailwindfx-base.css (generated dynamically from ThemeConfig, ~2-5KB)
-// Everything else compiled JIT on-demand
 
-TwStyle.apply(btn, "btn-primary", "rounded-lg", "px-4", "py-2"); // All JIT compiled
-TwStyle.apply(node, "bg-blue-500/80", "w-[320px]"); // JIT compiled with arbitrary values
+// Load generated AOT stylesheet (produced by tailwindfx:generate Maven goal)
+// Place tailwindfx-generated.css in src/main/resources/css/
+TwInstall.installGenerated(scene, "css/tailwindfx-generated.css");
+
+// Enable class-based styling (applies CSS classes instead of inline JIT)
+TwConfig.preferStylesheet(true);
+
+// Apply styles
+TwStyle.apply(btn, "btn-primary", "rounded-lg", "px-4", "py-2"); 
+// → Adds CSS classes: btn.getStyleClass() = ["btn-primary", "rounded-lg", "px-4", "py-2"]
+// → Styles applied via stylesheet, NOT inline
+
+TwStyle.apply(node, "bg-blue-500/80", "w-[320px]"); 
+// → bg-blue-500/80: static token → CSS class
+// → w-[320px]: arbitrary value → JIT inline fallback
 
 // Dark mode support (optional)
 TwInstall.installWithDarkMode(scene); // Also loads dark theme overrides

@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -244,10 +245,13 @@ public class TailwindCssMojo extends AbstractMojo {
         // Generate utilities for used classes
         getLog().info("TailwindFX: Generating utilities for " + usedClasses.size() + " classes");
         
+        JitCompiler compiler = new JitCompiler();
+        
         for (String className : usedClasses) {
             try {
-                JitCompiler.CompileResult result = JitCompiler.compile(className);
-                if (result != null && result.inlineStyle() != null && !result.inlineStyle().isEmpty()) {
+                // Use compileBatch to capture output from specialized processors (RingProcessor, etc.)
+                JitCompiler.BatchResult result = compiler.compileBatch(className);
+                if (result.hasInlineStyle()) {
                     // Convert inline style to class-based CSS
                     String classCss = convertToClassCss(className, result.inlineStyle());
                     css.append(classCss).append("\n");
@@ -267,22 +271,195 @@ public class TailwindCssMojo extends AbstractMojo {
 
     /**
      * Converts inline style format to class-based CSS.
+     * Translates Tailwind variants to valid JavaFX selectors:
+     * - hover:X → .X:hover
+     * - focus:X → .X:focused
+     * - pressed:X / active:X → .X:pressed
+     * - disabled:X → .X:disabled
+     * - md:, lg:, etc. → .bp-md .X, .bp-lg .X (based on BreakpointManager classes)
+     * - dark: → .dark .X (based on ThemeManager class)
+     * Filters !important as JavaFX doesn't support it.
      */
     private String convertToClassCss(String className, String inlineStyle) {
-        // Remove -fx- prefix and convert to standard CSS properties
         StringBuilder classCss = new StringBuilder();
-        classCss.append(".").append(className.replace("[", "\\[").replace("]", "\\]").replace(":", "\\:")).append(" {\n");
+        
+        // Parse variants from className
+        VariantInfo variantInfo = parseVariants(className);
+        String baseClassName = variantInfo.baseClass;
+        String selector = buildSelector(baseClassName, variantInfo);
+        
+        classCss.append(selector).append(" {\\n");
         
         // Parse inline style and convert to class format
         String[] properties = inlineStyle.split(";");
         for (String prop : properties) {
-            if (!prop.trim().isEmpty()) {
-                classCss.append("    ").append(prop.trim()).append(";\n");
+            String trimmed = prop.trim();
+            if (!trimmed.isEmpty()) {
+                // Filter !important as JavaFX doesn't support it
+                if (trimmed.contains("!important")) {
+                    getLog().warn("TailwindFX: !important is not supported in JavaFX CSS. Property filtered: " + trimmed);
+                    continue;
+                }
+                classCss.append("    ").append(trimmed).append(";\\n");
             }
         }
         
         classCss.append("}");
         return classCss.toString();
+    }
+    
+    /**
+     * Holds information about parsed variants from a Tailwind class name.
+     */
+    private static class VariantInfo {
+        String baseClass;
+        List<String> stateVariants = new ArrayList<>();  // hover, focus, pressed, active, disabled
+        List<String> breakpointVariants = new ArrayList<>();  // sm, md, lg, xl, 2xl
+        boolean isDark = false;
+        
+        VariantInfo(String baseClass) {
+            this.baseClass = baseClass;
+        }
+    }
+    
+    /**
+     * Parses Tailwind variants from a class name.
+     * Examples: 
+     * - "hover:bg-blue-500" → baseClass="bg-blue-500", stateVariants=["hover"]
+     * - "md:p-4" → baseClass="p-4", breakpointVariants=["md"]
+     * - "dark:text-white" → baseClass="text-white", isDark=true
+     * - "lg:hover:w-full" → baseClass="w-full", breakpointVariants=["lg"], stateVariants=["hover"]
+     */
+    private VariantInfo parseVariants(String className) {
+        VariantInfo info = new VariantInfo(className);
+        String remaining = className;
+        
+        // Process variants separated by colons
+        while (remaining.contains(":")) {
+            int colonIndex = remaining.indexOf(':');
+            String variant = remaining.substring(0, colonIndex);
+            remaining = remaining.substring(colonIndex + 1);
+            
+            // Check for arbitrary variant syntax [&:hover], [@media...]
+            if (variant.startsWith("[") && variant.endsWith("]")) {
+                // Extract content from brackets
+                String content = variant.substring(1, variant.length() - 1);
+                if (content.startsWith("&:")) {
+                    // [&:hover] → hover
+                    variant = content.substring(2);
+                } else if (content.startsWith("@media")) {
+                    // Handle media queries - map to breakpoints
+                    if (content.contains("min-width:640px")) {
+                        info.breakpointVariants.add("sm");
+                    } else if (content.contains("min-width:768px")) {
+                        info.breakpointVariants.add("md");
+                    } else if (content.contains("min-width:1024px")) {
+                        info.breakpointVariants.add("lg");
+                    } else if (content.contains("min-width:1280px")) {
+                        info.breakpointVariants.add("xl");
+                    } else if (content.contains("min-width:1536px")) {
+                        info.breakpointVariants.add("2xl");
+                    }
+                    variant = null; // Already processed
+                }
+            }
+            
+            if (variant == null) continue;
+            
+            // Categorize variant
+            switch (variant) {
+                case "hover":
+                case "focus":
+                case "pressed":
+                case "active":
+                case "disabled":
+                case "visited":
+                case "checked":
+                    info.stateVariants.add(variant);
+                    break;
+                case "sm":
+                case "md":
+                case "lg":
+                case "xl":
+                case "2xl":
+                    info.breakpointVariants.add(variant);
+                    break;
+                case "dark":
+                    info.isDark = true;
+                    break;
+                default:
+                    // Unknown variant, keep as part of base class
+                    break;
+            }
+        }
+        
+        info.baseClass = remaining;
+        return info;
+    }
+    
+    /**
+     * Builds a CSS selector from base class name and variants.
+     * Examples:
+     * - "bg-blue-500" with hover → ".bg-blue-500:hover"
+     * - "p-4" with md → ".bp-md .p-4"
+     * - "text-white" with dark → ".dark .text-white"
+     * - "w-full" with lg, hover → ".bp-lg .w-full:hover"
+     */
+    private String buildSelector(String baseClass, VariantInfo info) {
+        StringBuilder selector = new StringBuilder();
+        
+        // Escape special characters in class name for CSS
+        String escapedClass = escapeCssClassName(baseClass);
+        
+        // Start with breakpoint context (outer wrapper)
+        for (String bp : info.breakpointVariants) {
+            selector.append(".bp-").append(bp).append(" ");
+        }
+        
+        // Add dark mode context
+        if (info.isDark) {
+            selector.append(".dark ");
+        }
+        
+        // Base class selector
+        selector.append(".").append(escapedClass);
+        
+        // Add state pseudo-classes (JavaFX uses :hover, :focused, :pressed, :disabled)
+        for (String state : info.stateVariants) {
+            switch (state) {
+                case "hover":
+                    selector.append(":hover");
+                    break;
+                case "focus":
+                    selector.append(":focused");
+                    break;
+                case "pressed":
+                case "active":
+                    selector.append(":pressed");
+                    break;
+                case "disabled":
+                    selector.append(":disabled");
+                    break;
+                case "visited":
+                case "checked":
+                    // JavaFX doesn't have direct equivalents, skip or use custom handling
+                    break;
+            }
+        }
+        
+        return selector.toString();
+    }
+    
+    /**
+     * Escapes special CSS characters in class names.
+     */
+    private String escapeCssClassName(String className) {
+        return className
+            .replace("\\", "\\\\")
+            .replace("[", "\\[")
+            .replace("]", "\\]")
+            .replace(":", "\\:")
+            .replace(".", "\\.");
     }
 
     /**
