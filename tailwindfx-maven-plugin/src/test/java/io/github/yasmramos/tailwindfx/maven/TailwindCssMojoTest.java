@@ -219,4 +219,157 @@ public class TailwindCssMojoTest {
     assertNotNull(result);
     assertTrue(result.length() > 0, "Should generate valid CSS");
   }
+
+  @Test
+  public void testIsValidTailwindClassRejectsJavaIdentifiers() throws Exception {
+    TailwindCssMojo mojo = new TailwindCssMojo();
+
+    // Use reflection to access private method
+    java.lang.reflect.Method isValidMethod =
+        TailwindCssMojo.class.getDeclaredMethod("isValidTailwindClass", String.class);
+    isValidMethod.setAccessible(true);
+
+    // Common Java identifiers that should be rejected
+    String[] falsePositives = {
+      "String",
+      "Stage",
+      "Integer",
+      "Double",
+      "Boolean",
+      "Object",
+      "Void",
+      "printStackTrace",
+      "getPadding",
+      "setStyle",
+      "addClass",
+      "removeAll",
+      "github",
+      "BorderPane",
+      "VBox",
+      "HBox",
+      "Label",
+      "Button",
+      "10",
+      "120",
+      "248",
+      "class",
+      "style",
+      "styleClass",
+      "id",
+      "null",
+      "true",
+      "false",
+      "var",
+      "running",
+      "created",
+      "loaded"
+    };
+
+    for (String identifier : falsePositives) {
+      Boolean result = (Boolean) isValidMethod.invoke(mojo, identifier);
+      assertFalse(result, "Should reject Java identifier: " + identifier);
+    }
+  }
+
+  @Test
+  public void testIsValidTailwindClassAcceptsRealTailwindClasses() throws Exception {
+    TailwindCssMojo mojo = new TailwindCssMojo();
+
+    java.lang.reflect.Method isValidMethod =
+        TailwindCssMojo.class.getDeclaredMethod("isValidTailwindClass", String.class);
+    isValidMethod.setAccessible(true);
+
+    // Real Tailwind classes that should be accepted
+    String[] validClasses = {
+      "p-5",
+      "p-8",
+      "text-2xl",
+      "font-bold",
+      "bg-gray-50",
+      "bg-blue-500",
+      "rounded-lg",
+      "shadow-md",
+      "flex",
+      "grid",
+      "w-full",
+      "h-auto",
+      "m-4",
+      "mb-2",
+      "mt-4",
+      "mx-auto",
+      "py-2",
+      "px-4",
+      "border",
+      "border-2",
+      "gap-4",
+      "collapse-item",
+      "hover:bg-red-500",
+      "focus:ring-2",
+      "md:p-4",
+      "dark:text-white"
+    };
+
+    for (String className : validClasses) {
+      Boolean result = (Boolean) isValidMethod.invoke(mojo, className);
+      assertTrue(result, "Should accept valid Tailwind class: " + className);
+    }
+  }
+
+  @Test
+  public void testScanForTailwindClassesExtractsOnlyFromStrings() throws Exception {
+    TailwindCssMojo mojo = new TailwindCssMojo();
+
+    // Create a test Java file with both real Tailwind classes and false positives
+    File sourceDir = tempDir.resolve("src").toFile();
+    sourceDir.mkdirs();
+    File testFile = tempDir.resolve("src/TestExample.java").toFile();
+
+    String javaContent =
+        "package test;\n"
+            + "import io.github.yasmramos.tailwindfx.TwStyle;\n"
+            + "\n"
+            + "public class TestExample {\n"
+            + "    private String github = \"repo\";\n"
+            + "    private int count = 120;\n"
+            + "    \n"
+            + "    public void setup() {\n"
+            + "        Button btn = new Button();\n"
+            + "        TwStyle.apply(btn, \"p-5 bg-blue-500 text-white\");\n"
+            + "        btn.getStyleClass().add(\"rounded-lg\");\n"
+            + "        btn.getStyleClass().addAll(\"shadow-md\", \"hover:bg-blue-600\");\n"
+            + "        printStackTrace(); // Should not be picked up\n"
+            + "        Stage stage = new Stage(); // Should not be picked up\n"
+            + "    }\n"
+            + "}";
+
+    java.nio.file.Files.writeString(testFile.toPath(), javaContent);
+
+    // Use reflection to access private method
+    java.lang.reflect.Field sourceField = TailwindCssMojo.class.getDeclaredField("sourceDirectory");
+    sourceField.setAccessible(true);
+    sourceField.set(mojo, sourceDir);
+
+    java.lang.reflect.Method scanMethod =
+        TailwindCssMojo.class.getDeclaredMethod("scanForTailwindClasses", File.class);
+    scanMethod.setAccessible(true);
+
+    @SuppressWarnings("unchecked")
+    java.util.Set<String> classes = (java.util.Set<String>) scanMethod.invoke(mojo, sourceDir);
+
+    // Should contain real Tailwind classes
+    assertTrue(classes.contains("p-5"), "Should extract p-5");
+    assertTrue(classes.contains("bg-blue-500"), "Should extract bg-blue-500");
+    assertTrue(classes.contains("text-white"), "Should extract text-white");
+    assertTrue(classes.contains("rounded-lg"), "Should extract rounded-lg");
+    assertTrue(classes.contains("shadow-md"), "Should extract shadow-md");
+    assertTrue(classes.contains("hover:bg-blue-600"), "Should extract hover:bg-blue-600");
+
+    // Should NOT contain Java identifiers
+    assertFalse(classes.contains("String"), "Should not extract String");
+    assertFalse(classes.contains("Stage"), "Should not extract Stage");
+    assertFalse(classes.contains("Button"), "Should not extract Button");
+    assertFalse(classes.contains("printStackTrace"), "Should not extract printStackTrace");
+    assertFalse(classes.contains("github"), "Should not extract github");
+    assertFalse(classes.contains("count"), "Should not extract count");
+  }
 }

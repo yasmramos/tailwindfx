@@ -56,12 +56,21 @@ public class TailwindCssMojo extends AbstractMojo {
   /** Custom ThemeConfig class name (optional). */
   @Parameter private String themeConfigClass;
 
-  // Regex patterns for matching Tailwind classes
-  private static final Pattern CLASS_PATTERN =
+  // Regex patterns for matching Tailwind classes in Java source files
+  // Only match string literals passed to style application methods
+  private static final Pattern METHOD_CALL_PATTERN =
+      Pattern.compile(
+          "(?:TwStyle|TailwindFX)\\.(?:apply|applyRaw)\\s*\\([^)]*?\"([^\"]*)\"|"
+              + "getStyleClass\\(\\)\\.(?:add|addAll)\\s*\\(\\s*\"([^\"]*)\"|"
+              + "setStyleClass\\s*\\(\\s*\"([^\"]*)\"");
+
+  // Pattern for FXML styleClass attributes (already correctly bounded)
+  private static final Pattern FXML_CLASS_PATTERN = Pattern.compile("styleClass=\"([^\"]*)\"");
+
+  // Pattern to extract individual class names from a string literal
+  private static final Pattern CLASS_IN_STRING_PATTERN =
       Pattern.compile(
           "(?<![\\w-])([a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*(?:\\[[^\\]]+\\])?(?::[a-zA-Z0-9-]+(?:\\[[^\\]]+\\])?)*)");
-
-  private static final Pattern FXML_CLASS_PATTERN = Pattern.compile("styleClass=\"([^\"]*)\"");
 
   @Override
   public void execute() throws MojoExecutionException {
@@ -150,14 +159,32 @@ public class TailwindCssMojo extends AbstractMojo {
               }
             }
           }
-        }
+        } else if (file.toString().endsWith(".java")) {
+          // Extract classes only from string literals in style application methods
+          // This avoids false positives from Java identifiers like class names, method names, etc.
 
-        // Extract classes from Java strings (setStyleClass, addStyleClass, etc.)
-        Matcher matcher = CLASS_PATTERN.matcher(content);
-        while (matcher.find()) {
-          String potentialClass = matcher.group(1);
-          if (isValidTailwindClass(potentialClass)) {
-            tailwindClasses.add(potentialClass);
+          // Match method calls: TwStyle.apply(...), TailwindFX.apply(...), TwStyle.applyRaw(...)
+          Matcher methodMatcher = METHOD_CALL_PATTERN.matcher(content);
+          while (methodMatcher.find()) {
+            // Get the first non-null group (the string literal content)
+            String stringLiteral = null;
+            for (int i = 1; i <= methodMatcher.groupCount(); i++) {
+              if (methodMatcher.group(i) != null) {
+                stringLiteral = methodMatcher.group(i);
+                break;
+              }
+            }
+
+            if (stringLiteral != null) {
+              // Extract individual class names from the string literal
+              Matcher classMatcher = CLASS_IN_STRING_PATTERN.matcher(stringLiteral);
+              while (classMatcher.find()) {
+                String potentialClass = classMatcher.group(1);
+                if (isValidTailwindClass(potentialClass)) {
+                  tailwindClasses.add(potentialClass);
+                }
+              }
+            }
           }
         }
 
@@ -169,28 +196,84 @@ public class TailwindCssMojo extends AbstractMojo {
     return tailwindClasses;
   }
 
-  /** Validates if a string looks like a valid Tailwind class. */
+  /**
+   * Validates if a string is a valid Tailwind class by attempting to compile it with JitCompiler.
+   * This ensures we only accept classes that actually produce CSS output, eliminating false
+   * positives from Java identifiers.
+   */
   private boolean isValidTailwindClass(String className) {
     if (className == null || className.isEmpty()) {
       return false;
     }
 
-    // Skip common false positives
+    // Skip common false positives - Java identifiers and keywords
     if (className.equals("class")
         || className.equals("style")
         || className.equals("styleClass")
-        || className.equals("id")) {
+        || className.equals("id")
+        || className.equals("String")
+        || className.equals("Stage")
+        || className.equals("Integer")
+        || className.equals("Double")
+        || className.equals("Boolean")
+        || className.equals("Object")
+        || className.equals("Void")
+        || className.equals("var")
+        || className.equals("null")
+        || className.equals("true")
+        || className.equals("false")) {
       return false;
     }
 
-    // Must start with a letter or number
-    if (!Character.isLetterOrDigit(className.charAt(0))) {
+    // Skip PascalCase identifiers (Java class names)
+    if (Character.isUpperCase(className.charAt(0))) {
       return false;
     }
 
-    // Should contain at least one hyphen for most Tailwind classes
-    // But allow simple ones like 'bold', 'italic' if they exist
-    return className.length() > 1;
+    // Skip purely numeric values
+    if (className.matches("\\d+")) {
+      return false;
+    }
+
+    // Skip method names (typically camelCase starting with lowercase verb)
+    if (className.matches("[a-z][a-zA-Z0-9]*")
+        && !className.contains("-")
+        && className.length() > 2) {
+      // Check if it looks like a method name (common patterns)
+      if (className.startsWith("get")
+          || className.startsWith("set")
+          || className.startsWith("is")
+          || className.startsWith("has")
+          || className.startsWith("add")
+          || className.startsWith("remove")
+          || className.endsWith("ing") // e.g., "printing", "running"
+          || className.endsWith("ed")) { // e.g., "created", "loaded"
+        return false;
+      }
+    }
+
+    // Try to compile the class - if it produces no output, it's not a valid Tailwind class
+    try {
+      JitCompiler compiler = new JitCompiler();
+      JitCompiler.BatchResult result = compiler.compileBatch(className);
+
+      // Valid if it produces either inline style OR cssClasses (for variants like hover:, flex,
+      // etc.)
+      // We check both because some utilities produce CSS classes instead of inline styles
+      boolean hasValidOutput = result.hasInlineStyle() || !result.cssClasses().isEmpty();
+
+      if (!hasValidOutput && getLog().isDebugEnabled()) {
+        getLog().debug("Filtered out non-Tailwind class: " + className);
+      }
+
+      return hasValidOutput;
+    } catch (Exception e) {
+      // If compilation fails, it's not a valid Tailwind class
+      if (getLog().isDebugEnabled()) {
+        getLog().debug("Failed to compile potential class '" + className + "': " + e.getMessage());
+      }
+      return false;
+    }
   }
 
   /** Generates CSS content based on used classes. */
