@@ -1,6 +1,7 @@
 package io.github.yasmramos.tailwindfx.examples;
 
 import io.github.yasmramos.tailwindfx.TailwindFX;
+import io.github.yasmramos.tailwindfx.TwConfig;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -13,6 +14,10 @@ public class BasicApp extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        
+        // Configure TailwindFX to prefer stylesheet-based classes (build-time generated)
+        TwConfig config = new TwConfig();
+        config.preferStylesheet(true);
         
         // Left panel with examples list
         VBox examplesList = new VBox(10);
@@ -56,7 +61,8 @@ public class BasicApp extends Application {
         root.getStyleClass().addAll("bg-gray-50");
         
         Scene scene = new Scene(root, 1100, 700);
-        TailwindFX.install(scene);
+        TailwindFX.install(scene, config);
+        TailwindFX.installGenerated(scene, "/css/tailwindfx-generated.css");
         
         primaryStage.setTitle("TailwindFX - Examples Gallery");
         primaryStage.setScene(scene);
