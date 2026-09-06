@@ -58,11 +58,14 @@ public class TailwindCssMojo extends AbstractMojo {
 
   // Regex patterns for matching Tailwind classes in Java source files
   // Only match string literals passed to style application methods
+  // Captures the entire argument list between parentheses
   private static final Pattern METHOD_CALL_PATTERN =
       Pattern.compile(
-          "(?:TwStyle|TailwindFX)\\.(?:apply|applyRaw)\\s*\\([^)]*?\"([^\"]*)\"|"
-              + "getStyleClass\\(\\)\\.(?:add|addAll)\\s*\\(\\s*\"([^\"]*)\"|"
-              + "setStyleClass\\s*\\(\\s*\"([^\"]*)\"");
+          "(?:TwStyle|TailwindFX)\\.(?:apply|applyRaw)\\s*\\(([^)]*)\\)|"
+              + "getStyleClass\\(\\)\\.(?:add|addAll)\\s*\\(([^)]*)\\)|"
+              + "setStyleClass\\s*\\(([^)]*)\\)");
+  // Pattern to extract all string literals from method arguments
+  private static final Pattern STRING_LITERAL_PATTERN = Pattern.compile("\"([^\"]*)\"");
 
   // Pattern for FXML styleClass attributes (already correctly bounded)
   private static final Pattern FXML_CLASS_PATTERN = Pattern.compile("styleClass=\"([^\"]*)\"");
@@ -166,22 +169,27 @@ public class TailwindCssMojo extends AbstractMojo {
           // Match method calls: TwStyle.apply(...), TailwindFX.apply(...), TwStyle.applyRaw(...)
           Matcher methodMatcher = METHOD_CALL_PATTERN.matcher(content);
           while (methodMatcher.find()) {
-            // Get the first non-null group (the string literal content)
-            String stringLiteral = null;
+            // Get the first non-null group (the entire argument list)
+            String arguments = null;
             for (int i = 1; i <= methodMatcher.groupCount(); i++) {
               if (methodMatcher.group(i) != null) {
-                stringLiteral = methodMatcher.group(i);
+                arguments = methodMatcher.group(i);
                 break;
               }
             }
 
-            if (stringLiteral != null) {
-              // Extract individual class names from the string literal
-              Matcher classMatcher = CLASS_IN_STRING_PATTERN.matcher(stringLiteral);
-              while (classMatcher.find()) {
-                String potentialClass = classMatcher.group(1);
-                if (isValidTailwindClass(potentialClass)) {
-                  tailwindClasses.add(potentialClass);
+            if (arguments != null) {
+              // Extract all string literals from the arguments
+              Matcher stringMatcher = STRING_LITERAL_PATTERN.matcher(arguments);
+              while (stringMatcher.find()) {
+                String stringLiteral = stringMatcher.group(1);
+                // Extract individual class names from the string literal
+                Matcher classMatcher = CLASS_IN_STRING_PATTERN.matcher(stringLiteral);
+                while (classMatcher.find()) {
+                  String potentialClass = classMatcher.group(1);
+                  if (isValidTailwindClass(potentialClass)) {
+                    tailwindClasses.add(potentialClass);
+                  }
                 }
               }
             }
@@ -206,6 +214,19 @@ public class TailwindCssMojo extends AbstractMojo {
       return false;
     }
 
+    // Reject any className containing uppercase letters (Tailwind classes are always lowercase)
+    for (int i = 0; i < className.length(); i++) {
+      if (Character.isUpperCase(className.charAt(i))) {
+        return false;
+      }
+    }
+
+    // Validate against known Tailwind utility prefixes
+    // This prevents arbitrary identifiers like "github", "String", etc. from being accepted
+    if (!isKnownTailwindPrefix(className)) {
+      return false;
+    }
+
     // Skip common false positives - Java identifiers and keywords
     if (className.equals("class")
         || className.equals("style")
@@ -222,11 +243,6 @@ public class TailwindCssMojo extends AbstractMojo {
         || className.equals("null")
         || className.equals("true")
         || className.equals("false")) {
-      return false;
-    }
-
-    // Skip PascalCase identifiers (Java class names)
-    if (Character.isUpperCase(className.charAt(0))) {
       return false;
     }
 
@@ -541,4 +557,97 @@ public class TailwindCssMojo extends AbstractMojo {
       return ThemeConfig.defaultConfig();
     }
   }
+
+  /**
+   * Checks if a class name starts with a known Tailwind utility prefix. This prevents arbitrary
+   * Java identifiers from being incorrectly treated as Tailwind classes.
+   */
+  private boolean isKnownTailwindPrefix(String className) {
+    // Handle variant-prefixed classes (e.g., hover:bg-blue-500, md:p-4)
+    String baseClass = className;
+    if (className.contains(":")) {
+      int lastColon = className.lastIndexOf(':');
+      baseClass = className.substring(lastColon + 1);
+    }
+    
+    // Remove arbitrary value syntax for prefix checking
+    if (baseClass.contains("[")) {
+      baseClass = baseClass.substring(0, baseClass.indexOf("["));
+    }
+    
+    // Known Tailwind utility prefixes
+    // Layout: flex, grid, block, hidden, inline, flow-root, contents
+    // Spacing: p-, m-, gap-, space-x, space-y
+    // Sizing: w-, h-, min-w-, max-w-, min-h-, max-h-
+    // Typography: text-, font-, leading-, tracking-, list-, placeholder-
+    // Background: bg-, opacity-
+    // Border: border-, rounded-, divide-
+    // Effects: shadow-, blur-, brightness-, contrast-, drop-shadow-, grayscale-, hue-rotate-, invert-, saturate-, sepia-
+    // Transform: scale-, rotate-, translate-, skew-
+    // Transition: transition-, duration-, ease-, delay-
+    // Interactivity: cursor-, pointer-events-, select-, resize-, user-select-
+    // SVG: fill-, stroke-, stroke-width-
+    // Accessibility: sr-only, not-sr-only
+    // Position: static, fixed, absolute, relative, sticky, inset-, top-, right-, bottom-, left-, z-
+    // Display: visible, invisible, collapse
+    // Overflow: overflow-, overscroll-
+    // Scroll: scroll-, scrollbar-
+    // Container: container
+    // Ring: ring-, ring-offset-
+    // Divide: divide-
+    // Screen: screen-
+    
+    String[] knownPrefixes = {
+      "p", "px", "py", "pt", "pr", "pb", "pl",
+      "m", "mx", "my", "mt", "mr", "mb", "ml",
+      "gap", "space",
+      "w", "h", "min-w", "max-w", "min-h", "max-h",
+      "text", "font", "leading", "tracking", "list", "placeholder",
+      "bg", "opacity",
+      "border", "rounded", "divide",
+      "shadow", "blur", "brightness", "contrast", "drop-shadow", "grayscale", "hue-rotate", "invert", "saturate", "sepia",
+      "scale", "rotate", "translate", "skew",
+      "transition", "duration", "ease", "delay",
+      "cursor", "pointer-events", "select", "resize", "user-select",
+      "fill", "stroke",
+      "sr-only", "not-sr-only",
+      "static", "fixed", "absolute", "relative", "sticky", "inset", "top", "right", "bottom", "left", "z",
+      "visible", "invisible", "collapse",
+      "overflow", "overscroll",
+      "scroll", "scrollbar",
+      "container",
+      "ring", "ring-offset",
+      "flex", "grid", "block", "hidden", "inline", "flow-root", "contents",
+      "table", "inline-block", "inline-flex", "inline-grid",
+      "aspect", "object", "align", "justify", "place",
+      "padding", "margin"
+    };
+    
+    for (String prefix : knownPrefixes) {
+      if (baseClass.equals(prefix) || baseClass.startsWith(prefix + "-") || baseClass.startsWith(prefix + "/")) {
+        return true;
+      }
+    }
+    
+    // Also accept standalone utilities without hyphens
+    String[] standaloneUtilities = {
+      "flex", "grid", "block", "hidden", "inline", "contents", "flow-root",
+      "visible", "invisible", "collapse",
+      "static", "fixed", "absolute", "relative", "sticky",
+      "italic", "antialiased", "subpixel-antialiased",
+      "normal", "bold", "uppercase", "lowercase", "capitalize",
+      "truncate", "break-words", "break-all",
+      "underline", "line-through", "no-underline",
+      "checked", "focus-within", "focus-visible", "hover", "focus", "active", "disabled"
+    };
+    
+    for (String utility : standaloneUtilities) {
+      if (baseClass.equals(utility)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
 }
