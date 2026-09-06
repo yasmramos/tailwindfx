@@ -30,61 +30,13 @@ public final class ScrollSnapProcessor {
    * Processes a scroll-snap token and returns the corresponding CSS.
    *
    * @param tokenRaw The raw token string
-   * @return CSS string or null if not a scroll-snap token
+   * @return CSS string or null if not a scroll-snap token (JavaFX doesn't support scroll-snap via
+   *     CSS)
    */
   public static String processScrollSnap(String tokenRaw) {
-    if (tokenRaw == null || tokenRaw.isBlank()) {
-      return null;
-    }
-
-    if (!tokenRaw.startsWith(SNAP_PREFIX + "-")) {
-      return null;
-    }
-
-    String value = tokenRaw.substring(SNAP_PREFIX.length() + 1);
-
-    if (value.isBlank()) {
-      return null;
-    }
-
-    // Handle axis: snap-x, snap-y, snap-both
-    if ("x".equals(value)) {
-      return "-fx-snap-axis: horizontal; -fx-snap-enabled: true;";
-    }
-    if ("y".equals(value)) {
-      return "-fx-snap-axis: vertical; -fx-snap-enabled: true;";
-    }
-    if ("both".equals(value)) {
-      return "-fx-snap-axis: both; -fx-snap-enabled: true;";
-    }
-
-    // Handle snap type: snap-mandatory, snap-proximity
-    if ("mandatory".equals(value)) {
-      return "-fx-snap-type: mandatory;";
-    }
-    if ("proximity".equals(value)) {
-      return "-fx-snap-type: proximity;";
-    }
-
-    // Handle snap alignment: snap-start, snap-end, snap-center
-    if ("start".equals(value)) {
-      return "-fx-snap-align: start;";
-    }
-    if ("end".equals(value)) {
-      return "-fx-snap-align: end;";
-    }
-    if ("center".equals(value)) {
-      return "-fx-snap-align: center;";
-    }
-
-    // Handle snap stop: snap-normal, snap-always
-    if ("normal".equals(value)) {
-      return "-fx-snap-stop: normal;";
-    }
-    if ("always".equals(value)) {
-      return "-fx-snap-stop: always;";
-    }
-
+    // JavaFX does not support scroll-snap via CSS properties.
+    // Scroll snap should be handled programmatically via ScrollPane.
+    // Return null to prevent invalid -fx-snap-* properties from being injected.
     return null;
   }
 

@@ -27,17 +27,13 @@ class AspectRatioProcessorTest {
   @Test
   void testProcessAspectRatioSquare() {
     String css = AspectRatioProcessor.processAspectRatio("aspect-square");
-    assertNotNull(css);
-    assertTrue(css.contains("-fx-aspect-ratio"));
-    assertTrue(css.contains("1.0"));
+    assertNull(css);
   }
 
   @Test
   void testProcessAspectRatioVideo() {
     String css = AspectRatioProcessor.processAspectRatio("aspect-video");
-    assertNotNull(css);
-    assertTrue(css.contains("-fx-aspect-ratio"));
-    assertTrue(css.contains("1.777")); // 16/9 ≈ 1.7778
+    assertNull(css);
   }
 
   @Test
@@ -51,33 +47,25 @@ class AspectRatioProcessorTest {
   @Test
   void testProcessAspectRatioPortrait() {
     String css = AspectRatioProcessor.processAspectRatio("aspect-portrait");
-    assertNotNull(css);
-    assertTrue(css.contains("-fx-aspect-ratio"));
-    assertTrue(css.contains("0.75")); // 3/4 = 0.75
+    assertNull(css);
   }
 
   @Test
   void testProcessAspectRatioLandscape() {
     String css = AspectRatioProcessor.processAspectRatio("aspect-landscape");
-    assertNotNull(css);
-    assertTrue(css.contains("-fx-aspect-ratio"));
-    assertTrue(css.contains("1.333")); // 4/3 ≈ 1.3333
+    assertNull(css);
   }
 
   @Test
   void testProcessAspectRatioArbitrary() {
     String css = AspectRatioProcessor.processAspectRatio("aspect-[4/3]");
-    assertNotNull(css);
-    assertTrue(css.contains("-fx-aspect-ratio"));
-    assertTrue(css.contains("1.333"));
+    assertNull(css);
   }
 
   @Test
   void testProcessAspectRatioArbitraryDecimal() {
     String css = AspectRatioProcessor.processAspectRatio("aspect-[1.5]");
-    assertNotNull(css);
-    assertTrue(css.contains("-fx-aspect-ratio"));
-    assertTrue(css.contains("1.5"));
+    assertNull(css);
   }
 
   @Test

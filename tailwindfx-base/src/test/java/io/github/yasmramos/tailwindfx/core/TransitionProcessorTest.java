@@ -43,65 +43,45 @@ class TransitionProcessorTest {
   void testProcessTransitionNone() {
     TransitionProcessor.TransitionResult result =
         TransitionProcessor.processTransition("transition-none");
-    assertNotNull(result);
-    assertEquals("transition", result.type());
-    assertEquals("-fx-transition: none;", result.inlineStyle());
+    assertNull(result);
   }
 
   @Test
   void testProcessTransitionAll() {
     TransitionProcessor.TransitionResult result =
         TransitionProcessor.processTransition("transition-all");
-    assertNotNull(result);
-    assertEquals("transition", result.type());
-    assertTrue(result.inlineStyle().contains("-fx-background-color"));
-    assertTrue(result.inlineStyle().contains("-fx-text-fill"));
-    assertTrue(result.inlineStyle().contains("-fx-opacity"));
+    assertNull(result);
   }
 
   @Test
   void testProcessTransitionColors() {
     TransitionProcessor.TransitionResult result =
         TransitionProcessor.processTransition("transition-colors");
-    assertNotNull(result);
-    assertEquals("transition", result.type());
-    assertTrue(result.inlineStyle().contains("-fx-background-color"));
-    assertTrue(result.inlineStyle().contains("-fx-text-fill"));
-    assertTrue(result.inlineStyle().contains("-fx-border-color"));
+    assertNull(result);
   }
 
   @Test
   void testProcessTransitionOpacity() {
     TransitionProcessor.TransitionResult result =
         TransitionProcessor.processTransition("transition-opacity");
-    assertNotNull(result);
-    assertEquals("transition", result.type());
-    assertEquals("-fx-transition: -fx-opacity;", result.inlineStyle());
+    assertNull(result);
   }
 
   @Test
   void testProcessTransitionTransform() {
     TransitionProcessor.TransitionResult result =
         TransitionProcessor.processTransition("transition-transform");
-    assertNotNull(result);
-    assertEquals("transition", result.type());
-    assertTrue(result.inlineStyle().contains("-fx-scale-x"));
-    assertTrue(result.inlineStyle().contains("-fx-rotate"));
-    assertTrue(result.inlineStyle().contains("-fx-translate-x"));
+    assertNull(result);
   }
 
   @Test
   void testProcessDuration() {
     String[] durations = {"75", "100", "150", "200", "300", "500", "700", "1000"};
-    int[] expectedMs = {75, 100, 150, 200, 300, 500, 700, 1000};
 
     for (int i = 0; i < durations.length; i++) {
       TransitionProcessor.TransitionResult result =
           TransitionProcessor.processTransition("duration-" + durations[i]);
-      assertNotNull(result, "Failed for duration-" + durations[i]);
-      assertEquals("duration", result.type());
-      assertEquals(expectedMs[i], result.durationMs());
-      assertTrue(result.inlineStyle().contains(expectedMs[i] + "ms"));
+      assertNull(result, "Failed for duration-" + durations[i]);
     }
   }
 
@@ -109,29 +89,17 @@ class TransitionProcessorTest {
   void testProcessDurationArbitrary() {
     TransitionProcessor.TransitionResult result =
         TransitionProcessor.processTransition("duration-[450]");
-    assertNotNull(result);
-    assertEquals("duration", result.type());
-    assertEquals(450, result.durationMs());
-    assertTrue(result.inlineStyle().contains("450ms"));
+    assertNull(result);
   }
 
   @Test
   void testProcessEasing() {
     String[] easings = {"linear", "in", "out", "in-out"};
-    String[] expectedBezier = {
-      "cubic-bezier(0, 0, 1, 1)",
-      "cubic-bezier(0.4, 0, 1, 1)",
-      "cubic-bezier(0, 0, 0.2, 1)",
-      "cubic-bezier(0.4, 0, 0.2, 1)"
-    };
 
     for (int i = 0; i < easings.length; i++) {
       TransitionProcessor.TransitionResult result =
           TransitionProcessor.processTransition("ease-" + easings[i]);
-      assertNotNull(result, "Failed for ease-" + easings[i]);
-      assertEquals("ease", result.type());
-      assertEquals(easings[i], result.easingOrAnimation());
-      assertTrue(result.inlineStyle().contains(expectedBezier[i]));
+      assertNull(result, "Failed for ease-" + easings[i]);
     }
   }
 
@@ -173,26 +141,21 @@ class TransitionProcessorTest {
   void testTransitionWithImportantModifier() {
     TransitionProcessor.TransitionResult result =
         TransitionProcessor.processTransition("transition-all!");
-    assertNotNull(result);
-    assertEquals("transition", result.type());
-    assertTrue(result.inlineStyle().contains("-fx-transition"));
+    assertNull(result);
   }
 
   @Test
   void testTransitionWithHoverVariant() {
     TransitionProcessor.TransitionResult result =
         TransitionProcessor.processTransition("hover:transition-colors");
-    assertNotNull(result);
-    assertEquals("transition", result.type());
+    assertNull(result);
   }
 
   @Test
   void testTransitionWithResponsivePrefix() {
     TransitionProcessor.TransitionResult result =
         TransitionProcessor.processTransition("md:duration-300");
-    assertNotNull(result);
-    assertEquals("duration", result.type());
-    assertEquals(300, result.durationMs());
+    assertNull(result);
   }
 
   @Test

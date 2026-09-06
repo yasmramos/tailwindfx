@@ -66,41 +66,42 @@ public final class CssPropertyMapper {
       case "rounded" -> "-fx-background-radius";
       case "shadow" -> "-fx-effect";
 
-      // Visibility is NOT mapped to CSS because JavaFX doesn't support -fx-visibility.
-      // It is controlled via Node.setVisible() and Node.setManaged().
-      // Return null to prevent JIT compilation of invalid CSS.
+        // Visibility is NOT mapped to CSS because JavaFX doesn't support -fx-visibility.
+        // It is controlled via Node.setVisible() and Node.setManaged().
+        // Return null to prevent JIT compilation of invalid CSS.
       case "visible", "hidden", "invisible" -> null;
 
       case "gap" -> "-fx-hgap";
       case "gap-x" -> "-fx-hgap";
       case "gap-y" -> "-fx-vgap";
 
-      // Overflow is NOT mapped to CSS because JavaFX doesn't support -fx-overflow.
-      // Clipping is controlled via Node.setClip().
-      // Return null to prevent JIT compilation of invalid CSS.
+        // Overflow is NOT mapped to CSS because JavaFX doesn't support -fx-overflow.
+        // Clipping is controlled via Node.setClip().
+        // Return null to prevent JIT compilation of invalid CSS.
       case "overflow" -> null;
 
       case "cursor" -> "-fx-cursor";
 
-      // Z-index is NOT mapped to CSS because JavaFX doesn't support -fx-z-index.
-      // Z-order is controlled via Node.toFront() and Node.toBack().
-      // Return null to prevent JIT compilation of invalid CSS.
+        // Z-index is NOT mapped to CSS because JavaFX doesn't support -fx-z-index.
+        // Z-order is controlled via Node.toFront() and Node.toBack().
+        // Return null to prevent JIT compilation of invalid CSS.
       case "z" -> null;
 
-      // Resize is NOT mapped to CSS because JavaFX doesn't support -fx-resize.
-      // Resizing is controlled programmatically or via layout panes.
-      // Return null to prevent JIT compilation of invalid CSS.
+        // Resize is NOT mapped to CSS because JavaFX doesn't support -fx-resize.
+        // Resizing is controlled programmatically or via layout panes.
+        // Return null to prevent JIT compilation of invalid CSS.
       case "resize" -> null;
 
-      // Skew is NOT supported in JavaFX CSS. There is no -fx-she-x or -fx-she-y property.
-      // Skew transforms must be applied via Node.getTransforms().add(new Shear(...)).
-      // Return null to prevent JIT compilation of invalid CSS.
+        // Skew is NOT supported in JavaFX CSS. There is no -fx-she-x or -fx-she-y property.
+        // Skew transforms must be applied via Node.getTransforms().add(new Shear(...)).
+        // Return null to prevent JIT compilation of invalid CSS.
       case "skew-x", "skew-y" -> null;
 
-      // Blur, brightness, contrast, grayscale, invert, sepia are NOT mapped to CSS
-      // because JavaFX doesn't have corresponding -fx-* CSS properties for these filters.
-      // These effects are implemented via javafx.scene.effect.* classes (e.g., Blur, ColorAdjust).
-      // Return null to prevent JIT compilation of invalid CSS.
+        // Blur, brightness, contrast, grayscale, invert, sepia are NOT mapped to CSS
+        // because JavaFX doesn't have corresponding -fx-* CSS properties for these filters.
+        // These effects are implemented via javafx.scene.effect.* classes (e.g., Blur,
+        // ColorAdjust).
+        // Return null to prevent JIT compilation of invalid CSS.
       case "blur", "brightness", "contrast", "grayscale", "invert", "sepia" -> null;
 
       default -> null;
@@ -310,7 +311,11 @@ public final class CssPropertyMapper {
       case "xl" -> "576px";
       case "2xl" -> "672px";
       case "3xl" -> "768px";
-      case "full" -> "100%";
+        // JavaFX does not support percentage values in -fx-max-width/-fx-pref-width properties.
+        // "full" should be handled programmatically via maxWidth(Double.MAX_VALUE) or layout
+        // managers.
+        // Return null to prevent invalid CSS injection.
+      case "full" -> null;
       default -> null;
     };
   }
