@@ -66,6 +66,7 @@
         <gpg.plugin.version>3.1.0</gpg.plugin.version>
         <source.plugin.version>3.3.0</source.plugin.version>
         <javadoc.plugin.version>3.6.3</javadoc.plugin.version>
+        <tailwindfx.version>1.0-SNAPSHOT</tailwindfx.version>
     </properties>
     
     <dependencyManagement>
@@ -160,6 +161,21 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${surefire.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>${spotless.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>io.github.yasmramos</groupId>
+                    <artifactId>tailwindfx-maven-plugin</artifactId>
+                    <version>${tailwindfx.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>javafx-maven-plugin</artifactId>
+                    <version>0.0.8</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         
@@ -219,6 +235,32 @@
                         <goals>
                             <goal>jar</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <!-- Spotless Code Formatting -->
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless.version}</version>
+                <configuration>
+                    <java>
+                        <googleJavaFormat>
+                            <version>1.18.1</version>
+                            <style>GOOGLE</style>
+                        </googleJavaFormat>
+                        <removeUnusedImports/>
+                        <trimTrailingWhitespace/>
+                        <endWithNewline/>
+                    </java>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>compile</phase>
                     </execution>
                 </executions>
             </plugin>

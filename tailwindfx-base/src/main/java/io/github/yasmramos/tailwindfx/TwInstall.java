@@ -19,13 +19,75 @@ import javafx.stage.Stage;
  * <pre>
  * TwInstall.install(scene);
  * TwInstall.installMinimal(scene);
+ * TwInstall.installGenerated(scene, "css/tailwindfx-generated.css");
  * </pre>
  */
 public final class TwInstall {
 
   private static final String GENERATED_BASE_CSS_ID = "tailwindfx-base-generated";
+  private static final String GENERATED_STYLESHEET_CSS_PATH = "/css/tailwindfx-generated.css";
 
   private TwInstall() {}
+
+  /**
+   * Installs the build-time generated stylesheet (tailwindfx-generated.css) produced by the Maven
+   * plugin. This should be called AFTER installBase() to ensure proper cascade order: 1. Base CSS
+   * (variables, reset) - installed first 2. Generated stylesheet (utility classes) - installed
+   * second, can override base
+   *
+   * <p>The generated stylesheet contains pre-compiled utility classes for better performance and
+   * smaller bundle size. Dynamic/arbitrary values still use JIT fallback.
+   *
+   * @param scene the JavaFX scene to install the stylesheet into
+   * @param cssPath the path to the generated CSS file (default: "/css/tailwindfx-generated.css")
+   */
+  public static void installGenerated(Scene scene, String cssPath) {
+    if (cssPath == null || cssPath.trim().isEmpty()) {
+      cssPath = GENERATED_STYLESHEET_CSS_PATH;
+    }
+
+    // Ensure base CSS is installed first
+    installBase(scene);
+
+    // Load generated stylesheet
+    String normalizedPath = cssPath.startsWith("/") ? cssPath : "/" + cssPath;
+    java.net.URL url = TwInstall.class.getResource(normalizedPath);
+
+    if (url == null) {
+      // Try with TCCL
+      ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+      if (tccl != null) {
+        url = tccl.getResource(normalizedPath.substring(1));
+      }
+    }
+
+    if (url == null) {
+      System.err.println(
+          "[TailwindFX] Warning: Generated stylesheet not found at " + normalizedPath);
+      return;
+    }
+
+    String urlStr = url.toExternalForm();
+    var sheets = scene.getStylesheets();
+
+    // Remove if already installed
+    if (sheets.contains(urlStr)) {
+      sheets.remove(urlStr);
+    }
+
+    // Add after base CSS (at end of list)
+    sheets.add(urlStr);
+  }
+
+  /**
+   * Installs the build-time generated stylesheet using the default path. Equivalent to
+   * installGenerated(scene, null).
+   *
+   * @param scene the JavaFX scene to install the stylesheet into
+   */
+  public static void installGenerated(Scene scene) {
+    installGenerated(scene, null);
+  }
 
   /** Installs minimal CSS (base variables only). All utilities are JIT-compiled. */
   public static void install(Scene scene) {

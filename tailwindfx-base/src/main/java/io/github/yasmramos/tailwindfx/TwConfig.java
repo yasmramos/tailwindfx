@@ -9,6 +9,7 @@ package io.github.yasmramos.tailwindfx;
  * <pre>
  * TwConfig.INSTANCE.unit(8.0);
  * TwConfig.INSTANCE.debug(true);
+ * TwConfig.INSTANCE.preferStylesheet(true);
  * double currentUnit = TwConfig.INSTANCE.unit();
  * </pre>
  */
@@ -18,6 +19,7 @@ public final class TwConfig {
 
   private static double UNIT_SIZE = 4.0;
   private static boolean DEBUG_MODE = false;
+  private static boolean PREFER_STYLESHEET = false;
 
   private TwConfig() {}
 
@@ -61,9 +63,32 @@ public final class TwConfig {
     DEBUG_MODE = enabled;
   }
 
+  /**
+   * Check if stylesheet-based styling is preferred over inline JIT. When enabled, TailwindFX will
+   * apply CSS classes from the generated stylesheet instead of compiling inline styles, for tokens
+   * that exist in the AOT stylesheet.
+   *
+   * @return true if preferStylesheet mode is enabled
+   */
+  public static boolean isPreferStylesheet() {
+    return PREFER_STYLESHEET;
+  }
+
+  /**
+   * Enable or disable preferStylesheet mode. When enabled, TailwindFX applies CSS classes from the
+   * build-time generated stylesheet instead of compiling inline JIT styles, for tokens that exist
+   * in the AOT stylesheet. Dynamic/arbitrary values still use JIT fallback.
+   *
+   * @param enabled true to enable stylesheet-based styling
+   */
+  public static void preferStylesheet(boolean enabled) {
+    PREFER_STYLESHEET = enabled;
+  }
+
   /** Reset configuration to default values (useful for testing). */
   public static void reset() {
     UNIT_SIZE = 4.0;
     DEBUG_MODE = false;
+    PREFER_STYLESHEET = false;
   }
 }
