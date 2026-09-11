@@ -116,18 +116,20 @@ Results are reported in two modes:
 - **Average Time** (`avgt`): Lower is better (time per operation in milliseconds)
 - **Throughput** (`thrpt`): Higher is better (operations per second)
 
-Example output (from actual run on JDK 17):
+Example output (actual results from hardened configuration with `@Fork(3)`, JDK 17):
 ```
-Benchmark                                               Mode  Cnt         Score        Error   Units
-JitCompilerBenchmark.benchmarkCacheHitThroughput       thrpt    5  22119702.560 ± 295290.214  ops/s
-JitCompilerBenchmark.benchmarkCacheMissThroughput      thrpt    5   1972137.524 ±  96560.733  ops/s
-JitCompilerBenchmark.benchmarkMixedWorkloadThroughput  thrpt    5    602325.301 ±   8208.929  ops/s
-JitCompilerBenchmark.benchmarkCacheHit                  avgt    5        ≈ 10⁻⁴                 ms/op
-JitCompilerBenchmark.benchmarkCacheMiss                 avgt    5         0.001 ±      0.001  ms/op
-JitCompilerBenchmark.benchmarkMixedWorkload             avgt    5         0.002 ±      0.001  ms/op
+Benchmark                                          Mode  Cnt         Score        Error   Units
+JitCompilerBenchmark.benchmarkCacheHitThroughput  thrpt   15  22084163.924 ± 222820.028   ops/s
+JitCompilerBenchmark.benchmarkThroughput          thrpt   15   1889995.571 ± 152869.049   ops/s
+JitCompilerBenchmark.benchmarkCacheHit             avgt   15        ≈ 10⁻⁴                 ms/op
+JitCompilerBenchmark.benchmarkCacheMiss            avgt   15         0.001 ±      0.001   ms/op
+JitCompilerBenchmark.benchmarkMixedWorkload        avgt   15         0.002 ±      0.001   ms/op
 ```
 
-Note: Throughput mode provides more stable measurements with lower relative error for fast operations like cache hits and misses.
+Key findings:
+- Cache hit throughput: ~22M operations per second
+- Cache miss throughput: ~1.9M operations per second
+- Cache hits are approximately 10x faster than cache misses
 
 ## CI Integration
 
