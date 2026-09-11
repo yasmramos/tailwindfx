@@ -1,0 +1,58 @@
+name: JMH Benchmarks
+
+on:
+  push:
+    branches: [ "develop", "main" ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ "develop", "main" ]
+  workflow_dispatch:
+    inputs:
+      include_warmup:
+        description: 'Include warmup iterations (slower but more accurate)'
+        required: false
+        default: 'false'
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Build Benchmarks
+      run: mvn -B -P benchmarks package -DskipTests
+
+    - name: Run JMH Benchmarks
+      run: |
+        echo "Running JMH Benchmarks..."
+        # Run with limited iterations for CI speed. 
+        # For full analysis, use workflow_dispatch with include_warmup=true
+        java -jar tailwindfx-benchmarks/target/benchmarks.jar \
+          -i 3 -wi 2 -f 1 -t 1 \
+          -rf json -rff target/benchmark-results.json
+
+    - name: Upload Benchmark Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: jmh-results
+        path: target/benchmark-results.json
+        retention-days: 7
+
+    - name: Print Results Summary
+      run: |
+        if [ -f target/benchmark-results.json ]; then
+          echo "## Benchmark Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          cat target/benchmark-results.json >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        fi

@@ -5,8 +5,12 @@ import io.github.yasmramos.tailwindfx.core.JitCompiler;
 /**
  * Benchmark — Performance benchmarking for TailwindFX JIT Compiler.
  *
- * <p>Compares performance between cache hits and misses, measures compilation throughput, and
- * provides metrics for optimization decisions.
+ * <p>Compares performance between cache hit/miss/mixed workloads and measures compilation
+ * throughput. Provides metrics and formatting utilities for optimization decisions.
+ *
+ * <p><strong>Note:</strong> The actual performance measurement has been migrated to JMH-based
+ * benchmarks in the {@code tailwindfx-benchmarks} module for accurate microbenchmarking. This class
+ * remains to provide formatting utilities and API compatibility for tests.
  *
  * <h2>Usage Example:</h2>
  *
@@ -27,6 +31,7 @@ import io.github.yasmramos.tailwindfx.core.JitCompiler;
  *
  * @author yasmramos
  * @since 1.0.0
+ * @see io.github.yasmramos.tailwindfx.benchmark.JitCompilerBenchmark JMH benchmarks
  */
 public final class Benchmark {
 
