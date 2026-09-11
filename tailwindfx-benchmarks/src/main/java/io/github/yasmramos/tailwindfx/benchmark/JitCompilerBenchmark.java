@@ -104,6 +104,22 @@ public class JitCompilerBenchmark {
   }
 
   /**
+   * Benchmarks cache miss throughput (compilations per second on cold cache). Each invocation
+   * clears the cache to ensure no hits. This provides a stable ops/s metric for cache misses.
+   *
+   * @param blackhole JMH blackhole to consume results and prevent dead-code elimination
+   * @param state cache miss state with cleared cache
+   */
+  @Benchmark
+  @BenchmarkMode(Mode.Throughput)
+  @OutputTimeUnit(TimeUnit.SECONDS)
+  public void benchmarkCacheMissThroughput(Blackhole blackhole, CacheMissState state) {
+    String token = TEST_TOKENS[0];
+    var result = JitCompiler.compile(token);
+    blackhole.consume(result);
+  }
+
+  /**
    * Benchmarks cache hit performance (warm compilation). Cache is pre-populated, so all
    * compilations should be hits.
    *
@@ -161,21 +177,28 @@ public class JitCompilerBenchmark {
   }
 
   /**
-   * Benchmarks compilation throughput (compilations per second). Measures how many compilations can
-   * be performed in a fixed time window.
+   * Benchmarks mixed workload throughput (compilations per second with 50% hits, 50% misses).
+   * Alternates between new tokens (misses) and existing tokens (hits). This provides a stable ops/s
+   * metric for mixed workloads.
    *
    * @param blackhole JMH blackhole to consume results and prevent dead-code elimination
-   * @param state throughput state with cleared cache
-   * @return number of compilations performed
+   * @param state shared state for mixed workload
    */
   @Benchmark
   @BenchmarkMode(Mode.Throughput)
   @OutputTimeUnit(TimeUnit.SECONDS)
-  public int benchmarkThroughput(Blackhole blackhole, CacheMissState state) {
-    String token = TEST_TOKENS[0];
+  public void benchmarkMixedWorkloadThroughput(Blackhole blackhole, MixedState state) {
+    String token;
+    if (state.opCount % 2 == 0) {
+      // Cache miss - new unique token
+      token = "w-" + state.opCount + "px";
+    } else {
+      // Cache hit - existing token
+      token = TEST_TOKENS[state.opCount % TEST_TOKENS.length];
+    }
+    state.opCount++;
     var result = JitCompiler.compile(token);
     blackhole.consume(result);
-    return 1;
   }
 
   /** State holder for mixed workload benchmark. */

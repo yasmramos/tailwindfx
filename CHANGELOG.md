@@ -138,6 +138,10 @@ Comprehensive test suite with 59+ test classes covering:
 
 #### Benchmark Tests
 - `BenchmarkTest`
+- JMH-based benchmarks migrated to dedicated `tailwindfx-benchmarks` module with stable throughput measurements:
+  - `JitCompilerBenchmark`: Cache hit (~22.1M ops/s), cache miss (~1.97M ops/s), mixed workload (~602K ops/s)
+  - `StyleTokenParseBenchmark`, `VariantParserBenchmark`, `StyleResolverBenchmark`, `ThemeCssGeneratorBenchmark`
+  - Benchmarks run outside CI to avoid flakiness; use `mvn -P benchmarks package` and `java -jar tailwindfx-benchmarks/target/benchmarks.jar`
 
 #### CSS Utilities Tests
 - `CssUtilitiesTest`

@@ -65,11 +65,14 @@ java -jar tailwindfx-benchmarks/target/benchmarks.jar -lp
 
 ### JitCompilerBenchmark
 Measures the performance of `JitCompiler.compile()` with different cache scenarios:
-- **benchmarkCacheHit**: Compilation with warm cache (tokens pre-populated)
-- **benchmarkCacheMiss**: Compilation with cold cache (cache cleared before each invocation)
-- **benchmarkMixedWorkload**: Alternating hits and misses (50/50)
-- **benchmarkCacheHitThroughput**: Throughput measurement for cache hits (ops/s)
-- **benchmarkThroughput**: Overall compilation throughput (ops/s)
+- **benchmarkCacheHit**: Compilation with warm cache (tokens pre-populated) - Average Time mode
+- **benchmarkCacheMiss**: Compilation with cold cache (cache cleared before each invocation) - Average Time mode
+- **benchmarkMixedWorkload**: Alternating hits and misses (50/50) - Average Time mode
+- **benchmarkCacheHitThroughput**: Throughput measurement for cache hits (~22.1M ops/s)
+- **benchmarkCacheMissThroughput**: Throughput measurement for cache misses (~1.97M ops/s)
+- **benchmarkMixedWorkloadThroughput**: Throughput measurement for mixed workload (~602K ops/s)
+
+Key findings: Cache hits are ~11x faster than cache misses in throughput mode. Cache hit latency is so low it falls below timer resolution (≈ 10⁻⁴ ms/op).
 
 ### StyleTokenParseBenchmark
 Measures the performance of `StyleToken.parse()` for different token kinds:
