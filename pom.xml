@@ -67,6 +67,7 @@
         <source.plugin.version>3.3.0</source.plugin.version>
         <javadoc.plugin.version>3.6.3</javadoc.plugin.version>
         <tailwindfx.version>1.0-SNAPSHOT</tailwindfx.version>
+        <jmh.version>1.37</jmh.version>
     </properties>
     
     <dependencyManagement>
@@ -302,6 +303,19 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <!-- Benchmarks profile: only build benchmarks module when explicitly requested -->
+        <profile>
+            <id>benchmarks</id>
+            <activation>
+                <property>
+                    <name>benchmarks</name>
+                </property>
+            </activation>
+            <modules>
+                <module>tailwindfx-benchmarks</module>
+            </modules>
         </profile>
     </profiles>
 </project>
