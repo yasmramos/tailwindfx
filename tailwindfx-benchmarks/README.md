@@ -61,19 +61,51 @@ Common JMH options:
 java -jar tailwindfx-benchmarks/target/benchmarks.jar -lp
 ```
 
-## Benchmark Types
+## Benchmark Classes
 
-### Cache Miss Benchmark
-Measures compilation time when the token is not in the cache (cold compilation).
+### JitCompilerBenchmark
+Measures the performance of `JitCompiler.compile()` with different cache scenarios:
+- **benchmarkCacheHit**: Compilation with warm cache (tokens pre-populated)
+- **benchmarkCacheMiss**: Compilation with cold cache (cache cleared before each invocation)
+- **benchmarkMixedWorkload**: Alternating hits and misses (50/50)
+- **benchmarkCacheHitThroughput**: Throughput measurement for cache hits (ops/s)
+- **benchmarkThroughput**: Overall compilation throughput (ops/s)
 
-### Cache Hit Benchmark  
-Measures compilation time when the token is already cached (warm compilation).
+### StyleTokenParseBenchmark
+Measures the performance of `StyleToken.parse()` for different token kinds:
+- **benchmarkScaleParse**: SCALE tokens (e.g., p-4, m-2, w-12)
+- **benchmarkColorShadeParse**: COLOR_SHADE tokens without alpha (e.g., bg-blue-500)
+- **benchmarkColorShadeAlphaParse**: COLOR_SHADE tokens with alpha (e.g., bg-blue-500/80)
+- **benchmarkArbitraryParse**: ARBITRARY tokens (e.g., w-[320px], bg-[#ff6600])
+- **benchmarkNamedParse**: NAMED tokens (e.g., text-sm, rounded-lg)
+- **benchmarkUnknownParse**: UNKNOWN/invalid tokens
 
-### Mixed Workload Benchmark
-Alternates between cache hits and misses (50/50) to simulate real-world usage.
+### VariantParserBenchmark
+Measures the performance of `VariantParser.parse()` for different variant scenarios:
+- **benchmarkNoVariant**: Tokens without variants (e.g., bg-blue-500)
+- **benchmarkSingleVariant**: Tokens with one variant (e.g., hover:bg-blue-500)
+- **benchmarkMultipleVariants**: Tokens with multiple variants (e.g., md:hover:bg-blue-700)
+- **benchmarkComplexVariants**: Tokens with complex variant chains
+- **benchmarkArbitraryVariant**: Tokens with arbitrary variants (e.g., [@media(min-width:768px)]:w-full)
+- **benchmarkExtractVariants**: Performance of extractVariants() method
+- **benchmarkHasVariant**: Performance of hasVariant() method
 
-### Throughput Benchmark
-Measures compilations per second to assess overall throughput.
+### StyleResolverBenchmark
+Measures the performance of `StyleResolver.resolve()` for different token kinds:
+- **benchmarkScaleResolve**: Resolving SCALE tokens to pixel values
+- **benchmarkColorShadeResolve**: Resolving COLOR_SHADE tokens to RGB values
+- **benchmarkColorShadeAlphaResolve**: Resolving COLOR_SHADE tokens with alpha to RGBA values
+- **benchmarkArbitraryResolve**: Resolving ARBITRARY tokens
+- **benchmarkNamedResolve**: Resolving NAMED tokens
+
+Note: Tokens are pre-parsed in setup to isolate resolution cost from parsing cost.
+
+### ThemeCssGeneratorBenchmark
+Measures the performance of `ThemeCssGenerator.generateBaseCss()`:
+- **benchmarkGenerateBaseCss**: Time to generate full CSS with all variables
+- **benchmarkGenerateBaseCssThroughput**: CSS generations per second
+
+This is a heavier operation that generates all color, spacing, font-size, border-radius, opacity, and shadow variables. Useful for characterizing startup cost.
 
 ## Interpreting Results
 
