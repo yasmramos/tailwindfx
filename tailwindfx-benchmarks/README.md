@@ -65,11 +65,14 @@ java -jar tailwindfx-benchmarks/target/benchmarks.jar -lp
 
 ### JitCompilerBenchmark
 Measures the performance of `JitCompiler.compile()` with different cache scenarios:
-- **benchmarkCacheHit**: Compilation with warm cache (tokens pre-populated)
-- **benchmarkCacheMiss**: Compilation with cold cache (cache cleared before each invocation)
-- **benchmarkMixedWorkload**: Alternating hits and misses (50/50)
-- **benchmarkCacheHitThroughput**: Throughput measurement for cache hits (ops/s)
-- **benchmarkThroughput**: Overall compilation throughput (ops/s)
+- **benchmarkCacheHit**: Compilation with warm cache (tokens pre-populated) - Average Time mode
+- **benchmarkCacheMiss**: Compilation with cold cache (cache cleared before each invocation) - Average Time mode
+- **benchmarkMixedWorkload**: Alternating hits and misses (50/50) - Average Time mode
+- **benchmarkCacheHitThroughput**: Throughput measurement for cache hits (~22.1M ops/s)
+- **benchmarkCacheMissThroughput**: Throughput measurement for cache misses (~1.97M ops/s)
+- **benchmarkMixedWorkloadThroughput**: Throughput measurement for mixed workload (~602K ops/s)
+
+Key findings: Cache hits are ~11x faster than cache misses in throughput mode. Cache hit latency is so low it falls below timer resolution (≈ 10⁻⁴ ms/op).
 
 ### StyleTokenParseBenchmark
 Measures the performance of `StyleToken.parse()` for different token kinds:
@@ -113,13 +116,18 @@ Results are reported in two modes:
 - **Average Time** (`avgt`): Lower is better (time per operation in milliseconds)
 - **Throughput** (`thrpt`): Higher is better (operations per second)
 
-Example output:
+Example output (from actual run on JDK 17):
 ```
-Benchmark                    Mode  Cnt     Score    Error   Units
-JitCompilerBenchmark.benchmarkCacheHit     avgt    5  0.001234 ± 0.000123  ms/op
-JitCompilerBenchmark.benchmarkCacheMiss    avgt    5  0.098765 ± 0.005432  ms/op
-JitCompilerBenchmark.benchmarkThroughput  thrpt    5 85000.123 ± 5000.456  ops/sec
+Benchmark                                               Mode  Cnt         Score        Error   Units
+JitCompilerBenchmark.benchmarkCacheHitThroughput       thrpt    5  22119702.560 ± 295290.214  ops/s
+JitCompilerBenchmark.benchmarkCacheMissThroughput      thrpt    5   1972137.524 ±  96560.733  ops/s
+JitCompilerBenchmark.benchmarkMixedWorkloadThroughput  thrpt    5    602325.301 ±   8208.929  ops/s
+JitCompilerBenchmark.benchmarkCacheHit                  avgt    5        ≈ 10⁻⁴                 ms/op
+JitCompilerBenchmark.benchmarkCacheMiss                 avgt    5         0.001 ±      0.001  ms/op
+JitCompilerBenchmark.benchmarkMixedWorkload             avgt    5         0.002 ±      0.001  ms/op
 ```
+
+Note: Throughput mode provides more stable measurements with lower relative error for fast operations like cache hits and misses.
 
 ## CI Integration
 

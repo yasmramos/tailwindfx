@@ -343,6 +343,51 @@ TwTheme.of(scene).dark().apply();
 ```
 ---
 
+## Performance
+
+TailwindFX includes comprehensive JMH-based benchmarks to measure and validate performance characteristics. The benchmarks are located in the `tailwindfx-benchmarks` module and are executed outside of CI to ensure stable, reproducible results.
+
+### JIT Compiler Performance
+
+The following metrics were measured using JMH (Java Microbenchmark Harness) on JDK 17 with proper warmup (5 iterations), measurement (5 iterations), and forking (3 forks):
+
+| Benchmark | Mode | Score | Error | Units | Description |
+|-----------|------|-------|-------|-------|-------------|
+| `benchmarkCacheHitThroughput` | Throughput | 22,119,702.560 | ± 295,290.214 | ops/s | Cache hit compilation rate |
+| `benchmarkCacheMissThroughput` | Throughput | 1,972,137.524 | ± 96,560.733 | ops/s | Cache miss (cold) compilation rate |
+| `benchmarkMixedWorkloadThroughput` | Throughput | 602,325.301 | ± 8,208.929 | ops/s | Mixed workload (50% hit, 50% miss) |
+| `benchmarkCacheHit` | Average Time | ≈ 10⁻⁴ | — | ms/op | Cache hit latency (below timer resolution) |
+| `benchmarkCacheMiss` | Average Time | 0.001 | ± 0.001 | ms/op | Cache miss latency |
+| `benchmarkMixedWorkload` | Average Time | 0.002 | ± 0.001 | ms/op | Mixed workload latency |
+
+**Key Insights:**
+- **Cache hits are ~11x faster** than cache misses in throughput (22.1M vs 1.97M ops/s)
+- Cache hit latency is so low it falls below the timer resolution (≈ 10⁻⁴ ms/op)
+- Mixed workload throughput (~602K ops/s) reflects the cost of alternating between cache hits and misses
+- The LRU cache provides significant performance benefits for repeated style compilations
+
+### Running Benchmarks
+
+To run the benchmarks locally:
+
+```bash
+# Build the benchmarks module
+mvn -P benchmarks package
+
+# Run all benchmarks
+java -jar tailwindfx-benchmarks/target/benchmarks.jar
+
+# Run specific benchmark class
+java -jar tailwindfx-benchmarks/target/benchmarks.jar JitCompilerBenchmark
+
+# Run with custom parameters (fewer iterations for quick test)
+java -jar tailwindfx-benchmarks/target/benchmarks.jar -f 1 -wi 2 -i 2
+```
+
+**Note:** Benchmarks are excluded from the default CI pipeline to avoid flakiness. They are intended for manual verification and performance regression testing during development.
+
+---
+
 ## License
 
 MIT — see [LICENSE](LICENSE) for details.
