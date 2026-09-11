@@ -1,18 +1,31 @@
 name: JMH Benchmarks
 
 on:
+  # Run on release tags to characterize published versions
   push:
-    branches: [ "develop", "main" ]
     tags:
       - 'v*'
-  pull_request:
-    branches: [ "develop", "main" ]
+  # Scheduled nightly run with robust configuration
+  schedule:
+    # Runs at 02:00 UTC every day
+    - cron: '0 2 * * *'
+  # Manual trigger with option for more robust run
   workflow_dispatch:
     inputs:
       include_warmup:
         description: 'Include warmup iterations (slower but more accurate)'
         required: false
         default: 'false'
+      fail_on_regression:
+        description: 'Fail the workflow if performance regression is detected'
+        required: false
+        default: 'false'
+  # Optional: Run on PRs that touch benchmark-related code (smoke test only)
+  pull_request:
+    branches: [ "develop", "main" ]
+    paths:
+      - 'tailwindfx-benchmarks/**'
+      - 'tailwindfx-base/src/main/**'
 
 jobs:
   benchmark:
@@ -20,6 +33,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        # Fetch all history for benchmark comparison
+        fetch-depth: 0
 
     - name: Set up JDK 17
       uses: actions/setup-java@v4
@@ -31,13 +47,34 @@ jobs:
     - name: Build Benchmarks
       run: mvn -B -P benchmarks package -DskipTests
 
-    - name: Run JMH Benchmarks
+    - name: Determine benchmark mode
+      id: mode
       run: |
-        echo "Running JMH Benchmarks..."
-        # Run with limited iterations for CI speed. 
-        # For full analysis, use workflow_dispatch with include_warmup=true
+        # Determine if this is a robust run or smoke test
+        if [[ "${{ github.event_name }}" == "schedule" ]] || \
+           [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.include_warmup }}" == "true" ]] || \
+           [[ "${{ github.ref }}" =~ ^refs/tags/v* ]]; then
+          echo "mode=robust" >> $GITHUB_OUTPUT
+          echo "Running in ROBUST mode (more forks/iterations for reliable data)"
+        else
+          echo "mode=smoke" >> $GITHUB_OUTPUT
+          echo "Running in SMOKE mode (quick validation only)"
+        fi
+
+    - name: Run JMH Benchmarks (Smoke Test)
+      if: steps.mode.outputs.mode == 'smoke'
+      run: |
+        echo "Running JMH Benchmarks in smoke test mode..."
         java -jar tailwindfx-benchmarks/target/benchmarks.jar \
           -i 3 -wi 2 -f 1 -t 1 \
+          -rf json -rff target/benchmark-results.json
+
+    - name: Run JMH Benchmarks (Robust)
+      if: steps.mode.outputs.mode == 'robust'
+      run: |
+        echo "Running JMH Benchmarks in robust mode..."
+        java -jar tailwindfx-benchmarks/target/benchmarks.jar \
+          -i 5 -wi 5 -f 3 -t 1 \
           -rf json -rff target/benchmark-results.json
 
     - name: Upload Benchmark Results
@@ -46,12 +83,30 @@ jobs:
       with:
         name: jmh-results
         path: target/benchmark-results.json
-        retention-days: 7
+        retention-days: 30
+
+    - name: Store benchmark results for comparison
+      uses: benchmark-action/github-action-benchmark@v1
+      if: steps.mode.outputs.mode == 'robust'
+      with:
+        tool: 'jmh'
+        output-file-path: target/benchmark-results.json
+        # Store baseline in gh-pages branch
+        external-data-json-path: ./cache/benchmark-data.json
+        fail-on-alert: ${{ github.event_name == 'schedule' && github.event.inputs.fail_on_regression == 'true' }}
+        # Alert threshold set to 150% to avoid false positives from runner variability
+        alert-threshold: '150%'
+        comment-on-alert: true
+        save-data-file: true
+        gh-pages: true
+        gh-repository: github.com/${{ github.repository }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Print Results Summary
       run: |
         if [ -f target/benchmark-results.json ]; then
           echo "## Benchmark Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "Mode: ${{ steps.mode.outputs.mode }}" >> $GITHUB_STEP_SUMMARY
           echo '```json' >> $GITHUB_STEP_SUMMARY
           cat target/benchmark-results.json >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY

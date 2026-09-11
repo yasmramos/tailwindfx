@@ -133,15 +133,44 @@ Key findings:
 
 ## CI Integration
 
-**Note:** Benchmarks are NOT executed in CI by default because:
-1. They are slow (multiple seconds per benchmark)
-2. Results vary based on CI runner load
-3. They are meant for manual performance verification, not correctness testing
+Benchmarks are executed in CI via the `.github/workflows/benchmarks.yml` workflow. The workflow is configured with different modes depending on the trigger:
 
-To run benchmarks in CI (e.g., for performance regression testing), activate the profile:
-```bash
-mvn -P benchmarks test
-```
+### When benchmarks run
+
+| Trigger | Mode | Configuration | Purpose |
+|---------|------|---------------|---------|
+| **Release tags** (`v*`) | Robust | `-i 5 -wi 5 -f 3` | Characterize performance of published versions |
+| **Scheduled** (daily at 02:00 UTC) | Robust | `-i 5 -wi 5 -f 3` | Detect performance regressions over time |
+| **Manual dispatch** (default) | Smoke | `-i 3 -wi 2 -f 1` | Quick validation |
+| **Manual dispatch** (`include_warmup=true`) | Robust | `-i 5 -wi 5 -f 3` | Full performance analysis |
+| **PR** (only if benchmark-related files changed) | Smoke | `-i 3 -wi 2 -f 1` | Validate benchmarks compile and run |
+
+### Downloading results
+
+After a workflow run completes:
+1. Go to the workflow run page on GitHub Actions
+2. Scroll to the "Artifacts" section
+3. Download `jmh-results` artifact
+4. Extract `benchmark-results.json` for analysis
+
+### Performance regression detection
+
+The workflow uses [`benchmark-action/github-action-benchmark`](https://github.com/benchmark-action/github-action-benchmark) to:
+- Store historical baseline data in the `gh-pages` branch
+- Compare current results against historical data
+- Alert when performance degrades by more than **150%** (configurable threshold)
+- Post comments on commits when regressions are detected
+
+**Important:** The workflow will NOT fail on regression alerts for PRs or manual runs by default. The `fail-on-alert` option is only enabled for scheduled runs when explicitly requested via the `fail_on_regression` input, preventing false positives from blocking merges due to CI runner variability.
+
+### Running benchmarks manually
+
+To run benchmarks with robust configuration on demand:
+1. Go to Actions → "JMH Benchmarks" workflow
+2. Click "Run workflow"
+3. Check "Include warmup iterations" for reliable data
+4. Optionally check "Fail on regression" to enable strict mode
+5. Click "Run workflow"
 
 ## Adding New Benchmarks
 
