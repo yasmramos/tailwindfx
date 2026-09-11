@@ -86,7 +86,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **`TailwindFXMetrics`** — AtomicLong counters for cache hits/misses, compilations, conflicts, themes, animations, layout passes; alert system with `onAlert()`, `alertOnLowCacheHitRatio()`, `alertOnHighConflictRate()`, `alertOnSlowCompile()`
 
 #### Benchmarking (`benchmark` package)
-- **`Benchmark`** — Performance benchmarking utilities
+- **`Benchmark`** — Performance benchmarking utilities (formatting and metrics API retained for backward compatibility; actual performance measurements migrated to JMH in `tailwindfx-benchmarks` module)
+
+#### Benchmarks Module (`tailwindfx-benchmarks`)
+- **JMH-based benchmarks** — Java Microbenchmark Harness benchmarks for reliable performance measurement
+- **`JitCompilerBenchmark`** — Measures cache hit/miss/throughput with hardened configuration (`@Fork(3)`, 5 warmup/measurement iterations)
+- Key results: ~22M ops/s cache hit throughput, ~1.9M ops/s cache miss throughput, cache hits ~10x faster than misses
 
 #### Configuration & Batch Operations
 - **`TwConfig`** — Configuration options including unit, breakpoints, debug mode, warn-on-parent, auto-batch threshold

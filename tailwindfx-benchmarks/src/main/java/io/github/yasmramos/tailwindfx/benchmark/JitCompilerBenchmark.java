@@ -38,11 +38,11 @@ import org.openjdk.jmh.infra.Blackhole;
  * @since 0.1.0
  */
 @State(Scope.Thread)
-@BenchmarkMode({Mode.AverageTime, Mode.Throughput})
+@BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Warmup(iterations = 5, time = 1)
 @Measurement(iterations = 5, time = 1)
-@Fork(1)
+@Fork(3)
 public class JitCompilerBenchmark {
 
   /** Test tokens matching those used in the original Benchmark class. */
@@ -111,13 +111,29 @@ public class JitCompilerBenchmark {
    * @param state cache hit state with populated cache
    */
   @Benchmark
-  @BenchmarkMode(Mode.AverageTime)
-  @OutputTimeUnit(TimeUnit.MILLISECONDS)
   public void benchmarkCacheHit(Blackhole blackhole, CacheHitState state) {
     String token = TEST_TOKENS[state.tokenIndex % TEST_TOKENS.length];
     state.tokenIndex++;
     var result = JitCompiler.compile(token);
     blackhole.consume(result);
+  }
+
+  /**
+   * Benchmarks cache hit throughput (compilations per second with warm cache). Provides stable
+   * ops/s measurement for fast cache hit operations.
+   *
+   * @param blackhole JMH blackhole to consume results and prevent dead-code elimination
+   * @param state cache hit state with populated cache
+   */
+  @Benchmark
+  @BenchmarkMode(Mode.Throughput)
+  @OutputTimeUnit(TimeUnit.SECONDS)
+  public int benchmarkCacheHitThroughput(Blackhole blackhole, CacheHitState state) {
+    String token = TEST_TOKENS[state.tokenIndex % TEST_TOKENS.length];
+    state.tokenIndex++;
+    var result = JitCompiler.compile(token);
+    blackhole.consume(result);
+    return 1;
   }
 
   /**

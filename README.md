@@ -349,6 +349,47 @@ MIT — see [LICENSE](LICENSE) for details.
 
 ---
 
+## Performance
+
+TailwindFX includes JMH-based benchmarks to measure JIT compiler performance. The benchmarks are located in the `tailwindfx-benchmarks` module and can be run manually to verify performance characteristics.
+
+### Benchmark Results (JDK 17, JMH 1.37)
+
+The following results were obtained using hardened JMH configuration (`@Fork(3)`, 5 warmup/measurement iterations):
+
+| Benchmark | Mode | Score | Error | Units |
+|-----------|------|-------|-------|-------|
+| `benchmarkCacheHitThroughput` | Throughput | 22,084,163.924 | ±222,820.028 | ops/s |
+| `benchmarkThroughput` | Throughput | 1,889,995.571 | ±152,869.049 | ops/s |
+| `benchmarkCacheHit` | Average Time | ≈ 10⁻⁴ | — | ms/op |
+| `benchmarkCacheMiss` | Average Time | 0.001 | ±0.001 | ms/op |
+| `benchmarkMixedWorkload` | Average Time | 0.002 | ±0.001 | ms/op |
+
+**Key findings:**
+- **Cache hit throughput**: ~22M operations per second with warm cache
+- **Cache miss throughput**: ~1.9M operations per second (cold compilation)
+- **Cache hit vs miss ratio**: Cache hits are approximately **10x faster** than cache misses
+- **Average time per operation**: Cache hits complete in under 0.0001ms, while cache misses take ~0.001ms
+
+### Running Benchmarks
+
+To run the benchmarks manually:
+
+```bash
+# Build the benchmarks module
+mvn -P benchmarks package
+
+# Run all benchmarks
+java -jar tailwindfx-benchmarks/target/benchmarks.jar
+
+# Run specific benchmark
+java -jar tailwindfx-benchmarks/target/benchmarks.jar JitCompilerBenchmark.benchmarkCacheHit
+```
+
+**Note:** Benchmarks are excluded from the default CI pipeline to avoid flakiness. They are intended for manual performance verification and should be run in a controlled environment for accurate results.
+
+---
+
 ## Known Limitations
 
 TailwindFX is designed to bring Tailwind CSS concepts to JavaFX, but JavaFX has inherent limitations compared to web browsers. Please be aware of the following:
