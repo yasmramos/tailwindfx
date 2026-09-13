@@ -29,6 +29,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
+          server-id: central
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
       - name: Configure Git
         run: |
@@ -56,21 +61,16 @@ jobs:
         if: github.event_name == 'push' || github.event_name == 'release' || github.event_name == 'workflow_dispatch'
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_KEY_NAME: ${{ secrets.GPG_KEY_NAME }}
         run: |
-          # Import GPG key
-          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
-          GPG_KEY_ID=$(gpg --list-keys --keyid-format SHORT | grep -A1 "^pub" | tail -n1 | awk '{print $1}')
-          
-          # Deploy to OSSRH
+          # Deploy to Maven Central via Central Publisher Portal
           mvn --batch-mode clean deploy \
             -P release \
             -DperformRelease=true \
-            -Dgpg.keyname=$GPG_KEY_ID \
-            -Dgpg.passphrase=$MAVEN_GPG_PASSPHRASE \
-            -DaltDeploymentRepository=ossrh::default::https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/
+            -Dgpg.keyname=$GPG_KEY_NAME \
+            -Dgpg.passphrase=$MAVEN_GPG_PASSPHRASE
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v5

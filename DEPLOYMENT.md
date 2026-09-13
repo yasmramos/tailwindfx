@@ -1,15 +1,15 @@
 # Maven Central Deployment Guide
 
-This document explains how to publish TailwindFX to Maven Central.
+This document explains how to publish TailwindFX to Maven Central via the Central Publisher Portal.
 
 ## Prerequisites
 
-### 1. Sonatype OSSRH Account
+### 1. Sonatype Central Portal Account
 
-1. Create an account at [https://s01.oss.sonatype.org/](https://s01.oss.sonatype.org/)
-2. Create a new ticket/issue at [https://issues.sonatype.org/](https://issues.sonatype.org/) to request namespace ownership for `io.github.yasmramos`
-   - You'll need to verify ownership of your GitHub account
-   - Once approved, you can deploy under the `io.github.yasmramos` groupId
+1. Create an account at [https://central.sonatype.com/](https://central.sonatype.com/)
+2. Verify ownership of your GitHub account and namespace `io.github.yasmramos`
+   - The Central Portal will guide you through namespace verification
+   - Once verified, you can deploy under the `io.github.yasmramos` groupId
 
 ### 2. GPG Key Setup
 
@@ -29,7 +29,13 @@ gpg --armor --export yasmramos95@gmail.com > public-key.asc
 gpg --armor --export-secret-keys yasmramos95@gmail.com > private-key.asc
 ```
 
-### 3. Maven Settings
+### 3. Generate User Token in Central Portal
+
+1. Log into [https://central.sonatype.com/](https://central.sonatype.com/)
+2. Go to **Profile → User Token**
+3. Generate a new token and save the username and password securely
+
+### 4. Maven Settings (Optional for Local Deploy)
 
 Create or update `~/.m2/settings.xml`:
 
@@ -41,16 +47,16 @@ Create or update `~/.m2/settings.xml`:
                               http://maven.apache.org/xsd/settings-1.0.0.xsd">
     <servers>
         <server>
-            <id>ossrh</id>
-            <username>your-ossrh-username</username>
-            <password>your-ossrh-token</password>
+            <id>central</id>
+            <username>your-central-username</username>
+            <password>your-central-token</password>
         </server>
     </servers>
     <profiles>
         <profile>
             <id>release</id>
             <properties>
-                <gpg.keyname>YOUR_GPG_KEY_ID</gpg.keyname>
+                <gpg.keyname>YOUR_GPG_KEY_NAME</gpg.keyname>
                 <gpg.passphrase>your-gpg-passphrase</gpg.passphrase>
             </properties>
         </profile>
@@ -67,10 +73,11 @@ For automated deployment via GitHub Actions, configure these secrets in your rep
 
 | Secret Name | Description |
 |------------|-------------|
-| `OSSRH_USERNAME` | Your Sonatype OSSRH username |
-| `OSSRH_TOKEN` | Your Sonatype OSSRH token (generate from OSSRH profile) |
+| `OSSRH_USERNAME` | Your Central Portal username (from User Token) |
+| `OSSRH_PASSWORD` | Your Central Portal token (from User Token) |
 | `GPG_PRIVATE_KEY` | Content of your private-key.asc file |
 | `GPG_PASSPHRASE` | Passphrase for your GPG key |
+| `GPG_KEY_NAME` | Your GPG key name/ID (e.g., `ABC12345`) |
 
 ## Local Deployment
 
@@ -89,7 +96,7 @@ mvn clean deploy
 
 2. Build and deploy with GPG signing:
    ```bash
-   mvn clean deploy -P release -DperformRelease=true
+   mvn clean deploy -P release -DperformRelease=true -Dgpg.keyname=YOUR_KEY_NAME -Dgpg.passphrase=YOUR_PASSPHRASE
    ```
 
 3. Update version back to snapshot:
@@ -102,6 +109,8 @@ mvn clean deploy
 The workflow is configured to trigger on:
 - **Release creation**: Automatically deploys when you create a GitHub release
 - **Manual dispatch**: Manually trigger from Actions tab with version input
+
+The deployment uses the `central-publishing-maven-plugin` which automatically publishes to Maven Central via the Central Publisher Portal.
 
 ### Steps to Release:
 
@@ -127,21 +136,19 @@ The workflow is configured to trigger on:
 4. **Monitor the workflow**:
    - Go to Actions tab
    - Watch "Publish to Maven Central" workflow
-   - Once complete, artifacts will be in OSSRH staging
+   - Once complete, artifacts are published directly to Maven Central
 
-5. **Release from OSSRH**:
-   - Log into [https://s01.oss.sonatype.org/](https://s01.oss.sonatype.org/)
-   - Go to Staging Repositories
-   - Close and release your repository
-   - Artifacts will sync to Maven Central within ~2 hours
+5. **Verify publication**:
+   - Artifacts appear in Maven Central within minutes (no manual staging release required)
+   - Check [https://central.sonatype.com/search](https://central.sonatype.com/search)
 
 ## Verification
 
 After deployment, verify your artifact is available:
 
-1. **Check OSSRH**: [https://s01.oss.sonatype.org/#search](https://s01.oss.sonatype.org/#search)
-2. **Check Maven Central**: [https://central.sonatype.com/search](https://central.sonatype.com/search)
-3. **Search by groupId**: `io.github.yasmramos`
+1. **Check Maven Central**: [https://central.sonatype.com/search](https://central.sonatype.com/search)
+2. **Search by groupId**: `io.github.yasmramos`
+3. **Wait ~15-30 minutes** for full propagation to mirrors
 
 ## Troubleshooting
 
@@ -156,12 +163,15 @@ eval $(gpg-agent --daemon)
 ```
 
 **Deployment authorization fails:**
-- Verify OSSRH credentials in `~/.m2/settings.xml` or GitHub secrets
-- Ensure your OSSRH account has permissions for the namespace
+- Verify Central Portal credentials in GitHub secrets (`OSSRH_USERNAME`/`OSSRH_PASSWORD`)
+- Ensure your namespace `io.github.yasmramos` is verified in the Central Portal
 
 **Javadoc errors:**
 - The pom.xml is configured with `-Xdoclint:none` to bypass strict javadoc checks
 - Fix any broken @link references in source code
+
+**Plugin not found:**
+- Ensure `central-publishing-maven-plugin` version is defined in parent pom.xml
 
 ## Required Artifacts
 
@@ -174,13 +184,13 @@ Maven Central requires these artifacts for each deployment:
 
 ## Next Steps
 
-1. Complete OSSRH namespace verification
+1. Complete Central Portal namespace verification
 2. Generate and configure GPG keys
 3. Set up GitHub secrets
 4. Test with a snapshot deployment
 5. Create your first release!
 
 For more information:
-- [Sonatype OSSRH Guide](https://central.sonatype.org/pages/ossrh-guide.html)
-- [Maven Deploy Plugin](https://maven.apache.org/plugins/maven-deploy-plugin/)
-- [GPG Signing](https://central.sonatype.org/pages/working-with-pgp-signature-files.html)
+- [Central Publisher Portal Guide](https://central.sonatype.org/publish/publish-portal/)
+- [Central Publishing Maven Plugin](https://github.com/sonatype-nexus-community/central-publishing-maven-plugin)
+- [GPG Signing](https://central.sonatype.org/publish/requirements/gpg/)
