@@ -84,8 +84,11 @@ For automated deployment via GitHub Actions, configure these secrets in your rep
 ### Deploy Snapshot Version
 
 ```bash
-mvn clean deploy
+mvn clean deploy -P snapshot
 ```
+
+This publishes to the Central Portal snapshots repository (`https://central.sonatype.com/repository/maven-snapshots/`).
+Snapshots do not require GPG signing.
 
 ### Deploy Release Version
 
@@ -99,7 +102,9 @@ mvn clean deploy
    mvn clean deploy -P release -DperformRelease=true -Dgpg.keyname=YOUR_KEY_NAME -Dgpg.passphrase=YOUR_PASSPHRASE
    ```
 
-3. Update version back to snapshot:
+3. The `central-publishing-maven-plugin` automatically publishes to Maven Central via the Central Publisher Portal.
+
+4. Update version back to snapshot:
    ```xml
    <version>1.0.1-SNAPSHOT</version>
    ```
