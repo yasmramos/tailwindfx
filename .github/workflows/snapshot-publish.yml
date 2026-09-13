@@ -33,22 +33,8 @@ jobs:
           git config user.name "yasmramos"
           git config user.email "yasmramos95@gmail.com"
 
-      - name: Set snapshot version
-        run: |
-          # Get the base version from pom.xml (e.g., 0.1.1)
-          BASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          # Ensure it ends with -SNAPSHOT
-          if [[ "$BASE_VERSION" != *-SNAPSHOT ]]; then
-            SNAPSHOT_VERSION="${BASE_VERSION}-SNAPSHOT"
-          else
-            SNAPSHOT_VERSION="$BASE_VERSION"
-          fi
-          echo "Publishing snapshot version $SNAPSHOT_VERSION"
-          mvn --batch-mode versions:set -DnewVersion=$SNAPSHOT_VERSION -DgenerateBackupPoms=false
-          mvn --batch-mode versions:commit
-
       - name: Build and test
-        run: mvn --batch-mode clean verify -DskipTests=false
+        run: mvn --batch-mode clean verify -Drevision=0.1.1-SNAPSHOT -DskipTests=false
 
       - name: Publish snapshot to Central Portal
         env:
@@ -58,6 +44,7 @@ jobs:
           # Deploy snapshot to Maven Central via Central Portal snapshots endpoint
           mvn --batch-mode clean deploy \
             -P snapshot \
+            -Drevision=0.1.1-SNAPSHOT \
             -DskipTests
 
       - name: Upload build artifacts

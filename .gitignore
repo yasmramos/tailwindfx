@@ -1,3 +1,4 @@
 # Build artifacts
 dependency-reduced-pom.xml
 target/
+.flattened-pom.xml

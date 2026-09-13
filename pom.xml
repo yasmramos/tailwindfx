@@ -4,7 +4,7 @@
     
     <groupId>io.github.yasmramos</groupId>
     <artifactId>tailwindfx-parent</artifactId>
-    <version>0.1.1</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
     
     <!-- Required metadata for Maven Central -->
@@ -42,6 +42,7 @@
     </modules>
     
     <properties>
+        <revision>0.1.1</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>17</maven.compiler.release>
         <javafx.version>17</javafx.version>
@@ -55,7 +56,7 @@
         <gpg.plugin.version>3.1.0</gpg.plugin.version>
         <source.plugin.version>3.3.0</source.plugin.version>
         <javadoc.plugin.version>3.6.3</javadoc.plugin.version>
-        <tailwindfx.version>0.1.1</tailwindfx.version>
+        <tailwindfx.version>${revision}</tailwindfx.version>
         <jmh.version>1.37</jmh.version>
     </properties>
     
@@ -246,6 +247,31 @@
                             <goal>check</goal>
                         </goals>
                         <phase>compile</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
