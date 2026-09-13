@@ -37,13 +37,9 @@
     </scm>
     
     <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
         <repository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>central</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
         </repository>
     </distributionManagement>
     
@@ -62,7 +58,7 @@
         <jacoco.version>0.8.14</jacoco.version>
         <surefire.version>3.2.5</surefire.version>
         <spotless.version>2.43.0</spotless.version>
-        <nexus.staging.version>1.6.13</nexus.staging.version>
+        <central.publishing.version>0.8.0</central.publishing.version>
         <gpg.plugin.version>3.1.0</gpg.plugin.version>
         <source.plugin.version>3.3.0</source.plugin.version>
         <javadoc.plugin.version>3.6.3</javadoc.plugin.version>
@@ -141,11 +137,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>${javadoc.plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.sonatype.plugins</groupId>
-                    <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>${nexus.staging.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -300,6 +291,17 @@
                                 </configuration>
                             </execution>
                         </executions>
+                    </plugin>
+                    <!-- Central Publishing Plugin - Publishes to Maven Central via Central Publisher Portal -->
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${central.publishing.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
