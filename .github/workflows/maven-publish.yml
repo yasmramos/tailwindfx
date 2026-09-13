@@ -17,6 +17,8 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     environment: maven-central
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -46,11 +48,13 @@ jobs:
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "Releasing version $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "RELEASE_TAG=refs/tags/v$VERSION" >> $GITHUB_ENV
 
       - name: Set release version from workflow dispatch
         if: github.event_name == 'workflow_dispatch'
         run: |
           echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          echo "RELEASE_TAG=v${{ github.event.inputs.version }}" >> $GITHUB_ENV
 
       - name: Build and test
         run: mvn --batch-mode clean verify -Drevision=${{ env.VERSION }} -DskipTests=false
@@ -71,11 +75,25 @@ jobs:
             -Dgpg.keyname=$GPG_KEY_NAME \
             -Dgpg.passphrase=$MAVEN_GPG_PASSPHRASE
 
+      - name: Attach artifacts to GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: github.event_name == 'push' || github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          files: |
+            tailwindfx-base/target/*.jar
+            tailwindfx-maven-plugin/target/*.jar
+            tailwindfx-base/target/*.pom
+            tailwindfx-maven-plugin/target/*.pom
+          fail_on_unmatched_files: true
+          draft: false
+          generate_release_notes: true
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v5
         with:
           name: maven-artifacts
           path: |
-            target/*.jar
-            target/*.pom
+            tailwindfx-base/target/*.jar
+            tailwindfx-maven-plugin/target/*.jar
           retention-days: 30
