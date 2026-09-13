@@ -5,15 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
-import javafx.application.Platform;
 import javafx.scene.layout.Region;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -22,40 +17,14 @@ import org.testfx.framework.junit5.ApplicationTest;
 /**
  * Tests for {@link TwAnimation} — requires JavaFX Application Thread.
  *
- * <p>Each test runs on the FX thread via {@code runFx()} and blocks until done.
+ * <p>Each test runs on the FX thread via {@code interact()} and blocks until done.
  */
 @DisplayName("TwAnimation Tests")
 public class TwAnimationTest extends ApplicationTest {
 
   private static final double DELTA = 0.5;
 
-  @BeforeAll
-  static void setupSpec() {
-    // Ensure JavaFX is initialized
-  }
-
   /** Runs work on FX thread and blocks until done (max 3s). */
-  static void runFx(Runnable work) throws Exception {
-    CountDownLatch latch = new CountDownLatch(1);
-    AtomicReference<Throwable> err = new AtomicReference<>();
-    Platform.runLater(
-        () -> {
-          try {
-            work.run();
-          } catch (Throwable t) {
-            err.set(t);
-          } finally {
-            latch.countDown();
-          }
-        });
-    if (!latch.await(3, TimeUnit.SECONDS)) {
-      throw new RuntimeException("FX test timed out");
-    }
-    if (err.get() != null) {
-      throw new RuntimeException(err.get());
-    }
-  }
-
   @Nested
   @DisplayName("Null Guards and Validation")
   class NullGuardsTests {
@@ -123,8 +92,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("fadeIn should create Timeline and reset opacity to 0")
-    void testFadeInCreatesTimeline() throws Exception {
-      runFx(
+    void testFadeInCreatesTimeline() {
+      interact(
           () -> {
             Region n = new Region();
             TwAnimation anim = TwAnimation.fadeIn(n, 100);
@@ -136,8 +105,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("fadeIn with custom interpolator should work correctly")
-    void testFadeInWithInterpolator() throws Exception {
-      runFx(
+    void testFadeInWithInterpolator() {
+      interact(
           () -> {
             Region n = new Region();
             TwAnimation anim = TwAnimation.fadeIn(n, 200, Interpolator.LINEAR);
@@ -147,8 +116,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("fadeOut should create Timeline")
-    void testFadeOutCreatesTimeline() throws Exception {
-      runFx(
+    void testFadeOutCreatesTimeline() {
+      interact(
           () -> {
             Region n = new Region();
             n.setOpacity(1.0);
@@ -159,8 +128,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("slideUp should create Timeline and reset opacity")
-    void testSlideUpCreatesTimeline() throws Exception {
-      runFx(
+    void testSlideUpCreatesTimeline() {
+      interact(
           () -> {
             Region n = new Region();
             TwAnimation anim = TwAnimation.slideUp(n);
@@ -171,8 +140,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("scaleIn should create Timeline and reset scale")
-    void testScaleInCreatesTimeline() throws Exception {
-      runFx(
+    void testScaleInCreatesTimeline() {
+      interact(
           () -> {
             Region n = new Region();
             TwAnimation anim = TwAnimation.scaleIn(n);
@@ -183,8 +152,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("scaleIn with custom interpolator should work correctly")
-    void testScaleInWithInterpolator() throws Exception {
-      runFx(
+    void testScaleInWithInterpolator() {
+      interact(
           () -> {
             Region n = new Region();
             TwAnimation a = TwAnimation.scaleIn(n, 150, Interpolator.EASE_IN);
@@ -199,8 +168,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("shake should create Timeline")
-    void testShakeCreatesTimeline() throws Exception {
-      runFx(
+    void testShakeCreatesTimeline() {
+      interact(
           () -> {
             Region n = new Region();
             TwAnimation a = TwAnimation.shake(n);
@@ -210,8 +179,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("bounce should create Timeline")
-    void testBounceCreatesTimeline() throws Exception {
-      runFx(
+    void testBounceCreatesTimeline() {
+      interact(
           () -> {
             Region n = new Region();
             TwAnimation a = TwAnimation.bounce(n);
@@ -221,8 +190,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("pulse should have INDEFINITE cycle count")
-    void testPulseIsInfinite() throws Exception {
-      runFx(
+    void testPulseIsInfinite() {
+      interact(
           () -> {
             Region n = new Region();
             TwAnimation a = TwAnimation.pulse(n);
@@ -235,8 +204,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("spin should have INDEFINITE cycle count")
-    void testSpinIsInfinite() throws Exception {
-      runFx(
+    void testSpinIsInfinite() {
+      interact(
           () -> {
             Region n = new Region();
             TwAnimation a = TwAnimation.spin(n);
@@ -249,8 +218,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("breathe should have INDEFINITE cycle count")
-    void testBreatheIsInfinite() throws Exception {
-      runFx(
+    void testBreatheIsInfinite() {
+      interact(
           () -> {
             Region n = new Region();
             TwAnimation a = TwAnimation.breathe(n);
@@ -268,8 +237,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("chain should create SequentialTransition")
-    void testChainSequential() throws Exception {
-      runFx(
+    void testChainSequential() {
+      interact(
           () -> {
             Region n = new Region();
             TwAnimation a1 = TwAnimation.fadeIn(n, 50);
@@ -282,8 +251,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("parallel should create ParallelTransition")
-    void testParallelTransition() throws Exception {
-      runFx(
+    void testParallelTransition() {
+      interact(
           () -> {
             Region n = new Region();
             TwAnimation a1 = TwAnimation.fadeIn(n, 50);
@@ -295,8 +264,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("pause should create delay Timeline")
-    void testDelayCreatesTimeline() throws Exception {
-      runFx(
+    void testDelayCreatesTimeline() {
+      interact(
           () -> {
             TwAnimation d = TwAnimation.pause(200);
             assertNotNull(d, "delay should return non-null");
@@ -310,8 +279,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("speed should set animation rate")
-    void testTwAnimationSpeed() throws Exception {
-      runFx(
+    void testTwAnimationSpeed() {
+      interact(
           () -> {
             Region n = new Region();
             TwAnimation a = TwAnimation.fadeIn(n, 200).speed(2.0);
@@ -321,8 +290,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("cycleCount should set animation cycle count")
-    void testTwAnimationCycleCount() throws Exception {
-      runFx(
+    void testTwAnimationCycleCount() {
+      interact(
           () -> {
             Region n = new Region();
             TwAnimation a = TwAnimation.fadeIn(n, 200).cycleCount(3);
@@ -332,8 +301,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("autoReverse should enable auto reverse")
-    void testTwAnimationAutoReverse() throws Exception {
-      runFx(
+    void testTwAnimationAutoReverse() {
+      interact(
           () -> {
             Region n = new Region();
             TwAnimation a = TwAnimation.fadeIn(n, 200).autoReverse();
@@ -343,8 +312,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("onFinished should set handler")
-    void testTwAnimationOnFinished() throws Exception {
-      runFx(
+    void testTwAnimationOnFinished() {
+      interact(
           () -> {
             Region n = new Region();
             AtomicBoolean fired = new AtomicBoolean(false);
@@ -355,8 +324,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("easeIn should return self")
-    void testTwAnimationEaseIn() throws Exception {
-      runFx(
+    void testTwAnimationEaseIn() {
+      interact(
           () -> {
             Region n = new Region();
             TwAnimation a = TwAnimation.fadeIn(n, 200).easeIn();
@@ -371,8 +340,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("registry should support slot isolation")
-    void testRegistrySlotIsolation() throws Exception {
-      runFx(
+    void testRegistrySlotIsolation() {
+      interact(
           () -> {
             Region n = new Region();
             TwAnimation enter = TwAnimation.fadeIn(n, 50);
@@ -389,8 +358,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("registry should cancel previous animation when replacing")
-    void testRegistryReplacesCancels() throws Exception {
-      runFx(
+    void testRegistryReplacesCancels() {
+      interact(
           () -> {
             try {
               Region n = new Region();
@@ -427,8 +396,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("removeHoverEffects should not throw on clean node")
-    void testRemoveHoverEffectsNoop() throws Exception {
-      runFx(
+    void testRemoveHoverEffectsNoop() {
+      interact(
           () -> {
             Region n = new Region();
             // removeHoverEffects on a node with no hover effects should not throw
@@ -443,8 +412,8 @@ public class TwAnimationTest extends ApplicationTest {
 
     @Test
     @DisplayName("resetNode should reset all transforms to defaults")
-    void testResponsiveGuardResetNode() throws Exception {
-      runFx(
+    void testResponsiveGuardResetNode() {
+      interact(
           () -> {
             Region n = new Region();
             n.setTranslateX(20);
