@@ -4,14 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.yasmramos.tailwindfx.TwMetrics;
 import io.github.yasmramos.tailwindfx.TwStyle;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.testfx.framework.junit5.ApplicationTest;
@@ -22,38 +17,11 @@ import org.testfx.framework.junit5.ApplicationTest;
  */
 @DisplayName("TwMetrics Integration Tests")
 class MetricsIntegrationTest extends ApplicationTest {
-
-  @BeforeAll
-  static void setupSpec() {
-    // Ensure JavaFX is initialized
-  }
-
   /** Runs work on FX thread and blocks until done (max 3s). */
-  static void runFx(Runnable work) throws Exception {
-    CountDownLatch latch = new CountDownLatch(1);
-    AtomicReference<Throwable> err = new AtomicReference<>();
-    Platform.runLater(
-        () -> {
-          try {
-            work.run();
-          } catch (Throwable t) {
-            err.set(t);
-          } finally {
-            latch.countDown();
-          }
-        });
-    if (!latch.await(3, TimeUnit.SECONDS)) {
-      throw new RuntimeException("FX test timed out");
-    }
-    if (err.get() != null) {
-      throw new RuntimeException(err.get());
-    }
-  }
-
   @Test
   @DisplayName("Should record metrics when applying styles")
-  void testMetricsRecordedOnApply() throws Exception {
-    runFx(
+  void testMetricsRecordedOnApply() {
+    interact(
         () -> {
           // Reset and enable metrics
           TailwindFXMetrics.instance().reset();
@@ -82,8 +50,8 @@ class MetricsIntegrationTest extends ApplicationTest {
 
   @Test
   @DisplayName("Should show metrics when disabled")
-  void testMetricsWhenDisabled() throws Exception {
-    runFx(
+  void testMetricsWhenDisabled() {
+    interact(
         () -> {
           // Disable metrics
           TwMetrics.setEnabled(false);
@@ -103,8 +71,8 @@ class MetricsIntegrationTest extends ApplicationTest {
 
   @Test
   @DisplayName("Should increment cache hits on duplicate apply")
-  void testCacheHitsOnDuplicateApply() throws Exception {
-    runFx(
+  void testCacheHitsOnDuplicateApply() {
+    interact(
         () -> {
           TailwindFXMetrics.instance().reset();
           TwMetrics.setEnabled(true);
@@ -124,8 +92,8 @@ class MetricsIntegrationTest extends ApplicationTest {
 
   @Test
   @DisplayName("Should generate valid report with actual data")
-  void testReportWithRealData() throws Exception {
-    runFx(
+  void testReportWithRealData() {
+    interact(
         () -> {
           TailwindFXMetrics.instance().reset();
           TwMetrics.setEnabled(true);
@@ -154,8 +122,8 @@ class MetricsIntegrationTest extends ApplicationTest {
 
   @Test
   @DisplayName("Should track multiple nodes independently")
-  void testMultipleNodesMetrics() throws Exception {
-    runFx(
+  void testMultipleNodesMetrics() {
+    interact(
         () -> {
           TailwindFXMetrics.instance().reset();
           TwMetrics.setEnabled(true);
@@ -188,8 +156,8 @@ class MetricsIntegrationTest extends ApplicationTest {
 
   @Test
   @DisplayName("Should reset all metrics to zero")
-  void testResetClearsAllMetrics() throws Exception {
-    runFx(
+  void testResetClearsAllMetrics() {
+    interact(
         () -> {
           TailwindFXMetrics.instance().reset();
           TwMetrics.setEnabled(true);
@@ -214,8 +182,8 @@ class MetricsIntegrationTest extends ApplicationTest {
 
   @Test
   @DisplayName("Should calculate cache hit ratio correctly")
-  void testCacheHitRatioCalculation() throws Exception {
-    runFx(
+  void testCacheHitRatioCalculation() {
+    interact(
         () -> {
           TailwindFXMetrics.instance().reset();
           TwMetrics.setEnabled(true);
@@ -241,8 +209,8 @@ class MetricsIntegrationTest extends ApplicationTest {
 
   @Test
   @DisplayName("Should enable and disable metrics correctly")
-  void testEnableDisableToggle() throws Exception {
-    runFx(
+  void testEnableDisableToggle() {
+    interact(
         () -> {
           TwMetrics.setEnabled(false);
           assertFalse(TwMetrics.isEnabled(), "Should be disabled after setEnabled(false)");
