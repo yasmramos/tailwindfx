@@ -87,6 +87,17 @@ public final class StyleResolver {
   }
 
   private String resolveArbitrary(StyleToken token) {
+    // Si hay alpha y el valor arbitrario es un color hex válido, aplicar opacidad
+    if (token.alpha != null
+        && io.github.yasmramos.tailwindfx.color.ColorPalette.isValidHex(token.arbitraryVal)) {
+      String rgb =
+          io.github.yasmramos.tailwindfx.color.ColorPalette.hexToRgbString(token.arbitraryVal);
+      if (rgb != null) {
+        double opacity = token.alpha / 100.0;
+        return "rgba(" + rgb + "," + String.format("%.2f", opacity) + ")";
+      }
+    }
+    // Sin alpha o no es un color hex: devolver el valor arbitrario tal cual
     return token.arbitraryVal;
   }
 
