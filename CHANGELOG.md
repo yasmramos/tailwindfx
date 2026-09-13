@@ -5,6 +5,54 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.1.1] - 2026-09-13
+
+> **Patch Release** — Bug fixes, performance improvements, and enhanced FXML support.
+
+### Added
+
+#### FXML Integration
+- **`TwFXML`** — New utility class for processing JavaFX node trees loaded from FXML
+  - `process(Parent root)` — Recursively applies JIT compilation to nodes with arbitrary values
+  - `enableAutoJit(Parent root)` — Opt-in dynamic JIT compilation via ListChangeListener
+  - Supports both static classes (via generated CSS) and JIT/arbitrary values (via inline styles)
+- Automatic detection of JIT tokens in `styleClass` attributes
+- Protection against infinite recursion using node properties flag
+
+#### Opacity Modifier Support
+- Support for arbitrary color values with opacity modifier: `bg-[#ff0000]/80`
+- Converts hex colors to `rgba(r,g,b,opacity)` format automatically
+- Safe fallback for non-color arbitrary values with opacity suffix
+
+### Changed
+
+#### Testing Infrastructure
+- Migrated all pseudo-tests to real JUnit 5 tests with proper `@Test` annotations
+- Replaced custom `runFx()` helper with TestFX's standard `interact()` method
+- All tests now extend `ApplicationTest` for proper JavaFX toolkit initialization
+- Improved test reliability and build failure on assertion errors
+
+#### Documentation
+- Updated examples to promote `TwStyle.apply()` over `getStyleClass().addAll()` for JIT support
+- Clarified distinction between static classes (stylesheet-based) and arbitrary values (JIT-compiled)
+- Added FXML integration guide with `TwFXML.process()` usage pattern
+
+### Fixed
+
+- JIT/arbitrary values now work correctly when added via `getStyleClass().addAll()`
+- No more "unknown token" warnings for valid JIT utility classes
+- Opacity modifier parsing in `StyleToken` regex pattern
+- Test execution under Maven Surefire (tests were previously not running)
+
+### Removed
+
+- **Breaking:** Removed `TailwindFX` static facade in favor of specialized facades (`TwStyle`, `TwTheme`, etc.)
+- Removed `Benchmark` and `BenchmarkTest` classes (migrated to JMH benchmarks in `tailwindfx-benchmarks`)
+- Removed duplicate `runFx()` helper methods (replaced by TestFX `interact()`)
+- Removed manual test counters (`passed`/`failed`) and `runAll()` patterns
+
+---
+
 ## [0.1.0] - 2026-09-04
 
 > **Early Preview Release** — This is an initial preview version intended for testing and feedback. Some features may be incomplete or subject to change.

@@ -49,7 +49,7 @@ example-project/
         <dependency>
             <groupId>io.github.yasmramos</groupId>
             <artifactId>tailwindfx-base</artifactId>
-            <version>0.1.0</version>
+            <version>0.1.1</version>
         </dependency>
 
         <!-- JavaFX -->
@@ -79,7 +79,7 @@ example-project/
             <plugin>
                 <groupId>io.github.yasmramos</groupId>
                 <artifactId>tailwindfx-maven-plugin</artifactId>
-                <version>0.1.0</version>
+                <version>0.1.1</version>
                 <executions>
                     <execution>
                         <goals>

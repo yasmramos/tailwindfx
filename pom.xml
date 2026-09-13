@@ -4,7 +4,7 @@
     
     <groupId>io.github.yasmramos</groupId>
     <artifactId>tailwindfx-parent</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <packaging>pom</packaging>
     
     <!-- Required metadata for Maven Central -->
@@ -66,7 +66,7 @@
         <gpg.plugin.version>3.1.0</gpg.plugin.version>
         <source.plugin.version>3.3.0</source.plugin.version>
         <javadoc.plugin.version>3.6.3</javadoc.plugin.version>
-        <tailwindfx.version>1.0-SNAPSHOT</tailwindfx.version>
+        <tailwindfx.version>0.1.1</tailwindfx.version>
         <jmh.version>1.37</jmh.version>
     </properties>
     
