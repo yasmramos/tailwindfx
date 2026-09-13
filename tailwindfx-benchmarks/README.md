@@ -29,19 +29,25 @@ This generates an executable JAR at `tailwindfx-benchmarks/target/benchmarks.jar
 
 ## Running Benchmarks
 
-### Run all benchmarks
+### Using BenchmarkRunner (Recommended)
+
+The simplest way to run all benchmarks with reproducible defaults:
 
 ```bash
 java -jar tailwindfx-benchmarks/target/benchmarks.jar
 ```
 
-### Run specific benchmark
+This executes all benchmarks in the `io.github.yasmramos.tailwindfx.benchmark` package with:
+- 5 warmup iterations (1 second each)
+- 5 measurement iterations (1 second each)
+- 2 forks (separate JVM processes for reliability)
+- JSON output to `target/jmh-results.json`
 
-```bash
-java -jar tailwindfx-benchmarks/target/benchmarks.jar JitCompilerBenchmark.benchmarkCacheHit
-```
+Results are written to both console and `target/jmh-results.json` for further analysis.
 
-### Run with custom options
+### Run with custom JMH arguments
+
+Pass arguments to use the full JMH CLI:
 
 ```bash
 java -jar tailwindfx-benchmarks/target/benchmarks.jar -f 2 -wi 5 -i 5
@@ -54,6 +60,12 @@ Common JMH options:
 - `-t <threads>`: Number of threads
 - `-r <time>`: Time per iteration (e.g., `1s`, `500ms`)
 - `-v EXTRA`: Verbose output
+
+### Run specific benchmark pattern
+
+```bash
+java -jar tailwindfx-benchmarks/target/benchmarks.jar "JitCompiler.*"
+```
 
 ### List available benchmarks
 
