@@ -303,11 +303,6 @@
         <!-- Snapshot Profile: Activated for snapshot releases -->
         <profile>
             <id>snapshot</id>
-            <activation>
-                <property>
-                    <name>snapshots</name>
-                </property>
-            </activation>
             <distributionManagement>
                 <snapshotRepository>
                     <id>central</id>

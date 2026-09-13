@@ -38,7 +38,7 @@ jobs:
           # Get the base version from pom.xml (e.g., 0.1.1)
           BASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           # Ensure it ends with -SNAPSHOT
-          if [[ ! "$BASE_VERSION".endswith("-SNAPSHOT") ]]; then
+          if [[ "$BASE_VERSION" != *-SNAPSHOT ]]; then
             SNAPSHOT_VERSION="${BASE_VERSION}-SNAPSHOT"
           else
             SNAPSHOT_VERSION="$BASE_VERSION"
