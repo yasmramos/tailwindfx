@@ -42,6 +42,8 @@ public class TwStyleLayoutTest extends ApplicationTest {
           hbox.getChildren().clear();
           vbox.getChildren().clear();
           grid.getChildren().clear();
+          grid.setHgap(0.0);
+          grid.setVgap(0.0);
           button = new Button("Test");
         });
   }
