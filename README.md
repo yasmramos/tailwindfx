@@ -180,12 +180,12 @@ TwAnimation.onHoverScale(btn, 1.05);
 <dependency>
     <groupId>io.github.yasmramos</groupId>
     <artifactId>tailwindfx-base</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <note>This is an early preview release. The artifact is published to OSSRH/Sonatype snapshot repository.</note>
 </dependency>
 ```
 
-**Note:** This is an **early preview** version (`0.1.0`). To use snapshot versions, add the following repository to your `pom.xml`:
+**Note:** This is an **early preview** version (`0.1.1`). To use snapshot versions, add the following repository to your `pom.xml`:
 
 ```xml
 <repositories>
