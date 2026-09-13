@@ -36,13 +36,6 @@
         <tag>HEAD</tag>
     </scm>
     
-    <distributionManagement>
-        <repository>
-            <id>central</id>
-            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-        </repository>
-    </distributionManagement>
-    
     <modules>
         <module>tailwindfx-base</module>
         <module>tailwindfx-maven-plugin</module>
@@ -305,6 +298,17 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <!-- Snapshot Profile: Activated for snapshot releases -->
+        <profile>
+            <id>snapshot</id>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>central</id>
+                    <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+                </snapshotRepository>
+            </distributionManagement>
         </profile>
 
         <!-- Benchmarks profile: only build benchmarks module when explicitly requested -->
