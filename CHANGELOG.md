@@ -133,9 +133,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 #### Metrics & Monitoring (`metrics` package)
 - **`TailwindFXMetrics`** — AtomicLong counters for cache hits/misses, compilations, conflicts, themes, animations, layout passes; alert system with `onAlert()`, `alertOnLowCacheHitRatio()`, `alertOnHighConflictRate()`, `alertOnSlowCompile()`
 
-#### Benchmarking (`benchmark` package)
-- **`Benchmark`** — Performance benchmarking utilities (formatting and metrics API retained for backward compatibility; actual performance measurements migrated to JMH in `tailwindfx-benchmarks` module)
-
 #### Benchmarks Module (`tailwindfx-benchmarks`)
 - **JMH-based benchmarks** — Java Microbenchmark Harness benchmarks for reliable performance measurement
 - **`JitCompilerBenchmark`** — Measures cache hit/miss/throughput with hardened configuration (`@Fork(3)`, 5 warmup/measurement iterations)
@@ -183,13 +180,6 @@ Comprehensive test suite with 59+ test classes covering:
 
 #### Configuration & Batch Tests
 - `TwConfigTest`, `TwBatchTest`, `TwMetricsTest`, `TwResponsiveTest`, `TwStyleTest`, `TwStyleLayoutTest`, `TwThemeTest`, `TwEffectTest`
-
-#### Benchmark Tests
-- `BenchmarkTest`
-- JMH-based benchmarks migrated to dedicated `tailwindfx-benchmarks` module with stable throughput measurements:
-  - `JitCompilerBenchmark`: Cache hit (~22.1M ops/s), cache miss (~1.97M ops/s), mixed workload (~602K ops/s)
-  - `StyleTokenParseBenchmark`, `VariantParserBenchmark`, `StyleResolverBenchmark`, `ThemeCssGeneratorBenchmark`
-  - Benchmarks run outside CI to avoid flakiness; use `mvn -P benchmarks package` and `java -jar tailwindfx-benchmarks/target/benchmarks.jar`
 
 #### CSS Utilities Tests
 - `CssUtilitiesTest`
