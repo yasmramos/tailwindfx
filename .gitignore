@@ -1,37 +1,5 @@
 ```
-# Compiled and build artifacts
-*.class
-*.o
-*.obj
-*.out
-build/
+# Build artifacts
+dependency-reduced-pom.xml
 target/
-
-# Dependencies
-.gradle/
-.mypy_cache/
-.pytest_cache/
-__pycache__/
-dist/
-node_modules/
-venv/
-.venv/
-
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-
-# Environment
-.env
-.env.local
-*.env.*
-
-# Editors
-.vscode/
-.idea/
-
-# OS specific
-.DS_Store
-Thumbs.db
 ```
