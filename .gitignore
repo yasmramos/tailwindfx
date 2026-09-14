@@ -1,4 +1,41 @@
-# Build artifacts
-dependency-reduced-pom.xml
+```
+# Java/Maven specific
 target/
-.flattened-pom.xml
+*.class
+*.jar
+*.war
+*.ear
+*.tar
+*.tar.gz
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Dependencies
+.mypy_cache/
+.pytest_cache/
+coverage/
+htmlcov/
+.coverage
+
+# System
+.DS_Store
+Thumbs.db
+
+# Temp files
+*.tmp
+*.swp
+*.swo
+```
