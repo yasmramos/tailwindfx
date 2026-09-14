@@ -129,13 +129,14 @@ public final class ThemeManager {
   private long animDurationMs = 0;
 
   private ThemeManager(Scene scene, Node scopeNode) {
-    this.scene = Preconditions.requireNonNull(scene, "ThemeManager", "scene");
+    this.scene = scene;
     this.scopeNode = scopeNode;
   }
 
   // Factories
   /** Applies to the entire Scene root */
   public static ThemeManager forScene(Scene scene) {
+    Preconditions.requireNonNull(scene, "ThemeManager.forScene", "scene");
     return new ThemeManager(scene, null);
   }
 
