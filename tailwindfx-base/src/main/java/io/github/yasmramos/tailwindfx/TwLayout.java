@@ -123,10 +123,17 @@ public final class TwLayout {
           Builder helper = of((Pane) node);
           applyFlexContainer(helper, token);
         }
+      } else if (isGridContainerToken(token)) {
+        if (node instanceof Pane) {
+          Builder helper = of((Pane) node);
+          applyGridContainer(helper, token);
+        }
       }
       // Item utilities: apply to the node via its parent container
       else if (isFlexItemToken(token)) {
         applyFlexItem(node, token);
+      } else if (isGridItemToken(token)) {
+        applyGridItem(node, token);
       }
     }
   }
@@ -142,6 +149,27 @@ public final class TwLayout {
         || token.startsWith("justify-")
         || token.startsWith("items-")
         || token.startsWith("content-");
+  }
+
+  /** Checks if token is a grid container utility (cols, rows, flow, gap). */
+  private static boolean isGridContainerToken(String token) {
+    return token.startsWith("grid-cols-")
+        || token.startsWith("grid-rows-")
+        || token.equals("grid-flow-row")
+        || token.equals("grid-flow-col")
+        || token.equals("grid-flow-dense")
+        || token.equals("grid-flow-row-dense")
+        || token.equals("grid-flow-col-dense");
+  }
+
+  /** Checks if token is a grid item utility (span, start, end). */
+  private static boolean isGridItemToken(String token) {
+    return token.startsWith("col-span-")
+        || token.startsWith("row-span-")
+        || token.startsWith("col-start-")
+        || token.startsWith("col-end-")
+        || token.startsWith("row-start-")
+        || token.startsWith("row-end-");
   }
 
   /** Checks if token is a flex item utility (grow, shrink, basis, order, self). */
@@ -255,6 +283,48 @@ public final class TwLayout {
         // Ignore invalid values
       }
     }
+  }
+
+  /** Applies grid container configuration (cols, rows, flow). */
+  private static void applyGridContainer(Builder helper, String token) {
+    // Grid columns
+    if (token.startsWith("grid-cols-")) {
+      int cols = parseTailwindValue(token);
+      helper.cols(cols).build();
+    }
+    // Grid rows
+    else if (token.startsWith("grid-rows-")) {
+      int rows = parseTailwindValue(token);
+      helper.rows(rows).build();
+    }
+    // Grid auto-flow
+    else if (token.equals("grid-flow-row")) {
+      helper.autoFlow(TwGridPane.AutoFlow.ROW).build();
+    } else if (token.equals("grid-flow-col")) {
+      helper.autoFlow(TwGridPane.AutoFlow.COL).build();
+    } else if (token.equals("grid-flow-dense") || token.equals("grid-flow-row-dense")) {
+      helper.autoFlow(TwGridPane.AutoFlow.ROW_DENSE).build();
+    } else if (token.equals("grid-flow-col-dense")) {
+      helper.autoFlow(TwGridPane.AutoFlow.COL_DENSE).build();
+    }
+  }
+
+  /** Applies grid item style to a node (span, start, end). */
+  private static void applyGridItem(Node node, String token) {
+    Pane parent = getEffectiveParent(node);
+    if (!(parent instanceof TwGridPane)) return;
+
+    TwGridPane gridPane = (TwGridPane) parent;
+
+    if (token.startsWith("col-span-")) {
+      int span = parseTailwindValue(token);
+      TwGridPane.setColSpan(node, span);
+    } else if (token.startsWith("row-span-")) {
+      int span = parseTailwindValue(token);
+      TwGridPane.setRowSpan(node, span);
+    }
+    // Note: col-start/end and row-start/end are not yet implemented in TwGridPane
+    // These would require additional API methods for explicit positioning
   }
 
   /** Gets the effective parent pane. */
@@ -385,6 +455,8 @@ public final class TwLayout {
     private boolean flexWrap = false;
     private String[] gridAreas = null;
     private int gridCols2 = 3;
+    private int gridRows2 = 0; // 0 = inferred from children
+    private TwGridPane.AutoFlow gridAutoFlow = TwGridPane.AutoFlow.ROW;
     private double hgapVal = -1;
     private double vgapVal = -1;
     private Insets padding = Insets.EMPTY;
@@ -549,6 +621,28 @@ public final class TwLayout {
      */
     public Builder cols(int cols) {
       this.gridCols2 = cols;
+      return this;
+    }
+
+    /**
+     * Sets the number of rows for {@link TwGridPane}. Only applies when type is {@link
+     * LayoutType#FLEX_GRID}.
+     *
+     * @param rows number of rows (0 = inferred from children)
+     */
+    public Builder rows(int rows) {
+      this.gridRows2 = rows;
+      return this;
+    }
+
+    /**
+     * Sets the auto-flow direction for {@link TwGridPane}. Only applies when type is {@link
+     * LayoutType#FLEX_GRID}.
+     *
+     * @param autoFlow the auto-flow direction
+     */
+    public Builder autoFlow(TwGridPane.AutoFlow autoFlow) {
+      this.gridAutoFlow = autoFlow;
       return this;
     }
 
@@ -1111,6 +1205,10 @@ public final class TwLayout {
         } else {
           fg.cols(gridCols2);
         }
+        if (gridRows2 > 0) {
+          fg.rows(gridRows2);
+        }
+        fg.autoFlow(gridAutoFlow);
         if (gap > 0) fg.gap(gap);
         if (hasPad) fg.padding(padding);
       } else {
