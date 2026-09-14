@@ -416,6 +416,12 @@ public final class TwGridPane extends Pane {
     return this;
   }
 
+  public TwGridPane rows(int r) {
+    this.rows = r;
+    requestLayout();
+    return this;
+  }
+
   /** Sets padding after construction (analogous to {@code .p-N}). Triggers layout pass. */
   public TwGridPane padding(double px) {
     this.padding = new Insets(px);

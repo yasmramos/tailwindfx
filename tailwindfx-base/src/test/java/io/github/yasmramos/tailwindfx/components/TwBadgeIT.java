@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.testfx.framework.junit5.ApplicationTest;
 
 /** Unit tests for TwBadge component. */
-public class TwBadgeTest extends ApplicationTest {
+public class TwBadgeIT extends ApplicationTest {
 
   @Override
   public void start(javafx.stage.Stage stage) {

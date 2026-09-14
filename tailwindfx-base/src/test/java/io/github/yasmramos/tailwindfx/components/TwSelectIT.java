@@ -10,7 +10,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 
 /** Unit tests for TwSelect component. */
 @ExtendWith(ApplicationExtension.class)
-public class TwSelectTest {
+public class TwSelectIT {
 
   @Test
   public void testChoiceBoxCreation() {

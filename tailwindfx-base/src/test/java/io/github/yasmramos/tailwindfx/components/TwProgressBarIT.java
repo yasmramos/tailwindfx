@@ -8,7 +8,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 
 /** Unit tests for TwProgressBar component. */
 @ExtendWith(ApplicationExtension.class)
-public class TwProgressBarTest {
+public class TwProgressBarIT {
 
   @Test
   public void testProgressBarCreation() {

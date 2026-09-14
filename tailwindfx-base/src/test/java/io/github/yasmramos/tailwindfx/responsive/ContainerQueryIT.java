@@ -13,7 +13,7 @@ import org.testfx.framework.junit5.Start;
 import org.testfx.framework.junit5.Stop;
 
 /** Tests for {@link ContainerQuery} — container-based responsive utilities. */
-public class ContainerQueryTest extends ApplicationTest {
+public class ContainerQueryIT extends ApplicationTest {
 
   private Label testLabel;
   private Pane container;
