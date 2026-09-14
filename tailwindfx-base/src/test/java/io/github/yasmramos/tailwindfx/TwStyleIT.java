@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.testfx.framework.junit5.ApplicationTest;
 
 /** Unit tests for TwStyle facade class. */
-public class TwStyleTest extends ApplicationTest {
+public class TwStyleIT extends ApplicationTest {
 
   private Label labelNode;
   private HBox hboxParent;

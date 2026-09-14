@@ -9,7 +9,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 
 /** Unit tests for TwSpinner component. */
 @ExtendWith(ApplicationExtension.class)
-public class TwSpinnerTest {
+public class TwSpinnerIT {
 
   @Test
   public void testCreateDefaultSpinner() {

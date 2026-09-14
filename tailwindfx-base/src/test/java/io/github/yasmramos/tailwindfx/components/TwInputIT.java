@@ -8,7 +8,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 
 /** Unit tests for TwInput component. */
 @ExtendWith(ApplicationExtension.class)
-public class TwInputTest {
+public class TwInputIT {
 
   @Test
   public void testDefaultConstructor() {

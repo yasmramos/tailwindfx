@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.testfx.framework.junit5.ApplicationTest;
 
 /** Unit tests for TwCard component. */
-public class TwCardTest extends ApplicationTest {
+public class TwCardIT extends ApplicationTest {
 
   @Override
   public void start(javafx.stage.Stage stage) {

@@ -20,7 +20,7 @@ import org.testfx.framework.junit5.ApplicationTest;
  * <p>Each test runs on the FX thread via {@code interact()} and blocks until done.
  */
 @DisplayName("TwAnimation Tests")
-public class TwAnimationTest extends ApplicationTest {
+public class TwAnimationIT extends ApplicationTest {
 
   private static final double DELTA = 0.5;
 

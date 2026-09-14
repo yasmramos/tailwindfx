@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.testfx.framework.junit5.ApplicationTest;
 
 /** Unit tests for TwAvatar component. */
-public class TwAvatarTest extends ApplicationTest {
+public class TwAvatarIT extends ApplicationTest {
 
   @Override
   public void start(javafx.stage.Stage stage) {

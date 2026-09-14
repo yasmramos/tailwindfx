@@ -80,16 +80,24 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.3.0</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Automatic-Module-Name>io.github.yasmramos.tailwindfx</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
             </plugin>
 
-            <!-- Maven Surefire Plugin for TestFX -->
+            <!-- Maven Surefire Plugin for unit tests only -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${surefire.version}</version>
                 <configuration>
-                    <argLine>${jacoco.argLine} --add-opens javafx.graphics/com.sun.javafx.application=ALL-UNNAMED</argLine>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
+                    <argLine>@{argLine} --add-opens javafx.controls/javafx.scene.control=ALL-UNNAMED --add-opens javafx.graphics/javafx.scene=ALL-UNNAMED</argLine>
                     <systemPropertyVariables>
                         <testfx.robot>glass</testfx.robot>
                         <testfx.headless>true</testfx.headless>
@@ -102,40 +110,51 @@
                 </configuration>
             </plugin>
 
-            <!-- JaCoCo Plugin for Code Coverage -->
+            <!-- Maven Failsafe Plugin for integration/UI tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <includes>
+                        <include>**/*IT.java</include>
+                    </includes>
+                    <systemPropertyVariables>
+                        <testfx.robot>glass</testfx.robot>
+                        <testfx.headless>true</testfx.headless>
+                        <monocle.platform>GTK</monocle.platform>
+                        <prism.order>sw</prism.order>
+                        <prism.text>t2k</prism.text>
+                        <java.awt.headless>true</java.awt.headless>
+                        <glass.platform>com.sun.glass.ui.monocle.MonoclePlatform</glass.platform>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+            <!-- JaCoCo Plugin for Code Coverage - inherited from parent -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>
                 <executions>
-                    <execution>
-                        <id>prepare-agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                        <configuration>
-                            <destFile>${project.build.directory}/jacoco.exec</destFile>
-                            <propertyName>jacoco.argLine</propertyName>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                        <configuration>
-                            <dataFile>${project.build.directory}/jacoco.exec</dataFile>
-                            <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>jacoco-check</id>
                         <goals>
                             <goal>check</goal>
                         </goals>
                         <configuration>
-                            <dataFile>${project.build.directory}/jacoco.exec</dataFile>
                             <rules>
                                 <rule>
                                     <element>PACKAGE</element>
@@ -158,35 +177,10 @@
                 </executions>
             </plugin>
 
-            <!-- Spotless Plugin for Code Formatting -->
+            <!-- Spotless Plugin for Code Formatting - inherited from parent -->
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
-                <version>${spotless.version}</version>
-                <configuration>
-                    <java>
-                        <includes>
-                            <include>src/main/java/**/*.java</include>
-                            <include>src/test/java/**/*.java</include>
-                        </includes>
-                        <googleJavaFormat>
-                            <version>1.18.1</version>
-                            <style>GOOGLE</style>
-                        </googleJavaFormat>
-                        <removeUnusedImports/>
-                        <trimTrailingWhitespace/>
-                        <endWithNewline/>
-                    </java>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>spotless-check</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

@@ -18,7 +18,7 @@ import org.testfx.framework.junit5.ApplicationTest;
 
 /** Unit tests for {@link TwDataTable} — builder, sorting, filtering, pagination, search. */
 @DisplayName("TwDataTable Component Tests")
-public class TwDataTableTest extends ApplicationTest {
+public class TwDataTableIT extends ApplicationTest {
 
   record Person(String name, String email, int age) {}
 

@@ -9,7 +9,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 
 /** Unit tests for TwButton component. */
 @ExtendWith(ApplicationExtension.class)
-public class TwButtonTest {
+public class TwButtonIT {
 
   @Test
   public void testPrimaryButtonCreation() {

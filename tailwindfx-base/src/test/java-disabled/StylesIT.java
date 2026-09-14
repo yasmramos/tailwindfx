@@ -316,6 +316,14 @@ class StylesTest extends ApplicationTest {
   }
 
   @Test
+  @DisplayName("translateZ sets z translation")
+  void testTranslateZ() {
+    Region region = new Pane();
+
+    Styles.translateZ(region, 50);
+
+    assertEquals(50.0, region.getTranslateZ());
+  }
 
   // ==================== EFFECTS TESTS ====================
 
@@ -441,7 +449,6 @@ class StylesTest extends ApplicationTest {
     assertFalse(imageView.isPreserveRatio());
   }
 
-  @Test
   // ==================== CHAINING TESTS ====================
 
   @Test

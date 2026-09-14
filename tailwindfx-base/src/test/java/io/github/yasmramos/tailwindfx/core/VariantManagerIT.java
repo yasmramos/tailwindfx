@@ -14,7 +14,7 @@ import org.testfx.framework.junit5.ApplicationTest;
 
 /** Unit tests for VariantManager. */
 @ExtendWith(org.mockito.junit.jupiter.MockitoExtension.class)
-public class VariantManagerTest extends ApplicationTest {
+public class VariantManagerIT extends ApplicationTest {
 
   private Button testButton;
   private CheckBox testCheckBox;

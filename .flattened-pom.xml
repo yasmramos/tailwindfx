@@ -45,9 +45,11 @@
     <surefire.version>3.2.5</surefire.version>
     <revision>0.1.1</revision>
     <testfx.version>4.0.17</testfx.version>
+    <failsafe.version>3.2.5</failsafe.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <javafx.version>17</javafx.version>
     <junit.version>5.10.2</junit.version>
+    <maven-plugin-tools.version>3.13.1</maven-plugin-tools.version>
     <gpg.plugin.version>3.1.0</gpg.plugin.version>
     <javadoc.plugin.version>3.6.3</javadoc.plugin.version>
   </properties>
@@ -104,11 +106,14 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>3.4.1</version>
+        </plugin>
+        <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.11.0</version>
           <configuration>
-            <source>17</source>
-            <target>17</target>
+            <release>17</release>
           </configuration>
         </plugin>
         <plugin>
@@ -133,6 +138,10 @@
           <version>${surefire.version}</version>
         </plugin>
         <plugin>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>${failsafe.version}</version>
+        </plugin>
+        <plugin>
           <groupId>com.diffplug.spotless</groupId>
           <artifactId>spotless-maven-plugin</artifactId>
           <version>${spotless.version}</version>
@@ -147,9 +156,47 @@
           <artifactId>javafx-maven-plugin</artifactId>
           <version>0.0.8</version>
         </plugin>
+        <plugin>
+          <artifactId>maven-plugin-plugin</artifactId>
+          <version>${maven-plugin-tools.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.3.0</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.4.1</version>
+        <executions>
+          <execution>
+            <id>enforce-versions</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>17</version>
+                </requireJavaVersion>
+                <requireMavenVersion>
+                  <version>3.8.7</version>
+                </requireMavenVersion>
+                <bannedDependencies>
+                  <excludes>
+                    <exclude>javafx.*</exclude>
+                    <exclude>org.openjfx:*:(,17.0.0)</exclude>
+                  </excludes>
+                  <message>Use org.openjfx:javafx-*:17 for JavaFX dependencies</message>
+                </bannedDependencies>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
@@ -208,7 +255,7 @@
         <version>${spotless.version}</version>
         <executions>
           <execution>
-            <phase>compile</phase>
+            <phase>verify</phase>
             <goals>
               <goal>check</goal>
             </goals>
@@ -299,6 +346,10 @@
     <profile>
       <id>snapshot</id>
       <distributionManagement>
+        <repository>
+          <id>central</id>
+          <url>https://central.sonatype.com/repository/maven-releases/</url>
+        </repository>
         <snapshotRepository>
           <id>central</id>
           <url>https://central.sonatype.com/repository/maven-snapshots/</url>

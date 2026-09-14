@@ -12,7 +12,7 @@ import org.testfx.framework.junit5.ApplicationTest;
 
 /** Tests for layout-dependent styles (margins, gaps, flex). */
 @DisplayName("Layout-Dependent Style Tests")
-public class TwStyleLayoutTest extends ApplicationTest {
+public class TwStyleLayoutIT extends ApplicationTest {
 
   private HBox hbox;
   private VBox vbox;

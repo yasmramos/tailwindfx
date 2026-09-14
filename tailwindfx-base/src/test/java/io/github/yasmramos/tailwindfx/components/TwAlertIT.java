@@ -8,7 +8,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 
 /** Unit tests for TwAlert component. */
 @ExtendWith(ApplicationExtension.class)
-public class TwAlertTest {
+public class TwAlertIT {
 
   @Test
   public void testDefaultConstructor() {

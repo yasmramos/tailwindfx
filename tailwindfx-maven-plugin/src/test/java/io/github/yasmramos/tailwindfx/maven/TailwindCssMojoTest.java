@@ -3,6 +3,7 @@ package io.github.yasmramos.tailwindfx.maven;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -56,6 +57,139 @@ public class TailwindCssMojoTest {
 
     assertTrue(outputDir.exists(), "El directorio de salida debería crearse");
     assertTrue(outputDir.isDirectory(), "Debería ser un directorio");
+  }
+
+  @Test
+  public void testMojoWithCustomOutputFileName() throws Exception {
+    TailwindCssMojo mojo = new TailwindCssMojo();
+
+    File sourceDir = tempDir.resolve("src").toFile();
+    sourceDir.mkdirs();
+    File outputDir = tempDir.resolve("output").toFile();
+
+    java.lang.reflect.Field sourceField = TailwindCssMojo.class.getDeclaredField("sourceDirectory");
+    sourceField.setAccessible(true);
+    sourceField.set(mojo, sourceDir);
+
+    java.lang.reflect.Field outputField = TailwindCssMojo.class.getDeclaredField("outputDirectory");
+    outputField.setAccessible(true);
+    outputField.set(mojo, outputDir);
+
+    java.lang.reflect.Field fileNameField =
+        TailwindCssMojo.class.getDeclaredField("outputFileName");
+    fileNameField.setAccessible(true);
+    fileNameField.set(mojo, "custom-styles.css");
+
+    mojo.execute();
+
+    File cssFile = new File(outputDir, "custom-styles.css");
+    assertTrue(cssFile.exists(), "Should create CSS file with custom name");
+  }
+
+  @Test
+  public void testMojoWithIncludeBaseTrue() throws Exception {
+    TailwindCssMojo mojo = new TailwindCssMojo();
+
+    File sourceDir = tempDir.resolve("src").toFile();
+    sourceDir.mkdirs();
+
+    // Create a test file with base classes
+    Path testFile = sourceDir.toPath().resolve("Test.java");
+    Files.writeString(
+        testFile,
+        "package test;\n"
+            + "public class Test {\n"
+            + "  String s = \"p-4 m-2 bg-blue-500\";\n"
+            + "}");
+
+    File outputDir = tempDir.resolve("output").toFile();
+
+    java.lang.reflect.Field sourceField = TailwindCssMojo.class.getDeclaredField("sourceDirectory");
+    sourceField.setAccessible(true);
+    sourceField.set(mojo, sourceDir);
+
+    java.lang.reflect.Field outputField = TailwindCssMojo.class.getDeclaredField("outputDirectory");
+    outputField.setAccessible(true);
+    outputField.set(mojo, outputDir);
+
+    java.lang.reflect.Field includeBaseField =
+        TailwindCssMojo.class.getDeclaredField("includeBase");
+    includeBaseField.setAccessible(true);
+    includeBaseField.set(mojo, true);
+
+    mojo.execute();
+
+    File cssFile = new File(outputDir, "tailwindfx-generated.css");
+    assertTrue(cssFile.exists(), "Should create CSS file");
+    String content = Files.readString(cssFile.toPath());
+    assertTrue(content.length() > 0, "Should contain generated CSS when includeBase is true");
+  }
+
+  @Test
+  public void testMojoWithIncludeColors() throws Exception {
+    TailwindCssMojo mojo = new TailwindCssMojo();
+
+    File sourceDir = tempDir.resolve("src").toFile();
+    sourceDir.mkdirs();
+    File outputDir = tempDir.resolve("output").toFile();
+
+    java.lang.reflect.Field sourceField = TailwindCssMojo.class.getDeclaredField("sourceDirectory");
+    sourceField.setAccessible(true);
+    sourceField.set(mojo, sourceDir);
+
+    java.lang.reflect.Field outputField = TailwindCssMojo.class.getDeclaredField("outputDirectory");
+    outputField.setAccessible(true);
+    outputField.set(mojo, outputDir);
+
+    java.lang.reflect.Field includeColorsField =
+        TailwindCssMojo.class.getDeclaredField("includeColors");
+    includeColorsField.setAccessible(true);
+    includeColorsField.set(mojo, true);
+
+    mojo.execute();
+
+    File cssFile = new File(outputDir, "tailwindfx-generated.css");
+    assertTrue(cssFile.exists(), "Should create CSS file");
+    String content = Files.readString(cssFile.toPath());
+    assertTrue(
+        content.contains("-color") || content.contains("fill") || content.contains("background"),
+        "Should include color definitions when includeColors is true");
+  }
+
+  @Test
+  public void testMojoWithMinifyEnabled() throws Exception {
+    TailwindCssMojo mojo = new TailwindCssMojo();
+
+    File sourceDir = tempDir.resolve("src").toFile();
+    sourceDir.mkdirs();
+
+    // Create a test file with classes to generate CSS
+    Path testFile = sourceDir.toPath().resolve("Test.java");
+    Files.writeString(
+        testFile,
+        "package test;\n" + "public class Test {\n" + "  String s = \"p-4 m-2\";\n" + "}");
+
+    File outputDir = tempDir.resolve("output").toFile();
+
+    java.lang.reflect.Field sourceField = TailwindCssMojo.class.getDeclaredField("sourceDirectory");
+    sourceField.setAccessible(true);
+    sourceField.set(mojo, sourceDir);
+
+    java.lang.reflect.Field outputField = TailwindCssMojo.class.getDeclaredField("outputDirectory");
+    outputField.setAccessible(true);
+    outputField.set(mojo, outputDir);
+
+    java.lang.reflect.Field minifyField = TailwindCssMojo.class.getDeclaredField("minify");
+    minifyField.setAccessible(true);
+    minifyField.set(mojo, true);
+
+    mojo.execute();
+
+    File cssFile = new File(outputDir, "tailwindfx-generated.css");
+    assertTrue(cssFile.exists(), "Should create CSS file");
+    String content = Files.readString(cssFile.toPath());
+    // Minified CSS should have content (non-empty)
+    assertTrue(content.length() > 0, "Should generate minified CSS");
   }
 
   @Test
