@@ -94,7 +94,7 @@ public final class TwStyle {
       new HashSet<>(
           Arrays.asList(
               "m-", "mx-", "my-", "mt-", "mr-", "mb-", "ml-", "gap-", "gap-x-", "gap-y-", "flex-",
-              "grow", "shrink"));
+              "grow", "shrink", "justify-", "items-", "content-"));
 
   private static final Set<String> RESPONSIVE_PREFIXES =
       new HashSet<>(Arrays.asList("sm:", "md:", "lg:", "xl:", "2xl:"));

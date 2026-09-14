@@ -165,10 +165,9 @@ public final class TwLayout {
     } else if (token.equals("flex-col")) {
       helper.col().build();
     } else if (token.equals("flex-row-reverse")) {
-      // JavaFX doesn't support reverse direction natively; would require manual reordering
-      helper.row().build();
+      helper.rowReverse().build();
     } else if (token.equals("flex-col-reverse")) {
-      helper.col().build();
+      helper.colReverse().build();
     }
     // Wrap
     else if (token.equals("flex-wrap")) {
@@ -204,15 +203,17 @@ public final class TwLayout {
     }
     // Align content (multi-line)
     else if (token.equals("content-start")) {
-      helper.alignItems(TwFlexPane.Align.START).build();
+      helper.alignContent(TwFlexPane.AlignContent.START).build();
     } else if (token.equals("content-end")) {
-      helper.alignItems(TwFlexPane.Align.END).build();
+      helper.alignContent(TwFlexPane.AlignContent.END).build();
     } else if (token.equals("content-center")) {
-      helper.alignItems(TwFlexPane.Align.CENTER).build();
+      helper.alignContent(TwFlexPane.AlignContent.CENTER).build();
     } else if (token.equals("content-between")) {
-      helper.alignItems(TwFlexPane.Align.START).build();
+      helper.alignContent(TwFlexPane.AlignContent.BETWEEN).build();
     } else if (token.equals("content-around")) {
-      helper.alignItems(TwFlexPane.Align.START).build();
+      helper.alignContent(TwFlexPane.AlignContent.AROUND).build();
+    } else if (token.equals("content-stretch")) {
+      helper.alignContent(TwFlexPane.AlignContent.STRETCH).build();
     }
   }
 
@@ -367,7 +368,9 @@ public final class TwLayout {
     ANCHOR,
     TILE,
     FLEX,
-    FLEX_GRID
+    FLEX_GRID,
+    FLEX_ROW_REVERSE,
+    FLEX_COL_REVERSE
   }
 
   /** Layout builder with fluent API. */
@@ -409,6 +412,16 @@ public final class TwLayout {
 
     public Builder col() {
       type = LayoutType.COL;
+      return this;
+    }
+
+    public Builder rowReverse() {
+      type = LayoutType.FLEX_ROW_REVERSE;
+      return this;
+    }
+
+    public Builder colReverse() {
+      type = LayoutType.FLEX_COL_REVERSE;
       return this;
     }
 
@@ -1077,7 +1090,16 @@ public final class TwLayout {
         if (hasPad) ap.setPadding(padding);
         anchors.forEach((n, cc) -> applyAnchor(n, cc));
       } else if (p instanceof TwFlexPane fp) {
-        fp.setDirection(TwFlexPane.Direction.ROW);
+        // Set direction based on LayoutType (supports reverse directions)
+        if (type == LayoutType.FLEX_ROW_REVERSE) {
+          fp.setDirection(TwFlexPane.Direction.ROW_REVERSE);
+        } else if (type == LayoutType.FLEX_COL_REVERSE) {
+          fp.setDirection(TwFlexPane.Direction.COL_REVERSE);
+        } else if (type == LayoutType.COL || type == LayoutType.FLOW_COL) {
+          fp.setDirection(TwFlexPane.Direction.COL);
+        } else {
+          fp.setDirection(TwFlexPane.Direction.ROW);
+        }
         fp.setJustify(flexJustify);
         fp.setAlign(flexAlign);
         fp.setWrap(flexWrap);
