@@ -93,9 +93,27 @@ public final class TwStyle {
   private static final Set<String> LAYOUT_DEPENDENT_PREFIXES =
       new HashSet<>(
           Arrays.asList(
-              "m-", "mx-", "my-", "mt-", "mr-", "mb-", "ml-", "gap-", "gap-x-", "gap-y-", "flex-",
-              "grow", "shrink", "justify-", "items-", "content-", "grid-cols-", "grid-rows-",
-              "grid-flow-", "col-span-", "row-span-"));
+              "m-",
+              "mx-",
+              "my-",
+              "mt-",
+              "mr-",
+              "mb-",
+              "ml-",
+              "gap-",
+              "gap-x-",
+              "gap-y-",
+              "flex-",
+              "grow",
+              "shrink",
+              "justify-",
+              "items-",
+              "content-",
+              "grid-cols-",
+              "grid-rows-",
+              "grid-flow-",
+              "col-span-",
+              "row-span-"));
 
   private static final Set<String> RESPONSIVE_PREFIXES =
       new HashSet<>(Arrays.asList("sm:", "md:", "lg:", "xl:", "2xl:"));
@@ -555,9 +573,7 @@ public final class TwStyle {
     }
   }
 
-  /**
-   * Applies grid container styles (grid-cols-*, grid-rows-*, grid-flow-*) to a Pane node.
-   */
+  /** Applies grid container styles (grid-cols-*, grid-rows-*, grid-flow-*) to a Pane node. */
   private static void applyGridContainerStyle(javafx.scene.layout.Pane pane, String token) {
     // Only applies if the pane is a TwGridPane
     if (!(pane instanceof io.github.yasmramos.tailwindfx.layout.TwGridPane gridPane)) {
@@ -581,9 +597,7 @@ public final class TwStyle {
     }
   }
 
-  /**
-   * Applies grid item styles (col-span-*, row-span-*) to a node via its parent TwGridPane.
-   */
+  /** Applies grid item styles (col-span-*, row-span-*) to a node via its parent TwGridPane. */
   private static void applyGridItemStyle(
       Node node, io.github.yasmramos.tailwindfx.layout.TwGridPane gridPane, String token) {
     if (token.startsWith("col-span-")) {

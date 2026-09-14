@@ -452,6 +452,7 @@ public final class TwLayout {
 
     private TwFlexPane.Justify flexJustify = TwFlexPane.Justify.START;
     private TwFlexPane.Align flexAlign = TwFlexPane.Align.START;
+    private TwFlexPane.AlignContent flexAlignContent = TwFlexPane.AlignContent.START;
     private boolean flexWrap = false;
     private String[] gridAreas = null;
     private int gridCols2 = 3;
@@ -562,6 +563,17 @@ public final class TwLayout {
      */
     public Builder flexGrid() {
       type = LayoutType.FLEX_GRID;
+      return this;
+    }
+
+    /**
+     * Sets the align-content for a flex container (multi-line alignment). Only applies when type is
+     * {@link LayoutType#FLEX}.
+     *
+     * @param alignContent the align-content value
+     */
+    public Builder alignContent(TwFlexPane.AlignContent alignContent) {
+      this.flexAlignContent = alignContent;
       return this;
     }
 
@@ -1039,6 +1051,7 @@ public final class TwLayout {
         case ANCHOR -> !(source instanceof AnchorPane);
         case FLEX -> !(source instanceof TwFlexPane);
         case FLEX_GRID -> !(source instanceof TwGridPane);
+        case FLEX_ROW_REVERSE, FLEX_COL_REVERSE -> !(source instanceof TwFlexPane);
       };
     }
 
@@ -1056,6 +1069,7 @@ public final class TwLayout {
             case TILE -> new TilePane();
             case FLEX -> new TwFlexPane();
             case FLEX_GRID -> TwGridPane.create().build();
+            case FLEX_ROW_REVERSE, FLEX_COL_REVERSE -> new TwFlexPane();
           };
       restore(target, snaps);
       return target;
@@ -1196,6 +1210,7 @@ public final class TwLayout {
         }
         fp.setJustify(flexJustify);
         fp.setAlign(flexAlign);
+        fp.setAlignContent(flexAlignContent);
         fp.setWrap(flexWrap);
         fp.gap(gap);
         if (hasPad) fp.padding(padding);
