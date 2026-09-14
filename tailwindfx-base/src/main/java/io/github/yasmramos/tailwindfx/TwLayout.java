@@ -78,29 +78,141 @@ public final class TwLayout {
   /**
    * Apply layout classes (flex, grid, gap) with automatic container migration if needed.
    *
+   * <p>Behavior follows Tailwind CSS:
+   *
+   * <ul>
+   *   <li>Display classes ({@code flex}, {@code inline-flex}, {@code grid}) convert the NODE itself
+   *       into a container (if it's a Pane), not its parent.
+   *   <li>Container utilities ({@code flex-row}, {@code flex-col}, {@code flex-wrap}, {@code
+   *       justify-*}, {@code items-*}, {@code content-*}, {@code gap-*}) configure that container.
+   *   <li>Item utilities ({@code flex-1}, {@code grow}, {@code shrink}, {@code flex-none}, {@code
+   *       flex-auto}, {@code basis-*}, {@code order-*}, {@code self-*}) are read from the parent
+   *       container and applied to child nodes.
+   * </ul>
+   *
    * @param node the node to apply layout to
-   * @param tokens the layout tokens (flex, grid, gap-*, etc.)
+   * @param tokens the layout tokens (flex, inline-flex, grid, flex-row, justify-*, etc.)
    */
   public static void apply(Node node, String... tokens) {
     if (tokens == null || tokens.length == 0) return;
 
-    Pane parent = getEffectiveParent(node);
-    if (parent == null) return;
-
-    Builder helper = of(parent);
-
     for (String token : tokens) {
       if (token == null || token.isBlank()) continue;
 
-      if (token.equals("flex")) {
-        helper.flex().build();
+      // Display classes: apply to the NODE itself (if it's a Pane)
+      if (token.equals("flex") || token.equals("inline-flex")) {
+        if (node instanceof Pane) {
+          Builder helper = of((Pane) node);
+          helper.flex().build();
+          // Note: inline-flex behavior is approximated; JavaFX doesn't have true inline-flex
+        }
       } else if (token.equals("grid")) {
-        helper.flexGrid().build();
-      } else if (token.startsWith("gap-")) {
-        applyGap(helper, token);
-      } else if (token.startsWith("flex-") || token.equals("grow") || token.equals("shrink")) {
+        if (node instanceof Pane) {
+          Builder helper = of((Pane) node);
+          helper.flexGrid().build();
+        }
+      }
+      // Container utilities: apply to the NODE itself (if it's a Pane acting as container)
+      else if (token.startsWith("gap-")) {
+        if (node instanceof Pane) {
+          Builder helper = of((Pane) node);
+          applyGap(helper, token);
+        }
+      } else if (isFlexContainerToken(token)) {
+        if (node instanceof Pane) {
+          Builder helper = of((Pane) node);
+          applyFlexContainer(helper, token);
+        }
+      }
+      // Item utilities: apply to the node via its parent container
+      else if (isFlexItemToken(token)) {
         applyFlexItem(node, token);
       }
+    }
+  }
+
+  /** Checks if token is a flex container utility (direction, wrap, justification, alignment). */
+  private static boolean isFlexContainerToken(String token) {
+    return token.equals("flex-row")
+        || token.equals("flex-col")
+        || token.equals("flex-row-reverse")
+        || token.equals("flex-col-reverse")
+        || token.equals("flex-wrap")
+        || token.equals("flex-nowrap")
+        || token.startsWith("justify-")
+        || token.startsWith("items-")
+        || token.startsWith("content-");
+  }
+
+  /** Checks if token is a flex item utility (grow, shrink, basis, order, self). */
+  private static boolean isFlexItemToken(String token) {
+    return token.equals("grow")
+        || token.equals("shrink")
+        || token.equals("flex-1")
+        || token.equals("flex-none")
+        || token.equals("flex-auto")
+        || token.startsWith("flex-[")
+        || token.startsWith("basis-")
+        || token.startsWith("order-")
+        || token.startsWith("self-");
+  }
+
+  /** Applies flex container configuration (direction, wrap, justify, align, content). */
+  private static void applyFlexContainer(Builder helper, String token) {
+    // Direction
+    if (token.equals("flex-row")) {
+      helper.row().build();
+    } else if (token.equals("flex-col")) {
+      helper.col().build();
+    } else if (token.equals("flex-row-reverse")) {
+      // JavaFX doesn't support reverse direction natively; would require manual reordering
+      helper.row().build();
+    } else if (token.equals("flex-col-reverse")) {
+      helper.col().build();
+    }
+    // Wrap
+    else if (token.equals("flex-wrap")) {
+      helper.wrap(true).build();
+    } else if (token.equals("flex-nowrap")) {
+      helper.wrap(false).build();
+    }
+    // Justify content (main axis)
+    else if (token.equals("justify-start")) {
+      helper.justify(TwFlexPane.Justify.START).build();
+    } else if (token.equals("justify-end")) {
+      helper.justify(TwFlexPane.Justify.END).build();
+    } else if (token.equals("justify-center")) {
+      helper.justify(TwFlexPane.Justify.CENTER).build();
+    } else if (token.equals("justify-between")) {
+      helper.justify(TwFlexPane.Justify.BETWEEN).build();
+    } else if (token.equals("justify-around")) {
+      helper.justify(TwFlexPane.Justify.AROUND).build();
+    } else if (token.equals("justify-evenly")) {
+      helper.justify(TwFlexPane.Justify.EVENLY).build();
+    }
+    // Align items (cross axis)
+    else if (token.equals("items-start")) {
+      helper.alignItems(TwFlexPane.Align.START).build();
+    } else if (token.equals("items-end")) {
+      helper.alignItems(TwFlexPane.Align.END).build();
+    } else if (token.equals("items-center")) {
+      helper.alignItems(TwFlexPane.Align.CENTER).build();
+    } else if (token.equals("items-baseline")) {
+      helper.alignItems(TwFlexPane.Align.BASELINE).build();
+    } else if (token.equals("items-stretch")) {
+      helper.alignItems(TwFlexPane.Align.STRETCH).build();
+    }
+    // Align content (multi-line)
+    else if (token.equals("content-start")) {
+      helper.alignItems(TwFlexPane.Align.START).build();
+    } else if (token.equals("content-end")) {
+      helper.alignItems(TwFlexPane.Align.END).build();
+    } else if (token.equals("content-center")) {
+      helper.alignItems(TwFlexPane.Align.CENTER).build();
+    } else if (token.equals("content-between")) {
+      helper.alignItems(TwFlexPane.Align.START).build();
+    } else if (token.equals("content-around")) {
+      helper.alignItems(TwFlexPane.Align.START).build();
     }
   }
 

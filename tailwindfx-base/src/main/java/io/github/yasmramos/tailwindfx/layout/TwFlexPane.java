@@ -96,7 +96,8 @@ public class TwFlexPane extends Pane {
     START,
     CENTER,
     END,
-    STRETCH
+    STRETCH,
+    BASELINE
   }
 
   /**
@@ -1098,6 +1099,7 @@ public class TwFlexPane extends Pane {
       case START, STRETCH -> origin;
       case CENTER -> origin + (axisW - childW) / 2;
       case END -> origin + (axisW - childW);
+      case BASELINE -> origin; // baseline alignment treated as START for simplicity
     };
   }
 
@@ -1110,6 +1112,7 @@ public class TwFlexPane extends Pane {
       case START, STRETCH -> origin;
       case CENTER -> origin + (axisH - childH) / 2;
       case END -> origin + (axisH - childH);
+      case BASELINE -> origin; // baseline alignment treated as START for simplicity
     };
   }
 

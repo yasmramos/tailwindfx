@@ -692,7 +692,8 @@ public final class TwStyle {
   private static boolean requiresMigration(String token) {
     // Remove variants like hover:, md:, etc.
     String baseToken = token.contains(":") ? token.substring(token.indexOf(':') + 1) : token;
-    return baseToken.equals("flex") || baseToken.equals("grid");
+    // Migration is needed for display classes that convert the node into a container
+    return baseToken.equals("flex") || baseToken.equals("inline-flex") || baseToken.equals("grid");
   }
 
   /** Applies utility classes WITHOUT conflict resolution. */

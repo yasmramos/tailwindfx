@@ -165,6 +165,8 @@ public class TwI18nTest {
 
   @Test
   public void testGet_withFallback() {
+    // Set a non-existent bundle to force fallback behavior
+    TwI18n.setBaseName("nonexistent.bundle");
     String result = TwI18n.get("nonexistent.key", "fallback value");
     assertEquals("fallback value", result);
   }
@@ -230,7 +232,8 @@ public class TwI18nTest {
 
   @Test
   public void testBind_node_nullNode() {
-    assertThrows(IllegalArgumentException.class, () -> TwI18n.bind(null, "key"));
+    assertThrows(
+        IllegalArgumentException.class, () -> TwI18n.bind((javafx.scene.Node) null, "key"));
   }
 
   @Test
