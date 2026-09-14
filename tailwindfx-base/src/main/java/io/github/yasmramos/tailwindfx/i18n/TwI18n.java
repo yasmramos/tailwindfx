@@ -189,7 +189,12 @@ public final class TwI18n {
     if (bundle == null) return fallback;
 
     try {
-      return bundle.getString(key);
+      String value = bundle.getString(key);
+      // If the bundle returns the key itself (empty bundle fallback), use our fallback instead
+      if (key.equals(value)) {
+        return fallback;
+      }
+      return value;
     } catch (MissingResourceException e) {
       return fallback;
     }
