@@ -72,7 +72,9 @@ public class TwFlexPane extends Pane {
   /** Main axis direction (analogous to {@code flex-direction}). */
   public enum Direction {
     ROW,
-    COL
+    ROW_REVERSE,
+    COL,
+    COL_REVERSE
   }
 
   /**
@@ -192,6 +194,20 @@ public class TwFlexPane extends Pane {
   public static TwFlexPane col() {
     TwFlexPane f = new TwFlexPane();
     f.setDirection(Direction.COL);
+    return f;
+  }
+
+  /** Creates a row-reverse-direction TwFlexPane (flex-row-reverse). */
+  public static TwFlexPane rowReverse() {
+    TwFlexPane f = new TwFlexPane();
+    f.setDirection(Direction.ROW_REVERSE);
+    return f;
+  }
+
+  /** Creates a column-reverse-direction TwFlexPane (flex-col-reverse). */
+  public static TwFlexPane colReverse() {
+    TwFlexPane f = new TwFlexPane();
+    f.setDirection(Direction.COL_REVERSE);
     return f;
   }
 
@@ -613,7 +629,14 @@ public class TwFlexPane extends Pane {
     double ox = padding.getLeft();
     double oy = padding.getTop();
 
-    if (direction == Direction.ROW) {
+    // Handle reverse directions by reversing the children list
+    boolean isReverse = (direction == Direction.ROW_REVERSE || direction == Direction.COL_REVERSE);
+    if (isReverse) {
+      children = new java.util.ArrayList<>(children);
+      java.util.Collections.reverse(children);
+    }
+
+    if (direction == Direction.ROW || direction == Direction.ROW_REVERSE) {
       layoutRow(children, containerW, containerH, ox, oy);
     } else {
       layoutCol(children, containerW, containerH, ox, oy);

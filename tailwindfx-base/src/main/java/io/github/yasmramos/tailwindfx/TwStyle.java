@@ -94,7 +94,8 @@ public final class TwStyle {
       new HashSet<>(
           Arrays.asList(
               "m-", "mx-", "my-", "mt-", "mr-", "mb-", "ml-", "gap-", "gap-x-", "gap-y-", "flex-",
-              "grow", "shrink"));
+              "grow", "shrink", "justify-", "items-", "content-", "grid-cols-", "grid-rows-",
+              "grid-flow-", "col-span-", "row-span-"));
 
   private static final Set<String> RESPONSIVE_PREFIXES =
       new HashSet<>(Arrays.asList("sm:", "md:", "lg:", "xl:", "2xl:"));
@@ -334,6 +335,18 @@ public final class TwStyle {
     } else if (token.startsWith("flex-") || token.equals("grow") || token.equals("shrink")) {
       // Delegate to Styles.java for flex handling
       applyFlexStyleViaStyles(node, parent, token);
+    } else if (token.startsWith("grid-cols-")
+        || token.startsWith("grid-rows-")
+        || token.startsWith("grid-flow-")) {
+      // Grid container styles: apply to the node itself if it's a Pane
+      if (node instanceof javafx.scene.layout.Pane pane) {
+        applyGridContainerStyle(pane, token);
+      }
+    } else if (token.startsWith("col-span-") || token.startsWith("row-span-")) {
+      // Grid item styles: apply via parent TwGridPane
+      if (parent instanceof io.github.yasmramos.tailwindfx.layout.TwGridPane gridPane) {
+        applyGridItemStyle(node, gridPane, token);
+      }
     }
   }
 
@@ -539,6 +552,46 @@ public final class TwStyle {
         grid.setHgap(px);
         grid.setVgap(px);
       }
+    }
+  }
+
+  /**
+   * Applies grid container styles (grid-cols-*, grid-rows-*, grid-flow-*) to a Pane node.
+   */
+  private static void applyGridContainerStyle(javafx.scene.layout.Pane pane, String token) {
+    // Only applies if the pane is a TwGridPane
+    if (!(pane instanceof io.github.yasmramos.tailwindfx.layout.TwGridPane gridPane)) {
+      return;
+    }
+
+    if (token.startsWith("grid-cols-")) {
+      int cols = parseTailwindValue(token);
+      gridPane.cols(cols);
+    } else if (token.startsWith("grid-rows-")) {
+      int rows = parseTailwindValue(token);
+      gridPane.rows(rows);
+    } else if (token.equals("grid-flow-row")) {
+      gridPane.autoFlow(io.github.yasmramos.tailwindfx.layout.TwGridPane.AutoFlow.ROW);
+    } else if (token.equals("grid-flow-col")) {
+      gridPane.autoFlow(io.github.yasmramos.tailwindfx.layout.TwGridPane.AutoFlow.COL);
+    } else if (token.equals("grid-flow-dense") || token.equals("grid-flow-row-dense")) {
+      gridPane.autoFlow(io.github.yasmramos.tailwindfx.layout.TwGridPane.AutoFlow.ROW_DENSE);
+    } else if (token.equals("grid-flow-col-dense")) {
+      gridPane.autoFlow(io.github.yasmramos.tailwindfx.layout.TwGridPane.AutoFlow.COL_DENSE);
+    }
+  }
+
+  /**
+   * Applies grid item styles (col-span-*, row-span-*) to a node via its parent TwGridPane.
+   */
+  private static void applyGridItemStyle(
+      Node node, io.github.yasmramos.tailwindfx.layout.TwGridPane gridPane, String token) {
+    if (token.startsWith("col-span-")) {
+      int span = parseTailwindValue(token);
+      io.github.yasmramos.tailwindfx.layout.TwGridPane.setColSpan(node, span);
+    } else if (token.startsWith("row-span-")) {
+      int span = parseTailwindValue(token);
+      io.github.yasmramos.tailwindfx.layout.TwGridPane.setRowSpan(node, span);
     }
   }
 
