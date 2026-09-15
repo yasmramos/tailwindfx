@@ -1,9 +1,12 @@
 package io.github.yasmramos.tailwindfx;
 
+import io.github.yasmramos.tailwindfx.core.JitCompiler;
 import io.github.yasmramos.tailwindfx.core.Preconditions;
+import io.github.yasmramos.tailwindfx.core.StyleCache;
 import io.github.yasmramos.tailwindfx.core.TokenParser;
 import io.github.yasmramos.tailwindfx.core.TokenRegistry;
 import io.github.yasmramos.tailwindfx.core.UtilityConflictResolver;
+import io.github.yasmramos.tailwindfx.core.VariantManager;
 import io.github.yasmramos.tailwindfx.effect.EffectApplier;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
 import io.github.yasmramos.tailwindfx.style.LayoutApplier;
@@ -12,8 +15,8 @@ import io.github.yasmramos.tailwindfx.style.StylePerf;
 import io.github.yasmramos.tailwindfx.style.Styles;
 import io.github.yasmramos.tailwindfx.style.StylesheetApplier;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -34,17 +37,39 @@ import javafx.scene.layout.VBox;
  * TwStyle.remove(node, "old-class");
  * TwStyle.toggle(node, "active");
  * </pre>
+ *
+ * <h2>Application Order</h2>
+ *
+ * <p>When {@code apply()} is called, styles are applied in the following sequence:
+ *
+ * <ol>
+ *   <li><b>Effects</b>: Filter effects like blur, grayscale, invert via {@link EffectApplier}
+ *   <li><b>CSS Classes</b>: Standard utility classes via {@link UtilityConflictResolver}
+ *   <li><b>Layout Migration Warning</b>: Detects legacy layout tokens requiring container migration
+ *   <li><b>Layout-dependent Styles</b>: Margins, gaps, flex properties requiring parent context
+ *   <li><b>Variants</b>: Hover, focus, dark mode variants via {@link
+ *       io.github.yasmramos.tailwindfx.core.VariantManager}
+ *   <li><b>Unknown Token Warnings</b>: Debug logging for unrecognized tokens
+ *   <li><b>JIT Compilation</b>: Arbitrary values and dynamic tokens compiled to inline styles
+ * </ol>
+ *
+ * <p><b>Why order matters:</b> Variants must be applied before JIT because variant processing may
+ * generate JIT-compiled styles. Applying variants first ensures that hover/focus states are
+ * properly registered before any inline JIT styles override them.
+ *
+ * <h2>Token Parsing</h2>
+ *
+ * <p>The varargs {@code tokens} parameter accepts space-separated strings. Both of these calls are
+ * equivalent:
+ *
+ * <pre>
+ * TwStyle.apply(node, "p-4 bg-blue-500");
+ * TwStyle.apply(node, "p-4", "bg-blue-500");
+ * </pre>
  */
 public final class TwStyle {
 
-  private static final TwStyle INSTANCE = new TwStyle();
-
-  private static final Set<String> RESPONSIVE_PREFIXES =
-      new HashSet<>(Arrays.asList("sm:", "md:", "lg:", "xl:", "2xl:"));
-
-  private static final Set<String> STATE_PREFIXES =
-      new HashSet<>(
-          Arrays.asList("hover:", "focus:", "active:", "disabled:", "visited:", "checked:"));
+  private static final Logger LOGGER = Logger.getLogger(TwStyle.class.getName());
 
   private TwStyle() {}
 
@@ -76,12 +101,10 @@ public final class TwStyle {
     if (!result.layoutMigrationTokens().isEmpty()) {
       // Degrade gracefully with warning instead of throwing exception
       // This prevents runtime crashes and allows consumer to continue
-      if (TwConfig.isDebug()) {
-        System.out.println(
-            "[TailwindFX Warning] Layout classes requiring container migration ("
-                + String.join(", ", result.layoutMigrationTokens())
-                + ") should be applied using TailwindFX.layout() instead of TailwindFX.apply().");
-      }
+      LOGGER.log(
+          Level.WARNING,
+          "Layout classes requiring container migration ({0}) should be applied using TailwindFX.layout() instead of TailwindFX.apply().",
+          String.join(", ", result.layoutMigrationTokens()));
       // Delegate these tokens to TwLayout for proper handling
       // For now, we skip them to avoid partial styling
     }
@@ -99,16 +122,15 @@ public final class TwStyle {
     // Apply variant tokens via VariantManager
     if (!result.variantTokens().isEmpty()) {
       for (String variantToken : result.variantTokens()) {
-        io.github.yasmramos.tailwindfx.core.VariantManager.processToken(
-            node, variantToken, new io.github.yasmramos.tailwindfx.core.JitCompiler());
+        VariantManager.processToken(node, variantToken, new JitCompiler());
       }
     }
 
     // Handle unknown tokens with debug warning (Smart fallback as documented in README)
     // Warnings collected during single pass to avoid redundant iteration
-    if (!result.unknownTokens().isEmpty() && io.github.yasmramos.tailwindfx.TwConfig.isDebug()) {
+    if (!result.unknownTokens().isEmpty()) {
       for (String t : result.unknownTokens()) {
-        System.out.println("[TailwindFX Warning] Unknown token ignored: " + t);
+        LOGGER.log(Level.WARNING, "Unknown token ignored: {0}", t);
       }
     }
 
@@ -116,7 +138,8 @@ public final class TwStyle {
       // Check preferStylesheet mode: apply classes from AOT stylesheet when available,
       // fallback to JIT inline for dynamic/arbitrary values
       if (io.github.yasmramos.tailwindfx.TwConfig.isPreferStylesheet()) {
-        StylesheetApplier.applyWithStylesheetPreference(node, result.jitTokens().toArray(new String[0]));
+        StylesheetApplier.applyWithStylesheetPreference(
+            node, result.jitTokens().toArray(new String[0]));
       } else {
         StyleMerger.applyJit(node, result.jitTokens().toArray(new String[0]));
       }
@@ -445,9 +468,7 @@ public final class TwStyle {
       try {
         return Double.parseDouble(value.substring(0, value.length() - 2));
       } catch (NumberFormatException e) {
-        if (TwConfig.isDebug()) {
-          System.out.println("[TailwindFX Warning] Invalid px value: " + value);
-        }
+        LOGGER.log(Level.WARNING, "Invalid px value: {0}", value);
         return 0;
       }
     } else if (value.endsWith("rem")) {
@@ -455,9 +476,7 @@ public final class TwStyle {
         double rem = Double.parseDouble(value.substring(0, value.length() - 3));
         return rem * TwConfig.unit();
       } catch (NumberFormatException e) {
-        if (TwConfig.isDebug()) {
-          System.out.println("[TailwindFX Warning] Invalid rem value: " + value);
-        }
+        LOGGER.log(Level.WARNING, "Invalid rem value: {0}", value);
         return 0;
       }
     } else if (value.endsWith("em")) {
@@ -465,18 +484,14 @@ public final class TwStyle {
         double em = Double.parseDouble(value.substring(0, value.length() - 2));
         return em * TwConfig.unit();
       } catch (NumberFormatException e) {
-        if (TwConfig.isDebug()) {
-          System.out.println("[TailwindFX Warning] Invalid em value: " + value);
-        }
+        LOGGER.log(Level.WARNING, "Invalid em value: {0}", value);
         return 0;
       }
     } else {
       try {
         return Double.parseDouble(value);
       } catch (NumberFormatException e) {
-        if (TwConfig.isDebug()) {
-          System.out.println("[TailwindFX Warning] Invalid numeric value: " + value);
-        }
+        LOGGER.log(Level.WARNING, "Invalid numeric value: {0}", value);
         return 0;
       }
     }
@@ -488,15 +503,13 @@ public final class TwStyle {
     if (token.contains("[")) {
       int start = token.indexOf('[') + 1;
       int end = token.indexOf(']');
-      
+
       // Verify closing bracket exists to avoid StringIndexOutOfBoundsException
       if (end == -1) {
-        if (TwConfig.isDebug()) {
-          System.out.println("[TailwindFX Warning] Missing closing bracket in token: " + token);
-        }
+        LOGGER.log(Level.WARNING, "Missing closing bracket in token: {0}", token);
         return 0;
       }
-      
+
       String value = token.substring(start, end);
       if (value.endsWith("px")) {
         try {
@@ -504,18 +517,14 @@ public final class TwStyle {
           double pxValue = Double.parseDouble(value.substring(0, value.length() - 2));
           return pxValue / TwConfig.unit();
         } catch (NumberFormatException e) {
-          if (TwConfig.isDebug()) {
-            System.out.println("[TailwindFX Warning] Invalid px value in token: " + token);
-          }
+          LOGGER.log(Level.WARNING, "Invalid px value in token: {0}", token);
           return 0;
         }
       }
       try {
         return Double.parseDouble(value);
       } catch (NumberFormatException e) {
-        if (TwConfig.isDebug()) {
-          System.out.println("[TailwindFX Warning] Invalid numeric value in token: " + token);
-        }
+        LOGGER.log(Level.WARNING, "Invalid numeric value in token: {0}", token);
         return 0;
       }
     }
@@ -533,9 +542,7 @@ public final class TwStyle {
         return negative ? -value : value;
       } catch (NumberFormatException e) {
         // Handle non-numeric values like "auto", "full"
-        if (TwConfig.isDebug()) {
-          System.out.println("[TailwindFX Warning] Non-numeric value in token: " + token);
-        }
+        LOGGER.log(Level.WARNING, "Non-numeric value in token: {0}", token);
         return 0;
       }
     }
@@ -653,9 +660,7 @@ public final class TwStyle {
 
   /** Invalidates the entire style cache for a node. */
   public static void invalidateCache(Node node) {
-    Preconditions.requireNode(node, "TwStyle.invalidateCache");
-    node.getProperties().remove("tailwindfx.category.cache");
-    node.getProperties().remove("tailwindfx.cleanup-listener");
+    StyleCache.invalidate(node);
   }
 
   /**
@@ -663,19 +668,12 @@ public final class TwStyle {
    * compatibility.
    */
   public static void cleanupNode(Node node) {
-    invalidateCache(node);
+    StyleCache.cleanup(node);
   }
 
   /** Invalidates a specific category from the style cache for a node. */
   public static void invalidateCategoryCache(Node node, String category) {
-    Preconditions.requireNode(node, "TwStyle.invalidateCategoryCache");
-    Preconditions.requireNonBlank(category, "TwStyle.invalidateCategoryCache", "category");
-    @SuppressWarnings("unchecked")
-    java.util.Map<String, String> cache =
-        (java.util.Map<String, String>) node.getProperties().get("tailwindfx.category.cache");
-    if (cache != null) {
-      cache.remove(category);
-    }
+    StyleCache.invalidateCategory(node, category);
   }
 
   /**

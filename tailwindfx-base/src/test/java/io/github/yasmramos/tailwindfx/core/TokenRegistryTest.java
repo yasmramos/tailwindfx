@@ -1,9 +1,9 @@
 package io.github.yasmramos.tailwindfx.core;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for TokenRegistry.
@@ -307,11 +307,11 @@ class TokenRegistryTest {
   @DisplayName("extractPrefix handles various token formats")
   void testExtractPrefixEdgeCases() {
     // Note: extractPrefix is private, tested indirectly through public methods
-    
+
     // Single word tokens
     assertTrue(TokenRegistry.isJitPrefix("bg"));
     assertTrue(TokenRegistry.isJitPrefix("text"));
-    
+
     // Multi-hyphen tokens - backdrop-blur-sm works (backdrop is in JIT_PREFIXES)
     assertTrue(TokenRegistry.isJitPrefix("backdrop-blur-sm"));
     // min-w-64 and max-h-full don't work because extractPrefix returns "min" and "max"
@@ -323,7 +323,7 @@ class TokenRegistryTest {
   @DisplayName("stripVariantPrefix handles chained variants")
   void testStripVariantPrefixChainedVariants() {
     // Note: stripVariantPrefix is private, tested indirectly through public methods
-    
+
     assertTrue(TokenRegistry.isJitPrefix("dark:hover:bg-blue-500"));
     assertTrue(TokenRegistry.isJitPrefix("md:hover:text-lg"));
   }

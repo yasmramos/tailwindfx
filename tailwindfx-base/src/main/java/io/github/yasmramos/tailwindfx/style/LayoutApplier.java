@@ -23,15 +23,17 @@ import javafx.scene.layout.VBox;
  * TailwindFX custom containers like TwFlexPane and TwGridPane.
  *
  * <p>Key features:
+ *
  * <ul>
- *   <li>Margin application via Styles utility methods</li>
- *   <li>Gap application to parent containers (HBox, VBox, GridPane, TwFlexPane, TwGridPane)</li>
- *   <li>Flex grow/shrink factors for HBox, VBox, and TwFlexPane</li>
- *   <li>Grid column/row configuration for TwGridPane</li>
- *   <li>Automatic retry via parent property listener when node is not yet attached</li>
+ *   <li>Margin application via Styles utility methods
+ *   <li>Gap application to parent containers (HBox, VBox, GridPane, TwFlexPane, TwGridPane)
+ *   <li>Flex grow/shrink factors for HBox, VBox, and TwFlexPane
+ *   <li>Grid column/row configuration for TwGridPane
+ *   <li>Automatic retry via parent property listener when node is not yet attached
  * </ul>
  *
  * <p>Usage:
+ *
  * <pre>
  * LayoutApplier.applyLayoutDependentStyles(node, tokens);
  * </pre>
@@ -47,12 +49,13 @@ public final class LayoutApplier {
    *
    * <p>Layout-dependent styles require knowledge of the parent container type to be applied
    * correctly. This method handles:
+   *
    * <ul>
-   *   <li>Margin styles (m-*, mx-*, my-*, mt-*, mr-*, mb-*, ml-*)</li>
-   *   <li>Gap styles (gap-*, gap-x-*, gap-y-*) - applied to the node if it's a Pane</li>
-   *   <li>Flex styles (flex-*, grow, shrink) - applied based on parent type</li>
-   *   <li>Grid styles (grid-cols-*, grid-rows-*, grid-flow-*) - applied to TwGridPane</li>
-   *   <li>Grid item styles (col-span-*, row-span-*) - applied via TwGridPane</li>
+   *   <li>Margin styles (m-*, mx-*, my-*, mt-*, mr-*, mb-*, ml-*)
+   *   <li>Gap styles (gap-*, gap-x-*, gap-y-*) - applied to the node if it's a Pane
+   *   <li>Flex styles (flex-*, grow, shrink) - applied based on parent type
+   *   <li>Grid styles (grid-cols-*, grid-rows-*, grid-flow-*) - applied to TwGridPane
+   *   <li>Grid item styles (col-span-*, row-span-*) - applied via TwGridPane
    * </ul>
    *
    * @param node the node to apply styles to
@@ -104,12 +107,13 @@ public final class LayoutApplier {
    * Applies a single layout-dependent style token to a node.
    *
    * <p>This method dispatches to specific handlers based on the token type:
+   *
    * <ul>
-   *   <li>Margin tokens → {@link #applyMarginStyleViaStyles}</li>
-   *   <li>Gap tokens → {@link #applyGapStyle}</li>
-   *   <li>Flex tokens → {@link #applyFlexStyleViaStyles}</li>
-   *   <li>Grid container tokens → {@link #applyGridContainerStyle}</li>
-   *   <li>Grid item tokens → {@link #applyGridItemStyle}</li>
+   *   <li>Margin tokens → {@link #applyMarginStyleViaStyles}
+   *   <li>Gap tokens → {@link #applyGapStyle}
+   *   <li>Flex tokens → {@link #applyFlexStyleViaStyles}
+   *   <li>Grid container tokens → {@link #applyGridContainerStyle}
+   *   <li>Grid item tokens → {@link #applyGridItemStyle}
    * </ul>
    *
    * @param node the node to apply the style to
@@ -206,8 +210,8 @@ public final class LayoutApplier {
   /**
    * Delegates flex application to TwFlexPane or Styles.java methods.
    *
-   * <p>For TwFlexPane containers, uses precise grow factors via {@link TwFlexPane#setGrow}.
-   * For HBox/VBox, maps to Priority enum (NEVER/SOMETIMES/ALWAYS).
+   * <p>For TwFlexPane containers, uses precise grow factors via {@link TwFlexPane#setGrow}. For
+   * HBox/VBox, maps to Priority enum (NEVER/SOMETIMES/ALWAYS).
    *
    * @param node the node to apply flex to
    * @param parent the parent pane
@@ -301,8 +305,8 @@ public final class LayoutApplier {
   }
 
   /**
-   * Parses gap value from token and applies it to parent container.
-   * Supports both numeric values (gap-4) and arbitrary values (gap-[20px]).
+   * Parses gap value from token and applies it to parent container. Supports both numeric values
+   * (gap-4) and arbitrary values (gap-[20px]).
    *
    * @param parent the parent pane to apply gap to
    * @param token the gap token (e.g., "gap-4", "gap-[20px]")
@@ -429,11 +433,12 @@ public final class LayoutApplier {
    * Parses CSS value string to pixels using configured unit size.
    *
    * <p>Supports:
+   *
    * <ul>
-   *   <li>Pixels: "20px" → 20.0</li>
-   *   <li>Rem: "1.5rem" → 1.5 * TwConfig.unit()</li>
-   *   <li>Em: "2em" → 2.0 * TwConfig.unit()</li>
-   *   <li>Plain numbers: "16" → 16.0</li>
+   *   <li>Pixels: "20px" → 20.0
+   *   <li>Rem: "1.5rem" → 1.5 * TwConfig.unit()
+   *   <li>Em: "2em" → 2.0 * TwConfig.unit()
+   *   <li>Plain numbers: "16" → 16.0
    * </ul>
    *
    * @param value the CSS value string to parse
@@ -485,10 +490,11 @@ public final class LayoutApplier {
    * Parses numeric value from Tailwind token.
    *
    * <p>Examples:
+   *
    * <ul>
-   *   <li>"m-4" → 4</li>
-   *   <li>"m-[16px]" → 16px / TwConfig.unit()</li>
-   *   <li>"-m-4" → -4</li>
+   *   <li>"m-4" → 4
+   *   <li>"m-[16px]" → 16px / TwConfig.unit()
+   *   <li>"-m-4" → -4
    * </ul>
    *
    * @param token the Tailwind token to parse
@@ -499,7 +505,7 @@ public final class LayoutApplier {
     if (token.contains("[")) {
       int start = token.indexOf('[') + 1;
       int end = token.indexOf(']');
-      
+
       // Verify closing bracket exists to avoid StringIndexOutOfBoundsException
       if (end == -1) {
         if (TwConfig.isDebug()) {
@@ -507,7 +513,7 @@ public final class LayoutApplier {
         }
         return 0;
       }
-      
+
       String value = token.substring(start, end);
       if (value.endsWith("px")) {
         try {
@@ -554,11 +560,11 @@ public final class LayoutApplier {
   }
 
   /**
-   * Registers a listener to apply layout styles when node is attached to parent.
-   * Uses WeakReference to prevent memory leaks.
+   * Registers a listener to apply layout styles when node is attached to parent. Uses WeakReference
+   * to prevent memory leaks.
    *
-   * <p>Bug #10 fix: Converted local ListenerWrapper class to use AtomicReference for
-   * safe self-removal of the listener after application.
+   * <p>Bug #10 fix: Converted local ListenerWrapper class to use AtomicReference for safe
+   * self-removal of the listener after application.
    *
    * @param node the node to register listener for
    * @param tokens the tokens to apply when parent becomes available

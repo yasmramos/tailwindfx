@@ -8,11 +8,11 @@ import javafx.scene.Node;
 /**
  * EffectApplier — Applies visual effects to JavaFX nodes.
  *
- * <p>This class handles detection and application of Tailwind CSS filter/effect tokens
- * (blur, brightness, contrast, grayscale, invert, sepia) by delegating to TwEffect.
+ * <p>This class handles detection and application of Tailwind CSS filter/effect tokens (blur,
+ * brightness, contrast, grayscale, invert, sepia) by delegating to TwEffect.
  *
- * <p>Detection is delegated to TokenRegistry for centralized token classification.
- * Application uses specific exception handling to avoid silently swallowing bugs.
+ * <p>Detection is delegated to TokenRegistry for centralized token classification. Application uses
+ * specific exception handling to avoid silently swallowing bugs.
  *
  * <pre>
  * // Apply effect tokens
@@ -34,8 +34,8 @@ public final class EffectApplier {
    * Detection is performed using TokenRegistry.isEffectToken() for consistency.
    *
    * <p>Exception handling: Specific exceptions from TwEffect are re-thrown to surface bugs.
-   * Unexpected exceptions are logged at WARN level (in debug mode) and re-thrown to avoid
-   * silently hiding real issues.
+   * Unexpected exceptions are logged at WARN level (in debug mode) and re-thrown to avoid silently
+   * hiding real issues.
    *
    * @param node the node to apply the effect to
    * @param token the effect token (e.g., "blur-sm", "brightness-125", "grayscale")

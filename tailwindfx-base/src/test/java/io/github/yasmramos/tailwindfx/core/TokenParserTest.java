@@ -1,10 +1,8 @@
 package io.github.yasmramos.tailwindfx.core;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -26,7 +24,7 @@ class TokenParserTest {
     assertTrue(result.cssClasses().contains("rounded-lg"));
     assertTrue(result.cssClasses().contains("btn-primary"));
     assertTrue(result.cssClasses().contains("card-header"));
-    
+
     assertTrue(result.jitTokens().isEmpty());
     assertTrue(result.layoutDependentTokens().isEmpty());
     assertTrue(result.layoutMigrationTokens().isEmpty());
@@ -43,7 +41,7 @@ class TokenParserTest {
     assertTrue(result.jitTokens().contains("bg-blue-500"));
     assertTrue(result.jitTokens().contains("text-red-600"));
     assertTrue(result.jitTokens().contains("w-[200px]"));
-    
+
     assertTrue(result.cssClasses().isEmpty());
     assertTrue(result.layoutDependentTokens().isEmpty());
     assertTrue(result.layoutMigrationTokens().isEmpty());
@@ -61,7 +59,7 @@ class TokenParserTest {
     assertTrue(result.jitTokens().contains("m-[10px]"));
     assertTrue(result.jitTokens().contains("p-[2rem]"));
     assertTrue(result.jitTokens().contains("bg-[#ff0000]"));
-    
+
     assertTrue(result.cssClasses().isEmpty());
     assertTrue(result.unknownTokens().isEmpty());
   }
@@ -72,10 +70,10 @@ class TokenParserTest {
 
     assertEquals(2, result.jitTokens().size());
     assertEquals(2, result.layoutDependentTokens().size());
-    
+
     assertTrue(result.layoutDependentTokens().contains("gap-4"));
     assertTrue(result.layoutDependentTokens().contains("mx-auto"));
-    
+
     assertTrue(result.layoutMigrationTokens().isEmpty());
   }
 
@@ -85,7 +83,7 @@ class TokenParserTest {
 
     assertEquals(3, result.jitTokens().size());
     assertEquals(3, result.layoutMigrationTokens().size());
-    
+
     assertTrue(result.layoutMigrationTokens().contains("flex"));
     assertTrue(result.layoutMigrationTokens().contains("grid"));
     assertTrue(result.layoutMigrationTokens().contains("inline-flex"));
@@ -93,23 +91,23 @@ class TokenParserTest {
 
   @Test
   void testParseVariantTokens() {
-    TokenParser.ParseResult result = TokenParser.parse(
-        "hover:bg-blue-500", "focus:ring-2", "md:w-full", "dark:text-white");
+    TokenParser.ParseResult result =
+        TokenParser.parse("hover:bg-blue-500", "focus:ring-2", "md:w-full", "dark:text-white");
 
     assertEquals(4, result.variantTokens().size());
     assertTrue(result.variantTokens().contains("hover:bg-blue-500"));
     assertTrue(result.variantTokens().contains("focus:ring-2"));
     assertTrue(result.variantTokens().contains("md:w-full"));
     assertTrue(result.variantTokens().contains("dark:text-white"));
-    
+
     assertTrue(result.cssClasses().isEmpty());
     assertTrue(result.jitTokens().isEmpty());
   }
 
   @Test
   void testParseEffectTokens() {
-    TokenParser.ParseResult result = TokenParser.parse(
-        "blur-sm", "brightness-125", "grayscale", "invert", "sepia-0");
+    TokenParser.ParseResult result =
+        TokenParser.parse("blur-sm", "brightness-125", "grayscale", "invert", "sepia-0");
 
     assertEquals(5, result.effectTokens().size());
     assertTrue(result.effectTokens().contains("blur-sm"));
@@ -117,7 +115,7 @@ class TokenParserTest {
     assertTrue(result.effectTokens().contains("grayscale"));
     assertTrue(result.effectTokens().contains("invert"));
     assertTrue(result.effectTokens().contains("sepia-0"));
-    
+
     assertTrue(result.cssClasses().isEmpty());
     assertTrue(result.jitTokens().isEmpty());
   }
@@ -128,7 +126,7 @@ class TokenParserTest {
 
     assertEquals(2, result.cssClasses().size());
     assertEquals(2, result.unknownTokens().size());
-    
+
     assertTrue(result.unknownTokens().contains("nonexistent-class"));
     assertTrue(result.unknownTokens().contains("fake-token"));
   }
@@ -169,7 +167,7 @@ class TokenParserTest {
 
     assertEquals(1, resultInvert.effectTokens().size());
     assertTrue(resultInvert.effectTokens().contains("invert"));
-    
+
     assertEquals(1, resultInvert0.effectTokens().size());
     assertTrue(resultInvert0.effectTokens().contains("invert-0"));
   }
@@ -182,18 +180,19 @@ class TokenParserTest {
 
     assertEquals(1, resultGrayscale.effectTokens().size());
     assertTrue(resultGrayscale.effectTokens().contains("grayscale"));
-    
+
     assertEquals(1, resultGrayscale0.effectTokens().size());
     assertTrue(resultGrayscale0.effectTokens().contains("grayscale-0"));
   }
 
   @Test
   void testMixedTokenTypes() {
-    TokenParser.ParseResult result = TokenParser.parse(
-        "btn-primary", "bg-blue-500", "gap-4", "flex", "hover:text-white", "blur-sm");
+    TokenParser.ParseResult result =
+        TokenParser.parse(
+            "btn-primary", "bg-blue-500", "gap-4", "flex", "hover:text-white", "blur-sm");
 
     assertEquals(1, result.cssClasses().size());
-    // Note: gap-4 and flex are also JIT tokens (they need compilation), 
+    // Note: gap-4 and flex are also JIT tokens (they need compilation),
     // so jitTokens contains: bg-blue-500, gap-4, flex
     assertEquals(3, result.jitTokens().size()); // bg-blue-500, gap-4, flex
     assertEquals(1, result.layoutDependentTokens().size()); // gap-4
@@ -262,7 +261,7 @@ class TokenParserTest {
   @Test
   void testParseResultEmpty() {
     TokenParser.ParseResult empty = TokenParser.ParseResult.empty();
-    
+
     assertTrue(empty.isEmpty());
     assertEquals(0, empty.totalTokenCount());
     assertTrue(empty.cssClasses().isEmpty());
@@ -276,8 +275,9 @@ class TokenParserTest {
 
   @Test
   void testParseResultTotalTokenCount() {
-    TokenParser.ParseResult result = TokenParser.parse(
-        "bg-blue-500", "gap-4", "flex", "hover:text-white", "blur-sm", "unknown-token");
+    TokenParser.ParseResult result =
+        TokenParser.parse(
+            "bg-blue-500", "gap-4", "flex", "hover:text-white", "blur-sm", "unknown-token");
 
     // bg-blue-500: jit (1 token)
     // gap-4: jit + layout-dependent (1 token, classified in multiple categories)
@@ -286,7 +286,8 @@ class TokenParserTest {
     // blur-sm: effect (1 token)
     // unknown-token: css class + unknown (1 token, classified in multiple categories)
     // Total: 6 unique tokens, but some appear in multiple categories
-    // Count by classification: 3(jit) + 1(layout-dep) + 1(layout-mig) + 1(variant) + 1(effect) + 2(css+unknown) = 9
+    // Count by classification: 3(jit) + 1(layout-dep) + 1(layout-mig) + 1(variant) + 1(effect) +
+    // 2(css+unknown) = 9
     assertEquals(9, result.totalTokenCount());
   }
 }

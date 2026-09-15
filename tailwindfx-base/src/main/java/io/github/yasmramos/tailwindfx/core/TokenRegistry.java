@@ -137,20 +137,11 @@ public final class TokenRegistry {
   private static final Set<String> COMPONENT_PREFIXES =
       new HashSet<>(
           Arrays.asList(
-              "btn",
-              "input",
-              "card",
-              "badge",
-              "avatar",
-              "alert",
-              "spinner",
-              "tooltip",
-              "modal",
+              "btn", "input", "card", "badge", "avatar", "alert", "spinner", "tooltip", "modal",
               "group"));
 
   /** Theme variant tokens. */
-  private static final Set<String> THEME_VARIANTS =
-      new HashSet<>(Arrays.asList("dark", "light"));
+  private static final Set<String> THEME_VARIANTS = new HashSet<>(Arrays.asList("dark", "light"));
 
   /** Valid utility patterns for typo detection. */
   private static final Pattern[] UTILITY_PATTERNS = {
@@ -188,8 +179,8 @@ public final class TokenRegistry {
   /**
    * Checks if a token starts with a JIT prefix.
    *
-   * <p>This method uses robust prefix matching by extracting the prefix before the first hyphen
-   * (or the entire token if no hyphen) and comparing against known JIT prefixes.
+   * <p>This method uses robust prefix matching by extracting the prefix before the first hyphen (or
+   * the entire token if no hyphen) and comparing against known JIT prefixes.
    *
    * @param token the token to check (may include variant prefixes like "hover:")
    * @return true if the token's base starts with a known JIT prefix
@@ -216,8 +207,8 @@ public final class TokenRegistry {
   /**
    * Checks if a token requires layout context (parent container) to be applied.
    *
-   * <p>This method uses exact matching for tokens without values (grow, shrink) and prefix
-   * matching for tokens with values (gap-4, flex-1, etc.).
+   * <p>This method uses exact matching for tokens without values (grow, shrink) and prefix matching
+   * for tokens with values (gap-4, flex-1, etc.).
    *
    * @param token the token to check (without variant prefix)
    * @return true if this token requires parent container context
@@ -286,9 +277,7 @@ public final class TokenRegistry {
     String baseToken = stripVariantPrefix(token);
 
     // Migration is needed for display classes that convert the node into a container
-    return baseToken.equals("flex")
-        || baseToken.equals("inline-flex")
-        || baseToken.equals("grid");
+    return baseToken.equals("flex") || baseToken.equals("inline-flex") || baseToken.equals("grid");
   }
 
   /**
@@ -313,9 +302,7 @@ public final class TokenRegistry {
     }
 
     // Theme variants
-    if (THEME_VARIANTS.contains(token)
-        || token.startsWith("dark:")
-        || token.startsWith("light:")) {
+    if (THEME_VARIANTS.contains(token) || token.startsWith("dark:") || token.startsWith("light:")) {
       return true;
     }
 
