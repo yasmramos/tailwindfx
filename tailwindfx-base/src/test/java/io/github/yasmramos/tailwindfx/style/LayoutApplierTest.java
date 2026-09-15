@@ -59,7 +59,7 @@ public class LayoutApplierTest extends ApplicationTest {
 
   @Test
   public void testApplyMarginNumericValue() {
-    Label node = interact(() -> new Label("margin-test"));
+    Label node = new Label("margin-test");
     interact(() -> hBox.getChildren().add(node));
     
     LayoutApplier.applyLayoutDependentStyles(node, Arrays.asList("m-4"));
@@ -71,7 +71,7 @@ public class LayoutApplierTest extends ApplicationTest {
 
   @Test
   public void testApplyMarginArbitraryValue() {
-    Label node = interact(() -> new Label("margin-arbitrary-test"));
+    Label node = new Label("margin-arbitrary-test");
     interact(() -> hBox.getChildren().add(node));
     
     LayoutApplier.applyLayoutDependentStyles(node, Arrays.asList("m-[20px]"));
@@ -83,9 +83,10 @@ public class LayoutApplierTest extends ApplicationTest {
 
   @Test
   public void testApplyGapToHBox() {
-    Label node1 = interact(() -> new Label("gap-test-1"));
-    Label node2 = interact(() -> new Label("gap-test-2"));
-    HBox testHBox = interact(() -> new HBox(node1, node2));
+    Label node1 = new Label("gap-test-1");
+    Label node2 = new Label("gap-test-2");
+    HBox testHBox = new HBox(node1, node2);
+    interact(() -> {});
     
     LayoutApplier.applyLayoutDependentStyles(testHBox, Arrays.asList("gap-4"));
     
@@ -95,9 +96,10 @@ public class LayoutApplierTest extends ApplicationTest {
 
   @Test
   public void testApplyGapArbitraryValue() {
-    Label node1 = interact(() -> new Label("gap-px-1"));
-    Label node2 = interact(() -> new Label("gap-px-2"));
-    HBox testHBox = interact(() -> new HBox(node1, node2));
+    Label node1 = new Label("gap-px-1");
+    Label node2 = new Label("gap-px-2");
+    HBox testHBox = new HBox(node1, node2);
+    interact(() -> {});
     
     LayoutApplier.applyLayoutDependentStyles(testHBox, Arrays.asList("gap-[20px]"));
     
@@ -106,7 +108,7 @@ public class LayoutApplierTest extends ApplicationTest {
 
   @Test
   public void testApplyFlexGrowInHBox() {
-    Label node = interact(() -> new Label("flex-grow-test"));
+    Label node = new Label("flex-grow-test");
     interact(() -> hBox.getChildren().add(node));
     
     LayoutApplier.applyLayoutDependentStyles(node, Arrays.asList("grow"));
@@ -117,7 +119,7 @@ public class LayoutApplierTest extends ApplicationTest {
 
   @Test
   public void testApplyFlexShrink() {
-    Label node = interact(() -> new Label("flex-shrink-test"));
+    Label node = new Label("flex-shrink-test");
     interact(() -> hBox.getChildren().add(node));
     
     LayoutApplier.applyLayoutDependentStyles(node, Arrays.asList("shrink"));
@@ -128,7 +130,7 @@ public class LayoutApplierTest extends ApplicationTest {
 
   @Test
   public void testApplyFlexArbitraryValueInTwFlexPane() {
-    Label node = interact(() -> new Label("flex-arbitrary-test"));
+    Label node = new Label("flex-arbitrary-test");
     interact(() -> twFlexPane.getChildren().add(node));
     
     LayoutApplier.applyLayoutDependentStyles(node, Arrays.asList("flex-[2]"));
@@ -139,7 +141,7 @@ public class LayoutApplierTest extends ApplicationTest {
 
   @Test
   public void testApplyFlexArbitraryValueInHBox() {
-    Label node = interact(() -> new Label("flex-hbox-test"));
+    Label node = new Label("flex-hbox-test");
     interact(() -> hBox.getChildren().add(node));
     
     LayoutApplier.applyLayoutDependentStyles(node, Arrays.asList("flex-[3]"));
