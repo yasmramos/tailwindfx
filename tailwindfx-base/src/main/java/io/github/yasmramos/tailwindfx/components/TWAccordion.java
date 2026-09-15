@@ -26,11 +26,19 @@ public class TWAccordion extends Accordion {
   public TWAccordion(TitledPane... titledPanes) {
     super(titledPanes);
     getStyleClass().add("collapse");
-    // Asegurar que los panes iniciales tengan el estilo correcto
+    // Ensure that all panes have the correct style
     for (TitledPane pane : titledPanes) {
       ensureTailwindStyle(pane);
     }
+    // Update state classes after panes are added
     updateStateClasses();
+    
+    // Listen for changes in expanded pane to update states (open/close)
+    expandedPaneProperty()
+        .addListener(
+            (obs, oldPane, newPane) -> {
+              updateStateClasses();
+            });
   }
 
   private void ensureTailwindStyle(TitledPane pane) {
@@ -42,14 +50,19 @@ public class TWAccordion extends Accordion {
   }
 
   private void updateStateClasses() {
-    // Limpiar estados anteriores en todos los panes
+    // Clear previous state classes on all panes
     for (TitledPane pane : getPanes()) {
-      if (pane.isExpanded()) {
+      pane.getStyleClass().remove("collapse-open");
+      pane.getStyleClass().remove("collapse-close");
+    }
+    
+    // Apply correct state class based on expanded state
+    TitledPane expanded = getExpandedPane();
+    for (TitledPane pane : getPanes()) {
+      if (pane.equals(expanded)) {
         pane.getStyleClass().add("collapse-open");
-        pane.getStyleClass().remove("collapse-close");
       } else {
         pane.getStyleClass().add("collapse-close");
-        pane.getStyleClass().remove("collapse-open");
       }
     }
   }

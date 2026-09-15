@@ -2,6 +2,7 @@ package io.github.yasmramos.tailwindfx;
 
 import io.github.yasmramos.tailwindfx.core.ColorUtilityValidator;
 import io.github.yasmramos.tailwindfx.core.Preconditions;
+import io.github.yasmramos.tailwindfx.core.TokenParser;
 import io.github.yasmramos.tailwindfx.core.TokenRegistry;
 import io.github.yasmramos.tailwindfx.core.UtilityConflictResolver;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
@@ -58,103 +59,44 @@ public final class TwStyle {
   }
 
   private static void applyInternal(Node node, String... tokens) {
-    java.util.List<String> cssClasses = new java.util.ArrayList<>();
-    java.util.List<String> jitTokens = new java.util.ArrayList<>();
-    java.util.List<String> layoutDependentTokens = new java.util.ArrayList<>();
-    java.util.List<String> layoutMigrationTokens = new java.util.ArrayList<>();
-    java.util.List<String> variantTokens = new java.util.ArrayList<>();
-    java.util.List<String> effectTokens = new java.util.ArrayList<>();
-    java.util.Set<String> unknownTokens = new java.util.HashSet<>();
-
-    for (String token : tokens) {
-      if (token == null || token.isBlank()) continue;
-      for (String t : token.split("\\s+")) {
-        if (t.isBlank()) continue;
-
-        // Check if token has variants (hover:, focus:, dark:, sm:, etc.)
-        // Must distinguish between:
-        // 1. Variant syntax (prefix:) → hasVariant = true
-        // 2. Arbitrary property syntax ([prop:value]) → hasVariant = false, goes to JIT
-        // 3. Arbitrary variant syntax ([&:hover]:utility or [@media...]:utility) → hasVariant =
-        // true
-        boolean isArbitraryProperty = t.startsWith("[") && !t.contains("]:");
-        boolean hasVariant = t.contains(":") && !isArbitraryProperty;
-
-        // Extract base utility for variant tokens to enable proper validation
-        String baseUtility = hasVariant ? stripVariantPrefix(t) : t;
-
-        // Check for unsupported variants (responsive/state) on layout-dependent properties
-        // Instead of throwing exception, delegate to VariantManager for automatic handling
-        if (hasVariant && TokenRegistry.isLayoutDependent(baseUtility)) {
-          // Delegate to VariantManager for automatic handling instead of throwing exception
-          // This enables responsive layout properties like md:gap-4, hover:p-2, etc.
-          variantTokens.add(t);
-          continue;
-        }
-
-        // Handle filter/effect tokens via TwEffect (blur, brightness, contrast, etc.)
-        if (TokenRegistry.isEffectToken(baseUtility)) {
-          effectTokens.add(hasVariant ? t : baseUtility);
-          continue;
-        }
-
-        if (hasVariant) {
-          // Tokens with variants need special handling via VariantManager
-          variantTokens.add(t);
-        } else if (isJitToken(t)) {
-          jitTokens.add(t);
-          if (TokenRegistry.isLayoutDependent(t)) {
-            layoutDependentTokens.add(t);
-          }
-          // Check if token requires container migration (flex, grid)
-          if (TokenRegistry.requiresMigration(t)) {
-            layoutMigrationTokens.add(t);
-          }
-        } else {
-          cssClasses.add(t);
-          // Track unknown tokens for warning (single pass)
-          if (!TokenRegistry.isKnownUtility(t)) {
-            unknownTokens.add(t);
-          }
-        }
-      }
-    }
+    // Delegate token parsing and classification to TokenParser
+    TokenParser.ParseResult result = TokenParser.parse(tokens);
 
     // Apply effect tokens via TwEffect
-    if (!effectTokens.isEmpty()) {
-      for (String effectToken : effectTokens) {
+    if (!result.effectTokens().isEmpty()) {
+      for (String effectToken : result.effectTokens()) {
         applyEffectToken(node, effectToken);
       }
     }
 
     // If migration is needed, delegate to TwLayout and skip JIT for those tokens
     // Moved to BEGINNING before any mutations to avoid leaving node half-styled
-    if (!layoutMigrationTokens.isEmpty()) {
+    if (!result.layoutMigrationTokens().isEmpty()) {
       // Degrade gracefully with warning instead of throwing exception
       // This prevents runtime crashes and allows consumer to continue
       if (TwConfig.isDebug()) {
         System.out.println(
             "[TailwindFX Warning] Layout classes requiring container migration ("
-                + String.join(", ", layoutMigrationTokens)
+                + String.join(", ", result.layoutMigrationTokens())
                 + ") should be applied using TailwindFX.layout() instead of TailwindFX.apply().");
       }
       // Delegate these tokens to TwLayout for proper handling
       // For now, we skip them to avoid partial styling
     }
 
-    if (!cssClasses.isEmpty()) {
-      UtilityConflictResolver.applyAll(node, cssClasses.toArray(new String[0]));
-      TailwindFXMetrics.instance().recordApply(cssClasses.size());
+    if (!result.cssClasses().isEmpty()) {
+      UtilityConflictResolver.applyAll(node, result.cssClasses().toArray(new String[0]));
+      TailwindFXMetrics.instance().recordApply(result.cssClasses().size());
     }
 
     // Apply layout-dependent styles first (needs parent context)
-    if (!layoutDependentTokens.isEmpty()) {
-      applyLayoutDependentStyles(node, layoutDependentTokens);
+    if (!result.layoutDependentTokens().isEmpty()) {
+      applyLayoutDependentStyles(node, result.layoutDependentTokens());
     }
 
     // Apply variant tokens via VariantManager
-    if (!variantTokens.isEmpty()) {
-      for (String variantToken : variantTokens) {
+    if (!result.variantTokens().isEmpty()) {
+      for (String variantToken : result.variantTokens()) {
         io.github.yasmramos.tailwindfx.core.VariantManager.processToken(
             node, variantToken, new io.github.yasmramos.tailwindfx.core.JitCompiler());
       }
@@ -162,19 +104,19 @@ public final class TwStyle {
 
     // Handle unknown tokens with debug warning (Smart fallback as documented in README)
     // Warnings collected during single pass to avoid redundant iteration
-    if (!unknownTokens.isEmpty() && io.github.yasmramos.tailwindfx.TwConfig.isDebug()) {
-      for (String t : unknownTokens) {
+    if (!result.unknownTokens().isEmpty() && io.github.yasmramos.tailwindfx.TwConfig.isDebug()) {
+      for (String t : result.unknownTokens()) {
         System.out.println("[TailwindFX Warning] Unknown token ignored: " + t);
       }
     }
 
-    if (!jitTokens.isEmpty()) {
+    if (!result.jitTokens().isEmpty()) {
       // Check preferStylesheet mode: apply classes from AOT stylesheet when available,
       // fallback to JIT inline for dynamic/arbitrary values
       if (io.github.yasmramos.tailwindfx.TwConfig.isPreferStylesheet()) {
-        applyWithStylesheetPreference(node, jitTokens.toArray(new String[0]));
+        applyWithStylesheetPreference(node, result.jitTokens().toArray(new String[0]));
       } else {
-        StyleMerger.applyJit(node, jitTokens.toArray(new String[0]));
+        StyleMerger.applyJit(node, result.jitTokens().toArray(new String[0]));
       }
     }
   }

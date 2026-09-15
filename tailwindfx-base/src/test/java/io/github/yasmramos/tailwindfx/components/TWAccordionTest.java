@@ -62,9 +62,11 @@ public class TWAccordionTest {
 
     TWAccordion accordion = new TWAccordion(pane1, pane2);
 
-    // Initially no pane is expanded
-    assertFalse(pane1.isExpanded());
-    assertFalse(pane2.isExpanded());
+    // Initially no pane is expanded (both should be collapse-close)
+    assertFalse(pane1.getStyleClass().contains("collapse-open"));
+    assertTrue(pane1.getStyleClass().contains("collapse-close"));
+    assertFalse(pane2.getStyleClass().contains("collapse-open"));
+    assertTrue(pane2.getStyleClass().contains("collapse-close"));
 
     // Expand first pane
     accordion.setExpandedPane(pane1);
