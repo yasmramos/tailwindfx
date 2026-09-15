@@ -56,6 +56,13 @@ public class TailwindCssMojo extends AbstractMojo {
   /** Custom ThemeConfig class name (optional). */
   @Parameter private String themeConfigClass;
 
+  /** Whether to generate all utility classes instead of only used ones. */
+  @Parameter(defaultValue = "false")
+  private boolean generateAll;
+
+  /** Optional safelist of utility classes to always include. */
+  @Parameter private List<String> safelist;
+
   // Regex patterns for matching Tailwind classes in Java source files
   // Only match string literals passed to style application methods
   // Captures the entire argument list between parentheses
@@ -104,7 +111,31 @@ public class TailwindCssMojo extends AbstractMojo {
     try {
       // Scan source files for Tailwind classes
       Set<String> usedClasses = scanForTailwindClasses(sourceDirectory);
-      getLog().info("TailwindFX: Found " + usedClasses.size() + " unique Tailwind classes");
+      getLog()
+          .info(
+              "TailwindFX: Found "
+                  + usedClasses.size()
+                  + " unique Tailwind classes from source scanning");
+
+      // If generateAll is enabled, use TwCatalog to get all utility classes
+      if (generateAll) {
+        getLog().info("TailwindFX: generateAll mode enabled - generating full utility catalog");
+        Set<String> allClasses = io.github.yasmramos.tailwindfx.TwCatalog.allUtilityClasses();
+        getLog().info("TailwindFX: Catalog contains " + allClasses.size() + " utility classes");
+
+        // Combine scanned classes with full catalog and safelist
+        usedClasses.addAll(allClasses);
+        if (safelist != null && !safelist.isEmpty()) {
+          usedClasses.addAll(safelist);
+          getLog().info("TailwindFX: Added " + safelist.size() + " safelisted classes");
+        }
+      }
+
+      // Add safelist if provided (even in normal mode)
+      if (!generateAll && safelist != null && !safelist.isEmpty()) {
+        usedClasses.addAll(safelist);
+        getLog().info("TailwindFX: Added " + safelist.size() + " safelisted classes");
+      }
 
       if (getLog().isDebugEnabled()) {
         getLog().debug("Found classes: " + String.join(", ", usedClasses));
