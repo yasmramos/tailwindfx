@@ -185,11 +185,7 @@ public final class TwCatalog {
         JitCompiler.BatchResult result = compiler.compileBatch(utilityClass);
         if (result.hasInlineStyle()) {
           String classCss =
-              ".tw-"
-                  + utilityClass
-                  + " {\n  "
-                  + result.inlineStyle().replace("; ", ";\n  ")
-                  + "\n}\n";
+              "." + utilityClass + " {\n  " + result.inlineStyle().replace("; ", ";\n  ") + "\n}\n";
           css.append(classCss);
         }
       } catch (Exception e) {

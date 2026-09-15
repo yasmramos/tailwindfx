@@ -3,14 +3,18 @@ package io.github.yasmramos.tailwindfx;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.yasmramos.tailwindfx.theme.ThemeConfig;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 /**
  * TwCatalogTest — Tests for the utility class catalog generator.
  *
- * <p>Verifies that the catalog includes representative families of utilities, is not empty, and (if
- * generateFullCss is implemented) that the resulting CSS contains selectors for those utilities.
+ * <p>Verifies that the catalog includes representative families of utilities, is not empty, and
+ * generates a complete CSS file with all utilities.
  */
 class TwCatalogTest {
 
@@ -274,9 +278,9 @@ class TwCatalogTest {
     assertFalse(css.isEmpty(), "Generated CSS should not be empty");
 
     // Check that CSS contains some expected selectors
-    assertTrue(css.contains(".tw-p-4") || css.contains("p-4"), "CSS should contain p-4 utility");
+    assertTrue(css.contains(".p-4") || css.contains("p-4"), "CSS should contain p-4 utility");
     assertTrue(
-        css.contains(".tw-bg-blue-500") || css.contains("bg-blue-500"),
+        css.contains(".bg-blue-500") || css.contains("bg-blue-500"),
         "CSS should contain bg-blue-500 utility");
   }
 
@@ -298,5 +302,46 @@ class TwCatalogTest {
     assertTrue(
         allClasses.size() > 1000,
         "Catalog should have more than 1000 utilities, got: " + allClasses.size());
+  }
+
+  @Test
+  void testGenerateFullCssFileWithAllUtilities() throws IOException {
+    // Generate the complete CSS with all utilities
+    ThemeConfig config = ThemeConfig.defaultConfig();
+    String css = TwCatalog.generateFullCss(config);
+
+    // Verify CSS is generated
+    assertNotNull(css, "Generated CSS should not be null");
+    assertFalse(css.isEmpty(), "Generated CSS should not be empty");
+
+    // Write CSS to file in target directory
+    Path targetDir = Paths.get("target");
+    if (!Files.exists(targetDir)) {
+      Files.createDirectories(targetDir);
+    }
+
+    Path cssFile = targetDir.resolve("tailwindfx-all-utilities.css");
+    Files.writeString(cssFile, css);
+
+    // Verify file was created
+    assertTrue(Files.exists(cssFile), "CSS file should be created at " + cssFile.toAbsolutePath());
+    assertTrue(Files.size(cssFile) > 0, "CSS file should not be empty");
+
+    // Read back and verify content
+    String writtenCss = Files.readString(cssFile);
+    assertEquals(css, writtenCss, "Written CSS should match generated CSS");
+
+    // Verify CSS contains expected utilities (without prefix)
+    assertTrue(writtenCss.contains(".p-4"), "CSS file should contain .p-4 utility");
+    assertTrue(writtenCss.contains(".bg-blue-500"), "CSS file should contain .bg-blue-500 utility");
+    assertTrue(writtenCss.contains(".rounded-lg"), "CSS file should contain .rounded-lg utility");
+    assertTrue(writtenCss.contains(".text-xl"), "CSS file should contain .text-xl utility");
+
+    System.out.println(
+        "Generated CSS file with all utilities: "
+            + cssFile.toAbsolutePath()
+            + " ("
+            + Files.size(cssFile)
+            + " bytes)");
   }
 }
