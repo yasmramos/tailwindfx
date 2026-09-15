@@ -6,6 +6,7 @@ import io.github.yasmramos.tailwindfx.core.TokenParser;
 import io.github.yasmramos.tailwindfx.core.TokenRegistry;
 import io.github.yasmramos.tailwindfx.core.UtilityConflictResolver;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
+import io.github.yasmramos.tailwindfx.style.LayoutApplier;
 import io.github.yasmramos.tailwindfx.style.StyleMerger;
 import io.github.yasmramos.tailwindfx.style.StylePerf;
 import io.github.yasmramos.tailwindfx.style.Styles;
@@ -91,7 +92,7 @@ public final class TwStyle {
 
     // Apply layout-dependent styles first (needs parent context)
     if (!result.layoutDependentTokens().isEmpty()) {
-      applyLayoutDependentStyles(node, result.layoutDependentTokens());
+      LayoutApplier.applyLayoutDependentStyles(node, result.layoutDependentTokens());
     }
 
     // Apply variant tokens via VariantManager
@@ -127,7 +128,7 @@ public final class TwStyle {
    * inline compilation as fallback for dynamic/arbitrary values not resolved at build-time.
    *
    * @param node the target node
-   * @param tokens the tokens to apply
+   * @param tokens the tokens to apply (already tokenized, no whitespace splitting needed)
    */
   private static void applyWithStylesheetPreference(Node node, String... tokens) {
     // Separate tokens into:
@@ -139,6 +140,7 @@ public final class TwStyle {
     for (String token : tokens) {
       if (token == null || token.isBlank()) continue;
 
+      // Token is already individual (no need to split by whitespace)
       // Check if token contains arbitrary value syntax [...] or opacity modifier /
       // Opacity modifier: only valid for color utilities (use same validation as isJitToken)
       boolean hasArbitraryValue = token.contains("[") && token.contains("]");

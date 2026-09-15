@@ -172,6 +172,7 @@ public final class TokenParser {
       jitTokens.add(token);
       layoutMigrationTokens.add(token);
     } else if (isJitToken(token)) {
+      // JIT tokens (dynamic/arbitrary values or utilities with numeric suffixes) get compiled at runtime
       jitTokens.add(token);
       if (TokenRegistry.isLayoutDependent(token)) {
         layoutDependentTokens.add(token);
@@ -183,6 +184,16 @@ public final class TokenParser {
         unknownTokens.add(token);
       }
     }
+  }
+
+  /**
+   * Checks if a token contains arbitrary value syntax.
+   *
+   * @param token the token to check
+   * @return true if token contains [...] syntax
+   */
+  private static boolean hasArbitraryValue(String token) {
+    return token.contains("[") && token.contains("]");
   }
 
   /**
