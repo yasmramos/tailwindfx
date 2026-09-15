@@ -84,13 +84,20 @@ public final class TokenParser {
 
     for (String token : tokens) {
       if (token == null || token.isBlank()) continue;
-      
+
       // Split by whitespace to handle multiple tokens in a single string
       for (String t : token.split("\\s+")) {
         if (t.isBlank()) continue;
 
-        classifyToken(t, cssClasses, jitTokens, layoutDependentTokens, 
-                     layoutMigrationTokens, variantTokens, effectTokens, unknownTokens);
+        classifyToken(
+            t,
+            cssClasses,
+            jitTokens,
+            layoutDependentTokens,
+            layoutMigrationTokens,
+            variantTokens,
+            effectTokens,
+            unknownTokens);
       }
     }
 
@@ -101,15 +108,14 @@ public final class TokenParser {
         layoutMigrationTokens,
         variantTokens,
         effectTokens,
-        unknownTokens
-    );
+        unknownTokens);
   }
 
   /**
    * Classifies a single token into appropriate categories.
    *
-   * <p>This is the core classification logic that was previously embedded in TwStyle.applyInternal().
-   * It handles:
+   * <p>This is the core classification logic that was previously embedded in
+   * TwStyle.applyInternal(). It handles:
    *
    * <ol>
    *   <li>Variant detection (distinguishing variant syntax from arbitrary property syntax)
@@ -172,7 +178,8 @@ public final class TokenParser {
       jitTokens.add(token);
       layoutMigrationTokens.add(token);
     } else if (isJitToken(token)) {
-      // JIT tokens (dynamic/arbitrary values or utilities with numeric suffixes) get compiled at runtime
+      // JIT tokens (dynamic/arbitrary values or utilities with numeric suffixes) get compiled at
+      // runtime
       jitTokens.add(token);
       if (TokenRegistry.isLayoutDependent(token)) {
         layoutDependentTokens.add(token);
@@ -199,11 +206,11 @@ public final class TokenParser {
   /**
    * Detects if a token should be compiled as JIT.
    *
-   * <p>Uses strict prefix matching + numeric/arbitrary/negative pattern validation.
-   * Eliminates false positives like "card-2" or "panel-v2".
+   * <p>Uses strict prefix matching + numeric/arbitrary/negative pattern validation. Eliminates
+   * false positives like "card-2" or "panel-v2".
    *
-   * <p>This method strips variant prefixes (hover:, focus:, dark:, sm:, etc.) before checking,
-   * so that "hover:bg-blue-500" is correctly identified as a JIT token.
+   * <p>This method strips variant prefixes (hover:, focus:, dark:, sm:, etc.) before checking, so
+   * that "hover:bg-blue-500" is correctly identified as a JIT token.
    *
    * @param token the token to check
    * @return true if this token should be compiled as JIT
@@ -243,8 +250,8 @@ public final class TokenParser {
    * Result object containing categorized tokens from parsing.
    *
    * <p>This record provides immutable access to the classified tokens, enabling
-   * TwStyle.applyInternal() to act as an orchestrator that directs each category
-   * to its appropriate applier.
+   * TwStyle.applyInternal() to act as an orchestrator that directs each category to its appropriate
+   * applier.
    *
    * @param cssClasses static utility classes to apply via CSS
    * @param jitTokens dynamic tokens requiring JIT compilation
@@ -261,9 +268,8 @@ public final class TokenParser {
       List<String> layoutMigrationTokens,
       List<String> variantTokens,
       List<String> effectTokens,
-      Set<String> unknownTokens
-  ) {
-    
+      Set<String> unknownTokens) {
+
     /**
      * Creates an empty ParseResult with all categories initialized to empty collections.
      *
@@ -277,8 +283,7 @@ public final class TokenParser {
           new ArrayList<>(),
           new ArrayList<>(),
           new ArrayList<>(),
-          new HashSet<>()
-      );
+          new HashSet<>());
     }
 
     /**

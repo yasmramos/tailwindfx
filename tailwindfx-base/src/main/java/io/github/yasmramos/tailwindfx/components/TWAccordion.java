@@ -32,7 +32,7 @@ public class TWAccordion extends Accordion {
     }
     // Update state classes after panes are added
     updateStateClasses();
-    
+
     // Listen for changes in expanded pane to update states (open/close)
     expandedPaneProperty()
         .addListener(
@@ -55,7 +55,7 @@ public class TWAccordion extends Accordion {
       pane.getStyleClass().remove("collapse-open");
       pane.getStyleClass().remove("collapse-close");
     }
-    
+
     // Apply correct state class based on expanded state
     TitledPane expanded = getExpandedPane();
     for (TitledPane pane : getPanes()) {

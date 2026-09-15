@@ -1,18 +1,17 @@
 package io.github.yasmramos.tailwindfx.style;
 
-import io.github.yasmramos.tailwindfx.TwConfig;
-import io.github.yasmramos.tailwindfx.core.TokenParser;
 import io.github.yasmramos.tailwindfx.core.UtilityConflictResolver;
 import javafx.scene.Node;
 
 /**
  * StylesheetApplier — Applies tokens with stylesheet preference mode.
  *
- * <p>When preferStylesheet is enabled, this class adds CSS classes for tokens that exist
- * in the AOT-generated stylesheet, and only uses JIT inline compilation as fallback for
- * dynamic/arbitrary values not resolved at build-time.
+ * <p>When preferStylesheet is enabled, this class adds CSS classes for tokens that exist in the
+ * AOT-generated stylesheet, and only uses JIT inline compilation as fallback for dynamic/arbitrary
+ * values not resolved at build-time.
  *
  * <p>This class fixes:
+ *
  * <ul>
  *   <li>Bug #7: Duplicate isJitToken logic by reusing TokenParser/TokenRegistry for detecting
  *       arbitrary values and opacity modifiers instead of reimplementing contains("[")/indexOf('/')
@@ -75,7 +74,8 @@ public final class StylesheetApplier {
 
     // Fallback to JIT inline for dynamic/arbitrary values
     if (!dynamicTokens.isEmpty()) {
-      io.github.yasmramos.tailwindfx.style.StyleMerger.applyJit(node, dynamicTokens.toArray(new String[0]));
+      io.github.yasmramos.tailwindfx.style.StyleMerger.applyJit(
+          node, dynamicTokens.toArray(new String[0]));
     }
   }
 
@@ -83,13 +83,14 @@ public final class StylesheetApplier {
    * Checks if a token is dynamic (requires JIT compilation).
    *
    * <p>A token is dynamic if it contains:
+   *
    * <ul>
    *   <li>Arbitrary value syntax: [...]
    *   <li>Opacity modifier on a color utility: bg-red-500/50
    * </ul>
    *
-   * <p>This method delegates to TokenRegistry via TokenParser for consistent detection,
-   * fixing Bug #7 by avoiding duplicate logic.
+   * <p>This method delegates to TokenRegistry via TokenParser for consistent detection, fixing Bug
+   * #7 by avoiding duplicate logic.
    *
    * @param token the token to check
    * @return true if the token requires JIT compilation
