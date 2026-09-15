@@ -87,7 +87,9 @@ public final class TokenRegistry {
               "saturate",
               "sepia",
               "drop-shadow",
-              "backdrop"));
+              "backdrop",
+              "grow",
+              "shrink"));
 
   /** Layout-dependent prefixes requiring parent container context for application. */
   private static final Set<String> LAYOUT_DEPENDENT_PREFIXES =
@@ -155,9 +157,9 @@ public final class TokenRegistry {
     Pattern.compile("^font(-[a-zA-Z0-9]+)?$"),
     Pattern.compile("^shadow(-[a-zA-Z0-9]+)?$"),
     Pattern.compile("^(flex|hidden|italic)$"),
-    Pattern.compile("^text(-[a-zA-Z0-9]+)?$"),
-    Pattern.compile("^bg(-[a-zA-Z0-9]+)?$"),
-    Pattern.compile("^border(-[a-zA-Z0-9]+)?$"),
+    Pattern.compile("^text(-[a-zA-Z0-9-/]+)?$"),
+    Pattern.compile("^bg(-[a-zA-Z0-9-/\\[\\]#]+)?$"),
+    Pattern.compile("^border(-[a-zA-Z0-9-/\\[\\]#]+)?$"),
     Pattern.compile("^[pm](t|r|b|l|x|y)?(-[a-zA-Z0-9\\[\\]]+)?$"),
     Pattern.compile("^(w|h|min|max)(-[a-zA-Z0-9]+)?$"),
     Pattern.compile("^opacity(-[0-9]+)?$"),
