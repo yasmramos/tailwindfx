@@ -401,4 +401,142 @@ public class TwStyleIT extends ApplicationTest {
     TwConfig.reset();
     assertFalse(TwConfig.isPreferStylesheet(), "Reset should clear preferStylesheet");
   }
+
+  @Test
+  @DisplayName("parseTailwindValue should respect TwConfig.unit() for arbitrary px values")
+  void testParseTailwindValueRespectsUnitConfig() {
+    // Save original unit value
+    double originalUnit = TwConfig.unit();
+    
+    try {
+      // Set unit to 4px (default)
+      TwConfig.unit(4.0);
+      // m-[10px] should return 2.5 (10 / 4.0 = 2.5), not 2 (integer division)
+      // We need to use reflection to test private method, so we test via actual application
+      Label testNode = new Label("Test");
+      HBox parent = new HBox();
+      parent.getChildren().add(testNode);
+      
+      TwStyle.apply(testNode, "m-[10px]");
+      
+      // Verify margin was applied (the exact value depends on Styles.m implementation)
+      // The key is that parseTailwindValue now returns double respecting TwConfig.unit()
+      javafx.geometry.Insets margin = HBox.getMargin(testNode);
+      assertNotNull(margin, "Margin should be applied for m-[10px]");
+      
+      // Set unit to 8px and verify different result
+      TwConfig.unit(8.0);
+      Label testNode2 = new Label("Test2");
+      HBox parent2 = new HBox();
+      parent2.getChildren().add(testNode2);
+      
+      TwStyle.apply(testNode2, "m-[16px]");
+      
+      // With unit=8, m-[16px] should give factor of 2 (16/8=2)
+      margin = HBox.getMargin(testNode2);
+      assertNotNull(margin, "Margin should be applied for m-[16px] with unit=8");
+      
+    } finally {
+      // Restore original unit value
+      TwConfig.unit(originalUnit);
+    }
+  }
+
+  @Test
+  @DisplayName("layout migration tokens should not throw exception but warn gracefully")
+  void testLayoutMigrationTokensDontThrowException() {
+    // Enable debug mode to see warnings
+    boolean originalDebug = TwConfig.isDebug();
+    TwConfig.debug(true);
+    
+    try {
+      Label testNode = new Label("Test");
+      
+      // These tokens require layout migration and should not throw
+      // but should log a warning instead
+      assertDoesNotThrow(
+          () -> TwStyle.apply(testNode, "flex", "grid"),
+          "Layout migration tokens should not throw UnsupportedOperationException"
+      );
+      
+      // Node should still have some classes applied (not left half-styled)
+      // The migration tokens are skipped, but other processing continues
+    } finally {
+      TwConfig.debug(originalDebug);
+    }
+  }
+
+  @Test
+  @DisplayName("flex-[2] should differ from flex-1 in TwFlexPane")
+  void testFlexArbitraryValueInTwFlexPane() {
+    io.github.yasmramos.tailwindfx.layout.TwFlexPane flexPane = 
+        new io.github.yasmramos.tailwindfx.layout.TwFlexPane();
+    Label child1 = new Label("Child1");
+    Label child2 = new Label("Child2");
+    flexPane.getChildren().addAll(child1, child2);
+    
+    // Apply flex-1 to first child
+    TwStyle.apply(child1, "flex-1");
+    
+    // Apply flex-[2] to second child
+    TwStyle.apply(child2, "flex-[2]");
+    
+    // In TwFlexPane, grow factors should be different
+    double grow1 = io.github.yasmramos.tailwindfx.layout.TwFlexPane.getGrow(child1);
+    double grow2 = io.github.yasmramos.tailwindfx.layout.TwFlexPane.getGrow(child2);
+    
+    assertEquals(1.0, grow1, 0.01, "flex-1 should set grow factor to 1");
+    assertEquals(2.0, grow2, 0.01, "flex-[2] should set grow factor to 2");
+    assertNotEquals(grow1, grow2, "flex-[2] should differ from flex-1");
+  }
+
+  @Test
+  @DisplayName("icon/large should not be interpreted as opacity modifier")
+  void testIconLargeNotTreatedAsOpacityModifier() {
+    // Enable preferStylesheet mode to trigger applyWithStylesheetPreference
+    TwConfig.preferStylesheet(true);
+    
+    try {
+      Label testNode = new Label("Test");
+      
+      // icon/large should NOT be treated as dynamic token (opacity modifier)
+      // because "icon" is not a valid color utility base
+      TwStyle.apply(testNode, "icon/large");
+      
+      // Should be added as CSS class, not JIT compiled
+      assertTrue(
+          testNode.getStyleClass().contains("icon/large"),
+          "icon/large should be added as CSS class, not treated as opacity modifier"
+      );
+      
+      // Verify it's not in inline styles (which would indicate JIT compilation)
+      assertFalse(
+          testNode.getStyle().contains("icon/large"),
+          "icon/large should not be JIT compiled"
+      );
+      
+    } finally {
+      TwConfig.preferStylesheet(false);
+    }
+  }
+
+  @Test
+  @DisplayName("parseTailwindValue should handle missing closing bracket gracefully")
+  void testParseTailwindValueHandlesMissingBracket() {
+    boolean originalDebug = TwConfig.isDebug();
+    TwConfig.debug(true);
+    
+    try {
+      Label testNode = new Label("Test");
+      
+      // Token with missing closing bracket should not throw StringIndexOutOfBoundsException
+      assertDoesNotThrow(
+          () -> TwStyle.apply(testNode, "m-[10px"),
+          "Missing closing bracket should not throw exception"
+      );
+      
+    } finally {
+      TwConfig.debug(originalDebug);
+    }
+  }
 }

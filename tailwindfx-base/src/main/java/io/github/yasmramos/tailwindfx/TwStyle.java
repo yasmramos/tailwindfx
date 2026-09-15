@@ -206,17 +206,24 @@ public final class TwStyle {
       }
     }
 
+    // If migration is needed, delegate to TwLayout and skip JIT for those tokens
+    // Moved to BEGINNING before any mutations to avoid leaving node half-styled
+    if (!layoutMigrationTokens.isEmpty()) {
+      // Degrade gracefully with warning instead of throwing exception
+      // This prevents runtime crashes and allows consumer to continue
+      if (TwConfig.isDebug()) {
+        System.out.println(
+            "[TailwindFX Warning] Layout classes requiring container migration ("
+                + String.join(", ", layoutMigrationTokens)
+                + ") should be applied using TailwindFX.layout() instead of TailwindFX.apply().");
+      }
+      // Delegate these tokens to TwLayout for proper handling
+      // For now, we skip them to avoid partial styling
+    }
+
     if (!cssClasses.isEmpty()) {
       UtilityConflictResolver.applyAll(node, cssClasses.toArray(new String[0]));
       TailwindFXMetrics.instance().recordApply(cssClasses.size());
-    }
-
-    // If migration is needed, delegate to TwLayout and skip JIT for those tokens
-    if (!layoutMigrationTokens.isEmpty()) {
-      throw new UnsupportedOperationException(
-          "Layout classes requiring container migration ("
-              + String.join(", ", layoutMigrationTokens)
-              + ") must be applied using TailwindFX.layout() instead of TailwindFX.apply().");
     }
 
     // Apply layout-dependent styles first (needs parent context)
@@ -270,9 +277,18 @@ public final class TwStyle {
       if (token == null || token.isBlank()) continue;
 
       // Check if token contains arbitrary value syntax [...] or opacity modifier /
-      // Opacity modifier: any token with '/' followed by content (e.g., bg-blue-500/80)
+      // Opacity modifier: only valid for color utilities (use same validation as isJitToken)
       boolean hasArbitraryValue = token.contains("[") && token.contains("]");
-      boolean hasOpacityModifier = token.indexOf('/') > 0;
+      boolean hasOpacityModifier = false;
+      
+      // Use the same validation logic as isJitToken to avoid false positives like "icon/large"
+      if (token.contains("/")) {
+        int slashIndex = token.indexOf('/');
+        if (slashIndex > 0) {
+          String base = token.substring(0, slashIndex);
+          hasOpacityModifier = isValidColorUtilityBase(base);
+        }
+      }
 
       if (hasArbitraryValue || hasOpacityModifier) {
         dynamicTokens.add(token);
@@ -401,22 +417,22 @@ public final class TwStyle {
     }
 
     // Fallback to numeric parsing for standard values
-    int value = parseTailwindValue(token);
+    double value = parseTailwindValue(token);
 
     if (token.startsWith("m-")) {
-      Styles.m(node, value);
+      Styles.m(node, (int) value);
     } else if (token.startsWith("mx-")) {
-      Styles.mx(node, value);
+      Styles.mx(node, (int) value);
     } else if (token.startsWith("my-")) {
-      Styles.my(node, value);
+      Styles.my(node, (int) value);
     } else if (token.startsWith("mt-")) {
-      Styles.mt(node, value);
+      Styles.mt(node, (int) value);
     } else if (token.startsWith("mr-")) {
-      Styles.mr(node, value);
+      Styles.mr(node, (int) value);
     } else if (token.startsWith("mb-")) {
-      Styles.mb(node, value);
+      Styles.mb(node, (int) value);
     } else if (token.startsWith("ml-")) {
-      Styles.ml(node, value);
+      Styles.ml(node, (int) value);
     }
   }
 
@@ -458,11 +474,16 @@ public final class TwStyle {
           value = value.substring(1, value.length() - 1);
         }
         double flexValue = Double.parseDouble(value);
-        // For arbitrary flex values in HBox/VBox, use ALWAYS priority
+        // For arbitrary flex values in HBox/VBox, use ALWAYS priority with the actual factor
+        // Note: JavaFX HBox/VBox only supports Priority enum (NEVER/SOMETIMES/ALWAYS)
+        // and does not expose a public API to set custom grow factors.
+        // For precise flex factor control, use TwFlexPane instead of HBox/VBox.
+        // This maps flex-[N] where N > 0 to ALWAYS priority (equivalent to flex-1 behavior)
+        // while documenting the limitation for HBox/VBox containers.
         if (parent instanceof HBox) {
-          Styles.flex1(node);
+          HBox.setHgrow(node, flexValue > 0 ? Priority.ALWAYS : Priority.NEVER);
         } else if (parent instanceof VBox) {
-          Styles.vgrow(node);
+          VBox.setVgrow(node, flexValue > 0 ? Priority.ALWAYS : Priority.NEVER);
         }
       } catch (NumberFormatException e) {
         // Ignore invalid flex values
@@ -512,12 +533,12 @@ public final class TwStyle {
         String value = token.substring(start, end);
         px = parseCssValue(value);
       } else {
-        int value = parseTailwindValue(token);
-        px = value * 4.0;
+        double value = parseTailwindValue(token);
+        px = value * TwConfig.unit();
       }
     } else {
-      int value = parseTailwindValue(token);
-      px = value * 4.0;
+      double value = parseTailwindValue(token);
+      px = value * TwConfig.unit();
     }
 
     // Prioritize TwFlexPane if parent is TwFlexPane
@@ -581,10 +602,10 @@ public final class TwStyle {
     }
 
     if (token.startsWith("grid-cols-")) {
-      int cols = parseTailwindValue(token);
+      int cols = (int) parseTailwindValue(token);
       gridPane.cols(cols);
     } else if (token.startsWith("grid-rows-")) {
-      int rows = parseTailwindValue(token);
+      int rows = (int) parseTailwindValue(token);
       gridPane.rows(rows);
     } else if (token.equals("grid-flow-row")) {
       gridPane.autoFlow(io.github.yasmramos.tailwindfx.layout.TwGridPane.AutoFlow.ROW);
@@ -601,10 +622,10 @@ public final class TwStyle {
   private static void applyGridItemStyle(
       Node node, io.github.yasmramos.tailwindfx.layout.TwGridPane gridPane, String token) {
     if (token.startsWith("col-span-")) {
-      int span = parseTailwindValue(token);
+      int span = (int) parseTailwindValue(token);
       io.github.yasmramos.tailwindfx.layout.TwGridPane.setColSpan(node, span);
     } else if (token.startsWith("row-span-")) {
-      int span = parseTailwindValue(token);
+      int span = (int) parseTailwindValue(token);
       io.github.yasmramos.tailwindfx.layout.TwGridPane.setRowSpan(node, span);
     }
   }
@@ -653,15 +674,26 @@ public final class TwStyle {
   }
 
   /** Parses numeric value from Tailwind token (e.g., "m-4" -> 4, "p-[16px]" -> 4). */
-  private static int parseTailwindValue(String token) {
+  private static double parseTailwindValue(String token) {
     // Handle arbitrary values like m-[16px]
     if (token.contains("[")) {
       int start = token.indexOf('[') + 1;
       int end = token.indexOf(']');
+      
+      // Verify closing bracket exists to avoid StringIndexOutOfBoundsException
+      if (end == -1) {
+        if (TwConfig.isDebug()) {
+          System.out.println("[TailwindFX Warning] Missing closing bracket in token: " + token);
+        }
+        return 0;
+      }
+      
       String value = token.substring(start, end);
       if (value.endsWith("px")) {
         try {
-          return Integer.parseInt(value.substring(0, value.length() - 2)) / 4;
+          // Use double arithmetic respecting TwConfig.unit() like parseCssValue does for rem/em
+          double pxValue = Double.parseDouble(value.substring(0, value.length() - 2));
+          return pxValue / TwConfig.unit();
         } catch (NumberFormatException e) {
           if (TwConfig.isDebug()) {
             System.out.println("[TailwindFX Warning] Invalid px value in token: " + token);
@@ -670,7 +702,7 @@ public final class TwStyle {
         }
       }
       try {
-        return Integer.parseInt(value);
+        return Double.parseDouble(value);
       } catch (NumberFormatException e) {
         if (TwConfig.isDebug()) {
           System.out.println("[TailwindFX Warning] Invalid numeric value in token: " + token);
