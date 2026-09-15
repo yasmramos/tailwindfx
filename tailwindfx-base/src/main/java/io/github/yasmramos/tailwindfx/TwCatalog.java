@@ -226,20 +226,6 @@ public final class TwCatalog {
       }
     }
 
-    // Background opacity modifiers
-    for (String color : COLOR_FAMILIES) {
-      if (!"transparent".equals(color)) {
-        for (String opacity : OPACITIES) {
-          if ("white".equals(color) || "black".equals(color)) {
-            utilities.add("bg-" + color + "/" + opacity);
-          } else {
-            for (int shade : SHADES) {
-              utilities.add("bg-" + color + "-" + shade + "/" + opacity);
-            }
-          }
-        }
-      }
-    }
   }
 
   private static void addSpacingUtilities(Set<String> utilities, ThemeConfig config) {
