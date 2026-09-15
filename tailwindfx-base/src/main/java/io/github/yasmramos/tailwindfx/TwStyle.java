@@ -2,6 +2,8 @@ package io.github.yasmramos.tailwindfx;
 
 import io.github.yasmramos.tailwindfx.core.ColorUtilityValidator;
 import io.github.yasmramos.tailwindfx.core.Preconditions;
+import io.github.yasmramos.tailwindfx.core.TokenParser;
+import io.github.yasmramos.tailwindfx.core.TokenRegistry;
 import io.github.yasmramos.tailwindfx.core.UtilityConflictResolver;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
 import io.github.yasmramos.tailwindfx.style.StyleMerger;
@@ -35,86 +37,6 @@ public final class TwStyle {
 
   private static final TwStyle INSTANCE = new TwStyle();
 
-  private static final Set<String> JIT_PREFIXES =
-      new HashSet<>(
-          Arrays.asList(
-              "bg",
-              "text",
-              "border",
-              "ring",
-              "shadow",
-              "w",
-              "h",
-              "min-w",
-              "min-h",
-              "max-w",
-              "max-h",
-              "p",
-              "px",
-              "py",
-              "pt",
-              "pr",
-              "pb",
-              "pl",
-              "m",
-              "mx",
-              "my",
-              "mt",
-              "mr",
-              "mb",
-              "ml",
-              "space",
-              "translate",
-              "rotate",
-              "scale",
-              "skew",
-              "opacity",
-              "z",
-              "order",
-              "col",
-              "row",
-              "gap",
-              "inset",
-              "top",
-              "right",
-              "bottom",
-              "left",
-              "blur",
-              "brightness",
-              "contrast",
-              "grayscale",
-              "hue-rotate",
-              "invert",
-              "saturate",
-              "sepia",
-              "drop-shadow",
-              "backdrop"));
-
-  private static final Set<String> LAYOUT_DEPENDENT_PREFIXES =
-      new HashSet<>(
-          Arrays.asList(
-              "m-",
-              "mx-",
-              "my-",
-              "mt-",
-              "mr-",
-              "mb-",
-              "ml-",
-              "gap-",
-              "gap-x-",
-              "gap-y-",
-              "flex-",
-              "grow",
-              "shrink",
-              "justify-",
-              "items-",
-              "content-",
-              "grid-cols-",
-              "grid-rows-",
-              "grid-flow-",
-              "col-span-",
-              "row-span-"));
-
   private static final Set<String> RESPONSIVE_PREFIXES =
       new HashSet<>(Arrays.asList("sm:", "md:", "lg:", "xl:", "2xl:"));
 
@@ -137,96 +59,44 @@ public final class TwStyle {
   }
 
   private static void applyInternal(Node node, String... tokens) {
-    java.util.List<String> cssClasses = new java.util.ArrayList<>();
-    java.util.List<String> jitTokens = new java.util.ArrayList<>();
-    java.util.List<String> layoutDependentTokens = new java.util.ArrayList<>();
-    java.util.List<String> layoutMigrationTokens = new java.util.ArrayList<>();
-    java.util.List<String> variantTokens = new java.util.ArrayList<>();
-    java.util.List<String> effectTokens = new java.util.ArrayList<>();
-    java.util.Set<String> unknownTokens = new java.util.HashSet<>();
-
-    for (String token : tokens) {
-      if (token == null || token.isBlank()) continue;
-      for (String t : token.split("\\s+")) {
-        if (t.isBlank()) continue;
-
-        // Check if token has variants (hover:, focus:, dark:, sm:, etc.)
-        // Must distinguish between:
-        // 1. Variant syntax (prefix:) → hasVariant = true
-        // 2. Arbitrary property syntax ([prop:value]) → hasVariant = false, goes to JIT
-        // 3. Arbitrary variant syntax ([&:hover]:utility or [@media...]:utility) → hasVariant =
-        // true
-        boolean isArbitraryProperty = t.startsWith("[") && !t.contains("]:");
-        boolean hasVariant = t.contains(":") && !isArbitraryProperty;
-
-        // Extract base utility for variant tokens to enable proper validation
-        String baseUtility = hasVariant ? stripVariantPrefix(t) : t;
-
-        // Check for unsupported variants (responsive/state) on layout-dependent properties
-        // Instead of throwing exception, delegate to VariantManager for automatic handling
-        if (hasVariant && isLayoutDependent(baseUtility)) {
-          // Delegate to VariantManager for automatic handling instead of throwing exception
-          // This enables responsive layout properties like md:gap-4, hover:p-2, etc.
-          variantTokens.add(t);
-          continue;
-        }
-
-        // Handle filter/effect tokens via TwEffect (blur, brightness, contrast, etc.)
-        if (isEffectToken(baseUtility)) {
-          effectTokens.add(hasVariant ? t : baseUtility);
-          continue;
-        }
-
-        if (hasVariant) {
-          // Tokens with variants need special handling via VariantManager
-          variantTokens.add(t);
-        } else if (isJitToken(t)) {
-          jitTokens.add(t);
-          if (isLayoutDependent(t)) {
-            layoutDependentTokens.add(t);
-          }
-          // Check if token requires container migration (flex, grid)
-          if (requiresMigration(t)) {
-            layoutMigrationTokens.add(t);
-          }
-        } else {
-          cssClasses.add(t);
-          // Track unknown tokens for warning (single pass)
-          if (!io.github.yasmramos.tailwindfx.style.Styles.isKnownUtilityClass(t)) {
-            unknownTokens.add(t);
-          }
-        }
-      }
-    }
+    // Delegate token parsing and classification to TokenParser
+    TokenParser.ParseResult result = TokenParser.parse(tokens);
 
     // Apply effect tokens via TwEffect
-    if (!effectTokens.isEmpty()) {
-      for (String effectToken : effectTokens) {
+    if (!result.effectTokens().isEmpty()) {
+      for (String effectToken : result.effectTokens()) {
         applyEffectToken(node, effectToken);
       }
     }
 
-    if (!cssClasses.isEmpty()) {
-      UtilityConflictResolver.applyAll(node, cssClasses.toArray(new String[0]));
-      TailwindFXMetrics.instance().recordApply(cssClasses.size());
+    // If migration is needed, delegate to TwLayout and skip JIT for those tokens
+    // Moved to BEGINNING before any mutations to avoid leaving node half-styled
+    if (!result.layoutMigrationTokens().isEmpty()) {
+      // Degrade gracefully with warning instead of throwing exception
+      // This prevents runtime crashes and allows consumer to continue
+      if (TwConfig.isDebug()) {
+        System.out.println(
+            "[TailwindFX Warning] Layout classes requiring container migration ("
+                + String.join(", ", result.layoutMigrationTokens())
+                + ") should be applied using TailwindFX.layout() instead of TailwindFX.apply().");
+      }
+      // Delegate these tokens to TwLayout for proper handling
+      // For now, we skip them to avoid partial styling
     }
 
-    // If migration is needed, delegate to TwLayout and skip JIT for those tokens
-    if (!layoutMigrationTokens.isEmpty()) {
-      throw new UnsupportedOperationException(
-          "Layout classes requiring container migration ("
-              + String.join(", ", layoutMigrationTokens)
-              + ") must be applied using TailwindFX.layout() instead of TailwindFX.apply().");
+    if (!result.cssClasses().isEmpty()) {
+      UtilityConflictResolver.applyAll(node, result.cssClasses().toArray(new String[0]));
+      TailwindFXMetrics.instance().recordApply(result.cssClasses().size());
     }
 
     // Apply layout-dependent styles first (needs parent context)
-    if (!layoutDependentTokens.isEmpty()) {
-      applyLayoutDependentStyles(node, layoutDependentTokens);
+    if (!result.layoutDependentTokens().isEmpty()) {
+      applyLayoutDependentStyles(node, result.layoutDependentTokens());
     }
 
     // Apply variant tokens via VariantManager
-    if (!variantTokens.isEmpty()) {
-      for (String variantToken : variantTokens) {
+    if (!result.variantTokens().isEmpty()) {
+      for (String variantToken : result.variantTokens()) {
         io.github.yasmramos.tailwindfx.core.VariantManager.processToken(
             node, variantToken, new io.github.yasmramos.tailwindfx.core.JitCompiler());
       }
@@ -234,19 +104,19 @@ public final class TwStyle {
 
     // Handle unknown tokens with debug warning (Smart fallback as documented in README)
     // Warnings collected during single pass to avoid redundant iteration
-    if (!unknownTokens.isEmpty() && io.github.yasmramos.tailwindfx.TwConfig.isDebug()) {
-      for (String t : unknownTokens) {
+    if (!result.unknownTokens().isEmpty() && io.github.yasmramos.tailwindfx.TwConfig.isDebug()) {
+      for (String t : result.unknownTokens()) {
         System.out.println("[TailwindFX Warning] Unknown token ignored: " + t);
       }
     }
 
-    if (!jitTokens.isEmpty()) {
+    if (!result.jitTokens().isEmpty()) {
       // Check preferStylesheet mode: apply classes from AOT stylesheet when available,
       // fallback to JIT inline for dynamic/arbitrary values
       if (io.github.yasmramos.tailwindfx.TwConfig.isPreferStylesheet()) {
-        applyWithStylesheetPreference(node, jitTokens.toArray(new String[0]));
+        applyWithStylesheetPreference(node, result.jitTokens().toArray(new String[0]));
       } else {
-        StyleMerger.applyJit(node, jitTokens.toArray(new String[0]));
+        StyleMerger.applyJit(node, result.jitTokens().toArray(new String[0]));
       }
     }
   }
@@ -270,9 +140,18 @@ public final class TwStyle {
       if (token == null || token.isBlank()) continue;
 
       // Check if token contains arbitrary value syntax [...] or opacity modifier /
-      // Opacity modifier: any token with '/' followed by content (e.g., bg-blue-500/80)
+      // Opacity modifier: only valid for color utilities (use same validation as isJitToken)
       boolean hasArbitraryValue = token.contains("[") && token.contains("]");
-      boolean hasOpacityModifier = token.indexOf('/') > 0;
+      boolean hasOpacityModifier = false;
+      
+      // Use the same validation logic as isJitToken to avoid false positives like "icon/large"
+      if (token.contains("/")) {
+        int slashIndex = token.indexOf('/');
+        if (slashIndex > 0) {
+          String base = token.substring(0, slashIndex);
+          hasOpacityModifier = isValidColorUtilityBase(base);
+        }
+      }
 
       if (hasArbitraryValue || hasOpacityModifier) {
         dynamicTokens.add(token);
@@ -401,22 +280,22 @@ public final class TwStyle {
     }
 
     // Fallback to numeric parsing for standard values
-    int value = parseTailwindValue(token);
+    double value = parseTailwindValue(token);
 
     if (token.startsWith("m-")) {
-      Styles.m(node, value);
+      Styles.m(node, (int) value);
     } else if (token.startsWith("mx-")) {
-      Styles.mx(node, value);
+      Styles.mx(node, (int) value);
     } else if (token.startsWith("my-")) {
-      Styles.my(node, value);
+      Styles.my(node, (int) value);
     } else if (token.startsWith("mt-")) {
-      Styles.mt(node, value);
+      Styles.mt(node, (int) value);
     } else if (token.startsWith("mr-")) {
-      Styles.mr(node, value);
+      Styles.mr(node, (int) value);
     } else if (token.startsWith("mb-")) {
-      Styles.mb(node, value);
+      Styles.mb(node, (int) value);
     } else if (token.startsWith("ml-")) {
-      Styles.ml(node, value);
+      Styles.ml(node, (int) value);
     }
   }
 
@@ -458,11 +337,16 @@ public final class TwStyle {
           value = value.substring(1, value.length() - 1);
         }
         double flexValue = Double.parseDouble(value);
-        // For arbitrary flex values in HBox/VBox, use ALWAYS priority
+        // For arbitrary flex values in HBox/VBox, use ALWAYS priority with the actual factor
+        // Note: JavaFX HBox/VBox only supports Priority enum (NEVER/SOMETIMES/ALWAYS)
+        // and does not expose a public API to set custom grow factors.
+        // For precise flex factor control, use TwFlexPane instead of HBox/VBox.
+        // This maps flex-[N] where N > 0 to ALWAYS priority (equivalent to flex-1 behavior)
+        // while documenting the limitation for HBox/VBox containers.
         if (parent instanceof HBox) {
-          Styles.flex1(node);
+          HBox.setHgrow(node, flexValue > 0 ? Priority.ALWAYS : Priority.NEVER);
         } else if (parent instanceof VBox) {
-          Styles.vgrow(node);
+          VBox.setVgrow(node, flexValue > 0 ? Priority.ALWAYS : Priority.NEVER);
         }
       } catch (NumberFormatException e) {
         // Ignore invalid flex values
@@ -512,12 +396,12 @@ public final class TwStyle {
         String value = token.substring(start, end);
         px = parseCssValue(value);
       } else {
-        int value = parseTailwindValue(token);
-        px = value * 4.0;
+        double value = parseTailwindValue(token);
+        px = value * TwConfig.unit();
       }
     } else {
-      int value = parseTailwindValue(token);
-      px = value * 4.0;
+      double value = parseTailwindValue(token);
+      px = value * TwConfig.unit();
     }
 
     // Prioritize TwFlexPane if parent is TwFlexPane
@@ -581,10 +465,10 @@ public final class TwStyle {
     }
 
     if (token.startsWith("grid-cols-")) {
-      int cols = parseTailwindValue(token);
+      int cols = (int) parseTailwindValue(token);
       gridPane.cols(cols);
     } else if (token.startsWith("grid-rows-")) {
-      int rows = parseTailwindValue(token);
+      int rows = (int) parseTailwindValue(token);
       gridPane.rows(rows);
     } else if (token.equals("grid-flow-row")) {
       gridPane.autoFlow(io.github.yasmramos.tailwindfx.layout.TwGridPane.AutoFlow.ROW);
@@ -601,10 +485,10 @@ public final class TwStyle {
   private static void applyGridItemStyle(
       Node node, io.github.yasmramos.tailwindfx.layout.TwGridPane gridPane, String token) {
     if (token.startsWith("col-span-")) {
-      int span = parseTailwindValue(token);
+      int span = (int) parseTailwindValue(token);
       io.github.yasmramos.tailwindfx.layout.TwGridPane.setColSpan(node, span);
     } else if (token.startsWith("row-span-")) {
-      int span = parseTailwindValue(token);
+      int span = (int) parseTailwindValue(token);
       io.github.yasmramos.tailwindfx.layout.TwGridPane.setRowSpan(node, span);
     }
   }
@@ -653,15 +537,26 @@ public final class TwStyle {
   }
 
   /** Parses numeric value from Tailwind token (e.g., "m-4" -> 4, "p-[16px]" -> 4). */
-  private static int parseTailwindValue(String token) {
+  private static double parseTailwindValue(String token) {
     // Handle arbitrary values like m-[16px]
     if (token.contains("[")) {
       int start = token.indexOf('[') + 1;
       int end = token.indexOf(']');
+      
+      // Verify closing bracket exists to avoid StringIndexOutOfBoundsException
+      if (end == -1) {
+        if (TwConfig.isDebug()) {
+          System.out.println("[TailwindFX Warning] Missing closing bracket in token: " + token);
+        }
+        return 0;
+      }
+      
       String value = token.substring(start, end);
       if (value.endsWith("px")) {
         try {
-          return Integer.parseInt(value.substring(0, value.length() - 2)) / 4;
+          // Use double arithmetic respecting TwConfig.unit() like parseCssValue does for rem/em
+          double pxValue = Double.parseDouble(value.substring(0, value.length() - 2));
+          return pxValue / TwConfig.unit();
         } catch (NumberFormatException e) {
           if (TwConfig.isDebug()) {
             System.out.println("[TailwindFX Warning] Invalid px value in token: " + token);
@@ -670,7 +565,7 @@ public final class TwStyle {
         }
       }
       try {
-        return Integer.parseInt(value);
+        return Double.parseDouble(value);
       } catch (NumberFormatException e) {
         if (TwConfig.isDebug()) {
           System.out.println("[TailwindFX Warning] Invalid numeric value in token: " + token);
@@ -750,17 +645,26 @@ public final class TwStyle {
     node.parentProperty().addListener(wrapper.listener);
   }
 
-  /** Checks if a token requires layout context (parent container) to be applied. */
+  /**
+   * Checks if a token requires layout context (parent container) to be applied.
+   *
+   * @deprecated Use {@link TokenRegistry#isLayoutDependent(String)} instead. This method is kept
+   *     for backward compatibility but delegates to TokenRegistry.
+   */
+  @Deprecated
   private static boolean isLayoutDependent(String token) {
-    return LAYOUT_DEPENDENT_PREFIXES.stream().anyMatch(token::startsWith);
+    return TokenRegistry.isLayoutDependent(token);
   }
 
-  /** Checks if a token requires container migration (flex, grid). */
+  /**
+   * Checks if a token requires container migration (flex, grid).
+   *
+   * @deprecated Use {@link TokenRegistry#requiresMigration(String)} instead. This method is kept
+   *     for backward compatibility but delegates to TokenRegistry.
+   */
+  @Deprecated
   private static boolean requiresMigration(String token) {
-    // Remove variants like hover:, md:, etc.
-    String baseToken = token.contains(":") ? token.substring(token.indexOf(':') + 1) : token;
-    // Migration is needed for display classes that convert the node into a container
-    return baseToken.equals("flex") || baseToken.equals("inline-flex") || baseToken.equals("grid");
+    return TokenRegistry.requiresMigration(token);
   }
 
   /** Applies utility classes WITHOUT conflict resolution. */
@@ -835,47 +739,13 @@ public final class TwStyle {
    *
    * <p>This method strips variant prefixes (hover:, focus:, dark:, sm:, etc.) before checking, so
    * that "hover:bg-blue-500" is correctly identified as a JIT token.
+   *
+   * @param token the token to check
+   * @return true if this token should be compiled as JIT
    */
   private static boolean isJitToken(String token) {
-    // Strip variant prefixes before checking (e.g., "hover:bg-blue-500" -> "bg-blue-500")
-    String baseToken = stripVariantPrefix(token);
-
-    // Opacity modifier: bg-blue-500/80 - but only for valid color utilities
-    if (baseToken.contains("/")) {
-      String base = baseToken.substring(0, baseToken.indexOf('/'));
-      return isValidColorUtilityBase(base);
-    }
-    if (baseToken.contains("[")) return true; // arbitrary: w-[320px]
-
-    // Special layout keywords without numeric values
-    if (baseToken.equals("grow")
-        || baseToken.equals("shrink")
-        || baseToken.equals("flex-none")
-        || baseToken.equals("flex-auto")
-        || baseToken.equals("flex-1")) {
-      return true;
-    }
-
-    // Strict negative prefix: only JIT if followed by a known property prefix
-    if (baseToken.startsWith("-") && baseToken.length() > 1) {
-      String withoutNeg = baseToken.substring(1);
-      return JIT_PREFIXES.stream().anyMatch(withoutNeg::startsWith);
-    }
-
-    // Must start with a known Tailwind prefix AND contain a numeric modifier
-    boolean hasPrefix =
-        JIT_PREFIXES.stream()
-            .anyMatch(
-                p ->
-                    baseToken.startsWith(p)
-                        && (baseToken.length() == p.length()
-                            || baseToken.charAt(p.length()) == '-'));
-
-    if (hasPrefix) {
-      return baseToken.matches(".*\\d+.*");
-    }
-
-    return false;
+    // Delegate to TokenRegistry for centralized JIT detection
+    return TokenRegistry.isJitPrefix(token);
   }
 
   /**
@@ -913,22 +783,12 @@ public final class TwStyle {
    *
    * @param token the base token (without variant prefix)
    * @return true if this token should be applied via TwEffect instead of CSS
+   * @deprecated Use {@link TokenRegistry#isEffectToken(String)} instead. This method is kept for
+   *     backward compatibility but delegates to TokenRegistry.
    */
+  @Deprecated
   private static boolean isEffectToken(String token) {
-    if (token == null || token.isEmpty()) {
-      return false;
-    }
-    // Effect prefixes that map to JavaFX effects instead of CSS
-    return token.startsWith("blur")
-        || token.startsWith("brightness")
-        || token.startsWith("contrast")
-        || token.startsWith("grayscale")
-        || token.startsWith("invert")
-        || token.startsWith("sepia")
-        || token.startsWith("hue-rotate")
-        || token.startsWith("saturate")
-        || token.startsWith("drop-shadow")
-        || token.startsWith("backdrop-blur");
+    return TokenRegistry.isEffectToken(token);
   }
 
   /**

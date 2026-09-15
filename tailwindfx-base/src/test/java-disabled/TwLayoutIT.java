@@ -223,7 +223,7 @@ class TwLayoutTest extends ApplicationTest {
     TwLayout.apply(container, "flex", "gap-4");
 
     TwFlexPane flexPane = (TwFlexPane) container;
-    assertEquals(16.0, flexPane.getSpacing());
+    assertEquals(16.0, flexPane.getGap());
   }
 
   @Test
@@ -232,7 +232,7 @@ class TwLayoutTest extends ApplicationTest {
     TwLayout.apply(container, "flex", "gap-2");
 
     TwFlexPane flexPane = (TwFlexPane) container;
-    assertEquals(8.0, flexPane.getSpacing());
+    assertEquals(8.0, flexPane.getGap());
   }
 
   @Test
@@ -482,7 +482,7 @@ class TwLayoutTest extends ApplicationTest {
     TwLayout.apply(container, "flex", "justify-center", "items-center", "gap-4");
 
     TwFlexPane flexPane = (TwFlexPane) container;
-    assertEquals(16.0, flexPane.getSpacing());
+    assertEquals(16.0, flexPane.getGap());
     assertNotNull(flexPane);
   }
 
@@ -542,6 +542,6 @@ class TwLayoutTest extends ApplicationTest {
     TwFlexPane flexPane = (TwFlexPane) container;
     assertEquals(TwFlexPane.Direction.COL, flexPane.getDirection());
     assertTrue(flexPane.isWrap());
-    assertEquals(16.0, flexPane.getSpacing());
+    assertEquals(16.0, flexPane.getGap());
   }
 }

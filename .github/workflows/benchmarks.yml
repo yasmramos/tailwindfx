@@ -66,6 +66,7 @@ jobs:
       if: steps.mode.outputs.mode == 'smoke'
       run: |
         echo "Running JMH Benchmarks in smoke test mode..."
+        mkdir -p target
         java -jar tailwindfx-benchmarks/target/benchmarks.jar \
           -i 3 -wi 2 -f 1 -t 1 -to 5m \
           -rf json -rff target/benchmark-results.json
@@ -74,6 +75,7 @@ jobs:
       if: steps.mode.outputs.mode == 'robust'
       run: |
         echo "Running JMH Benchmarks in robust mode..."
+        mkdir -p target
         java -jar tailwindfx-benchmarks/target/benchmarks.jar \
           -i 5 -wi 5 -f 3 -t 1 -to 5m \
           -rf json -rff target/benchmark-results.json
