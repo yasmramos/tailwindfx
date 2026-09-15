@@ -1,15 +1,16 @@
 package io.github.yasmramos.tailwindfx;
 
-import io.github.yasmramos.tailwindfx.core.ColorUtilityValidator;
 import io.github.yasmramos.tailwindfx.core.Preconditions;
 import io.github.yasmramos.tailwindfx.core.TokenParser;
 import io.github.yasmramos.tailwindfx.core.TokenRegistry;
 import io.github.yasmramos.tailwindfx.core.UtilityConflictResolver;
+import io.github.yasmramos.tailwindfx.effect.EffectApplier;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
 import io.github.yasmramos.tailwindfx.style.LayoutApplier;
 import io.github.yasmramos.tailwindfx.style.StyleMerger;
 import io.github.yasmramos.tailwindfx.style.StylePerf;
 import io.github.yasmramos.tailwindfx.style.Styles;
+import io.github.yasmramos.tailwindfx.style.StylesheetApplier;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -63,10 +64,10 @@ public final class TwStyle {
     // Delegate token parsing and classification to TokenParser
     TokenParser.ParseResult result = TokenParser.parse(tokens);
 
-    // Apply effect tokens via TwEffect
+    // Apply effect tokens via EffectApplier
     if (!result.effectTokens().isEmpty()) {
       for (String effectToken : result.effectTokens()) {
-        applyEffectToken(node, effectToken);
+        EffectApplier.applyEffectToken(node, effectToken);
       }
     }
 
@@ -115,67 +116,10 @@ public final class TwStyle {
       // Check preferStylesheet mode: apply classes from AOT stylesheet when available,
       // fallback to JIT inline for dynamic/arbitrary values
       if (io.github.yasmramos.tailwindfx.TwConfig.isPreferStylesheet()) {
-        applyWithStylesheetPreference(node, result.jitTokens().toArray(new String[0]));
+        StylesheetApplier.applyWithStylesheetPreference(node, result.jitTokens().toArray(new String[0]));
       } else {
         StyleMerger.applyJit(node, result.jitTokens().toArray(new String[0]));
       }
-    }
-  }
-
-  /**
-   * Applies tokens with stylesheet preference mode. When preferStylesheet is enabled, this method
-   * adds CSS classes for tokens that exist in the AOT-generated stylesheet, and only uses JIT
-   * inline compilation as fallback for dynamic/arbitrary values not resolved at build-time.
-   *
-   * @param node the target node
-   * @param tokens the tokens to apply (already tokenized, no whitespace splitting needed)
-   */
-  private static void applyWithStylesheetPreference(Node node, String... tokens) {
-    // Separate tokens into:
-    // 1. Static tokens (no arbitrary values) → apply as CSS class
-    // 2. Dynamic/arbitrary tokens ([...], /opacity) → fallback to JIT inline
-    java.util.List<String> staticTokens = new java.util.ArrayList<>();
-    java.util.List<String> dynamicTokens = new java.util.ArrayList<>();
-
-    for (String token : tokens) {
-      if (token == null || token.isBlank()) continue;
-
-      // Token is already individual (no need to split by whitespace)
-      // Check if token contains arbitrary value syntax [...] or opacity modifier /
-      // Opacity modifier: only valid for color utilities (use same validation as isJitToken)
-      boolean hasArbitraryValue = token.contains("[") && token.contains("]");
-      boolean hasOpacityModifier = false;
-      
-      // Use the same validation logic as isJitToken to avoid false positives like "icon/large"
-      if (token.contains("/")) {
-        int slashIndex = token.indexOf('/');
-        if (slashIndex > 0) {
-          String base = token.substring(0, slashIndex);
-          hasOpacityModifier = isValidColorUtilityBase(base);
-        }
-      }
-
-      if (hasArbitraryValue || hasOpacityModifier) {
-        dynamicTokens.add(token);
-      } else {
-        staticTokens.add(token);
-      }
-    }
-
-    // Apply static tokens as CSS classes (AOT stylesheet will handle them)
-    if (!staticTokens.isEmpty()) {
-      for (String cls : staticTokens) {
-        if (!node.getStyleClass().contains(cls)) {
-          node.getStyleClass().add(cls);
-        }
-      }
-      // Use UtilityConflictResolver for conflict resolution between classes of same category
-      UtilityConflictResolver.applyAll(node, staticTokens.toArray(new String[0]));
-    }
-
-    // Fallback to JIT inline for dynamic/arbitrary values
-    if (!dynamicTokens.isEmpty()) {
-      StyleMerger.applyJit(node, dynamicTokens.toArray(new String[0]));
     }
   }
 
@@ -772,10 +716,12 @@ public final class TwStyle {
    *
    * @param base the token before the '/' modifier
    * @return true if this is a valid color utility base
-   * @see ColorUtilityValidator#isValidColorUtilityBase(String)
+   * @see io.github.yasmramos.tailwindfx.core.ColorUtilityValidator#isValidColorUtilityBase(String)
+   * @deprecated Use ColorUtilityValidator directly or StylesheetApplier instead.
    */
+  @Deprecated
   private static boolean isValidColorUtilityBase(String base) {
-    return ColorUtilityValidator.isValidColorUtilityBase(base);
+    return io.github.yasmramos.tailwindfx.core.ColorUtilityValidator.isValidColorUtilityBase(base);
   }
 
   /**
@@ -799,48 +745,12 @@ public final class TwStyle {
    *
    * @param node the node to apply the effect to
    * @param token the effect token (e.g., "blur-sm", "brightness-125", "grayscale")
+   * @deprecated Use {@link EffectApplier#applyEffectToken(Node, String)} instead. This method is
+   *     kept for backward compatibility but will be removed in a future version.
    */
+  @Deprecated
   private static void applyEffectToken(javafx.scene.Node node, String token) {
-    try {
-      if (token.startsWith("blur-")) {
-        String size = token.substring(5);
-        if ("none".equals(size)) {
-          TwEffect.blurNone(node);
-        } else {
-          TwEffect.blurWithSize(node, size);
-        }
-      } else if (token.equals("blur")) {
-        TwEffect.blur(node, 0); // default blur
-      } else if (token.startsWith("brightness-")) {
-        String percentage = token.substring(11);
-        TwEffect.brightnessWithPercentage(node, percentage);
-      } else if (token.equals("brightness")) {
-        TwEffect.brightness(node, 1.0); // default no change
-      } else if (token.startsWith("contrast-")) {
-        String percentage = token.substring(9);
-        TwEffect.contrastWithPercentage(node, percentage);
-      } else if (token.equals("contrast")) {
-        TwEffect.contrast(node, 1.0); // default no change
-      } else if (token.equals("grayscale")) {
-        TwEffect.grayscale(node);
-      } else if (token.equals("grayscale-0")) {
-        TwEffect.grayscaleNone(node);
-      } else if (token.equals("invert")) {
-        TwEffect.invert(node);
-      } else if (token.equals("invert-0")) {
-        TwEffect.invertNone(node);
-      } else if (token.equals("sepia")) {
-        TwEffect.sepia(node);
-      } else if (token.equals("sepia-0")) {
-        TwEffect.sepiaNone(node);
-      } else if (TwConfig.isDebug()) {
-        System.out.println("[TailwindFX Warning] Unsupported effect token: " + token);
-      }
-    } catch (Exception e) {
-      if (TwConfig.isDebug()) {
-        System.out.println(
-            "[TailwindFX Warning] Failed to apply effect \"" + token + "\": " + e.getMessage());
-      }
-    }
+    // Delegate to EffectApplier for proper error handling
+    EffectApplier.applyEffectToken(node, token);
   }
 }
