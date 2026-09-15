@@ -130,7 +130,8 @@ public final class TokenRegistry {
               "hue-rotate",
               "saturate",
               "drop-shadow",
-              "backdrop-blur"));
+              "backdrop-blur",
+              "opacity"));
 
   /** Component class prefixes for static utility validation. */
   private static final Set<String> COMPONENT_PREFIXES =
