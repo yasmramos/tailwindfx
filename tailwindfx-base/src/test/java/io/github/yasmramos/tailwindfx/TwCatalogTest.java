@@ -314,13 +314,13 @@ class TwCatalogTest {
     assertNotNull(css, "Generated CSS should not be null");
     assertFalse(css.isEmpty(), "Generated CSS should not be empty");
 
-    // Write CSS to file in target directory
-    Path targetDir = Paths.get("target");
-    if (!Files.exists(targetDir)) {
-      Files.createDirectories(targetDir);
+    // Write CSS to file in src/test/resources/generated-css directory
+    Path resourcesDir = Paths.get("src", "test", "resources", "generated-css");
+    if (!Files.exists(resourcesDir)) {
+      Files.createDirectories(resourcesDir);
     }
 
-    Path cssFile = targetDir.resolve("tailwindfx-all-utilities.css");
+    Path cssFile = resourcesDir.resolve("tailwindfx-all-utilities.css");
     Files.writeString(cssFile, css);
 
     // Verify file was created
