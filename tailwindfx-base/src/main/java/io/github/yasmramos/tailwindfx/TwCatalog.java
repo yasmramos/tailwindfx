@@ -225,7 +225,6 @@ public final class TwCatalog {
         }
       }
     }
-
   }
 
   private static void addSpacingUtilities(Set<String> utilities, ThemeConfig config) {
