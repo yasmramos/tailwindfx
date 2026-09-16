@@ -10,6 +10,7 @@ import io.github.yasmramos.tailwindfx.layout.TwFlexPane;
 import io.github.yasmramos.tailwindfx.layout.TwGridPane;
 import java.util.Arrays;
 import java.util.List;
+import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -63,9 +64,14 @@ public class LayoutApplierTest extends ApplicationTest {
 
     LayoutApplier.applyLayoutDependentStyles(node, Arrays.asList("m-4"));
 
-    // m-4 should apply 4 * unit = 16px margin on all sides
-    assertEquals(16.0, node.getTranslateX(), 0.1, "Margin X should be applied");
-    assertEquals(16.0, node.getTranslateY(), 0.1, "Margin Y should be applied");
+    // m-4 should apply margin via HBox/VBox/GridPane.setMargin(), not translate
+    // Margins are handled programmatically, not via CSS or translate properties
+    Insets hboxMargin = HBox.getMargin(node);
+    assertNotNull(hboxMargin, "HBox margin should be set");
+    assertEquals(16.0, hboxMargin.getTop(), 0.1, "Margin top should be 16px (4 * 4px)");
+    assertEquals(16.0, hboxMargin.getRight(), 0.1, "Margin right should be 16px");
+    assertEquals(16.0, hboxMargin.getBottom(), 0.1, "Margin bottom should be 16px");
+    assertEquals(16.0, hboxMargin.getLeft(), 0.1, "Margin left should be 16px");
   }
 
   @Test
@@ -75,9 +81,14 @@ public class LayoutApplierTest extends ApplicationTest {
 
     LayoutApplier.applyLayoutDependentStyles(node, Arrays.asList("m-[20px]"));
 
-    // m-[20px] should apply 20px margin
-    assertNotNull(node.getStyle(), "Style should be set");
-    assertTrue(node.getStyle().contains("-fx-margin"), "Should contain margin property");
+    // m-[20px] should apply 20px margin via HBox.setMargin()
+    // JavaFX doesn't have -fx-margin CSS property; margins are set programmatically
+    Insets hboxMargin = HBox.getMargin(node);
+    assertNotNull(hboxMargin, "HBox margin should be set for arbitrary values");
+    assertEquals(20.0, hboxMargin.getTop(), 0.1, "Margin top should be 20px");
+    assertEquals(20.0, hboxMargin.getRight(), 0.1, "Margin right should be 20px");
+    assertEquals(20.0, hboxMargin.getBottom(), 0.1, "Margin bottom should be 20px");
+    assertEquals(20.0, hboxMargin.getLeft(), 0.1, "Margin left should be 20px");
   }
 
   @Test
@@ -173,7 +184,7 @@ public class LayoutApplierTest extends ApplicationTest {
   @Test
   public void testApplyColSpanToChild() {
     Label node = new Label("colspan-test");
-    twGridPane.getChildren().add(node);
+    interact(() -> twGridPane.getChildren().add(node));
 
     LayoutApplier.applyLayoutDependentStyles(node, Arrays.asList("col-span-2"));
 
@@ -184,7 +195,7 @@ public class LayoutApplierTest extends ApplicationTest {
   @Test
   public void testApplyRowSpanToChild() {
     Label node = new Label("rowspan-test");
-    twGridPane.getChildren().add(node);
+    interact(() -> twGridPane.getChildren().add(node));
 
     LayoutApplier.applyLayoutDependentStyles(node, Arrays.asList("row-span-3"));
 
@@ -257,7 +268,7 @@ public class LayoutApplierTest extends ApplicationTest {
   @Test
   public void testMultipleTokensApplication() {
     Label node = new Label("multi-token-test");
-    hBox.getChildren().add(node);
+    interact(() -> hBox.getChildren().add(node));
 
     List<String> tokens = Arrays.asList("m-2", "flex-1", "gap-2");
     LayoutApplier.applyLayoutDependentStyles(node, tokens);

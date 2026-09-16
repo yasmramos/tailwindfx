@@ -31,10 +31,10 @@ public final class CssPropertyMapper {
       case "p" -> "-fx-padding";
       case "px" -> "-fx-padding";
       case "py" -> "-fx-padding";
-      case "pt", "top" -> "-fx-padding";
-      case "pr", "right" -> "-fx-padding";
-      case "pb", "bottom" -> "-fx-padding";
-      case "pl", "left" -> "-fx-padding";
+        // Note: top/right/bottom/left are NOT mapped to CSS because JavaFX doesn't support
+        // -fx-inset or similar properties. Insets must be applied programmatically via
+        // Node.setTranslateX/Y() or layout panes. Return null to prevent invalid CSS generation.
+      case "pt", "top", "pr", "right", "pb", "bottom", "pl", "left" -> null;
 
         // Margin properties are NOT mapped to CSS because JavaFX doesn't support -fx-margin.
         // They are handled by Styles.java via HBox.setMargin(), VBox.setMargin(),
@@ -43,7 +43,10 @@ public final class CssPropertyMapper {
       case "m", "mx", "my", "mt", "mr", "mb", "ml" -> null;
 
       case "bg" -> "-fx-background-color";
-      case "border" -> "-fx-border-color";
+        // Border width vs border color: distinguish by token type in CssPropertyMapper.map()
+        // For border widths (border, border-0, border-2, etc.), map to -fx-border-width
+        // For border colors (border-blue-500), map to -fx-border-color
+      case "border" -> "-fx-border-color"; // Default to color; width handled specially in map()
 
       case "text" -> "-fx-text-fill";
       case "font" -> "-fx-font-family";
@@ -332,9 +335,42 @@ public final class CssPropertyMapper {
       return null;
     }
 
-    // Special handling for border-* styles (solid, dashed, dotted, none)
-    if ("border".equals(token.prefix) && isBorderStyle(token.namedValue)) {
-      return prop("-fx-border-style", resolvedValue);
+    // Special handling for border widths: border, border-0, border-2, border-4, border-8
+    // These should map to -fx-border-width, not -fx-border-color
+    // Border width tokens are SCALE type or the base 'border' token without color/shade
+    if ("border".equals(token.prefix)) {
+      // Check if it's a border style (solid, dashed, dotted, none)
+      if (isBorderStyle(token.namedValue)) {
+        return prop("-fx-border-style", resolvedValue);
+      }
+      // Check if it's a border width (SCALE type or base 'border' with numeric scale)
+      if (token.kind == StyleToken.Kind.SCALE || (token.scale != null && token.colorName == null)) {
+        // Base 'border' without number should be 1px
+        if (token.scale == null) {
+          return prop("-fx-border-width", "1px");
+        }
+        return prop("-fx-border-width", resolvedValue);
+      }
+      // Otherwise it's a border color (COLOR_SHADE type), continue with default mapping
+    }
+
+    // Special handling for rotate: already resolved as degrees without 'px' suffix
+    if ("rotate".equals(token.prefix)) {
+      String property = mapToCssProperty(token.prefix);
+      return prop(property, resolvedValue);
+    }
+
+    // Special handling for translate-x and translate-y: use signed values
+    if ("translate".equals(token.prefix) && token.subPrefix != null) {
+      String property =
+          switch (token.subPrefix) {
+            case "x" -> "-fx-translate-x";
+            case "y" -> "-fx-translate-y";
+            default -> mapToCssProperty(token.prefix + "-" + token.subPrefix);
+          };
+      if (property != null) {
+        return prop(property, resolvedValue);
+      }
     }
 
     // Special handling for w-auto, w-min, w-max, h-auto, h-min, h-max

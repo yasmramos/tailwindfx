@@ -43,6 +43,31 @@ public final class StyleResolver {
   }
 
   private String resolveScale(StyleToken token) {
+    // Special handling for border widths: border-0, border-2, border-4, border-8
+    // These should use the scale value directly as pixels (not from spacing table)
+    if ("border".equals(token.prefix) && token.scale != null) {
+      return token.scale + "px";
+    }
+
+    // Special handling for rotate: use scale directly as degrees, with sign, no 'px' suffix
+    if ("rotate".equals(token.prefix)) {
+      int value = token.signedScale();
+      return String.valueOf(value);
+    }
+
+    // Special handling for translate-x and translate-y: use signed scale with spacing
+    if ("translate".equals(token.prefix)) {
+      double[] spacing = themeConfig.spacing();
+      int scale = token.scale;
+      if (scale >= 0 && scale < spacing.length) {
+        int value = token.negative ? -(int) spacing[scale] : (int) spacing[scale];
+        return value + "px";
+      }
+      // Fallback
+      int fallback = token.negative ? -(scale * 4) : (scale * 4);
+      return fallback + "px";
+    }
+
     double[] spacing = themeConfig.spacing();
     int scale = token.scale;
 
