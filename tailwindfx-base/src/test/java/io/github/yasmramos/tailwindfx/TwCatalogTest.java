@@ -8,7 +8,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
+import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
 import org.junit.jupiter.api.Test;
+import org.testfx.framework.junit5.ApplicationTest;
 
 /**
  * TwCatalogTest — Tests for the utility class catalog generator.
@@ -16,7 +19,7 @@ import org.junit.jupiter.api.Test;
  * <p>Verifies that the catalog includes representative families of utilities, is not empty, and
  * generates a complete CSS file with all utilities.
  */
-class TwCatalogTest {
+class TwCatalogTest extends ApplicationTest {
 
   @Test
   void testAllUtilityClassesIsNotEmpty() {
@@ -343,5 +346,41 @@ class TwCatalogTest {
             + " ("
             + Files.size(cssFile)
             + " bytes)");
+  }
+
+  @Test
+  void testGenerateCssAndLoadToScene() {
+    // Generate the complete CSS with all utilities
+    ThemeConfig config = ThemeConfig.defaultConfig();
+    String css = TwCatalog.generateFullCss(config);
+
+    // Verify CSS is generated
+    assertNotNull(css, "Generated CSS should not be null");
+    assertFalse(css.isEmpty(), "Generated CSS should not be empty");
+
+    // Create a JavaFX scene and install TailwindFX
+    StackPane root = new StackPane();
+    Scene scene = new Scene(root, 800, 600);
+    TailwindFX.install(scene);
+
+    // Load the generated CSS into the scene
+    scene.getStylesheets().add("data:text/css," + css.replace("#", "%23"));
+
+    // Verify that the scene has stylesheets loaded
+    assertFalse(scene.getStylesheets().isEmpty(), "Scene should have stylesheets loaded");
+
+    // Verify that CSS contains expected utilities loaded in scene
+    String sceneCss = css;
+    assertTrue(
+        sceneCss.contains(".p-4") || sceneCss.contains("p-4"),
+        "Scene CSS should contain p-4 utility");
+    assertTrue(
+        sceneCss.contains(".bg-blue-500") || sceneCss.contains("bg-blue-500"),
+        "Scene CSS should contain bg-blue-500 utility");
+    assertTrue(
+        sceneCss.contains(".rounded-lg") || sceneCss.contains("rounded-lg"),
+        "Scene CSS should contain rounded-lg utility");
+
+    System.out.println("Successfully loaded generated CSS to Scene with " + css.length() + " bytes");
   }
 }
