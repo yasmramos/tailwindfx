@@ -89,8 +89,7 @@ public final class TokenRegistry {
               "drop-shadow",
               "backdrop",
               "grow",
-              "shrink",
-              "flex"));
+              "shrink"));
 
   /** Layout-dependent prefixes requiring parent container context for application. */
   private static final Set<String> LAYOUT_DEPENDENT_PREFIXES =

@@ -120,4 +120,4 @@ Configure in pom.xml:
 
 ## License
 
-MIT License
+Apache License 2.0
