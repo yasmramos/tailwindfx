@@ -390,7 +390,7 @@ java -jar tailwindfx-benchmarks/target/benchmarks.jar -f 1 -wi 2 -i 2
 
 ## License
 
-Apache License 2.0 — see [LICENSE](LICENSE) for details.
+Apache License 2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE) for details.
 
 ---
 
