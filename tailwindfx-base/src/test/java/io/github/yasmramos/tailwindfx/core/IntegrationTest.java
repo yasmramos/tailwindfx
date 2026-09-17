@@ -122,7 +122,15 @@ public class IntegrationTest {
   public void testCachePerformance() {
     String[] tokens = {"p-4", "bg-blue-500", "text-white", "rounded-md"};
 
-    // First compilation (cache miss)
+    // Warmup to ensure JIT compilation
+    for (int i = 0; i < 5; i++) {
+      JitCompiler.compileBatch(tokens);
+    }
+    
+    // Clear cache to simulate cache miss
+    JitCompiler.clearCache();
+
+    // First compilation after cache clear (cache miss)
     long start1 = System.nanoTime();
     JitCompiler.compileBatch(tokens);
     long time1 = System.nanoTime() - start1;
@@ -132,9 +140,21 @@ public class IntegrationTest {
     JitCompiler.compileBatch(tokens);
     long time2 = System.nanoTime() - start2;
 
-    assertTrue(time2 < time1, "Cache hit should be faster than cache miss");
+    // Use average of multiple runs for more reliable measurement
+    long totalHitTime = 0;
+    int iterations = 10;
+    for (int i = 0; i < iterations; i++) {
+      long start = System.nanoTime();
+      JitCompiler.compileBatch(tokens);
+      totalHitTime += System.nanoTime() - start;
+    }
+    long avgHitTime = totalHitTime / iterations;
+
+    assertTrue(avgHitTime < time1, 
+        String.format("Cache hit (%.3f ms) should be faster than cache miss (%.3f ms)", 
+            avgHitTime / 1_000_000.0, time1 / 1_000_000.0));
     System.out.println(
-        "Cache miss: " + (time1 / 1_000_000.0) + "ms, Cache hit: " + (time2 / 1_000_000.0) + "ms");
+        "Cache miss: " + (time1 / 1_000_000.0) + "ms, Avg cache hit: " + (avgHitTime / 1_000_000.0) + "ms");
   }
 
   @Test
