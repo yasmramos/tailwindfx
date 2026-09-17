@@ -163,11 +163,17 @@ public class TailwindCssMojoTest {
     File sourceDir = tempDir.resolve("src").toFile();
     sourceDir.mkdirs();
 
-    // Create a test file with classes to generate CSS
+    // Create a test file with classes to generate CSS using proper TwStyle syntax
     Path testFile = sourceDir.toPath().resolve("Test.java");
     Files.writeString(
         testFile,
-        "package test;\n" + "public class Test {\n" + "  String s = \"p-4 m-2\";\n" + "}");
+        "package test;\n"
+            + "import io.github.yasmramos.tailwindfx.TwStyle;\n"
+            + "public class Test {\n"
+            + "  public void setup() {\n"
+            + "    TwStyle.apply(\"p-4 m-2\");\n"
+            + "  }\n"
+            + "}");
 
     File outputDir = tempDir.resolve("output").toFile();
 
