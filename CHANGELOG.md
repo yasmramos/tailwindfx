@@ -191,4 +191,4 @@ Comprehensive test suite with 59+ test classes covering:
 - README.md with setup and usage instructions
 - CONTRIBUTING.md with contribution guidelines
 - CODE_OF_CONDUCT.md with community standards
-- MIT License with 2026 copyright
+- Apache License 2.0 with 2026 copyright

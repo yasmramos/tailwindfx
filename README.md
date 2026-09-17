@@ -6,7 +6,7 @@
 [![JavaFX](https://img.shields.io/badge/JavaFX-17%2B-green)](https://openjfx.io/)
 [![Build](https://img.shields.io/github/actions/workflow/status/yasmramos/TailwindFX/maven.yml?branch=main&label=build)](https://github.com/yasmramos/TailwindFX/actions/workflows/maven.yml)
 [![Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/yasmramos/85eea898808574addebcd08db98ccb69/raw/test-results.json)](https://github.com/yasmramos/TailwindFX/actions/workflows/maven.yml)
-[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue)](LICENSE)
 
 ---
 
@@ -390,7 +390,7 @@ java -jar tailwindfx-benchmarks/target/benchmarks.jar -f 1 -wi 2 -i 2
 
 ## License
 
-MIT — see [LICENSE](LICENSE) for details.
+Apache License 2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE) for details.
 
 ---
 
