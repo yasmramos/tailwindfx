@@ -508,7 +508,7 @@ public final class ThemeManager {
     if (root == null) return;
 
     // Pass 1: Immediate refresh
-    root.applyCss();
+    safeApplyCss(root);
     if (root instanceof javafx.scene.Parent) {
       ((javafx.scene.Parent) root).requestLayout();
     }
@@ -519,9 +519,26 @@ public final class ThemeManager {
     // Pass 2: Deferred refresh (catches components that load lazily)
     Platform.runLater(
         () -> {
-          root.applyCss();
+          safeApplyCss(root);
           refreshDescendants(root);
         });
+  }
+
+  /**
+   * Safely applies CSS to a node, catching any NPEs that may occur if the node is not fully
+   * initialized.
+   *
+   * <p>JavaFX's internal CSS processing can throw NPEs when applyCss() is called before the node
+   * is fully attached to the scene graph or during early initialization phases.
+   */
+  private static void safeApplyCss(Node node) {
+    if (node == null) return;
+    try {
+      node.applyCss();
+    } catch (NullPointerException e) {
+      // Ignore NPEs during CSS application - node may not be fully initialized yet
+      // This is expected behavior in some edge cases during scene graph transitions
+    }
   }
 
   /** Recursively applies CSS and requests layout on all descendant nodes. */

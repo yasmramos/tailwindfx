@@ -1,59 +1,28 @@
-# Compiled and build artifacts
+```
+# Maven/Java build artifacts
+.target/
 *.class
-*.o
-*.obj
-*.out
-build/
-target/
+*.jar
+*.war
+*.ear
+*.zip
+
+# Generated files
+.flattened-pom.xml
 
 # Dependencies
-node_modules/
-venv/
-.venv/
-__pycache__/
-.mypy_cache/
-.pytest_cache/
+.m2/
 .gradle/
 
 # Logs and temp files
 *.log
 *.tmp
-*.swp
-
-# Environment
-.env
-.env.local
-*.env.*
 
 # Editors
 .vscode/
 .idea/
 
-# System files
+# OS generated files
 .DS_Store
 Thumbs.db
-
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# Archives
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
+```

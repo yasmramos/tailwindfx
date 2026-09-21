@@ -13,8 +13,8 @@
   <description>Core library for TailwindFX - A Tailwind CSS-inspired utility-first styling framework for JavaFX applications</description>
   <licenses>
     <license>
-      <name>MIT License</name>
-      <url>https://opensource.org/licenses/MIT</url>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
