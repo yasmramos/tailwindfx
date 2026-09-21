@@ -219,6 +219,45 @@ public final class TokenParser {
     // Delegate to TokenRegistry for centralized JIT detection
     return TokenRegistry.isJitPrefix(token);
   }
+  
+  /**
+   * Checks if a JIT token has an arbitrary or numeric value that requires runtime compilation.
+   *
+   * <p>Tokens like "text-white", "text-lg", "bg-blue-500" are known utilities that should be
+   * applied as CSS classes. Only tokens with arbitrary values ([...]) or numeric suffixes
+   * require JIT compilation.
+   *
+   * @param token the token to check (already confirmed as JIT prefix)
+   * @return true if this token requires JIT compilation
+   */
+  private static boolean requiresJitCompilation(String token) {
+    // Arbitrary values always need JIT
+    if (hasArbitraryValue(token)) {
+      return true;
+    }
+    
+    // Strip variant prefixes to get the base token
+    String baseToken = stripVariantPrefix(token);
+    
+    // Extract the value part (everything after the first hyphen)
+    int hyphenIndex = baseToken.indexOf('-');
+    if (hyphenIndex < 0 || hyphenIndex >= baseToken.length() - 1) {
+      // No value part (e.g., "text", "bg") - shouldn't happen for valid tokens
+      return false;
+    }
+    
+    String valuePart = baseToken.substring(hyphenIndex + 1);
+    
+    // Check if value is purely numeric (possibly negative or with decimal)
+    // These need JIT compilation for dynamic sizing
+    if (valuePart.matches("^-?\\d+(\\.\\d+)?$")) {
+      return true;
+    }
+    
+    // Named values (white, blue-500, lg, 2xl, etc.) are known utilities
+    // and should be applied as CSS classes, not JIT
+    return false;
+  }
 
   /**
    * Strips variant prefixes from a token.

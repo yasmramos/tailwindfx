@@ -38,6 +38,7 @@
     
     <modules>
         <module>tailwindfx-base</module>
+        <module>tailwindfx-components</module>
         <module>tailwindfx-maven-plugin</module>
     </modules>
     
