@@ -1034,7 +1034,7 @@ public final class Styles {
    *
    * <pre>
    * Label label = new Label("Click me");
-   * TailwindFX.apply(label, "text-blue-500");
+   * TwStyle.apply(label, "text-blue-500");
    * SVGPath icon = loadIcon();
    * Styles.fillCurrent(icon, label); // icon fill = label text color
    * </pre>

@@ -16,7 +16,7 @@ public class BasicDashboardExample extends Application {
 
         // Sidebar
         Label logo = new Label("TailwindFX");
-        TailwindFX.apply(logo, "text-2xl", "font-bold");
+        TwStyle.apply(logo, "text-2xl", "font-bold");
 
         Button dashboardBtn = new Button("Dashboard");
         Button profileBtn = new Button("Profile");
@@ -28,10 +28,10 @@ public class BasicDashboardExample extends Application {
         settingsBtn.setPrefWidth(150);
         logoutBtn.setPrefWidth(150);
 
-        TailwindFX.apply(dashboardBtn, "btn-primary", "rounded-lg");
-        TailwindFX.apply(profileBtn, "rounded-lg", "border");
-        TailwindFX.apply(settingsBtn, "rounded-lg", "border");
-        TailwindFX.apply(logoutBtn, "rounded-lg", "border");
+        TwStyle.apply(dashboardBtn, "btn-primary", "rounded-lg");
+        TwStyle.apply(profileBtn, "rounded-lg", "border");
+        TwStyle.apply(settingsBtn, "rounded-lg", "border");
+        TwStyle.apply(logoutBtn, "rounded-lg", "border");
 
         VBox sidebar = new VBox(15,
                 logo,
@@ -45,11 +45,11 @@ public class BasicDashboardExample extends Application {
         sidebar.setPadding(new Insets(20));
         sidebar.setAlignment(Pos.TOP_CENTER);
         sidebar.setPrefWidth(200);
-        TailwindFX.apply(sidebar, "bg-gray-100", "border-r");
+        TwStyle.apply(sidebar, "bg-gray-100", "border-r");
 
         // Navbar
         Label welcomeText = new Label("Welcome, User");
-        TailwindFX.apply(welcomeText, "text-2xl", "font-bold");
+        TwStyle.apply(welcomeText, "text-2xl", "font-bold");
 
         HBox navbar = new HBox(welcomeText);
         navbar.setPadding(new Insets(20));
@@ -88,7 +88,7 @@ public class BasicDashboardExample extends Application {
         );
 
         mainContent.setPadding(new Insets(20));
-        TailwindFX.apply(mainContent, "bg-gray-50");
+        TwStyle.apply(mainContent, "bg-gray-50");
 
         // Root Layout
         BorderPane root = new BorderPane();
@@ -109,16 +109,16 @@ public class BasicDashboardExample extends Application {
     private VBox createCard(String titleText, String valueText) {
 
         Label title = new Label(titleText);
-        TailwindFX.apply(title, "text-sm", "text-gray-600");
+        TwStyle.apply(title, "text-sm", "text-gray-600");
 
         Label value = new Label(valueText);
-        TailwindFX.apply(value, "text-2xl", "font-bold");
+        TwStyle.apply(value, "text-2xl", "font-bold");
 
         VBox card = new VBox(10, title, value);
         card.setAlignment(Pos.CENTER);
         card.setPadding(new Insets(20));
         card.setPrefSize(180, 120);
-        TailwindFX.apply(card, "bg-white", "border", "rounded-lg", "shadow-md");
+        TwStyle.apply(card, "bg-white", "border", "rounded-lg", "shadow-md");
 
         return card;
     }

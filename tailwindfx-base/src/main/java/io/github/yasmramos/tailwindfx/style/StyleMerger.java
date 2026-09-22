@@ -17,7 +17,7 @@ import javafx.scene.Node;
  *
  * <p>Merge rules: - JIT wins over previous styles of the same property (developer's intent) -
  * Properties not affected by JIT are preserved intact - Node's CSS classes are NOT touched here
- * (handled by TailwindFX.apply)
+ * (handled by TwStyle.apply)
  */
 public final class StyleMerger {
 

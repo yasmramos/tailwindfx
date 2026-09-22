@@ -486,7 +486,7 @@ public final class TailwindFXMetrics {
               "WARN",
               String.format(
                   "Low JIT cache hit ratio: %.1f%% (%d lookups)", cacheHitRatio() * 100, total),
-              "Use TailwindFX.apply() for stable classes; reserve jit() for dynamic values"));
+              "Use TwStyle.apply() for stable classes; reserve jit() for dynamic values"));
     }
 
     if (applyCalls() > 0 && conflictResolutions() > applyCalls() * 0.30) {
@@ -539,7 +539,7 @@ public final class TailwindFXMetrics {
    * TailwindFX.metrics().printHealth();
    * // ✅ All healthy   — or —
    * // [WARN] Low JIT cache hit ratio: 34.2% (250 lookups)
-   * //   → Use TailwindFX.apply() for stable classes...
+   * //   → Use TwStyle.apply() for stable classes...
    * </pre>
    */
   public void printHealth() {
