@@ -72,12 +72,17 @@ class TokenParserTest {
   void testParseLayoutDependentTokens() {
     TokenParser.ParseResult result = TokenParser.parse("gap-4", "mx-auto");
 
-    // gap-4 and mx-auto are layout-dependent but have named values (not numeric/arbitrary)
-    // so they should be CSS classes, not JIT tokens
+    // gap-4 and mx-auto are layout-dependent with named values
+    // They should be CSS classes AND layout-dependent tokens
     assertEquals(0, result.jitTokens().size());
     assertEquals(2, result.cssClasses().size());
     assertTrue(result.cssClasses().contains("gap-4"));
     assertTrue(result.cssClasses().contains("mx-auto"));
+
+    // Layout-dependent tokens need programmatic application via LayoutApplier
+    assertEquals(2, result.layoutDependentTokens().size());
+    assertTrue(result.layoutDependentTokens().contains("gap-4"));
+    assertTrue(result.layoutDependentTokens().contains("mx-auto"));
 
     assertTrue(result.layoutMigrationTokens().isEmpty());
   }

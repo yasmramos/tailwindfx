@@ -318,6 +318,123 @@ public final class TokenRegistry {
   }
 
   /**
+   * Checks if a token requires JIT compilation (arbitrary values, arbitrary properties, or opacity modifiers on colors).
+   *
+   * <p>This is the single source of truth for JIT compilation decisions, matching Tailwind CSS v4 behavior:
+   * <ul>
+   *   <li>Arbitrary values: w-[320px], bg-[#fff], text-[length:var(--x)] → JIT
+   *   <li>Arbitrary properties: [color:red], [mask-type:luminance] → JIT
+   *   <li>Arbitrary modifiers: bg-red-500/[0.3], hover:bg-[#fff]/(0.5) → JIT
+   *   <li>Opacity on color utilities: bg-blue-500/50, text-red-500/80 → JIT
+   *   <li>Predefined utilities: w-32, bg-red-500, p-4, -mt-4 → NOT JIT (CSS class)
+   * </ul>
+   *
+   * @param token the token to check (may include variant prefixes)
+   * @return true if this token requires JIT compilation
+   */
+  public static boolean requiresJitCompilation(String token) {
+    if (token == null || token.isEmpty()) return false;
+
+    // Strip variant prefixes for validation
+    String baseToken = stripVariantPrefix(token);
+
+    // Fast path: arbitrary property [...:...]
+    if (baseToken.startsWith("[") && baseToken.endsWith("]")) {
+      // Must contain : for property:value syntax
+      return baseToken.indexOf(':', 1) > 1; // [color:red] ✓, [] ✗
+    }
+
+    int lastSlashIndex = baseToken.lastIndexOf('/');
+
+    if (lastSlashIndex == -1) {
+      // No slash, check for arbitrary values in base
+      return containsArbitraryValue(baseToken);
+    }
+
+    String base = baseToken.substring(0, lastSlashIndex);
+    String modifier = baseToken.substring(lastSlashIndex + 1);
+
+    // If modifier is numeric (opacity), validate base is a color utility
+    if (isNumeric(modifier)) {
+      // Opacity on color utility → JIT
+      return ColorUtilityValidator.isValidColorUtilityBase(base);
+    }
+
+    // If modifier is arbitrary [...] or (...) → JIT
+    if (isArbitraryValue(modifier)) {
+      return true;
+    }
+
+    // If base contains arbitrary values → JIT
+    if (containsArbitraryValue(base)) {
+      return true;
+    }
+
+    // Not a valid JIT token (e.g., icon/large is not a color utility)
+    return false;
+  }
+
+  /**
+   * Checks if a string contains an arbitrary value in [...] syntax.
+   * Handles nested parens/brackets like calc(100px-4rem) or var(--x).
+   *
+   * @param input the string to check
+   * @return true if it contains arbitrary value syntax
+   */
+  private static boolean containsArbitraryValue(String input) {
+    int bracketDepth = 0;
+    int start = -1;
+
+    for (int i = 0; i < input.length(); i++) {
+      char c = input.charAt(i);
+
+      if (c == '[' && bracketDepth == 0) {
+        start = i;
+        bracketDepth++;
+      } else if (c == '[') {
+        bracketDepth++;
+      } else if (c == ']') {
+        bracketDepth--;
+        if (bracketDepth == 0 && start >= 0) {
+          // Found complete [...] - validate it's not empty
+          String arbitrary = input.substring(start + 1, i);
+          return !arbitrary.isEmpty() && !arbitrary.trim().isEmpty();
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Checks if a modifier/value is arbitrary: [...] or (...) for CSS vars.
+   *
+   * @param value the value to check
+   * @return true if it's an arbitrary value
+   */
+  private static boolean isArbitraryValue(String value) {
+    if (value == null || value.length() < 2) return false;
+
+    // Arbitrary: [value] or (var(--x))
+    if ((value.startsWith("[") && value.endsWith("]"))
+        || (value.startsWith("(") && value.endsWith(")"))) {
+      String content = value.substring(1, value.length() - 1);
+      return !content.isEmpty() && !content.trim().isEmpty();
+    }
+    return false;
+  }
+
+  /**
+   * Checks if a string is numeric (integer or decimal).
+   *
+   * @param str the string to check
+   * @return true if it's a valid number
+   */
+  private static boolean isNumeric(String str) {
+    if (str == null || str.isEmpty()) return false;
+    return str.matches("\\d+(\\.\\d+)?");
+  }
+
+  /**
    * Gets all JIT prefixes for iteration or debugging.
    *
    * @return unmodifiable set of JIT prefixes

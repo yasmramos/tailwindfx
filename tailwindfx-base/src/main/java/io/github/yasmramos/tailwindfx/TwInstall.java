@@ -38,6 +38,10 @@ public final class TwInstall {
    * <p>The generated stylesheet contains pre-compiled utility classes for better performance and
    * smaller bundle size. Dynamic/arbitrary values still use JIT fallback.
    *
+   * <p>This method enables {@code TwConfig.preferStylesheet(true)} upon successful loading, making
+   * the AOT-generated stylesheet the canonical path for applying styles. If the stylesheet is not
+   * found, preferStylesheet remains false and JIT inline compilation is used as fallback.
+   *
    * @param scene the JavaFX scene to install the stylesheet into
    * @param cssPath the path to the generated CSS file (default: "/css/tailwindfx-generated.css")
    */
@@ -63,7 +67,8 @@ public final class TwInstall {
 
     if (url == null) {
       System.err.println(
-          "[TailwindFX] Warning: Generated stylesheet not found at " + normalizedPath);
+          "[TailwindFX] Warning: Generated stylesheet not found at " + normalizedPath
+              + ". Falling back to JIT inline compilation. Use TwInstall.installMinimal() instead.");
       return;
     }
 
@@ -77,6 +82,9 @@ public final class TwInstall {
 
     // Add after base CSS (at end of list)
     sheets.add(urlStr);
+
+    // Enable preferStylesheet mode: AOT stylesheet is now the canonical path
+    TwConfig.preferStylesheet(true);
   }
 
   /**
