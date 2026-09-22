@@ -239,11 +239,13 @@ class ThemeManagerTest extends ApplicationTest {
   @Test
   @DisplayName("Should detect dark theme correctly")
   void testIsDark() {
-    ThemeManager.forScene(scene).light().apply();
-    assertFalse(ThemeManager.isDark(scene));
+    interact(() -> {
+      ThemeManager.forScene(scene).light().apply();
+      assertFalse(ThemeManager.isDark(scene));
 
-    ThemeManager.forScene(scene).dark().apply();
-    assertTrue(ThemeManager.isDark(scene));
+      ThemeManager.forScene(scene).dark().apply();
+      assertTrue(ThemeManager.isDark(scene));
+    });
   }
 
   @Test

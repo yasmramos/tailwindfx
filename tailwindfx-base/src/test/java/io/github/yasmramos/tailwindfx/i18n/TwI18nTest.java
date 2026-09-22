@@ -47,9 +47,10 @@ public class TwI18nTest {
 
   @Test
   public void testGet_withoutInitialization() {
-    // Should not throw exception even if not initialized
+    // Set a non-existent bundle to test fallback behavior
+    TwI18n.setBaseName("nonexistent.bundle.for.test");
     String result = TwI18n.get("some.key");
-    // Should return key as fallback
+    // Should return key as fallback when bundle doesn't exist
     assertEquals("some.key", result);
   }
 
@@ -173,18 +174,24 @@ public class TwI18nTest {
 
   @Test
   public void testGet_withParams_noParams() {
+    // Set a non-existent bundle to test fallback behavior
+    TwI18n.setBaseName("nonexistent.bundle.for.test");
     String result = TwI18n.get("some.key");
     assertEquals("some.key", result);
   }
 
   @Test
   public void testGet_withParams_emptyArray() {
+    // Set a non-existent bundle to test fallback behavior
+    TwI18n.setBaseName("nonexistent.bundle.for.test");
     String result = TwI18n.get("some.key", new Object[0]);
     assertEquals("some.key", result);
   }
 
   @Test
   public void testGet_withParams_nullArray() {
+    // Set a non-existent bundle to test fallback behavior
+    TwI18n.setBaseName("nonexistent.bundle.for.test");
     String result = TwI18n.get("some.key", (Object[]) null);
     assertEquals("some.key", result);
   }

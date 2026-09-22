@@ -1,6 +1,6 @@
 package io.github.yasmramos.tailwindfx.components;
 
-import io.github.yasmramos.tailwindfx.TailwindFX;
+import io.github.yasmramos.tailwindfx.TwStyle;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
