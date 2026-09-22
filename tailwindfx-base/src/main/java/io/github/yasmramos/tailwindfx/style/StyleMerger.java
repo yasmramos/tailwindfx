@@ -50,8 +50,8 @@ public final class StyleMerger {
   }
 
   /**
-   * Elimina propiedades JIT del inline style de un nodo. Útil para deshacer estilos aplicados
-   * dinámicamente.
+   * Removes JIT properties from a node's inline style. Useful for undoing dynamically applied
+   * styles.
    */
   public static void removeJit(Node node, String... tokens) {
     JitCompiler.BatchResult result = JitCompiler.compileBatch(tokens);
@@ -66,17 +66,17 @@ public final class StyleMerger {
     }
   }
 
-  /** Reemplaza completamente el inline style JIT (elimina el previo y aplica el nuevo). */
+  // Replaces the entire JIT inline style (removes previous and applies new).
   public static void replaceJit(Node node, String... tokens) {
     node.setStyle("");
     node.getStyleClass().removeIf(cls -> !cls.isBlank());
     applyJit(node, tokens);
   }
 
-  // Merge de inline styles
+  // Inline styles merge
   /**
-   * Mergea dos bloques de inline style. Las propiedades del bloque 'incoming' sobreescriben las del
-   * 'existing'. Las propiedades en 'existing' que no están en 'incoming' se preservan.
+   * Merges two inline style blocks. Properties in the 'incoming' block overwrite those in
+   * 'existing'. Properties in 'existing' that are not in 'incoming' are preserved.
    *
    * <p>merge("-fx-padding: 8px; -fx-opacity: 0.5;", "-fx-padding: 16px; -fx-font-size: 14px;") →
    * "-fx-font-size: 14px; -fx-opacity: 0.5; -fx-padding: 16px;"
