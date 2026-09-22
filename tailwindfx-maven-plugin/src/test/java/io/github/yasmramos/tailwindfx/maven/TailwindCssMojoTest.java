@@ -16,7 +16,7 @@ public class TailwindCssMojoTest {
   public void testMojoExecution() throws Exception {
     TailwindCssMojo mojo = new TailwindCssMojo();
 
-    // Configurar directorios temporales usando reflexión (como hace Maven)
+    // Configure temporary directories using reflection (as Maven does)
     File sourceDir = tempDir.resolve("src").toFile();
     sourceDir.mkdirs();
     File outputDir = tempDir.resolve("output").toFile();
@@ -29,12 +29,12 @@ public class TailwindCssMojoTest {
     outputField.setAccessible(true);
     outputField.set(mojo, outputDir);
 
-    // Ejecutar el mojo
+    // Execute the mojo
     assertDoesNotThrow(() -> mojo.execute());
 
-    // Verificar que se creó el archivo CSS
+    // Verify that the CSS file was created
     File cssFile = new File(outputDir, "tailwindfx-generated.css");
-    assertTrue(cssFile.exists(), "El archivo CSS debería existir");
+    assertTrue(cssFile.exists(), "CSS file should exist");
   }
 
   @Test
@@ -55,8 +55,8 @@ public class TailwindCssMojoTest {
 
     mojo.execute();
 
-    assertTrue(outputDir.exists(), "El directorio de salida debería crearse");
-    assertTrue(outputDir.isDirectory(), "Debería ser un directorio");
+    assertTrue(outputDir.exists(), "Output directory should be created");
+    assertTrue(outputDir.isDirectory(), "Should be a directory");
   }
 
   @Test

@@ -7,41 +7,41 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * ColorPalette — Paleta de colores Tailwind como valores RGB.
+ * ColorPalette — Tailwind color palette as RGB values.
  *
- * <p>Convierte "blue-500" → "#3b82f6" (hex) o "59,130,246" (componentes RGB sin #) para poder construir
- * rgba(r,g,b,alpha) al aplicar opacidad /80.
+ * <p>Converts "blue-500" → "#3b82f6" (hex) or "59,130,246" (RGB components without #) to build
+ * rgba(r,g,b,alpha) when applying opacity /80.
  *
- * <p>Esta clase es la ÚNICA fuente de verdad para los valores de color en TailwindFX.
- * Las familias con escala tienen 11 shades (50-950), los colores planos tienen valor único.
+ * <p>This class is the ONLY source of truth for color values in TailwindFX. Scaled families have 11
+ * shades (50-950), flat colors have a single value.
  */
 public final class ColorPalette {
 
-  /** Array ordenado de shades estándar de TailwindCSS. */
+  /** Ordered array of standard TailwindCSS shades. */
   public static final int[] SHADES = {50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950};
 
-  /** Lista ordenada de familias de colores con escala (excluye colores planos). */
+  /** Ordered list of scaled color families (excludes flat colors). */
   public static final String[] FAMILIES;
 
-  /** Colores planos (sin escala de shades) según TailwindCSS. */
+  /** Flat colors (without shade scale) according to TailwindCSS. */
   public static final Map<String, String> NAMED_COLORS;
 
   static {
-    // Inicializar NAMED_COLORS primero
+    // Initialize NAMED_COLORS first
     NAMED_COLORS = new HashMap<>();
     NAMED_COLORS.put("white", "#ffffff");
     NAMED_COLORS.put("black", "#000000");
     NAMED_COLORS.put("transparent", "transparent");
 
-    // Construir FAMILIES en el orden de inserción del bloque estático
+    // Build FAMILIES in the insertion order of the static block
     Set<String> familiesSet = new LinkedHashSet<>();
-    // Las familias se añaden al conjunto durante la inicialización del PALETTE
-    // Se asignará después de que el bloque estático principal se ejecute
+    // Families are added to the set during PALETTE initialization
+    // Will be assigned after the main static block executes
     FAMILIES = initializeFamilies(familiesSet);
   }
 
   private static String[] initializeFamilies(Set<String> familiesSet) {
-    // Orden explícito consistente con el bloque estático
+    // Explicit order consistent with the static block
     familiesSet.add("slate");
     familiesSet.add("gray");
     familiesSet.add("red");
@@ -84,8 +84,8 @@ public final class ColorPalette {
   }
 
   /**
-   * Devuelve el array de hex para una familia específica en el orden de SHADES.
-   * @return array de 11 elementos o null si la familia no existe
+   * Returns the hex array for a specific family in SHADES order.
+   * @return array of 11 elements or null if the family doesn't exist
    */
   public static String[] shadesOf(String family) {
     if (!isFamily(family)) {
@@ -98,7 +98,7 @@ public final class ColorPalette {
     return result;
   }
 
-  /** Verifica si un nombre corresponde a una familia con escala. */
+  /** Checks if a name corresponds to a scaled family. */
   public static boolean isFamily(String name) {
     for (String f : FAMILIES) {
       if (f.equals(name)) {
@@ -108,7 +108,7 @@ public final class ColorPalette {
     return false;
   }
 
-  /** Verifica si un nombre corresponde a un color plano. */
+  /** Checks if a name corresponds to a flat color. */
   public static boolean isNamedColor(String name) {
     return NAMED_COLORS.containsKey(name);
   }
@@ -116,8 +116,8 @@ public final class ColorPalette {
   // Public API
 
   /**
-   * Devuelve el hex de un color: resolve("blue", 500) → "#3b82f6" Devuelve null si el color/shade
-   * no existe.
+   * Returns the hex of a color: resolve("blue", 500) → "#3b82f6" Returns null if the color/shade
+   * doesn't exist.
    */
   public static String hex(String colorName, int shade) {
     String key = colorName + "-" + shade;
@@ -125,7 +125,7 @@ public final class ColorPalette {
   }
 
   /**
-   * Devuelve componentes RGB separados por coma: rgb("blue", 500) → "59,130,246" Para construir
+   * Returns comma-separated RGB components: rgb("blue", 500) → "59,130,246" To build
    * rgba(r,g,b,alpha).
    */
   public static String rgb(String colorName, int shade) {
@@ -135,26 +135,26 @@ public final class ColorPalette {
   }
 
   /**
-   * Construye el valor CSS completo para -fx-background-color / -fx-text-fill: - Sin alpha:
-   * devuelve hex "#3b82f6" - Con alpha: devuelve "rgba(59,130,246,0.80)"
+   * Builds the complete CSS value for -fx-background-color / -fx-text-fill: - Without alpha:
+   * returns hex "#3b82f6" - With alpha: returns "rgba(59,130,246,0.80)"
    */
   public static String fxColor(String colorName, int shade, Double alphaFraction) {
-    // Fallback a gray-500 si el color no existe en la paleta
+    // Fallback to gray-500 if the color doesn't exist in the palette
     if (!exists(colorName, shade)) {
       Preconditions.LOG.warning(
           "ColorPalette: color not found '"
               + colorName
               + "-"
               + shade
-              + "' — usando gray-500 como fallback");
+              + "' — using gray-500 as fallback");
       colorName = "gray";
       shade = 500;
     }
-    // Clamp alpha a [0.0, 1.0]
+    // Clamp alpha to [0.0, 1.0]
     if (alphaFraction != null && (alphaFraction < 0.0 || alphaFraction > 1.0)) {
       double clamped = Math.max(0.0, Math.min(1.0, alphaFraction));
       Preconditions.LOG.warning(
-          "ColorPalette: alpha " + alphaFraction + " fuera de [0,1] — ajustado a " + clamped);
+          "ColorPalette: alpha " + alphaFraction + " out of [0,1] — adjusted to " + clamped);
       alphaFraction = clamped;
     }
     if (alphaFraction == null || alphaFraction >= 1.0) {
@@ -169,17 +169,17 @@ public final class ColorPalette {
     return PALETTE.containsKey(colorName + "-" + shade);
   }
 
-  // Validación y normalización de colores hexadecimales arbitrarios
+  // Validation and normalization of arbitrary hex colors
 
-  /** Verifica si un string es un color hex CSS válido. Acepta #RRGGBB y #RGB. */
+  /** Checks if a string is a valid CSS hex color. Accepts #RRGGBB and #RGB. */
   public static boolean isValidHex(String hex) {
     if (hex == null) return false;
     return hex.matches("^#[0-9A-Fa-f]{6}$") || hex.matches("^#[0-9A-Fa-f]{3}$");
   }
 
   /**
-   * Normaliza un hex corto a 6 dígitos: #f60 → #ff6600. Si ya tiene 6 dígitos o es null/inválido lo
-   * devuelve sin cambios.
+   * Normalizes a short hex to 6 digits: #f60 → #ff6600. If it already has 6 digits or is
+   * null/invalid, returns it unchanged.
    */
   public static String normalizeHex(String hex) {
     if (hex == null) return null;
@@ -191,8 +191,8 @@ public final class ColorPalette {
   }
 
   /**
-   * Convierte un hex arbitrario a "r,g,b" para construir rgba(). Acepta #RGB y #RRGGBB. Devuelve
-   * null si el hex es inválido.
+   * Converts an arbitrary hex to "r,g,b" to build rgba(). Accepts #RGB and #RRGGBB. Returns null if
+   * the hex is invalid.
    */
   public static String hexToRgbString(String hex) {
     String n = normalizeHex(hex);
@@ -200,7 +200,7 @@ public final class ColorPalette {
     return hexToRgb(n);
   }
 
-  // Conversión hex → RGB
+  // Hex → RGB conversion
 
   private static String hexToRgb(String hex) {
     String h = hex.startsWith("#") ? hex.substring(1) : hex;
