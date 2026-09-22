@@ -335,4 +335,66 @@ class TokenRegistryTest {
     assertTrue(TokenRegistry.isJitPrefix("w-[200px]"));
     assertTrue(TokenRegistry.isJitPrefix("m-[10px]"));
   }
+
+  // ==========================================================================
+  // requiresJitCompilation Tests (Centralized JIT Decision)
+  // ==========================================================================
+
+  @Test
+  @DisplayName("requiresJitCompilation returns false for predefined utilities")
+  void testRequiresJitCompilationPredefinedUtilities() {
+    // Predefined theme utilities should NOT require JIT
+    assertFalse(TokenRegistry.requiresJitCompilation("p-4"));
+    assertFalse(TokenRegistry.requiresJitCompilation("bg-blue-500"));
+    assertFalse(TokenRegistry.requiresJitCompilation("text-white"));
+    assertFalse(TokenRegistry.requiresJitCompilation("w-64"));
+    assertFalse(TokenRegistry.requiresJitCompilation("rounded-lg"));
+    assertFalse(TokenRegistry.requiresJitCompilation("gap-4"));
+  }
+
+  @Test
+  @DisplayName("requiresJitCompilation returns true for arbitrary values")
+  void testRequiresJitCompilationArbitraryValues() {
+    // Arbitrary values [...] require JIT compilation
+    assertTrue(TokenRegistry.requiresJitCompilation("p-[13px]"));
+    assertTrue(TokenRegistry.requiresJitCompilation("bg-[#abc]"));
+    assertTrue(TokenRegistry.requiresJitCompilation("w-[200px]"));
+    assertTrue(TokenRegistry.requiresJitCompilation("m-[10px]"));
+    assertTrue(TokenRegistry.requiresJitCompilation("text-[length:var(--x)]"));
+  }
+
+  @Test
+  @DisplayName("requiresJitCompilation returns true for opacity modifiers on colors")
+  void testRequiresJitCompilationOpacityModifiers() {
+    // Opacity modifiers on color utilities require JIT
+    assertTrue(TokenRegistry.requiresJitCompilation("bg-blue-500/50"));
+    assertTrue(TokenRegistry.requiresJitCompilation("text-red-500/80"));
+    assertTrue(TokenRegistry.requiresJitCompilation("border-gray-300/75"));
+    assertTrue(TokenRegistry.requiresJitCompilation("hover:bg-blue-500/90"));
+  }
+
+  @Test
+  @DisplayName("requiresJitCompilation returns false for non-color opacity-like patterns")
+  void testRequiresJitCompilationNonColorOpacity() {
+    // Non-color utilities with / should NOT be treated as opacity (e.g., icon/large)
+    assertFalse(TokenRegistry.requiresJitCompilation("icon/large"));
+    assertFalse(TokenRegistry.requiresJitCompilation("btn-primary/custom"));
+  }
+
+  @Test
+  @DisplayName("requiresJitCompilation handles arbitrary properties")
+  void testRequiresJitCompilationArbitraryProperties() {
+    // Arbitrary properties [...:...] require JIT
+    assertTrue(TokenRegistry.requiresJitCompilation("[color:red]"));
+    assertTrue(TokenRegistry.requiresJitCompilation("[mask-type:luminance]"));
+    // Empty or invalid arbitrary properties should return false
+    assertFalse(TokenRegistry.requiresJitCompilation("[]"));
+  }
+
+  @Test
+  @DisplayName("requiresJitCompilation handles null and empty")
+  void testRequiresJitCompilationNullAndEmpty() {
+    assertFalse(TokenRegistry.requiresJitCompilation(null));
+    assertFalse(TokenRegistry.requiresJitCompilation(""));
+  }
 }

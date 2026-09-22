@@ -179,17 +179,23 @@ public final class TokenParser {
       layoutMigrationTokens.add(token);
     } else if (isJitToken(token)) {
       // JIT tokens (dynamic/arbitrary values or utilities with numeric suffixes) get compiled at
-      // runtime
+      // runtime.
       // However, named values like text-white, bg-blue-500, text-lg are known utilities
       // that should be applied as CSS classes, not JIT compiled.
-      if (requiresJitCompilation(token)) {
+      // Use centralized requiresJitCompilation logic from TokenRegistry for consistency.
+      if (TokenRegistry.requiresJitCompilation(token)) {
         jitTokens.add(token);
         if (TokenRegistry.isLayoutDependent(token)) {
           layoutDependentTokens.add(token);
         }
       } else {
-        // Named value with JIT prefix (e.g., text-white, bg-blue-500) -> CSS class
+        // Named value with JIT prefix (e.g., text-white, bg-blue-500, p-4) -> CSS class
         cssClasses.add(token);
+        // Layout-dependent tokens (gap-4, mx-auto, etc.) need programmatic application
+        // even though they use CSS classes for the actual styling
+        if (TokenRegistry.isLayoutDependent(token)) {
+          layoutDependentTokens.add(token);
+        }
         // Track unknown tokens for warning (single pass)
         if (!TokenRegistry.isKnownUtility(token)) {
           unknownTokens.add(token);
@@ -205,7 +211,7 @@ public final class TokenParser {
   }
 
   /**
-   * Checks if a token contains arbitrary value syntax.
+   * Detects if a token contains arbitrary value syntax.
    *
    * @param token the token to check
    * @return true if token contains [...] syntax
@@ -225,62 +231,12 @@ public final class TokenParser {
    *
    * @param token the token to check
    * @return true if this token should be compiled as JIT
+   * @deprecated Use {@link TokenRegistry#requiresJitCompilation(String)} for centralized JIT detection.
    */
+  @Deprecated(since = "1.0", forRemoval = true)
   private static boolean isJitToken(String token) {
     // Delegate to TokenRegistry for centralized JIT detection
     return TokenRegistry.isJitPrefix(token);
-  }
-
-  /**
-   * Checks if a JIT token has an arbitrary or numeric value that requires runtime compilation.
-   *
-   * <p>Tokens like "text-white", "text-lg", "bg-blue-500" are known utilities that should be
-   * applied as CSS classes. Only tokens with arbitrary values ([...]) or numeric suffixes require
-   * JIT compilation.
-   *
-   * <p>Tokens with opacity modifiers (e.g., "bg-blue-500/80", "text-red-500/50") also require JIT
-   * compilation because the opacity value needs to be applied dynamically.
-   *
-   * <p>Numeric values like "gap-4", "p-2" are part of Tailwind's spacing scale and are known
-   * utilities that should be applied as CSS classes, not JIT compiled.
-   *
-   * @param token the token to check (already confirmed as JIT prefix)
-   * @return true if this token requires JIT compilation
-   */
-  private static boolean requiresJitCompilation(String token) {
-    // Arbitrary values always need JIT
-    if (hasArbitraryValue(token)) {
-      return true;
-    }
-
-    // Strip variant prefixes to get the base token
-    String baseToken = stripVariantPrefix(token);
-
-    // Extract the value part (everything after the first hyphen)
-    int hyphenIndex = baseToken.indexOf('-');
-    if (hyphenIndex < 0 || hyphenIndex >= baseToken.length() - 1) {
-      // No value part (e.g., "text", "bg") - shouldn't happen for valid tokens
-      return false;
-    }
-
-    String valuePart = baseToken.substring(hyphenIndex + 1);
-
-    // Check for opacity modifier (e.g., blue-500/80, red-600/50)
-    // The format is: value/opacity where opacity is a number
-    if (valuePart.contains("/")) {
-      String[] parts = valuePart.split("/", 2);
-      if (parts.length == 2) {
-        String opacityPart = parts[1];
-        // Opacity can be a number (50, 80) or decimal (0.5, .75)
-        if (opacityPart.matches("^\\.?\\d+(\\.\\d+)?$")) {
-          return true;
-        }
-      }
-    }
-
-    // Named values (white, blue-500, lg, 2xl, etc.) and spacing scale values (0, 1, 2, 3, 4, etc.)
-    // are known utilities and should be applied as CSS classes, not JIT
-    return false;
   }
 
   /**
