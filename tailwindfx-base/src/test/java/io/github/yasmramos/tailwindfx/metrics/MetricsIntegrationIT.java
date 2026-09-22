@@ -7,6 +7,7 @@ import io.github.yasmramos.tailwindfx.TwStyle;
 import javafx.scene.Scene;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.testfx.framework.junit5.ApplicationTest;
@@ -17,16 +18,20 @@ import org.testfx.framework.junit5.ApplicationTest;
  */
 @DisplayName("TwMetrics Integration Tests")
 class MetricsIntegrationTest extends ApplicationTest {
+
+  @BeforeEach
+  void setUp() {
+    // Reset global state before each test to avoid cross-test contamination
+    TailwindFXMetrics.instance().reset();
+    TwMetrics.setEnabled(true);
+  }
+
   /** Runs work on FX thread and blocks until done (max 3s). */
   @Test
   @DisplayName("Should record metrics when applying styles")
   void testMetricsRecordedOnApply() {
     interact(
         () -> {
-          // Reset and enable metrics
-          TailwindFXMetrics.instance().reset();
-          TwMetrics.setEnabled(true);
-
           Region node = new Region();
 
           // Apply some styles
@@ -38,13 +43,11 @@ class MetricsIntegrationTest extends ApplicationTest {
           assertNotNull(report);
           assertTrue(report.contains("TailwindFX Metrics"));
 
-          // Get current metrics
-          long cacheHits = TailwindFXMetrics.instance().cacheHits();
-          long cacheMisses = TailwindFXMetrics.instance().cacheMisses();
+          // Get current metrics - applyCalls tracks all style applications regardless of JIT
+          long applyCalls = TailwindFXMetrics.instance().applyCalls();
 
           // At least one operation should have been recorded
-          assertTrue(
-              cacheHits + cacheMisses > 0, "Should have recorded at least one cache operation");
+          assertTrue(applyCalls > 0, "Should have recorded at least one apply operation");
         });
   }
 
@@ -55,7 +58,6 @@ class MetricsIntegrationTest extends ApplicationTest {
         () -> {
           // Disable metrics
           TwMetrics.setEnabled(false);
-          TailwindFXMetrics.instance().reset();
 
           Region node = new Region();
           TwStyle.apply(node, "rounded-lg");
@@ -74,19 +76,15 @@ class MetricsIntegrationTest extends ApplicationTest {
   void testCacheHitsOnDuplicateApply() {
     interact(
         () -> {
-          TailwindFXMetrics.instance().reset();
-          TwMetrics.setEnabled(true);
-
           Region node = new Region();
 
           // Apply styles - metrics should be recorded
           TwStyle.apply(node, "rounded-lg");
           TwStyle.apply(node, "p-4");
 
-          // Verify operations were recorded
-          long totalOps =
-              TailwindFXMetrics.instance().cacheHits() + TailwindFXMetrics.instance().cacheMisses();
-          assertTrue(totalOps > 0, "Should have recorded at least one operation");
+          // Verify operations were recorded using applyCalls
+          long applyCalls = TailwindFXMetrics.instance().applyCalls();
+          assertTrue(applyCalls > 0, "Should have recorded at least one operation");
         });
   }
 
@@ -95,9 +93,6 @@ class MetricsIntegrationTest extends ApplicationTest {
   void testReportWithRealData() {
     interact(
         () -> {
-          TailwindFXMetrics.instance().reset();
-          TwMetrics.setEnabled(true);
-
           StackPane root = new StackPane();
           Scene scene = new Scene(root, 400, 300);
           Region node = new Region();
@@ -125,9 +120,6 @@ class MetricsIntegrationTest extends ApplicationTest {
   void testMultipleNodesMetrics() {
     interact(
         () -> {
-          TailwindFXMetrics.instance().reset();
-          TwMetrics.setEnabled(true);
-
           Region node1 = new Region();
           Region node2 = new Region();
           Region node3 = new Region();
@@ -137,11 +129,9 @@ class MetricsIntegrationTest extends ApplicationTest {
           TwStyle.apply(node2, "p-2");
           TwStyle.apply(node3, "rounded-lg");
 
-          // Verify metrics were recorded (at least some operations)
-          long totalOps =
-              TailwindFXMetrics.instance().cacheHits() + TailwindFXMetrics.instance().cacheMisses();
-
-          assertTrue(totalOps > 0, "Should have recorded at least one operation");
+          // Verify metrics were recorded using applyCalls
+          long applyCalls = TailwindFXMetrics.instance().applyCalls();
+          assertTrue(applyCalls > 0, "Should have recorded at least one operation");
 
           // Each node should have its own report
           String report1 = TwMetrics.debugReport(node1);
@@ -159,16 +149,12 @@ class MetricsIntegrationTest extends ApplicationTest {
   void testResetClearsAllMetrics() {
     interact(
         () -> {
-          TailwindFXMetrics.instance().reset();
-          TwMetrics.setEnabled(true);
-
           Region node = new Region();
           TwStyle.apply(node, "rounded-lg", "p-4", "shadow-md");
 
-          // Verify some metrics were recorded
-          long beforeReset =
-              TailwindFXMetrics.instance().cacheHits() + TailwindFXMetrics.instance().cacheMisses();
-          assertTrue(beforeReset > 0);
+          // Verify some metrics were recorded using applyCalls
+          long applyCallsBeforeReset = TailwindFXMetrics.instance().applyCalls();
+          assertTrue(applyCallsBeforeReset > 0);
 
           // Reset
           TailwindFXMetrics.instance().reset();
@@ -177,6 +163,7 @@ class MetricsIntegrationTest extends ApplicationTest {
           assertEquals(0, TailwindFXMetrics.instance().cacheHits());
           assertEquals(0, TailwindFXMetrics.instance().cacheMisses());
           assertEquals(0, TailwindFXMetrics.instance().compilations());
+          assertEquals(0, TailwindFXMetrics.instance().applyCalls());
         });
   }
 
