@@ -180,9 +180,20 @@ public final class TokenParser {
     } else if (isJitToken(token)) {
       // JIT tokens (dynamic/arbitrary values or utilities with numeric suffixes) get compiled at
       // runtime
-      jitTokens.add(token);
-      if (TokenRegistry.isLayoutDependent(token)) {
-        layoutDependentTokens.add(token);
+      // However, named values like text-white, bg-blue-500, text-lg are known utilities
+      // that should be applied as CSS classes, not JIT compiled.
+      if (requiresJitCompilation(token)) {
+        jitTokens.add(token);
+        if (TokenRegistry.isLayoutDependent(token)) {
+          layoutDependentTokens.add(token);
+        }
+      } else {
+        // Named value with JIT prefix (e.g., text-white, bg-blue-500) -> CSS class
+        cssClasses.add(token);
+        // Track unknown tokens for warning (single pass)
+        if (!TokenRegistry.isKnownUtility(token)) {
+          unknownTokens.add(token);
+        }
       }
     } else {
       cssClasses.add(token);
@@ -227,6 +238,12 @@ public final class TokenParser {
    * applied as CSS classes. Only tokens with arbitrary values ([...]) or numeric suffixes
    * require JIT compilation.
    *
+   * <p>Tokens with opacity modifiers (e.g., "bg-blue-500/80", "text-red-500/50") also require
+   * JIT compilation because the opacity value needs to be applied dynamically.
+   *
+   * <p>Numeric values like "gap-4", "p-2" are part of Tailwind's spacing scale and are known
+   * utilities that should be applied as CSS classes, not JIT compiled.
+   *
    * @param token the token to check (already confirmed as JIT prefix)
    * @return true if this token requires JIT compilation
    */
@@ -248,14 +265,21 @@ public final class TokenParser {
     
     String valuePart = baseToken.substring(hyphenIndex + 1);
     
-    // Check if value is purely numeric (possibly negative or with decimal)
-    // These need JIT compilation for dynamic sizing
-    if (valuePart.matches("^-?\\d+(\\.\\d+)?$")) {
-      return true;
+    // Check for opacity modifier (e.g., blue-500/80, red-600/50)
+    // The format is: value/opacity where opacity is a number
+    if (valuePart.contains("/")) {
+      String[] parts = valuePart.split("/", 2);
+      if (parts.length == 2) {
+        String opacityPart = parts[1];
+        // Opacity can be a number (50, 80) or decimal (0.5, .75)
+        if (opacityPart.matches("^\\.?\\d+(\\.\\d+)?$")) {
+          return true;
+        }
+      }
     }
     
-    // Named values (white, blue-500, lg, 2xl, etc.) are known utilities
-    // and should be applied as CSS classes, not JIT
+    // Named values (white, blue-500, lg, 2xl, etc.) and spacing scale values (0, 1, 2, 3, 4, etc.)
+    // are known utilities and should be applied as CSS classes, not JIT
     return false;
   }
 

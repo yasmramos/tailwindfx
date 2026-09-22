@@ -35,14 +35,18 @@ class TokenParserTest {
 
   @Test
   void testParseJitTokens() {
+    // Only arbitrary values and numeric values require JIT compilation
+    // Named values like bg-blue-500, text-red-600 are known utilities and go as CSS classes
     TokenParser.ParseResult result = TokenParser.parse("bg-blue-500", "text-red-600", "w-[200px]");
 
-    assertEquals(3, result.jitTokens().size());
-    assertTrue(result.jitTokens().contains("bg-blue-500"));
-    assertTrue(result.jitTokens().contains("text-red-600"));
+    assertEquals(1, result.jitTokens().size());
     assertTrue(result.jitTokens().contains("w-[200px]"));
+    
+    // Named color values should be CSS classes
+    assertEquals(2, result.cssClasses().size());
+    assertTrue(result.cssClasses().contains("bg-blue-500"));
+    assertTrue(result.cssClasses().contains("text-red-600"));
 
-    assertTrue(result.cssClasses().isEmpty());
     assertTrue(result.layoutDependentTokens().isEmpty());
     assertTrue(result.layoutMigrationTokens().isEmpty());
     assertTrue(result.variantTokens().isEmpty());
@@ -68,11 +72,12 @@ class TokenParserTest {
   void testParseLayoutDependentTokens() {
     TokenParser.ParseResult result = TokenParser.parse("gap-4", "mx-auto");
 
-    assertEquals(2, result.jitTokens().size());
-    assertEquals(2, result.layoutDependentTokens().size());
-
-    assertTrue(result.layoutDependentTokens().contains("gap-4"));
-    assertTrue(result.layoutDependentTokens().contains("mx-auto"));
+    // gap-4 and mx-auto are layout-dependent but have named values (not numeric/arbitrary)
+    // so they should be CSS classes, not JIT tokens
+    assertEquals(0, result.jitTokens().size());
+    assertEquals(2, result.cssClasses().size());
+    assertTrue(result.cssClasses().contains("gap-4"));
+    assertTrue(result.cssClasses().contains("mx-auto"));
 
     assertTrue(result.layoutMigrationTokens().isEmpty());
   }
@@ -147,16 +152,13 @@ class TokenParserTest {
     // "grow-x" should not collide with "grow"
     TokenParser.ParseResult result = TokenParser.parse("grow-x");
 
-    // grow-x is a JIT token (starts with "grow" prefix which is in JIT_PREFIXES)
-    // but it's not a known utility, so it should be tracked as unknown
-    // However, current implementation only adds to unknownTokens if it's a CSS class
-    // JIT tokens that are unknown are NOT added to unknownTokens set
-    assertEquals(0, result.cssClasses().size());
-    assertEquals(1, result.jitTokens().size());
-    // Note: JIT tokens are not added to unknownTokens even if not recognized
-    // This is by design - they will be compiled and may work at runtime
-    assertTrue(result.unknownTokens().isEmpty());
-    assertTrue(result.jitTokens().contains("grow-x"));
+    // grow-x starts with "grow" which is in JIT_PREFIXES, but it's not a known utility
+    // Since it doesn't have arbitrary or numeric value, requiresJitCompilation returns false
+    // So it goes to cssClasses, and since it's not a known utility, it's also unknown
+    assertEquals(1, result.cssClasses().size());
+    assertTrue(result.jitTokens().isEmpty());
+    assertTrue(result.unknownTokens().contains("grow-x"));
+    assertTrue(result.cssClasses().contains("grow-x"));
   }
 
   @Test
@@ -191,25 +193,32 @@ class TokenParserTest {
         TokenParser.parse(
             "btn-primary", "bg-blue-500", "gap-4", "flex", "hover:text-white", "blur-sm");
 
-    assertEquals(1, result.cssClasses().size());
-    // Note: gap-4 and flex are also JIT tokens (they need compilation),
-    // so jitTokens contains: bg-blue-500, gap-4, flex
-    assertEquals(3, result.jitTokens().size()); // bg-blue-500, gap-4, flex
-    assertEquals(1, result.layoutDependentTokens().size()); // gap-4
+    // btn-primary: css class (1)
+    // bg-blue-500: css class (named value, not arbitrary/numeric) (1)
+    // gap-4: css class (named value) + unknown (not in known utilities registry) (2)
+    // flex: jit + layout-migration (requires JIT compilation for display:flex) (1)
+    // hover:text-white: variant (1)
+    // blur-sm: effect (1)
+    assertEquals(3, result.cssClasses().size()); // btn-primary, bg-blue-500, gap-4
+    assertEquals(1, result.jitTokens().size()); // flex
+    assertEquals(0, result.layoutDependentTokens().size());
     assertEquals(1, result.layoutMigrationTokens().size()); // flex
     assertEquals(1, result.variantTokens().size()); // hover:text-white
     assertEquals(1, result.effectTokens().size()); // blur-sm
-    assertTrue(result.unknownTokens().isEmpty());
+    assertEquals(1, result.unknownTokens().size()); // gap-4 (not in known utilities registry)
+    assertTrue(result.unknownTokens().contains("gap-4"));
   }
 
   @Test
   void testMultipleTokensInSingleString() {
     TokenParser.ParseResult result = TokenParser.parse("bg-blue-500 text-red-600", "gap-4 flex");
 
-    // All four tokens are JIT: bg-blue-500, text-red-600, gap-4, flex
-    assertEquals(4, result.jitTokens().size());
-    // Only gap-4 is layout-dependent (flex is layout-migration, not layout-dependent)
-    assertEquals(1, result.layoutDependentTokens().size()); // gap-4 only
+    // bg-blue-500: css class (named value)
+    // text-red-600: css class (named value)
+    // gap-4: css class (named value)
+    // flex: jit + layout-migration
+    assertEquals(3, result.cssClasses().size()); // bg-blue-500, text-red-600, gap-4
+    assertEquals(1, result.jitTokens().size()); // flex only
     assertEquals(1, result.layoutMigrationTokens().size()); // flex only
   }
 
@@ -217,8 +226,10 @@ class TokenParserTest {
   void testNullAndBlankTokens() {
     TokenParser.ParseResult result = TokenParser.parse(null, "", "   ", "bg-blue-500");
 
-    assertEquals(1, result.jitTokens().size());
-    assertTrue(result.jitTokens().contains("bg-blue-500"));
+    // bg-blue-500 is a named value (not arbitrary/numeric), so it goes to cssClasses
+    assertEquals(1, result.cssClasses().size());
+    assertTrue(result.cssClasses().contains("bg-blue-500"));
+    assertTrue(result.jitTokens().isEmpty());
     assertTrue(result.isEmpty() == false);
     assertEquals(1, result.totalTokenCount());
   }
@@ -279,15 +290,15 @@ class TokenParserTest {
         TokenParser.parse(
             "bg-blue-500", "gap-4", "flex", "hover:text-white", "blur-sm", "unknown-token");
 
-    // bg-blue-500: jit (1 token)
-    // gap-4: jit + layout-dependent (1 token, classified in multiple categories)
-    // flex: jit + layout-migration (1 token, classified in multiple categories)
+    // bg-blue-500: css class (named value) (1 token)
+    // gap-4: css class + unknown (not in known utilities registry) (2 classifications)
+    // flex: jit + layout-migration (1 token, classified in multiple categories) (2)
     // hover:text-white: variant (1 token)
     // blur-sm: effect (1 token)
-    // unknown-token: css class + unknown (1 token, classified in multiple categories)
-    // Total: 6 unique tokens, but some appear in multiple categories
-    // Count by classification: 3(jit) + 1(layout-dep) + 1(layout-mig) + 1(variant) + 1(effect) +
-    // 2(css+unknown) = 9
+    // unknown-token: css class + unknown (1 token, classified in multiple categories) (2)
+    // Total: 6 unique tokens
+    // Count by classification: 1(jit) + 0(layout-dep) + 1(layout-mig) + 1(variant) + 1(effect) +
+    // 3(css) + 2(unknown) = 9
     assertEquals(9, result.totalTokenCount());
   }
 }
