@@ -2,19 +2,116 @@ package io.github.yasmramos.tailwindfx.color;
 
 import io.github.yasmramos.tailwindfx.core.Preconditions;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * ColorPalette — Paleta de colores Tailwind como valores RGB.
  *
- * <p>Convierte "blue-500" → "59,130,246" (componentes RGB sin #) para poder construir
+ * <p>Convierte "blue-500" → "#3b82f6" (hex) o "59,130,246" (componentes RGB sin #) para poder construir
  * rgba(r,g,b,alpha) al aplicar opacidad /80.
  *
- * <p>También convierte shade a hex para casos sin opacidad.
+ * <p>Esta clase es la ÚNICA fuente de verdad para los valores de color en TailwindFX.
+ * Las familias con escala tienen 11 shades (50-950), los colores planos tienen valor único.
  */
 public final class ColorPalette {
 
+  /** Array ordenado de shades estándar de TailwindCSS. */
+  public static final int[] SHADES = {50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950};
+
+  /** Lista ordenada de familias de colores con escala (excluye colores planos). */
+  public static final String[] FAMILIES;
+
+  /** Colores planos (sin escala de shades) según TailwindCSS. */
+  public static final Map<String, String> NAMED_COLORS;
+
+  static {
+    // Inicializar NAMED_COLORS primero
+    NAMED_COLORS = new HashMap<>();
+    NAMED_COLORS.put("white", "#ffffff");
+    NAMED_COLORS.put("black", "#000000");
+    NAMED_COLORS.put("transparent", "transparent");
+
+    // Construir FAMILIES en el orden de inserción del bloque estático
+    Set<String> familiesSet = new LinkedHashSet<>();
+    // Las familias se añaden al conjunto durante la inicialización del PALETTE
+    // Se asignará después de que el bloque estático principal se ejecute
+    FAMILIES = initializeFamilies(familiesSet);
+  }
+
+  private static String[] initializeFamilies(Set<String> familiesSet) {
+    // Orden explícito consistente con el bloque estático
+    familiesSet.add("slate");
+    familiesSet.add("gray");
+    familiesSet.add("red");
+    familiesSet.add("orange");
+    familiesSet.add("amber");
+    familiesSet.add("yellow");
+    familiesSet.add("lime");
+    familiesSet.add("green");
+    familiesSet.add("emerald");
+    familiesSet.add("teal");
+    familiesSet.add("cyan");
+    familiesSet.add("sky");
+    familiesSet.add("blue");
+    familiesSet.add("indigo");
+    familiesSet.add("violet");
+    familiesSet.add("purple");
+    familiesSet.add("fuchsia");
+    familiesSet.add("pink");
+    familiesSet.add("rose");
+    familiesSet.add("zinc");
+    familiesSet.add("neutral");
+    familiesSet.add("stone");
+    familiesSet.add("mauve");
+    familiesSet.add("olive");
+    familiesSet.add("mist");
+    familiesSet.add("taupe");
+    return familiesSet.toArray(new String[0]);
+  }
+
   private ColorPalette() {}
+
+  /** Devuelve el conjunto ordenado de familias de colores con escala. */
+  public static String[] families() {
+    return FAMILIES;
+  }
+
+  /** Devuelve el mapa de colores planos (nombre → hex/valor). */
+  public static Map<String, String> namedColors() {
+    return NAMED_COLORS;
+  }
+
+  /**
+   * Devuelve el array de hex para una familia específica en el orden de SHADES.
+   * @return array de 11 elementos o null si la familia no existe
+   */
+  public static String[] shadesOf(String family) {
+    if (!isFamily(family)) {
+      return null;
+    }
+    String[] result = new String[SHADES.length];
+    for (int i = 0; i < SHADES.length; i++) {
+      result[i] = hex(family, SHADES[i]);
+    }
+    return result;
+  }
+
+  /** Verifica si un nombre corresponde a una familia con escala. */
+  public static boolean isFamily(String name) {
+    for (String f : FAMILIES) {
+      if (f.equals(name)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /** Verifica si un nombre corresponde a un color plano. */
+  public static boolean isNamedColor(String name) {
+    return NAMED_COLORS.containsKey(name);
+  }
 
   // Public API
 
@@ -455,10 +552,6 @@ public final class ColorPalette {
     put("taupe", 800, "#7a6b61");
     put("taupe", 900, "#63574e");
     put("taupe", 950, "#3a322d");
-
-    // White / Black
-    PALETTE.put("white-0", "#ffffff");
-    PALETTE.put("black-0", "#000000");
   }
 
   private static void put(String name, int shade, String hex) {

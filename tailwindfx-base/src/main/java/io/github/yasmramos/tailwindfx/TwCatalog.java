@@ -89,41 +89,10 @@ public final class TwCatalog {
     "0", "5", "10", "20", "25", "30", "40", "50", "60", "70", "75", "80", "90", "95", "100"
   };
 
-  // Color families from ColorPalette
-  private static final String[] COLOR_FAMILIES = {
-    "slate",
-    "gray",
-    "red",
-    "orange",
-    "amber",
-    "yellow",
-    "lime",
-    "green",
-    "emerald",
-    "teal",
-    "cyan",
-    "sky",
-    "blue",
-    "indigo",
-    "violet",
-    "purple",
-    "fuchsia",
-    "pink",
-    "rose",
-    "zinc",
-    "neutral",
-    "stone",
-    "mauve",
-    "olive",
-    "mist",
-    "taupe",
-    "white",
-    "black",
-    "transparent"
-  };
-
-  // Shades
-  private static final int[] SHADES = {50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950};
+  // Color families derived from ColorPalette (single source of truth)
+  // Note: COLOR_FAMILIES contains only scaled color families, not named colors
+  
+  /** Javadoc updated: using 29 color families (22 standard + 7 custom) with 11 shades each, plus 3 named colors. */
 
   /**
    * Generates the complete catalog of all supported utility classes using the default theme
@@ -224,22 +193,22 @@ public final class TwCatalog {
   // ============================================================================
 
   private static void addColorUtilities(Set<String> utilities) {
-    // Background colors: bg-{color}-{shade}
-    for (String color : COLOR_FAMILIES) {
-      // Named colors (white, black, transparent) don't use shades
-      if ("white".equals(color) || "black".equals(color) || "transparent".equals(color)) {
-        utilities.add("bg-" + color);
-        utilities.add("text-" + color);
-        utilities.add("border-" + color);
-        utilities.add("ring-" + color);
-      } else {
-        for (int shade : SHADES) {
-          utilities.add("bg-" + color + "-" + shade);
-          utilities.add("text-" + color + "-" + shade);
-          utilities.add("border-" + color + "-" + shade);
-          utilities.add("ring-" + color + "-" + shade);
-        }
+    // Background colors: bg-{color}-{shade} for scaled families, bg-{named} for named colors
+    // Derive from ColorPalette as single source of truth
+    for (String family : io.github.yasmramos.tailwindfx.color.ColorPalette.families()) {
+      for (int shade : io.github.yasmramos.tailwindfx.color.ColorPalette.SHADES) {
+        utilities.add("bg-" + family + "-" + shade);
+        utilities.add("text-" + family + "-" + shade);
+        utilities.add("border-" + family + "-" + shade);
+        utilities.add("ring-" + family + "-" + shade);
       }
+    }
+    // Named colors (white, black, transparent) don't use shades
+    for (String name : io.github.yasmramos.tailwindfx.color.ColorPalette.namedColors().keySet()) {
+      utilities.add("bg-" + name);
+      utilities.add("text-" + name);
+      utilities.add("border-" + name);
+      utilities.add("ring-" + name);
     }
   }
 
@@ -395,16 +364,16 @@ public final class TwCatalog {
     utilities.add("list-disc");
     utilities.add("list-decimal");
 
-    // Placeholder
+    // Placeholder - derive from ColorPalette as single source of truth
     utilities.add("placeholder-transparent");
-    for (String color : new String[] {"white", "black"}) {
-      utilities.add("placeholder-" + color);
+    for (String name : io.github.yasmramos.tailwindfx.color.ColorPalette.namedColors().keySet()) {
+      if (!"transparent".equals(name)) {
+        utilities.add("placeholder-" + name);
+      }
     }
-    for (String color : COLOR_FAMILIES) {
-      if (!"white".equals(color) && !"black".equals(color) && !"transparent".equals(color)) {
-        for (int shade : SHADES) {
-          utilities.add("placeholder-" + color + "-" + shade);
-        }
+    for (String family : io.github.yasmramos.tailwindfx.color.ColorPalette.families()) {
+      for (int shade : io.github.yasmramos.tailwindfx.color.ColorPalette.SHADES) {
+        utilities.add("placeholder-" + family + "-" + shade);
       }
     }
   }
