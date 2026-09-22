@@ -1,6 +1,7 @@
 package io.github.yasmramos.tailwindfx;
 
 import io.github.yasmramos.tailwindfx.core.JitCompiler;
+import io.github.yasmramos.tailwindfx.core.ThemeCssGenerator;
 import io.github.yasmramos.tailwindfx.theme.ThemeConfig;
 import java.util.Set;
 import java.util.TreeSet;
@@ -182,14 +183,19 @@ public final class TwCatalog {
    * at runtime, without depending on the Maven plugin.
    *
    * @param config the theme configuration to use
-   * @return the complete CSS string containing all utility class definitions
+   * @return the complete CSS string containing all utility class definitions and base variables
    */
   public static String generateFullCss(ThemeConfig config) {
-    Set<String> allClasses = allUtilityClasses(config);
     StringBuilder css = new StringBuilder();
+
+    // First, generate base CSS variables (.root block)
+    ThemeCssGenerator generator = new ThemeCssGenerator(config);
+    css.append(generator.generateBaseCss());
+    css.append("\n");
 
     // Compile each utility class and append to CSS
     JitCompiler compiler = new JitCompiler();
+    Set<String> allClasses = allUtilityClasses(config);
     for (String utilityClass : allClasses) {
       try {
         JitCompiler.BatchResult result = compiler.compileBatch(utilityClass);
