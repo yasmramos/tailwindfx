@@ -19,7 +19,7 @@ import javafx.stage.Stage;
  * <p>All methods are static for direct access:
  *
  * <pre>
- * TailwindFX.apply(node, "btn-primary", "rounded-lg");
+ * TwStyle.apply(node, "btn-primary", "rounded-lg");
  * TailwindFX.install(scene);
  * TailwindFX.theme(scene).dark().apply();
  * </pre>

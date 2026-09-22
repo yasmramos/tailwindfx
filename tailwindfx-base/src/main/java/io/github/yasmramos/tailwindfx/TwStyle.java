@@ -103,7 +103,7 @@ public final class TwStyle {
       // This prevents runtime crashes and allows consumer to continue
       LOGGER.log(
           Level.WARNING,
-          "Layout classes requiring container migration ({0}) should be applied using TailwindFX.layout() instead of TailwindFX.apply().",
+          "Layout classes requiring container migration ({0}) should be applied using TailwindFX.layout() instead of TwStyle.apply().",
           String.join(", ", result.layoutMigrationTokens()));
       // Delegate these tokens to TwLayout for proper handling
       // For now, we skip them to avoid partial styling

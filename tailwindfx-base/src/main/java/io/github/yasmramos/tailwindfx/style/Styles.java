@@ -129,7 +129,7 @@ public final class Styles {
     return rowSpan(node, 6);
   }
 
-  // GRIDPANE — posición explícita col-start-*, row-start-*
+  // GRIDPANE - explicit position col-start-*, row-start-*
 
   /**
    * Positions a node at a specific cell in a {@link GridPane}.
@@ -225,7 +225,7 @@ public final class Styles {
    * nodo debe estar ya añadido al padre para que el margen tenga efecto inmediato.
    *
    * <pre>
-   * // Correcto — añadir primero, margen después
+   * // Correct - add first, margin after
    * parent.getChildren().add(node);
    * Styles.mx(node, 4);
    *
@@ -359,7 +359,7 @@ public final class Styles {
     return node;
   }
 
-  // MARGIN WithParent — añaden el nodo Y aplican el margen en un solo paso
+  // MARGIN WithParent - add node AND apply margin in a single step
   // Eliminan el problema del orden de llamada descrito en el javadoc de margin.
 
   /**
@@ -424,7 +424,7 @@ public final class Styles {
    * Añade varios nodos a un padre con el mismo margen (n × 4px) aplicado a cada uno.
    *
    * <pre>
-   * // Añade tres cards a un HBox con 8px de margen cada una
+   * // Adds three cards to an HBox with 8px margin each
    * Styles.addWithMargin(hbox, 2, card1, card2, card3);
    * </pre>
    *
@@ -444,7 +444,7 @@ public final class Styles {
 
   // Z-ORDER — z-0, z-10, z-20, z-30, z-40, z-50, z-auto
   // Corresponde a: z-index en CSS web
-  // NOTA: En JavaFX, viewOrder más BAJO = más adelante (al revés que z-index)
+  // NOTE: In JavaFX, lower viewOrder = more forward (opposite of z-index)
 
   /**
    * .z-{value} — controla el orden de pintado del nodo. JavaFX viewOrder: 0 = frente, valores
@@ -452,7 +452,7 @@ public final class Styles {
    */
   public static <T extends Node> T z(T node, int zIndex) {
     Preconditions.requireNode(node, "Styles.z");
-    // Invertir: z-50 en Tailwind = más adelante = viewOrder negativo
+    // Invert: z-50 in Tailwind = more forward = negative viewOrder
     node.setViewOrder(-zIndex);
     return node;
   }
@@ -601,7 +601,7 @@ public final class Styles {
   /** .sepia — aplica tono sepia al nodo */
   public static <T extends Node> T sepia(T node) {
     Preconditions.requireNode(node, "Styles.sepia");
-    // Sepia: desaturar + shift de tono cálido
+    // Sepia: desaturate + warm tone shift
     node.setEffect(new ColorAdjust(0.1, -0.5, 0.1, 0));
     return node;
   }
@@ -1034,7 +1034,7 @@ public final class Styles {
    *
    * <pre>
    * Label label = new Label("Click me");
-   * TailwindFX.apply(label, "text-blue-500");
+   * TwStyle.apply(label, "text-blue-500");
    * SVGPath icon = loadIcon();
    * Styles.fillCurrent(icon, label); // icon fill = label text color
    * </pre>
@@ -1298,7 +1298,7 @@ public final class Styles {
             4));
   }
 
-  // USER-SELECT — Control de selección de texto
+  // USER-SELECT - Text selection control
   // Corresponde a: user-select: none/text/all/auto en CSS web
 
   /** .select-none — Disables text selection */
@@ -1330,7 +1330,7 @@ public final class Styles {
     return node;
   }
 
-  // TOUCH-ACTION — Control de gestos táctiles
+  // TOUCH-ACTION - Touch gesture control
   // Corresponde a: touch-action: auto/none/pan-x/pan-y/pinch-zoom/manipulation en CSS web
 
   /** .touch-auto — Default touch gesture handling */

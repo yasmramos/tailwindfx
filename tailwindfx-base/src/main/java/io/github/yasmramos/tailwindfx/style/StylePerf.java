@@ -19,8 +19,8 @@ import javafx.scene.Node;
  *
  * <pre>
  * // Without StyleDiff: both calls run the full resolver
- * TailwindFX.apply(button, "btn-primary rounded-lg");
- * TailwindFX.apply(button, "btn-primary rounded-lg"); // redundant work
+ * TwStyle.apply(button, "btn-primary rounded-lg");
+ * TwStyle.apply(button, "btn-primary rounded-lg"); // redundant work
  *
  * // With StyleDiff: second call is a no-op
  * StylePerf.apply(button, "btn-primary rounded-lg");
@@ -35,15 +35,15 @@ import javafx.scene.Node;
  *
  * <pre>
  * // Without batch: 3 CSS engine passes
- * TailwindFX.apply(card1, "w-full p-4");
- * TailwindFX.apply(card2, "w-full p-4");
- * TailwindFX.apply(card3, "w-full p-4");
+ * TwStyle.apply(card1, "w-full p-4");
+ * TwStyle.apply(card2, "w-full p-4");
+ * TwStyle.apply(card3, "w-full p-4");
  *
  * // With batch: 1 CSS engine pass
  * StylePerf.batch(() -> {
- *     TailwindFX.apply(card1, "w-full p-4");
- *     TailwindFX.apply(card2, "w-full p-4");
- *     TailwindFX.apply(card3, "w-full p-4");
+ *     TwStyle.apply(card1, "w-full p-4");
+ *     TwStyle.apply(card2, "w-full p-4");
+ *     TwStyle.apply(card3, "w-full p-4");
  * });
  * </pre>
  *
@@ -52,7 +52,7 @@ import javafx.scene.Node;
  * <p>Both features are available directly via the entry point:
  *
  * <pre>
- * TailwindFX.apply(node, "btn-primary", "rounded-lg");
+ * TwStyle.apply(node, "btn-primary", "rounded-lg");
  * TailwindFX.batch(() -> { ... });
  * TailwindFX.batchJit(() -> { ... });
  * </pre>
@@ -144,7 +144,7 @@ public final class StylePerf {
    * <pre>
    * // Applying utilities to a dashboard of 200 cards:
    * StylePerf.batch(() ->
-   *     cards.forEach(c -> TailwindFX.apply(c, "card", "shadow-md", "rounded-lg"))
+   *     cards.forEach(c -> TwStyle.apply(c, "card", "shadow-md", "rounded-lg"))
    * );
    * </pre>
    *
@@ -200,7 +200,7 @@ public final class StylePerf {
   }
 
   /**
-   * Enqueues a deferred apply operation. Called by TailwindFX.apply() when a batch is active. Do
+   * Enqueues a deferred apply operation. Called by TwStyle.apply() when a batch is active. Do
    * not call directly.
    *
    * @param node the node to apply to
@@ -235,7 +235,7 @@ public final class StylePerf {
    * <pre>
    * // From a background data-loading thread:
    * StylePerf.batchAsync(() -> {
-   *     results.forEach(row -> TailwindFX.apply(row.cell(), "table-cell"));
+   *     results.forEach(row -> TwStyle.apply(row.cell(), "table-cell"));
    * });
    * </pre>
    *
@@ -258,11 +258,11 @@ public final class StylePerf {
    * var nodes = buildNodes(500);
    *
    * double noBatch = StylePerf.benchmark(500,
-   *     i -> TailwindFX.apply(nodes.get(i), "card shadow-md rounded-lg"));
+   *     i -> TwStyle.apply(nodes.get(i), "card shadow-md rounded-lg"));
    *
    * double withBatch = StylePerf.benchmark(1, i ->
    *     StylePerf.batch(() ->
-   *         nodes.forEach(n -> TailwindFX.apply(n, "card shadow-md rounded-lg"))));
+   *         nodes.forEach(n -> TwStyle.apply(n, "card shadow-md rounded-lg"))));
    *
    * System.out.printf("No batch: %.2f ms, Batch: %.2f ms%n", noBatch, withBatch);
    * </pre>

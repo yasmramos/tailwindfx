@@ -503,7 +503,7 @@ public final class UtilityConflictResolver {
       Preconditions.LOG.warning(
           "UtilityConflictResolver.apply: unusually long class name ("
               + cssClass.length()
-              + " chars) — is this a JIT token? Use TailwindFX.apply() instead for auto-detection.");
+              + " chars) — is this a JIT token? Use TwStyle.apply() instead for auto-detection.");
     }
     String category = findCategory(cssClass);
     if (category != null) {

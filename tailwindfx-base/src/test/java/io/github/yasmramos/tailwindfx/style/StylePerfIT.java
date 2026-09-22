@@ -3,6 +3,7 @@ package io.github.yasmramos.tailwindfx.style;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.yasmramos.tailwindfx.TailwindFX;
+import io.github.yasmramos.tailwindfx.style.TwStyle;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
@@ -140,8 +141,8 @@ class StylePerfTest extends ApplicationTest {
                 () -> {
                   StylePerf.batch(
                       () -> {
-                        TailwindFX.apply(button, "btn-primary");
-                        TailwindFX.apply(container, "v-box", "p-4");
+                        TwStyle.apply(button, "btn-primary");
+                        TwStyle.apply(container, "v-box", "p-4");
                       });
                 },
                 "Batch execution should not throw");
@@ -165,7 +166,7 @@ class StylePerfTest extends ApplicationTest {
           new Thread(
               () -> {
                 try {
-                  StylePerf.batch(() -> TailwindFX.apply(button, "btn-primary"));
+                  StylePerf.batch(() -> TwStyle.apply(button, "btn-primary"));
                 } catch (IllegalStateException e) {
                   exceptionThrown[0] = true;
                 }
@@ -184,9 +185,9 @@ class StylePerfTest extends ApplicationTest {
                 () -> {
                   StylePerf.batch(
                       () -> {
-                        TailwindFX.apply(button, "btn-primary");
+                        TwStyle.apply(button, "btn-primary");
                         // Nested batch
-                        StylePerf.batch(() -> TailwindFX.apply(container, "v-box"));
+                        StylePerf.batch(() -> TwStyle.apply(container, "v-box"));
                       });
                 },
                 "Nested batches should not throw");
@@ -214,7 +215,7 @@ class StylePerfTest extends ApplicationTest {
     void testPendingOpsCleared() {
       interact(
           () -> {
-            StylePerf.batch(() -> TailwindFX.apply(button, "btn-primary"));
+            StylePerf.batch(() -> TwStyle.apply(button, "btn-primary"));
             // After batch, pendingOps should be cleared internally
             // We verify by checking batch is not active
             assertFalse(StylePerf.isBatchActive());
@@ -231,7 +232,7 @@ class StylePerfTest extends ApplicationTest {
     void testBatchAsync() {
       assertDoesNotThrow(
           () -> {
-            StylePerf.batchAsync(() -> TailwindFX.apply(button, "btn-primary"));
+            StylePerf.batchAsync(() -> TwStyle.apply(button, "btn-primary"));
             // Give time for async execution
             Thread.sleep(100);
           },
@@ -359,7 +360,7 @@ class StylePerfTest extends ApplicationTest {
   class IntegrationTests {
 
     @Test
-    @DisplayName("Should work with TailwindFX.apply inside batch")
+    @DisplayName("Should work with TwStyle.apply inside batch")
     void testTailwindFXApplyInBatch() {
       interact(
           () -> {
@@ -367,11 +368,11 @@ class StylePerfTest extends ApplicationTest {
                 () -> {
                   StylePerf.batch(
                       () -> {
-                        TailwindFX.apply(button, "btn-primary", "text-white");
-                        TailwindFX.apply(container, "flex", "gap-2");
+                        TwStyle.apply(button, "btn-primary", "text-white");
+                        TwStyle.apply(container, "flex", "gap-2");
                       });
                 },
-                "TailwindFX.apply should work inside StylePerf.batch");
+                "TwStyle.apply should work inside StylePerf.batch");
           });
     }
 

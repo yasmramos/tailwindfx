@@ -19,27 +19,27 @@ public class BasicLoginExample extends Application {
     public void start(Stage stage) {
 
         Label title = new Label("Welcome Back");
-        TailwindFX.apply(title, "text-2xl", "font-bold");
+        TwStyle.apply(title, "text-2xl", "font-bold");
 
         Label subtitle = new Label("Login to continue");
-        TailwindFX.apply(subtitle, "text-sm", "text-gray-600");
+        TwStyle.apply(subtitle, "text-sm", "text-gray-600");
 
         TextField emailField = new TextField();
         emailField.setPromptText("Enter your email");
         emailField.setMaxWidth(250);
-        TailwindFX.apply(emailField, "rounded-lg", "border");
+        TwStyle.apply(emailField, "rounded-lg", "border");
 
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Enter your password");
         passwordField.setMaxWidth(250);
-        TailwindFX.apply(passwordField, "rounded-lg", "border");
+        TwStyle.apply(passwordField, "rounded-lg", "border");
 
         Button loginButton = new Button("Login");
         loginButton.setPrefWidth(250);
-        TailwindFX.apply(loginButton, "btn-primary", "rounded-lg");
+        TwStyle.apply(loginButton, "btn-primary", "rounded-lg");
 
         Hyperlink forgotPassword = new Hyperlink("Forgot Password?");
-        TailwindFX.apply(forgotPassword, "text-blue-600");
+        TwStyle.apply(forgotPassword, "text-blue-600");
 
         VBox root = new VBox(15,
                 title,
@@ -52,7 +52,7 @@ public class BasicLoginExample extends Application {
 
         root.setAlignment(Pos.CENTER);
         root.setPadding(new Insets(30));
-        TailwindFX.apply(root, "bg-gray-50", "border", "rounded-xl");
+        TwStyle.apply(root, "bg-gray-50", "border", "rounded-xl");
 
         Scene scene = new Scene(root, 450, 550);
 

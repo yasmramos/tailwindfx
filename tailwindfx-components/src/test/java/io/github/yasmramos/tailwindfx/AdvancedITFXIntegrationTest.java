@@ -52,7 +52,7 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
     @DisplayName("Should handle single click on button")
     void testSingleClick() {
       Button btn = new Button("Click Me");
-      TailwindFX.apply(btn, "btn-primary");
+      TwStyle.apply(btn, "btn-primary");
 
       AtomicBoolean clicked = new AtomicBoolean(false);
       btn.setOnAction(e -> clicked.set(true));
@@ -115,7 +115,7 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
     @DisplayName("Should type text into TextField")
     void testTyping() {
       TextField field = new TextField();
-      TailwindFX.apply(field, "input");
+      TwStyle.apply(field, "input");
 
       interact(() -> root.getChildren().add(field));
 
@@ -293,7 +293,7 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
       emailField.setPromptText("Your Email");
 
       Button submitBtn = new Button("Submit");
-      TailwindFX.apply(submitBtn, "btn-primary");
+      TwStyle.apply(submitBtn, "btn-primary");
 
       AtomicBoolean submitted = new AtomicBoolean(false);
       submitBtn.setOnAction(
@@ -306,7 +306,7 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
       interact(
           () -> {
             VBox form = new VBox(10, nameField, emailField, submitBtn);
-            TailwindFX.apply(form, "p-4", "gap-2");
+            TwStyle.apply(form, "p-4", "gap-2");
             root.getChildren().add(form);
           });
 

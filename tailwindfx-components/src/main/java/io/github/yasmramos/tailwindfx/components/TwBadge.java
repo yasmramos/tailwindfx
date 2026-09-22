@@ -39,7 +39,7 @@ public class TwBadge extends Label {
   public static TwBadge create(String text, String color) {
     TwBadge lbl = new TwBadge();
     lbl.setText(text.toUpperCase());
-    TailwindFX.apply(lbl, "badge", "badge-" + color, "badge-md");
+    TwStyle.apply(lbl, "badge", "badge-" + color, "badge-md");
     return lbl;
   }
 
@@ -62,7 +62,7 @@ public class TwBadge extends Label {
    */
   public static TwBadge pill(String text, String color) {
     TwBadge lbl = create(text, color);
-    TailwindFX.apply(lbl, "badge-pill");
+    TwStyle.apply(lbl, "badge-pill");
     return lbl;
   }
 
@@ -109,7 +109,7 @@ public class TwBadge extends Label {
   public static TwBadge outline(String text, String color) {
     TwBadge lbl = new TwBadge();
     lbl.setText(text.toUpperCase());
-    TailwindFX.apply(lbl, "badge", "badge-outline", "badge-" + color, "badge-md");
+    TwStyle.apply(lbl, "badge", "badge-outline", "badge-" + color, "badge-md");
     return lbl;
   }
 
@@ -135,11 +135,11 @@ public class TwBadge extends Label {
       super();
 
       dot = new Label();
-      TailwindFX.apply(dot, "dot", "dot-" + dotColor, "dot-sm");
+      TwStyle.apply(dot, "dot", "dot-" + dotColor, "dot-sm");
 
       label = new TwBadge();
       label.setText(text);
-      TailwindFX.apply(label, "badge", "badge-" + textColor, "badge-compact");
+      TwStyle.apply(label, "badge", "badge-" + textColor, "badge-compact");
       label.setPadding(new Insets(0));
 
       getChildren().addAll(dot, label);

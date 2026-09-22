@@ -87,7 +87,7 @@ public final class StyleResolver {
       return null;
     }
 
-    // Mapear shade a índice del array
+    // Map shade to array index
     int[] shadeValues = {50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950};
     int index = -1;
     for (int i = 0; i < shadeValues.length; i++) {
@@ -113,7 +113,7 @@ public final class StyleResolver {
   }
 
   private String resolveArbitrary(StyleToken token) {
-    // Si hay alpha y el valor arbitrario es un color hex válido, aplicar opacidad
+    // If there's alpha and the arbitrary value is a valid hex color, apply opacity
     if (token.alpha != null
         && io.github.yasmramos.tailwindfx.color.ColorPalette.isValidHex(token.arbitraryVal)) {
       String rgb =
@@ -141,9 +141,9 @@ public final class StyleResolver {
       return "rgba(" + rgbContent + "," + String.format("%.2f", opacity) + ")";
     }
 
-    // Si es hex, convertir a rgba
+    // If is hex, convert to rgba
     if (colorValue.startsWith("#")) {
-      // Simplificado: asumir hex de 6 dígitos
+      // Simplified: assume 6-digit hex
       if (colorValue.length() == 7) {
         int r = Integer.parseInt(colorValue.substring(1, 3), 16);
         int g = Integer.parseInt(colorValue.substring(3, 5), 16);

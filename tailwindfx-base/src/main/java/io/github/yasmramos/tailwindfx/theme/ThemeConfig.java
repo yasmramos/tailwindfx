@@ -65,7 +65,7 @@ public final class ThemeConfig {
     if (shades == null) {
       return null;
     }
-    // Mapeo correcto de shade a índice: 50→0, 100→1, 200→2, 300→3, 400→4, 500→5, 600→6, 700→7,
+    // Correct shade to index mapping: 50→0, 100→1, 200→2, 300→3, 400→4, 500→5, 600→6, 700→7,
     // 800→8, 900→9, 950→10
     int index;
     if (shade == 50) index = 0;
@@ -195,7 +195,7 @@ public final class ThemeConfig {
     }
 
     private void initDefaults() {
-      // Derivar colores desde ColorPalette (única fuente de verdad)
+      // Derive colors from ColorPalette (single source of truth)
       for (String family : io.github.yasmramos.tailwindfx.color.ColorPalette.families()) {
         colors.put(family, io.github.yasmramos.tailwindfx.color.ColorPalette.shadesOf(family));
       }

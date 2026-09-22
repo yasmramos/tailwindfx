@@ -53,11 +53,11 @@ public class TwAvatar extends StackPane {
   public static TwAvatar create(String initials, String color, String size) {
     TwAvatar avatar = new TwAvatar();
 
-    TailwindFX.apply(avatar, "avatar", "avatar-" + size, "avatar-" + color);
+    TwStyle.apply(avatar, "avatar", "avatar-" + size, "avatar-" + color);
     avatar.setPadding(new Insets(0));
 
     Label lbl = new Label(initials.toUpperCase());
-    TailwindFX.apply(lbl, "avatar-text", "avatar-text-" + color);
+    TwStyle.apply(lbl, "avatar-text", "avatar-text-" + color);
 
     avatar.getChildren().add(lbl);
     StackPane.setAlignment(lbl, Pos.CENTER);
@@ -85,7 +85,7 @@ public class TwAvatar extends StackPane {
   public static TwAvatar fromImage(Node image, String size) {
     TwAvatar avatar = new TwAvatar();
 
-    TailwindFX.apply(avatar, "avatar", "avatar-" + size, "avatar-image");
+    TwStyle.apply(avatar, "avatar", "avatar-" + size, "avatar-image");
 
     // Clip to circle
     double avatarSize = getAvatarSize(size);
@@ -163,7 +163,7 @@ public class TwAvatar extends StackPane {
       double xOffset = 0;
       for (TwAvatar avatar : avatars) {
         // Add border class to each avatar in group
-        TailwindFX.apply(avatar, "avatar-group-item");
+        TwStyle.apply(avatar, "avatar-group-item");
         avatar.setTranslateX(xOffset);
         getChildren().add(avatar);
         xOffset += spacing;
@@ -192,7 +192,7 @@ public class TwAvatar extends StackPane {
       if (size <= 0) size = 40; // default
 
       statusDot = new Label();
-      TailwindFX.apply(
+      TwStyle.apply(
           statusDot,
           "avatar-status-dot",
           isOnline ? "avatar-status-online" : "avatar-status-offline");

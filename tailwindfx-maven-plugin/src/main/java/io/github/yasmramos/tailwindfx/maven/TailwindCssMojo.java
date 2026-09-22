@@ -197,7 +197,7 @@ public class TailwindCssMojo extends AbstractMojo {
           // Extract classes only from string literals in style application methods
           // This avoids false positives from Java identifiers like class names, method names, etc.
 
-          // Match method calls: TwStyle.apply(...), TailwindFX.apply(...), TwStyle.applyRaw(...)
+          // Match method calls: TwStyle.apply(...), TwStyle.apply(...), TwStyle.applyRaw(...)
           Matcher methodMatcher = METHOD_CALL_PATTERN.matcher(content);
           while (methodMatcher.find()) {
             // Get the first non-null group (the entire argument list)

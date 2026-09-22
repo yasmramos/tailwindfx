@@ -35,7 +35,7 @@ class TailwindFXTest extends ApplicationTest {
 
   @Test
   void testApplyStyles() {
-    TailwindFX.apply(testButton, "bg-blue-500", "text-white");
+    TwStyle.apply(testButton, "bg-blue-500", "text-white");
 
     // Verify that styles were applied (checking if style class was added)
     assertFalse(testButton.getStyleClass().isEmpty());
@@ -102,7 +102,7 @@ class TailwindFXTest extends ApplicationTest {
         () -> {
           TailwindFX.batch(
               () -> {
-                TailwindFX.apply(testButton, "bg-green-500");
+                TwStyle.apply(testButton, "bg-green-500");
               });
 
           assertTrue(testButton.getStyleClass().contains("bg-green-500"));

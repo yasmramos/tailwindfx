@@ -56,7 +56,7 @@ import javafx.scene.layout.Region;
  *
  * <pre>
  * TwFlexPane flex = TwFlexPane.row().gap(16).justify(Justify.BETWEEN);
- * TailwindFX.apply(flex, "p-4", "bg-white", "rounded-lg");
+ * TwStyle.apply(flex, "p-4", "bg-white", "rounded-lg");
  *
  * // Responsive with ResponsiveNode:
  * ResponsiveNode.on(flex)
