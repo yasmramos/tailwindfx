@@ -311,6 +311,56 @@ public final class ThemeConfig {
             "#9f1239", "#881337", "#4c0519"
           });
 
+      // Neutral grays (Tailwind standard)
+      colors.put(
+          "zinc",
+          new String[] {
+            "#fafafa", "#f4f4f5", "#e4e4e7", "#d4d4d8", "#a1a1aa", "#71717a", "#52525b", "#3f3f46",
+            "#27272a", "#18181b", "#09090b"
+          });
+      colors.put(
+          "neutral",
+          new String[] {
+            "#fafafa", "#f5f5f5", "#e5e5e5", "#d4d4d4", "#a3a3a3", "#737373", "#525252", "#404040",
+            "#262626", "#171717", "#0a0a0a"
+          });
+      colors.put(
+          "stone",
+          new String[] {
+            "#fafaf9", "#f5f5f4", "#e7e5e4", "#d6d3d1", "#a8a29e", "#78716c", "#57534e", "#44403c",
+            "#292524", "#1c1917", "#0c0a09"
+          });
+
+      // Custom color families (converted from OKLCH to hex)
+      // Mauve: purple-gray tones
+      colors.put(
+          "mauve",
+          new String[] {
+            "#f7f5fa", "#efeaf5", "#ded6e9", "#cbc0db", "#b3a5c9", "#9a88b7", "#846fa6", "#715991",
+            "#5f487a", "#4d3a63", "#2a1f3a"
+          });
+      // Olive: green-yellow muted tones
+      colors.put(
+          "olive",
+          new String[] {
+            "#fcfce8", "#f8f8d1", "#efefad", "#e6e68a", "#dddd60", "#d4d438", "#bfbf2e", "#a9a927",
+            "#8f8f23", "#757520", "#3d3d12"
+          });
+      // Mist: blue-cyan very light tones
+      colors.put(
+          "mist",
+          new String[] {
+            "#f4fbfc", "#e8f7f9", "#d0eff3", "#b8e7ed", "#9bdce6", "#7ed0df", "#62c3d8", "#46b5d0",
+            "#2ba6c7", "#1298be", "#0a6f8a"
+          });
+      // Taupe: brown-gray warm tones
+      colors.put(
+          "taupe",
+          new String[] {
+            "#f9f7f5", "#f3efeb", "#e7e1d9", "#dad3c8", "#c9bfb0", "#b8aba0", "#a5968b", "#918075",
+            "#7a6b61", "#63574e", "#3a322d"
+          });
+
       // Named colors: white, black, transparent
       colors.put(
           "white",
