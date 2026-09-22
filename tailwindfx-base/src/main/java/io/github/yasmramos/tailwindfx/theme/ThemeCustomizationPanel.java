@@ -69,20 +69,20 @@ public class ThemeCustomizationPanel extends VBox {
     setPadding(new Insets(20));
     setStyle("-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8px;");
 
-    // Título
+    // Title
     Label titleLabel = new Label("🎨 Theme Customization");
     titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
 
-    // Sección de Colores
+    // Colors Section
     VBox colorsSection = createColorsSection();
 
-    // Sección de Propiedades
+    // Properties Section
     VBox propertiesSection = createPropertiesSection();
 
-    // Sección de Preview
+    // Preview Section
     VBox previewSection = createPreviewSection();
 
-    // Sección de Acciones
+    // Actions Section
     HBox actionsSection = createActionsSection();
 
     getChildren()
@@ -230,7 +230,7 @@ public class ThemeCustomizationPanel extends VBox {
     Label title = new Label("👁️ Live Preview");
     title.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #475569;");
 
-    // Área de preview (usamos Pane en lugar de Region para tener getChildren() público)
+    // Preview area (using Pane instead of Region to have public getChildren())
     StackPane previewContainer = new StackPane();
     previewContainer.setPrefHeight(150);
     previewContainer.setStyle("-fx-background-color: #e2e8f0; -fx-background-radius: 8px;");
@@ -372,7 +372,7 @@ public class ThemeCustomizationPanel extends VBox {
             """,
               toCssColor(bg), radius, toCssColor(primary), radius, shadow / 100.0, shadow / 5.0));
 
-      // Actualizar botón de preview
+      // Update preview button
       previewButton.setStyle(
           String.format(
               """
@@ -395,7 +395,7 @@ public class ThemeCustomizationPanel extends VBox {
             """,
               18 * spacing, toCssColor(text)));
 
-      // Actualizar tema global si está disponible
+      // Update global theme if available
       if (themeManager != null) {
         updateThemeColors(primary, secondary, bg, text);
       }
@@ -432,8 +432,8 @@ public class ThemeCustomizationPanel extends VBox {
    */
   private void updateThemeColors(Color primary, Color secondary, Color bg, Color text) {
     try {
-      // Aquí se podría integrar con el sistema de temas existente
-      // Por ahora, solo actualizamos las variables CSS si están disponibles
+      // Here we could integrate with the existing theme system
+      // For now, we only update CSS variables if available
       System.out.println("Theme colors updated:");
       System.out.println("  Primary: " + toCssColor(primary));
       System.out.println("  Secondary: " + toCssColor(secondary));

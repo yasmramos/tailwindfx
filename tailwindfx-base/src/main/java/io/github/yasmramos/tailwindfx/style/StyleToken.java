@@ -26,7 +26,7 @@ public final class StyleToken {
   private static final Pattern COLOR_SHADE_ALPHA =
       Pattern.compile("^(-?)([a-z][a-z-]*)-([a-z]+)-(\\d+)(?:/(\\d+))?$");
 
-  // Escalar básico: p-4, w-12, gap-8
+  // Basic scale: p-4, w-12, gap-8
   private static final Pattern SCALE = Pattern.compile("^(-?)([a-z][a-z-]*)-(\\d+)$");
 
   // Named: text-sm, rounded-lg, font-bold
@@ -103,7 +103,7 @@ public final class StyleToken {
           Kind.COLOR_SHADE);
     }
 
-    // 3. Scale numérico: p-4, w-12, -mt-4
+    // 3. Numeric scale: p-4, w-12, -mt-4
     m = SCALE.matcher(token);
     if (m.matches()) {
       // Detectar sub-prefix: px, py, pt, pr, pb, pl, mx, my, etc.

@@ -519,7 +519,7 @@ public final class JitCompiler {
   private CompileResult doCompile(String raw) {
     StyleToken t = StyleToken.parse(raw);
 
-    // Delegar resolución al StyleResolver
+    // Delegate resolution to StyleResolver
     String resolvedValue = resolver.resolve(t);
     if (resolvedValue == null) {
       return CompileResult.unknown(raw);
