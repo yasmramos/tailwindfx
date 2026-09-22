@@ -10,7 +10,7 @@ Restructure the source code packages to improve modularity, maintainability, and
 - Core library classes (TailwindFX, FxLayout, JIT compiler)
 - UI components (FxButton, FxCard, FxDataTable, etc.)
 - Utilities (ColorUtil, CssParser)
-- Animations (FxAnimation)
+- Animations (TwAnimation)
 - Theme management (ThemeManager, ThemeScopeManager)
 - Internationalization (FxI18n)
 - Data components (FxVirtualFlow)
@@ -56,7 +56,7 @@ tailwindfx/
 │   ├── ComponentFactory.java
 │   └── JitCompiler.java
 ├── animation/               # Animation utilities
-│   └── FxAnimation.java
+│   └── TwAnimation.java
 ├── theme/                   # Theme management
 │   ├── ThemeManager.java
 │   ├── ThemeScopeManager.java
