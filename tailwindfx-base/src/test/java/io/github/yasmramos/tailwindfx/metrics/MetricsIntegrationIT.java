@@ -78,13 +78,21 @@ class MetricsIntegrationTest extends ApplicationTest {
         () -> {
           Region node = new Region();
 
-          // Apply styles - metrics should be recorded
-          TwStyle.apply(node, "rounded-lg");
-          TwStyle.apply(node, "p-4");
+          // Apply arbitrary values that go through JIT compiler to exercise cache metrics
+          TwStyle.apply(node, "p-[13px]");
+          TwStyle.apply(node, "w-[200px]");
+          
+          // Apply again to trigger cache hits
+          TwStyle.apply(node, "p-[13px]");
+          TwStyle.apply(node, "w-[200px]");
 
-          // Verify operations were recorded using applyCalls
+          // Verify operations were recorded using applyCalls and JIT cache metrics
           long applyCalls = TailwindFXMetrics.instance().applyCalls();
+          long cacheHits = TailwindFXMetrics.instance().cacheHits();
+          long cacheMisses = TailwindFXMetrics.instance().cacheMisses();
+          
           assertTrue(applyCalls > 0, "Should have recorded at least one operation");
+          assertTrue(cacheHits + cacheMisses > 0, "Should have recorded JIT cache activity");
         });
   }
 

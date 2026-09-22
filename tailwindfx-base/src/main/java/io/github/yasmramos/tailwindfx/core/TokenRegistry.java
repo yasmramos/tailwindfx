@@ -479,6 +479,10 @@ public final class TokenRegistry {
     if (token == null || !token.contains(":")) {
       return token;
     }
+    // Don't strip from tokens containing arbitrary values [...] - colons inside [] are not variants
+    if (token.contains("[")) {
+      return token;
+    }
     // Don't strip from arbitrary properties [...] - they are not variants
     if (token.startsWith("[")) {
       return token;
