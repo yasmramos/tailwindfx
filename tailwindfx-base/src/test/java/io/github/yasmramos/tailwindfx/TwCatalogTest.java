@@ -381,6 +381,7 @@ class TwCatalogTest extends ApplicationTest {
         sceneCss.contains(".rounded-lg") || sceneCss.contains("rounded-lg"),
         "Scene CSS should contain rounded-lg utility");
 
-    System.out.println("Successfully loaded generated CSS to Scene with " + css.length() + " bytes");
+    System.out.println(
+        "Successfully loaded generated CSS to Scene with " + css.length() + " bytes");
   }
 }

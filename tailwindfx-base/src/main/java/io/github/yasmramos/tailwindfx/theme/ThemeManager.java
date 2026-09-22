@@ -528,8 +528,8 @@ public final class ThemeManager {
    * Safely applies CSS to a node, catching any NPEs that may occur if the node is not fully
    * initialized.
    *
-   * <p>JavaFX's internal CSS processing can throw NPEs when applyCss() is called before the node
-   * is fully attached to the scene graph or during early initialization phases.
+   * <p>JavaFX's internal CSS processing can throw NPEs when applyCss() is called before the node is
+   * fully attached to the scene graph or during early initialization phases.
    */
   private static void safeApplyCss(Node node) {
     if (node == null) return;

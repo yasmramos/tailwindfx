@@ -43,8 +43,8 @@ class StyleResolverTest {
     String result = resolver.resolve(token);
 
     assertNotNull(result);
-    // El color puede estar en formato rgb() o hex, verificar que no sea null
-    assertTrue(result.length() > 0);
+    // Debe devolver referencia a variable CSS lookupeada
+    assertEquals("-color-blue-500", result);
   }
 
   @Test

@@ -41,7 +41,7 @@ class TokenParserTest {
 
     assertEquals(1, result.jitTokens().size());
     assertTrue(result.jitTokens().contains("w-[200px]"));
-    
+
     // Named color values should be CSS classes
     assertEquals(2, result.cssClasses().size());
     assertTrue(result.cssClasses().contains("bg-blue-500"));
