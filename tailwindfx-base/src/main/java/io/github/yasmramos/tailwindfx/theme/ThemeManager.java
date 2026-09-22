@@ -545,7 +545,7 @@ public final class ThemeManager {
   private static void refreshDescendants(Node node) {
     if (node instanceof javafx.scene.Parent parent) {
       for (Node child : parent.getChildrenUnmodifiable()) {
-        child.applyCss();
+        safeApplyCss(child);
         if (child instanceof javafx.scene.Parent) {
           ((javafx.scene.Parent) child).requestLayout();
         }
