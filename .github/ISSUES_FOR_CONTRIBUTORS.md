@@ -9,7 +9,7 @@ The following issues have been completed and merged into the main branch:
 - ~~**1. Add Missing Cursor Utilities** - Implemented in v0.1.0~~
 - ~~**2. Add User-Select Utilities** - Implemented in Styles.java~~
 - ~~**3. Add Resize Utilities** - Implemented in v0.1.0~~
-- ~~**4. Document FxAnimation Class** - docs/FxAnimation.md created~~
+- ~~**4. Document TwAnimation Class** - docs/TwAnimation.md created~~
 - ~~**5. Add Unit Tests for ColorPalette** - ColorPaletteTest.java added with 80%+ coverage~~
 - ~~**6. Create Example Project** - basic-app and demo-app examples created~~
 - ~~**7. Add Touch-Action Utilities** - Implemented in Styles.java~~
