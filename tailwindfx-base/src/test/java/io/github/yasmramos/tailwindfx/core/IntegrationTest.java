@@ -126,7 +126,7 @@ public class IntegrationTest {
     for (int i = 0; i < 5; i++) {
       JitCompiler.compileBatch(tokens);
     }
-    
+
     // Clear cache to simulate cache miss
     JitCompiler.clearCache();
 
@@ -150,11 +150,17 @@ public class IntegrationTest {
     }
     long avgHitTime = totalHitTime / iterations;
 
-    assertTrue(avgHitTime < time1, 
-        String.format("Cache hit (%.3f ms) should be faster than cache miss (%.3f ms)", 
+    assertTrue(
+        avgHitTime < time1,
+        String.format(
+            "Cache hit (%.3f ms) should be faster than cache miss (%.3f ms)",
             avgHitTime / 1_000_000.0, time1 / 1_000_000.0));
     System.out.println(
-        "Cache miss: " + (time1 / 1_000_000.0) + "ms, Avg cache hit: " + (avgHitTime / 1_000_000.0) + "ms");
+        "Cache miss: "
+            + (time1 / 1_000_000.0)
+            + "ms, Avg cache hit: "
+            + (avgHitTime / 1_000_000.0)
+            + "ms");
   }
 
   @Test

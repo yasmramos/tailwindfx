@@ -230,16 +230,16 @@ public final class TokenParser {
     // Delegate to TokenRegistry for centralized JIT detection
     return TokenRegistry.isJitPrefix(token);
   }
-  
+
   /**
    * Checks if a JIT token has an arbitrary or numeric value that requires runtime compilation.
    *
    * <p>Tokens like "text-white", "text-lg", "bg-blue-500" are known utilities that should be
-   * applied as CSS classes. Only tokens with arbitrary values ([...]) or numeric suffixes
-   * require JIT compilation.
+   * applied as CSS classes. Only tokens with arbitrary values ([...]) or numeric suffixes require
+   * JIT compilation.
    *
-   * <p>Tokens with opacity modifiers (e.g., "bg-blue-500/80", "text-red-500/50") also require
-   * JIT compilation because the opacity value needs to be applied dynamically.
+   * <p>Tokens with opacity modifiers (e.g., "bg-blue-500/80", "text-red-500/50") also require JIT
+   * compilation because the opacity value needs to be applied dynamically.
    *
    * <p>Numeric values like "gap-4", "p-2" are part of Tailwind's spacing scale and are known
    * utilities that should be applied as CSS classes, not JIT compiled.
@@ -252,19 +252,19 @@ public final class TokenParser {
     if (hasArbitraryValue(token)) {
       return true;
     }
-    
+
     // Strip variant prefixes to get the base token
     String baseToken = stripVariantPrefix(token);
-    
+
     // Extract the value part (everything after the first hyphen)
     int hyphenIndex = baseToken.indexOf('-');
     if (hyphenIndex < 0 || hyphenIndex >= baseToken.length() - 1) {
       // No value part (e.g., "text", "bg") - shouldn't happen for valid tokens
       return false;
     }
-    
+
     String valuePart = baseToken.substring(hyphenIndex + 1);
-    
+
     // Check for opacity modifier (e.g., blue-500/80, red-600/50)
     // The format is: value/opacity where opacity is a number
     if (valuePart.contains("/")) {
@@ -277,7 +277,7 @@ public final class TokenParser {
         }
       }
     }
-    
+
     // Named values (white, blue-500, lg, 2xl, etc.) and spacing scale values (0, 1, 2, 3, 4, etc.)
     // are known utilities and should be applied as CSS classes, not JIT
     return false;

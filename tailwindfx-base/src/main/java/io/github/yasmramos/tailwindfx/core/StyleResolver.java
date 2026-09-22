@@ -103,12 +103,13 @@ public final class StyleResolver {
 
     String colorValue = shades[index];
 
-    // Aplicar opacidad si existe
+    // Aplicar opacidad si existe: usar valor literal para rgba()
     if (token.alpha != null) {
       return applyOpacity(colorValue, token.alpha);
     }
 
-    return colorValue;
+    // Sin opacidad: devolver referencia a variable CSS lookupeada
+    return "-color-" + token.colorName + "-" + token.shade;
   }
 
   private String resolveArbitrary(StyleToken token) {

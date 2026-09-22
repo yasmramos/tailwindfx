@@ -365,6 +365,97 @@ public final class ColorPalette {
     put("rose", 900, "#881337");
     put("rose", 950, "#4c0519");
 
+    // Zinc (Tailwind standard neutral gray)
+    put("zinc", 50, "#fafafa");
+    put("zinc", 100, "#f4f4f5");
+    put("zinc", 200, "#e4e4e7");
+    put("zinc", 300, "#d4d4d8");
+    put("zinc", 400, "#a1a1aa");
+    put("zinc", 500, "#71717a");
+    put("zinc", 600, "#52525b");
+    put("zinc", 700, "#3f3f46");
+    put("zinc", 800, "#27272a");
+    put("zinc", 900, "#18181b");
+    put("zinc", 950, "#09090b");
+
+    // Neutral (Tailwind standard neutral gray)
+    put("neutral", 50, "#fafafa");
+    put("neutral", 100, "#f5f5f5");
+    put("neutral", 200, "#e5e5e5");
+    put("neutral", 300, "#d4d4d4");
+    put("neutral", 400, "#a3a3a3");
+    put("neutral", 500, "#737373");
+    put("neutral", 600, "#525252");
+    put("neutral", 700, "#404040");
+    put("neutral", 800, "#262626");
+    put("neutral", 900, "#171717");
+    put("neutral", 950, "#0a0a0a");
+
+    // Stone (Tailwind standard neutral gray)
+    put("stone", 50, "#fafaf9");
+    put("stone", 100, "#f5f5f4");
+    put("stone", 200, "#e7e5e4");
+    put("stone", 300, "#d6d3d1");
+    put("stone", 400, "#a8a29e");
+    put("stone", 500, "#78716c");
+    put("stone", 600, "#57534e");
+    put("stone", 700, "#44403c");
+    put("stone", 800, "#292524");
+    put("stone", 900, "#1c1917");
+    put("stone", 950, "#0c0a09");
+
+    // Mauve (custom purple-gray tones)
+    put("mauve", 50, "#f7f5fa");
+    put("mauve", 100, "#efeaf5");
+    put("mauve", 200, "#ded6e9");
+    put("mauve", 300, "#cbc0db");
+    put("mauve", 400, "#b3a5c9");
+    put("mauve", 500, "#9a88b7");
+    put("mauve", 600, "#846fa6");
+    put("mauve", 700, "#715991");
+    put("mauve", 800, "#5f487a");
+    put("mauve", 900, "#4d3a63");
+    put("mauve", 950, "#2a1f3a");
+
+    // Olive (custom green-yellow muted tones)
+    put("olive", 50, "#fcfce8");
+    put("olive", 100, "#f8f8d1");
+    put("olive", 200, "#efefad");
+    put("olive", 300, "#e6e68a");
+    put("olive", 400, "#dddd60");
+    put("olive", 500, "#d4d438");
+    put("olive", 600, "#bfbf2e");
+    put("olive", 700, "#a9a927");
+    put("olive", 800, "#8f8f23");
+    put("olive", 900, "#757520");
+    put("olive", 950, "#3d3d12");
+
+    // Mist (custom blue-cyan very light tones)
+    put("mist", 50, "#f4fbfc");
+    put("mist", 100, "#e8f7f9");
+    put("mist", 200, "#d0eff3");
+    put("mist", 300, "#b8e7ed");
+    put("mist", 400, "#9bdce6");
+    put("mist", 500, "#7ed0df");
+    put("mist", 600, "#62c3d8");
+    put("mist", 700, "#46b5d0");
+    put("mist", 800, "#2ba6c7");
+    put("mist", 900, "#1298be");
+    put("mist", 950, "#0a6f8a");
+
+    // Taupe (custom brown-gray warm tones)
+    put("taupe", 50, "#f9f7f5");
+    put("taupe", 100, "#f3efeb");
+    put("taupe", 200, "#e7e1d9");
+    put("taupe", 300, "#dad3c8");
+    put("taupe", 400, "#c9bfb0");
+    put("taupe", 500, "#b8aba0");
+    put("taupe", 600, "#a5968b");
+    put("taupe", 700, "#918075");
+    put("taupe", 800, "#7a6b61");
+    put("taupe", 900, "#63574e");
+    put("taupe", 950, "#3a322d");
+
     // White / Black
     PALETTE.put("white-0", "#ffffff");
     PALETTE.put("black-0", "#000000");

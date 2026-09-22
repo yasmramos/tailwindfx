@@ -36,6 +36,17 @@ class TwCatalogTest extends ApplicationTest {
     assertTrue(allClasses.contains("bg-red-100"), "Should contain bg-red-100");
     assertTrue(allClasses.contains("bg-green-900"), "Should contain bg-green-900");
 
+    // New color families: zinc, neutral, stone
+    assertTrue(allClasses.contains("bg-zinc-500"), "Should contain bg-zinc-500");
+    assertTrue(allClasses.contains("bg-neutral-700"), "Should contain bg-neutral-700");
+    assertTrue(allClasses.contains("bg-stone-300"), "Should contain bg-stone-300");
+
+    // New custom color families: mauve, olive, mist, taupe
+    assertTrue(allClasses.contains("bg-mauve-500"), "Should contain bg-mauve-500");
+    assertTrue(allClasses.contains("bg-olive-500"), "Should contain bg-olive-500");
+    assertTrue(allClasses.contains("bg-mist-500"), "Should contain bg-mist-500");
+    assertTrue(allClasses.contains("bg-taupe-500"), "Should contain bg-taupe-500");
+
     // Text colors
     assertTrue(allClasses.contains("text-blue-500"), "Should contain text-blue-500");
     assertTrue(allClasses.contains("text-gray-700"), "Should contain text-gray-700");
@@ -381,6 +392,7 @@ class TwCatalogTest extends ApplicationTest {
         sceneCss.contains(".rounded-lg") || sceneCss.contains("rounded-lg"),
         "Scene CSS should contain rounded-lg utility");
 
-    System.out.println("Successfully loaded generated CSS to Scene with " + css.length() + " bytes");
+    System.out.println(
+        "Successfully loaded generated CSS to Scene with " + css.length() + " bytes");
   }
 }
