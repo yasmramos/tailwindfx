@@ -174,35 +174,37 @@ public final class TokenParser {
       // Tokens with variants need special handling via VariantManager
       variantTokens.add(token);
     } else if (TokenRegistry.requiresMigration(token)) {
-      // Migration tokens (flex, grid, inline-flex) are also JIT tokens
-      jitTokens.add(token);
+      // Migration tokens (flex, grid, inline-flex) without arbitrary values -> CSS class
+      // Check this BEFORE JIT to avoid misclassifying display properties as JIT tokens
+      cssClasses.add(token);
       layoutMigrationTokens.add(token);
+    } else if (TokenRegistry.requiresJitCompilation(token)) {
+      // JIT tokens (arbitrary values, arbitrary properties, opacity modifiers on colors)
+      jitTokens.add(token);
+      if (TokenRegistry.isLayoutDependent(token)) {
+        layoutDependentTokens.add(token);
+      }
+      if (TokenRegistry.requiresMigration(token)) {
+        layoutMigrationTokens.add(token);
+      }
     } else if (isJitToken(token)) {
-      // JIT tokens (dynamic/arbitrary values or utilities with numeric suffixes) get compiled at
-      // runtime.
-      // However, named values like text-white, bg-blue-500, text-lg are known utilities
-      // that should be applied as CSS classes, not JIT compiled.
-      // Use centralized requiresJitCompilation logic from TokenRegistry for consistency.
-      if (TokenRegistry.requiresJitCompilation(token)) {
-        jitTokens.add(token);
-        if (TokenRegistry.isLayoutDependent(token)) {
-          layoutDependentTokens.add(token);
-        }
-      } else {
-        // Named value with JIT prefix (e.g., text-white, bg-blue-500, p-4) -> CSS class
-        cssClasses.add(token);
-        // Layout-dependent tokens (gap-4, mx-auto, etc.) need programmatic application
-        // even though they use CSS classes for the actual styling
-        if (TokenRegistry.isLayoutDependent(token)) {
-          layoutDependentTokens.add(token);
-        }
-        // Track unknown tokens for warning (single pass)
-        if (!TokenRegistry.isKnownUtility(token)) {
-          unknownTokens.add(token);
-        }
+      // Tokens with JIT prefix but named values (e.g., text-white, bg-blue-500, p-4) -> CSS class
+      cssClasses.add(token);
+      // Layout-dependent tokens (gap-4, mx-auto, etc.) need programmatic application
+      // even when they use CSS classes for the actual styling
+      if (TokenRegistry.isLayoutDependent(token)) {
+        layoutDependentTokens.add(token);
+      }
+      // Track unknown tokens for warning (single pass)
+      if (!TokenRegistry.isKnownUtility(token)) {
+        unknownTokens.add(token);
       }
     } else {
       cssClasses.add(token);
+      // Layout-dependent tokens in the else branch also need programmatic application
+      if (TokenRegistry.isLayoutDependent(token)) {
+        layoutDependentTokens.add(token);
+      }
       // Track unknown tokens for warning (single pass)
       if (!TokenRegistry.isKnownUtility(token)) {
         unknownTokens.add(token);
