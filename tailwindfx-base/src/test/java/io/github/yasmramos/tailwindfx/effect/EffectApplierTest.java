@@ -256,7 +256,7 @@ class EffectApplierTest {
         void testInvalidEffectToken() {
             // Invalid effect tokens should not throw, just log in debug mode
             assertDoesNotThrow(() -> 
-                EffectApplier.applyEffectToken(button, "blur-invalid-size")
+                EffectApplier.applyEffectToken(button, "blur-unknown-size")
             );
         }
     }
@@ -401,7 +401,7 @@ class EffectApplierTest {
             assertDoesNotThrow(() -> {
                 // Simulate a hover brightening effect
                 EffectApplier.applyEffectToken(button, "brightness-110");
-                EffectApplier.applyEffectToken(button, "contrast-105");
+                EffectApplier.applyEffectToken(button, "contrast-125");
             });
         }
 

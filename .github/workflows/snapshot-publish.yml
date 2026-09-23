@@ -33,8 +33,11 @@ jobs:
           git config user.name "yasmramos"
           git config user.email "yasmramos95@gmail.com"
 
+      - name: Install xvfb
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+
       - name: Build and test
-        run: mvn --batch-mode clean verify -Drevision=0.1.1-SNAPSHOT -DskipTests=false
+        run: xvfb-run -a mvn --batch-mode clean verify -Drevision=0.1.1-SNAPSHOT -DskipTests=false -Dtestfx.headless=true -Dtestfx.robot=glass -Dtestfx.setup.timeout=2500 -Dglass.platform=monocle -Dmonocle.platform=headless
 
       - name: Publish snapshot to Central Portal
         env:
