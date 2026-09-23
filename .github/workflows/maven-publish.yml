@@ -92,8 +92,23 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v5
         with:
-          name: maven-artifacts
+          name: maven-snapshot-artifacts
           path: |
-            tailwindfx-base/target/*.jar
-            tailwindfx-maven-plugin/target/*.jar
-          retention-days: 30
+            target/*.jar
+
+      - name: Bump revision to next development version
+        if: success() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        run: |
+          RELEASED=${{ env.VERSION }}
+          # Quitar sufijo -SNAPSHOT si lo hubiera
+          RELEASED=${RELEASED%-SNAPSHOT}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$RELEASED"
+          NEXT="$MAJOR.$MINOR.$((PATCH + 1))"
+          echo "Bumping revision to $NEXT"
+          git fetch origin develop
+          git checkout develop
+          # Actualizar la propiedad <revision> en el pom.xml raíz
+          mvn -q versions:set-property -Dproperty=revision -DnewVersion="$NEXT" -DgenerateBackupPoms=false
+          git add pom.xml
+          git commit -m "chore: bump revision to $NEXT [skip ci]"
+          git push origin develop
