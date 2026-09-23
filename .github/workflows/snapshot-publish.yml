@@ -36,8 +36,13 @@ jobs:
       - name: Install xvfb
         run: sudo apt-get update && sudo apt-get install -y xvfb
 
+      - name: Resolve snapshot version
+        run: |
+          BASE=$(mvn -q -DforceStdout help:evaluate -Dexpression=revision)
+          echo "SNAPSHOT_VERSION=${BASE%-SNAPSHOT}-SNAPSHOT" >> "$GITHUB_ENV"
+
       - name: Build and test
-        run: xvfb-run -a mvn --batch-mode clean verify -Drevision=0.1.1-SNAPSHOT -DskipTests=false -Dtestfx.headless=true -Dtestfx.robot=glass -Dtestfx.setup.timeout=2500 -Dglass.platform=monocle -Dmonocle.platform=headless
+        run: xvfb-run -a mvn --batch-mode clean verify -Drevision=${SNAPSHOT_VERSION} -DskipTests=false -Dtestfx.headless=true -Dtestfx.robot=glass -Dtestfx.setup.timeout=2500 -Dglass.platform=monocle -Dmonocle.platform=headless
 
       - name: Publish snapshot to Central Portal
         env:
@@ -47,7 +52,7 @@ jobs:
           # Deploy snapshot to Maven Central via Central Portal snapshots endpoint
           mvn --batch-mode clean deploy \
             -P snapshot \
-            -Drevision=0.1.1-SNAPSHOT \
+            -Drevision=${SNAPSHOT_VERSION} \
             -DskipTests
 
       - name: Upload build artifacts
