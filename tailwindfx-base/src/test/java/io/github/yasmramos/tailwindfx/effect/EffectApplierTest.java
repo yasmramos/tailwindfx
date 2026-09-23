@@ -252,10 +252,10 @@ class EffectApplierTest {
         }
 
         @Test
-        @DisplayName("Should handle invalid effect token gracefully in debug mode")
+        @DisplayName("Should handle invalid blur size token by throwing exception")
         void testInvalidEffectToken() {
-            // Invalid effect tokens should not throw, just log in debug mode
-            assertDoesNotThrow(() -> 
+            // Invalid blur sizes should throw IllegalArgumentException
+            assertThrows(IllegalArgumentException.class, () -> 
                 EffectApplier.applyEffectToken(button, "blur-unknown-size")
             );
         }
