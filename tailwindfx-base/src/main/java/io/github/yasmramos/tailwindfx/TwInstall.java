@@ -67,7 +67,8 @@ public final class TwInstall {
 
     if (url == null) {
       System.err.println(
-          "[TailwindFX] Warning: Generated stylesheet not found at " + normalizedPath
+          "[TailwindFX] Warning: Generated stylesheet not found at "
+              + normalizedPath
               + ". Falling back to JIT inline compilation. Use TwInstall.installMinimal() instead.");
       return;
     }

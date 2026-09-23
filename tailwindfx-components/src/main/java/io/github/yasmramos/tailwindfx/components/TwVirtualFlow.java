@@ -47,6 +47,20 @@ public class TwVirtualFlow<T> extends Region {
         return label;
       };
 
+  /**
+   * Default cell factory that renders each item as a simple padded {@link javafx.scene.control.Label}.
+   *
+   * @param <T> the item type
+   * @return a fresh default cell factory instance
+   */
+  public static <T> Function<T, Node> defaultCellFactory() {
+    return item -> {
+      var label = new javafx.scene.control.Label(String.valueOf(item));
+      label.setStyle("-fx-padding: 8;");
+      return label;
+    };
+  }
+
   private Orientation orientation = Orientation.VERTICAL;
   private final DoubleProperty cellHeight = new SimpleDoubleProperty(48);
   private final DoubleProperty cellWidth = new SimpleDoubleProperty(200);
@@ -152,6 +166,8 @@ public class TwVirtualFlow<T> extends Region {
   public void setItems(ObservableList<T> items) {
     Objects.requireNonNull(items, "items cannot be null");
     this.items.setAll(items);
+    // Drop selections that are no longer valid for the new item set.
+    selectedIndices.removeIf(idx -> idx < 0 || idx >= this.items.size());
   }
 
   public ObservableList<T> getItems() {
@@ -159,11 +175,25 @@ public class TwVirtualFlow<T> extends Region {
   }
 
   public void setCellFactory(Function<T, Node> factory) {
-    Objects.requireNonNull(factory, "cellFactory cannot be null");
-    this.cellFactory = factory;
+    if (factory == null) {
+      // Null is treated as "use the default factory" so callers can clear a custom factory safely.
+      this.cellFactory = defaultCellFactory();
+    } else {
+      this.cellFactory = factory;
+    }
     visibleCells.values().forEach(cellContainer.getChildren()::remove);
     visibleCells.clear();
     updateVisibleCells();
+  }
+
+  /**
+   * Returns the current cell factory used to create visual nodes for items. Never {@code null};
+   * falls back to {@link #defaultCellFactory()} semantics when cleared via {@code setCellFactory(null)}.
+   *
+   * @return the cell factory function
+   */
+  public Function<T, Node> getCellFactory() {
+    return cellFactory;
   }
 
   public void setCellSizeProvider(Function<T, Double> provider) {
@@ -171,6 +201,15 @@ public class TwVirtualFlow<T> extends Region {
     sizeCacheDirty = true;
     updateScrollBar();
     updateVisibleCells();
+  }
+
+  /**
+   * Returns the current cell size provider, or {@code null} if a fixed cell size is used.
+   *
+   * @return the cell size provider function, or null
+   */
+  public Function<T, Double> getCellSizeProvider() {
+    return cellSizeProvider;
   }
 
   public void setCellHeight(double height) {

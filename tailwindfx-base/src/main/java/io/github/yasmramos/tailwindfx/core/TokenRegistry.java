@@ -318,9 +318,12 @@ public final class TokenRegistry {
   }
 
   /**
-   * Checks if a token requires JIT compilation (arbitrary values, arbitrary properties, or opacity modifiers on colors).
+   * Checks if a token requires JIT compilation (arbitrary values, arbitrary properties, or opacity
+   * modifiers on colors).
    *
-   * <p>This is the single source of truth for JIT compilation decisions, matching Tailwind CSS v4 behavior:
+   * <p>This is the single source of truth for JIT compilation decisions, matching Tailwind CSS v4
+   * behavior:
+   *
    * <ul>
    *   <li>Arbitrary values: w-[320px], bg-[#fff], text-[length:var(--x)] → JIT
    *   <li>Arbitrary properties: [color:red], [mask-type:luminance] → JIT
@@ -375,8 +378,8 @@ public final class TokenRegistry {
   }
 
   /**
-   * Checks if a string contains an arbitrary value in [...] syntax.
-   * Handles nested parens/brackets like calc(100px-4rem) or var(--x).
+   * Checks if a string contains an arbitrary value in [...] syntax. Handles nested parens/brackets
+   * like calc(100px-4rem) or var(--x).
    *
    * @param input the string to check
    * @return true if it contains arbitrary value syntax

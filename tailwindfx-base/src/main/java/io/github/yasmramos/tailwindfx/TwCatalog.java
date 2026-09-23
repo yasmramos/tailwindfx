@@ -30,10 +30,10 @@ import java.util.TreeSet;
  *
  * <ul>
  *   <li>Colors: bg-{color}-{shade}, text-{color}-{shade}, border-{color}-{shade},
- *       ring-{color}-{shade} using 29 color families (slate, gray, red, orange, amber, yellow, lime,
- *       green, emerald, teal, cyan, sky, blue, indigo, violet, purple, fuchsia, pink, rose, zinc,
- *       neutral, stone, mauve, olive, mist, taupe, white, black, transparent) and shades 50..950,
- *       plus -white/-black/-transparent
+ *       ring-{color}-{shade} using 29 color families (slate, gray, red, orange, amber, yellow,
+ *       lime, green, emerald, teal, cyan, sky, blue, indigo, violet, purple, fuchsia, pink, rose,
+ *       zinc, neutral, stone, mauve, olive, mist, taupe, white, black, transparent) and shades
+ *       50..950, plus -white/-black/-transparent
  *   <li>Spacing: p-{n}, px/py/pt/pr/pb/pl-{n}, m-*, gap-*, space-*, w-{n}, h-{n}, min/max-w/h-{n},
  *       inset/top/right/bottom/left-{n} using ThemeConfig.spacing(), plus special values (full,
  *       auto, screen, fractions)
@@ -91,8 +91,11 @@ public final class TwCatalog {
 
   // Color families derived from ColorPalette (single source of truth)
   // Note: COLOR_FAMILIES contains only scaled color families, not named colors
-  
-  /** Javadoc updated: using 29 color families (22 standard + 7 custom) with 11 shades each, plus 3 named colors. */
+
+  /**
+   * Javadoc updated: using 29 color families (22 standard + 7 custom) with 11 shades each, plus 3
+   * named colors.
+   */
 
   /**
    * Generates the complete catalog of all supported utility classes using the default theme

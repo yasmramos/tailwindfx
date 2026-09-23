@@ -78,11 +78,11 @@ class MetricsIntegrationTest extends ApplicationTest {
         () -> {
           Region node = new Region();
 
-          // Apply mixed tokens: predefined utilities (go to cssClasses and recordApply) 
+          // Apply mixed tokens: predefined utilities (go to cssClasses and recordApply)
           // plus arbitrary values (go through JIT compiler to exercise cache metrics)
           TwStyle.apply(node, "bg-blue-500", "p-[13px]");
           TwStyle.apply(node, "text-white", "w-[200px]");
-          
+
           // Apply again to trigger cache hits on JIT tokens
           TwStyle.apply(node, "bg-blue-500", "p-[13px]");
           TwStyle.apply(node, "text-white", "w-[200px]");
@@ -91,7 +91,7 @@ class MetricsIntegrationTest extends ApplicationTest {
           long applyCalls = TailwindFXMetrics.instance().applyCalls();
           long cacheHits = TailwindFXMetrics.instance().cacheHits();
           long cacheMisses = TailwindFXMetrics.instance().cacheMisses();
-          
+
           assertTrue(applyCalls > 0, "Should have recorded at least one apply operation");
           assertTrue(cacheHits + cacheMisses > 0, "Should have recorded JIT cache activity");
         });

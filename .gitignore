@@ -1,35 +1,14 @@
-```
-# Compiled and build artifacts
-*.pyc
-__pycache__/
-*.o
-*.obj
-dist/
-build/
+# Maven build artifacts
 target/
-*.class
-*.exe
-*.dll
-*.so
-*.a
-*.out
+.flattened-pom.xml
 
-# Dependencies
-.venv/
-venv/
-node_modules/
-.mypy_cache/
-.pytest_cache/
-.gradle/
-julia-*/
-zig*/
+# Compiled class files
+*.class
+*.jar
 
 # Logs and temp files
 *.log
 *.tmp
-*.swp
-*.swo
-*.bak
 
 # Environment
 .env
@@ -41,6 +20,7 @@ zig*/
 .idea/
 *.swp
 *.swo
+*.bak
 
 # System files
 .DS_Store
@@ -50,28 +30,3 @@ Thumbs.db
 coverage/
 htmlcov/
 .coverage
-
-# Compressed files
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
-```

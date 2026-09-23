@@ -233,7 +233,8 @@ public final class TokenParser {
    *
    * @param token the token to check
    * @return true if this token should be compiled as JIT
-   * @deprecated Use {@link TokenRegistry#requiresJitCompilation(String)} for centralized JIT detection.
+   * @deprecated Use {@link TokenRegistry#requiresJitCompilation(String)} for centralized JIT
+   *     detection.
    */
   @Deprecated(since = "1.0", forRemoval = true)
   private static boolean isJitToken(String token) {
