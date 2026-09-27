@@ -372,7 +372,7 @@ class TwCatalogTest extends ApplicationTest {
     // Create a JavaFX scene and install TailwindFX
     StackPane root = new StackPane();
     Scene scene = new Scene(root, 800, 600);
-    TailwindFX.install(scene);
+    TwInstall.install(scene);
 
     // Load the generated CSS into the scene
     scene.getStylesheets().add("data:text/css," + css.replace("#", "%23"));

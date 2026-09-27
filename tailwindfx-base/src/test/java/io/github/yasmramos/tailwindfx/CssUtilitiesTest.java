@@ -19,10 +19,10 @@ class CssUtilitiesTest {
     void testNoStaticCssFiles() {
       // All CSS is now generated dynamically by ThemeCssGenerator and applied via JIT
       // No static CSS files should be required
-      var resource = TailwindFX.class.getResource("/tailwindfx/tailwindfx.css");
+      var resource = TwStyle.class.getResource("/tailwindfx/tailwindfx.css");
       assertNull(resource, "tailwindfx.css should NOT exist (JIT compiled)");
 
-      var darkResource = TailwindFX.class.getResource("/tailwindfx/tailwindfx-dark.css");
+      var darkResource = TwStyle.class.getResource("/tailwindfx/tailwindfx-dark.css");
       assertNull(darkResource, "tailwindfx-dark.css should NOT exist (handled by ThemeManager)");
     }
   }

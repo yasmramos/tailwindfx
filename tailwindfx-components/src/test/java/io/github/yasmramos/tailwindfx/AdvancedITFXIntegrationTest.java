@@ -39,7 +39,7 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
   public void start(Stage stage) {
     root = new StackPane();
     Scene scene = new Scene(root, 1024, 768);
-    TailwindFX.install(scene);
+    TwInstall.install(scene);
     stage.setScene(scene);
     stage.show();
   }
