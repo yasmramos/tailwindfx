@@ -105,22 +105,22 @@ TailwindFX.theme(scene).dark().apply();
 ### Buttons
 ```java
 Button primary = new Button("Save");
-TailwindFX.apply(primary, "btn", "btn-primary");
+TwStyle.apply(primary, "btn", "btn-primary");
 
 Button secondary = new Button("Cancel");
-TailwindFX.apply(secondary, "btn", "btn-secondary");
+TwStyle.apply(secondary, "btn", "btn-secondary");
 ```
 
 ### Cards
 ```java
 VBox card = new VBox();
-TailwindFX.apply(card, "card", "shadow-lg");
+TwStyle.apply(card, "card", "shadow-lg");
 ```
 
 ### Badges
 ```java
 Label badge = new Label("New");
-TailwindFX.apply(badge, "badge", "badge-blue");
+TwStyle.apply(badge, "badge", "badge-blue");
 ```
 
 ### Avatars
@@ -131,7 +131,7 @@ StackPane avatar = ComponentFactory.avatar("JD", "blue", 48);
 ### Inputs
 ```java
 TextField input = new TextField();
-TailwindFX.apply(input, "input");
+TwStyle.apply(input, "input");
 ```
 
 ## Customization

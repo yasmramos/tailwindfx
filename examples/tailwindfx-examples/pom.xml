@@ -15,18 +15,30 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>17</maven.compiler.release>
-        <exec.mainClass>tailwindfx.examples.DashboardApp</exec.mainClass>
-        <tailwindfx.version>1.0-SNAPSHOT</tailwindfx.version>
+        <exec.mainClass>tailwindfx.examples.Launcher</exec.mainClass>
+        <tailwindfx.version>0.1.1</tailwindfx.version>
     </properties>
 
     <dependencies>
         <!-- TailwindFX Library -->
         <dependency>
-            <groupId>io.github.yasmramos</groupId>
-            <artifactId>tailwindfx</artifactId>
-            <version>${tailwindfx.version}</version>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>tailwindfx-parent</artifactId>
+            <version>0.1.1</version>
+            <type>pom</type>
         </dependency>
-
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>tailwindfx-base</artifactId>
+            <version>0.1.1</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>tailwindfx-components</artifactId>
+            <version>0.1.1</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 
     <build>
