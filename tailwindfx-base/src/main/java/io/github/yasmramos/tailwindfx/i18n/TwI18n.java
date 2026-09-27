@@ -167,6 +167,7 @@ public final class TwI18n {
   public static void setLocale(Locale locale) {
     Preconditions.requireNonNull(locale, "TwI18n.setLocale", "locale");
     currentLocale.set(locale);
+    Locale.setDefault(locale);
   }
 
   /** Returns the current active locale. */
