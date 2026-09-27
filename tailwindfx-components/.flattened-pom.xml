@@ -7,10 +7,10 @@
     <artifactId>tailwindfx-parent</artifactId>
     <version>0.1.2</version>
   </parent>
-  <artifactId>tailwindfx-base</artifactId>
+  <artifactId>tailwindfx-components</artifactId>
   <version>0.1.2</version>
-  <name>TailwindFX Base</name>
-  <description>Core library for TailwindFX - A Tailwind CSS-inspired utility-first styling framework for JavaFX applications</description>
+  <name>TailwindFX Components</name>
+  <description>Pre-built UI components for TailwindFX - A Tailwind CSS-inspired utility-first styling framework for JavaFX applications</description>
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
@@ -19,6 +19,11 @@
     </license>
   </licenses>
   <dependencies>
+    <dependency>
+      <groupId>io.github.yasmramos</groupId>
+      <artifactId>tailwindfx-base</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-controls</artifactId>
@@ -83,7 +88,7 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <Automatic-Module-Name>io.github.yasmramos.tailwindfx</Automatic-Module-Name>
+              <Automatic-Module-Name>io.github.yasmramos.tailwindfx.components</Automatic-Module-Name>
             </manifestEntries>
           </archive>
         </configuration>

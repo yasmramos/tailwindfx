@@ -48,7 +48,8 @@ public class TwVirtualFlow<T> extends Region {
       };
 
   /**
-   * Default cell factory that renders each item as a simple padded {@link javafx.scene.control.Label}.
+   * Default cell factory that renders each item as a simple padded {@link
+   * javafx.scene.control.Label}.
    *
    * @param <T> the item type
    * @return a fresh default cell factory instance
@@ -72,6 +73,12 @@ public class TwVirtualFlow<T> extends Region {
   private final ObjectProperty<SelectionMode> selectionMode =
       new SimpleObjectProperty<>(SelectionMode.SINGLE);
   private final ObservableList<Integer> selectedIndices = FXCollections.observableArrayList();
+
+  /** The caller-supplied list registered via {@link #setItems(ObservableList)}, if any. */
+  private ObservableList<T> sourceItems;
+
+  /** Listener that drops stale selections when the caller mutates its own list directly. */
+  private ListChangeListener<T> sourceItemsListener;
 
   // Contenedor interno
   private final Pane cellContainer = new Pane();
@@ -165,7 +172,22 @@ public class TwVirtualFlow<T> extends Region {
   // Public API - Core
   public void setItems(ObservableList<T> items) {
     Objects.requireNonNull(items, "items cannot be null");
+    // Detach the listener previously attached to the old source list (if any).
+    if (sourceItems != null && sourceItems != this.items && sourceItemsListener != null) {
+      sourceItems.removeListener(sourceItemsListener);
+    }
     this.items.setAll(items);
+    if (items != this.items) {
+      // Track the caller's list so direct changes (e.g. clearing it) automatically drop
+      // stale selections instead of leaving out-of-range indices behind.
+      sourceItemsListener =
+          c -> selectedIndices.removeIf(idx -> idx < 0 || idx >= this.items.size());
+      sourceItems = items;
+      sourceItems.addListener(sourceItemsListener);
+    } else {
+      sourceItems = null;
+      sourceItemsListener = null;
+    }
     // Drop selections that are no longer valid for the new item set.
     selectedIndices.removeIf(idx -> idx < 0 || idx >= this.items.size());
   }
@@ -188,7 +210,8 @@ public class TwVirtualFlow<T> extends Region {
 
   /**
    * Returns the current cell factory used to create visual nodes for items. Never {@code null};
-   * falls back to {@link #defaultCellFactory()} semantics when cleared via {@code setCellFactory(null)}.
+   * falls back to {@link #defaultCellFactory()} semantics when cleared via {@code
+   * setCellFactory(null)}.
    *
    * @return the cell factory function
    */
@@ -300,9 +323,20 @@ public class TwVirtualFlow<T> extends Region {
     if (onSelectionChange != null) onSelectionChange.accept(getSelectedItems());
   }
 
+  /**
+   * Selects the item at the given index. In {@link SelectionMode#MULTIPLE} the index is added to
+   * the current selection (toggle semantics, mirroring mouse shortcut-click behavior); in every
+   * other mode the selection is replaced by this single index.
+   *
+   * @param index the index to select; ignored when out of bounds
+   */
   public void selectIndex(int index) {
     if (index < 0 || index >= items.size()) return;
-    selectedIndices.setAll(index);
+    if (selectionMode.get() == SelectionMode.MULTIPLE) {
+      if (!selectedIndices.contains(index)) selectedIndices.add(index);
+    } else {
+      selectedIndices.setAll(index);
+    }
     if (onSelectionChange != null) onSelectionChange.accept(getSelectedItems());
   }
 
