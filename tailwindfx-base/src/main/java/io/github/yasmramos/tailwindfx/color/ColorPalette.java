@@ -85,6 +85,7 @@ public final class ColorPalette {
 
   /**
    * Returns the hex array for a specific family in SHADES order.
+   *
    * @return array of 11 elements or null if the family doesn't exist
    */
   public static String[] shadesOf(String family) {

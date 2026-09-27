@@ -2,7 +2,6 @@ package io.github.yasmramos.tailwindfx.style;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.github.yasmramos.tailwindfx.TailwindFX;
 import io.github.yasmramos.tailwindfx.TwStyle;
 import javafx.application.Platform;
 import javafx.scene.control.Button;

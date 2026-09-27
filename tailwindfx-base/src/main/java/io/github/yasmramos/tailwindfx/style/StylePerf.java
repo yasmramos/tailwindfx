@@ -200,8 +200,8 @@ public final class StylePerf {
   }
 
   /**
-   * Enqueues a deferred apply operation. Called by TwStyle.apply() when a batch is active. Do
-   * not call directly.
+   * Enqueues a deferred apply operation. Called by TwStyle.apply() when a batch is active. Do not
+   * call directly.
    *
    * @param node the node to apply to
    * @param classes the classes to apply

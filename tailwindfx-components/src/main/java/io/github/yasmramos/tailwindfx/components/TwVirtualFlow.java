@@ -47,6 +47,21 @@ public class TwVirtualFlow<T> extends Region {
         return label;
       };
 
+  /**
+   * Default cell factory that renders each item as a simple padded {@link
+   * javafx.scene.control.Label}.
+   *
+   * @param <T> the item type
+   * @return a fresh default cell factory instance
+   */
+  public static <T> Function<T, Node> defaultCellFactory() {
+    return item -> {
+      var label = new javafx.scene.control.Label(String.valueOf(item));
+      label.setStyle("-fx-padding: 8;");
+      return label;
+    };
+  }
+
   private Orientation orientation = Orientation.VERTICAL;
   private final DoubleProperty cellHeight = new SimpleDoubleProperty(48);
   private final DoubleProperty cellWidth = new SimpleDoubleProperty(200);
@@ -58,6 +73,12 @@ public class TwVirtualFlow<T> extends Region {
   private final ObjectProperty<SelectionMode> selectionMode =
       new SimpleObjectProperty<>(SelectionMode.SINGLE);
   private final ObservableList<Integer> selectedIndices = FXCollections.observableArrayList();
+
+  /** The caller-supplied list registered via {@link #setItems(ObservableList)}, if any. */
+  private ObservableList<T> sourceItems;
+
+  /** Listener that drops stale selections when the caller mutates its own list directly. */
+  private ListChangeListener<T> sourceItemsListener;
 
   // Contenedor interno
   private final Pane cellContainer = new Pane();
@@ -151,7 +172,24 @@ public class TwVirtualFlow<T> extends Region {
   // Public API - Core
   public void setItems(ObservableList<T> items) {
     Objects.requireNonNull(items, "items cannot be null");
+    // Detach the listener previously attached to the old source list (if any).
+    if (sourceItems != null && sourceItems != this.items && sourceItemsListener != null) {
+      sourceItems.removeListener(sourceItemsListener);
+    }
     this.items.setAll(items);
+    if (items != this.items) {
+      // Track the caller's list so direct changes (e.g. clearing it) automatically drop
+      // stale selections instead of leaving out-of-range indices behind.
+      sourceItemsListener =
+          c -> selectedIndices.removeIf(idx -> idx < 0 || idx >= this.items.size());
+      sourceItems = items;
+      sourceItems.addListener(sourceItemsListener);
+    } else {
+      sourceItems = null;
+      sourceItemsListener = null;
+    }
+    // Drop selections that are no longer valid for the new item set.
+    selectedIndices.removeIf(idx -> idx < 0 || idx >= this.items.size());
   }
 
   public ObservableList<T> getItems() {
@@ -159,11 +197,26 @@ public class TwVirtualFlow<T> extends Region {
   }
 
   public void setCellFactory(Function<T, Node> factory) {
-    Objects.requireNonNull(factory, "cellFactory cannot be null");
-    this.cellFactory = factory;
+    if (factory == null) {
+      // Null is treated as "use the default factory" so callers can clear a custom factory safely.
+      this.cellFactory = defaultCellFactory();
+    } else {
+      this.cellFactory = factory;
+    }
     visibleCells.values().forEach(cellContainer.getChildren()::remove);
     visibleCells.clear();
     updateVisibleCells();
+  }
+
+  /**
+   * Returns the current cell factory used to create visual nodes for items. Never {@code null};
+   * falls back to {@link #defaultCellFactory()} semantics when cleared via {@code
+   * setCellFactory(null)}.
+   *
+   * @return the cell factory function
+   */
+  public Function<T, Node> getCellFactory() {
+    return cellFactory;
   }
 
   public void setCellSizeProvider(Function<T, Double> provider) {
@@ -171,6 +224,15 @@ public class TwVirtualFlow<T> extends Region {
     sizeCacheDirty = true;
     updateScrollBar();
     updateVisibleCells();
+  }
+
+  /**
+   * Returns the current cell size provider, or {@code null} if a fixed cell size is used.
+   *
+   * @return the cell size provider function, or null
+   */
+  public Function<T, Double> getCellSizeProvider() {
+    return cellSizeProvider;
   }
 
   public void setCellHeight(double height) {
@@ -261,9 +323,20 @@ public class TwVirtualFlow<T> extends Region {
     if (onSelectionChange != null) onSelectionChange.accept(getSelectedItems());
   }
 
+  /**
+   * Selects the item at the given index. In {@link SelectionMode#MULTIPLE} the index is added to
+   * the current selection (toggle semantics, mirroring mouse shortcut-click behavior); in every
+   * other mode the selection is replaced by this single index.
+   *
+   * @param index the index to select; ignored when out of bounds
+   */
   public void selectIndex(int index) {
     if (index < 0 || index >= items.size()) return;
-    selectedIndices.setAll(index);
+    if (selectionMode.get() == SelectionMode.MULTIPLE) {
+      if (!selectedIndices.contains(index)) selectedIndices.add(index);
+    } else {
+      selectedIndices.setAll(index);
+    }
     if (onSelectionChange != null) onSelectionChange.accept(getSelectedItems());
   }
 

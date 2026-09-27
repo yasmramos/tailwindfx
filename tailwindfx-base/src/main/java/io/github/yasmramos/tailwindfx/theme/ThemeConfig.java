@@ -201,10 +201,15 @@ public final class ThemeConfig {
       }
       // Colores planos: derivar desde ColorPalette.namedColors()
       // Se modelan como arrays de 11 valores iguales para mantener compatibilidad con la API
-      for (Map.Entry<String, String> entry : io.github.yasmramos.tailwindfx.color.ColorPalette.namedColors().entrySet()) {
+      for (Map.Entry<String, String> entry :
+          io.github.yasmramos.tailwindfx.color.ColorPalette.namedColors().entrySet()) {
         String name = entry.getKey();
         String value = entry.getValue();
-        colors.put(name, new String[] {value, value, value, value, value, value, value, value, value, value, value});
+        colors.put(
+            name,
+            new String[] {
+              value, value, value, value, value, value, value, value, value, value, value
+            });
       }
 
       // Spacing: 0-64 (base 4px)

@@ -203,7 +203,8 @@ class TokenParserTest {
 
     // btn-primary: css class (1)
     // bg-blue-500: css class (named value, not arbitrary/numeric) (1)
-    // gap-4: css class (named value) + layout-dependent + unknown (not in known utilities registry) (3)
+    // gap-4: css class (named value) + layout-dependent + unknown (not in known utilities registry)
+    // (3)
     // flex: css class + layout-migration (no arbitrary values) (2)
     // hover:text-white: variant (1)
     // blur-sm: effect (1)
@@ -300,7 +301,8 @@ class TokenParserTest {
             "bg-blue-500", "gap-4", "flex", "hover:text-white", "blur-sm", "unknown-token");
 
     // bg-blue-500: css class (named value) (1 token)
-    // gap-4: css class + layout-dependent + unknown (not in known utilities registry) (3 classifications)
+    // gap-4: css class + layout-dependent + unknown (not in known utilities registry) (3
+    // classifications)
     // flex: css class + layout-migration (1 token, classified in multiple categories) (2)
     // hover:text-white: variant (1 token)
     // blur-sm: effect (1 token)
