@@ -98,14 +98,24 @@
                         <include>**/*Test.java</include>
                     </includes>
                     <argLine>@{argLine} --add-opens javafx.controls/javafx.scene.control=ALL-UNNAMED --add-opens javafx.graphics/javafx.scene=ALL-UNNAMED</argLine>
+                    <!--
+                        Monocle headless configuration (verified locally with openjfx-monocle 17.0.10):
+                        - glass.platform must be the short name "Monocle". JavaFX resolves the factory
+                          as "com.sun.glass.ui." + value + "PlatformFactory"; using the full class name
+                          here produced ClassNotFoundException
+                          ("com.sun.glass.ui.com.sun.glass.ui.monocle...PlatformFactory").
+                        - monocle.platform must be "Headless": the TestFX openjfx-monocle artifact does
+                          not ship a GTK platform factory, so "GTK" can never resolve. Headless works
+                          without any display (no Xvfb required).
+                    -->
                     <systemPropertyVariables>
                         <testfx.robot>glass</testfx.robot>
                         <testfx.headless>true</testfx.headless>
-                        <monocle.platform>GTK</monocle.platform>
+                        <glass.platform>Monocle</glass.platform>
+                        <monocle.platform>Headless</monocle.platform>
                         <prism.order>sw</prism.order>
                         <prism.text>t2k</prism.text>
                         <java.awt.headless>true</java.awt.headless>
-                        <glass.platform>com.sun.glass.ui.monocle.MonoclePlatform</glass.platform>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -135,11 +145,12 @@
                     <systemPropertyVariables>
                         <testfx.robot>glass</testfx.robot>
                         <testfx.headless>true</testfx.headless>
-                        <monocle.platform>GTK</monocle.platform>
+                        <!-- See comment in the surefire configuration above: Monocle/Headless only. -->
+                        <glass.platform>Monocle</glass.platform>
+                        <monocle.platform>Headless</monocle.platform>
                         <prism.order>sw</prism.order>
                         <prism.text>t2k</prism.text>
                         <java.awt.headless>true</java.awt.headless>
-                        <glass.platform>com.sun.glass.ui.monocle.MonoclePlatform</glass.platform>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
