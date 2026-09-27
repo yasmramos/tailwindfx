@@ -1,3 +1,18 @@
+/*
+ * Copyright 2026 Yasmany Ramos García (yasmramos).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.github.yasmramos.tailwindfx.examples.dashboard;
 
 import io.github.yasmramos.tailwindfx.TwBatch;
@@ -5,7 +20,6 @@ import io.github.yasmramos.tailwindfx.TwConfig;
 import io.github.yasmramos.tailwindfx.TwEffect;
 import io.github.yasmramos.tailwindfx.TwInstall;
 import io.github.yasmramos.tailwindfx.TwMetrics;
-import io.github.yasmramos.tailwindfx.TwResponsive;
 import io.github.yasmramos.tailwindfx.TwStyle;
 import io.github.yasmramos.tailwindfx.TwTheme;
 import io.github.yasmramos.tailwindfx.animation.TwAnimation;
@@ -26,6 +40,7 @@ import io.github.yasmramos.tailwindfx.components.TwSpinner;
 import io.github.yasmramos.tailwindfx.layout.TwFlexPane;
 import io.github.yasmramos.tailwindfx.layout.TwGridPane;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
+import io.github.yasmramos.tailwindfx.responsive.ResponsiveNode;
 import io.github.yasmramos.tailwindfx.theme.ThemeManager;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -73,7 +88,7 @@ public class DashboardApp extends Application {
 
     root.setLeft(buildSidebar());
     root.setTop(buildHeader(scene));
-    root.setCenter(buildMainArea(stage));
+    root.setCenter(buildMainArea(stage, scene));
 
     stage.setTitle("TailwindFX Demo Dashboard");
     stage.setScene(scene);
@@ -168,7 +183,7 @@ public class DashboardApp extends Application {
   private Label metricsLabel;
 
   /** Builds the scrollable main area with a responsive grid of demo cards. */
-  private VBox buildMainArea(Stage stage) {
+  private VBox buildMainArea(Stage stage, Scene scene) {
     cardsGrid = TwGridPane.create().cols(3).gap(16).build();
 
     cardsGrid.getChildren().addAll(buildButtonsCard(), buildBadgesCard(), buildAlertsCard());
@@ -208,10 +223,12 @@ public class DashboardApp extends Application {
             });
 
     // Declarative responsive styling of the grid container itself.
-    TwResponsive.on(cardsGrid)
-        .at(BreakpointManager.BP.SM.minWidthPx(), "gap-2")
-        .at(BreakpointManager.BP.LG.minWidthPx(), "gap-4")
-        .install(cardsGrid.getScene());
+    // ResponsiveNode.Builder can be configured before the node is attached to a Scene,
+    // and Breakpoint#minWidth is a public field holding the breakpoint width in px.
+    ResponsiveNode.on(cardsGrid)
+        .at((int) BreakpointManager.BP.SM.minWidth, "gap-2")
+        .at((int) BreakpointManager.BP.LG.minWidth, "gap-4")
+        .install(scene);
 
     return contentWrapper(mainScroll);
   }
@@ -312,12 +329,12 @@ public class DashboardApp extends Application {
     TwAvatar a1 = TwAvatar.create("jr", "blue", "md");
     TwAvatar a2 = TwAvatar.create("ak", "green", "md");
     TwAvatar a3 = TwAvatar.create("ms", "purple", "md");
-    TwAvatar.AvatarGroupHolder group = new TwAvatar.AvatarGroupHolder(a1, a2, a3);
+    TwAvatar.TwAvatarGroup group = TwAvatar.group(a1, a2, a3);
 
     TwAvatar single = TwAvatar.create("yd", "red", "lg");
-    TwAvatar.WithStatus online = new TwAvatar.WithStatus(single, true);
+    TwAvatar.TwAvatarWithStatus online = TwAvatar.withStatus(single, true);
 
-    HBox row2 = new HBox(16, group.node(), online);
+    HBox row2 = new HBox(16, group, online);
     row2.setStyle("-fx-alignment: center-left;");
 
     VBox box = new VBox(12, sizes, row2);
