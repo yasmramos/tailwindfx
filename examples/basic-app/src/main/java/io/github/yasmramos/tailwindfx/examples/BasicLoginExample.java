@@ -1,6 +1,7 @@
 package io.github.yasmramos.tailwindfx.examples;
 
-import io.github.yasmramos.tailwindfx.TailwindFX;
+import io.github.yasmramos.tailwindfx.TwInstall;
+import io.github.yasmramos.tailwindfx.TwStyle;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -57,7 +58,7 @@ public class BasicLoginExample extends Application {
         Scene scene = new Scene(root, 450, 550);
 
         // Install TailwindFX framework styles
-        TailwindFX.install(scene);
+        TwInstall.install(scene);
 
         stage.setTitle("TailwindFX Basic Login Example");
         stage.setScene(scene);

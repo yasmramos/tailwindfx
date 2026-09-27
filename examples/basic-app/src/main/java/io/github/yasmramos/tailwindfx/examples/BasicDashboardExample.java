@@ -7,7 +7,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import io.github.yasmramos.tailwindfx.TailwindFX;
+import io.github.yasmramos.tailwindfx.TwInstall;
+import io.github.yasmramos.tailwindfx.TwStyle;
 
 public class BasicDashboardExample extends Application {
 
@@ -98,7 +99,7 @@ public class BasicDashboardExample extends Application {
         Scene scene = new Scene(root, 1100, 700);
 
         // Install TailwindFX framework styles
-        TailwindFX.install(scene);
+        TwInstall.install(scene);
 
         stage.setTitle("TailwindFX Basic Dashboard Example");
         stage.setScene(scene);

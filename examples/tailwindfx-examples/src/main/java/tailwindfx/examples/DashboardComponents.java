@@ -1,6 +1,6 @@
 package tailwindfx.examples;
 
-import io.github.yasmramos.tailwindfx.TailwindFX;
+import io.github.yasmramos.tailwindfx.TwStyle;
 import io.github.yasmramos.tailwindfx.animation.TwAnimation;
 import javafx.animation.*;
 import javafx.geometry.Insets;

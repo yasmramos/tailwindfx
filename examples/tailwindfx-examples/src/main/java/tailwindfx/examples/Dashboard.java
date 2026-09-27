@@ -1,9 +1,8 @@
 package tailwindfx.examples;
 
-import io.github.yasmramos.tailwindfx.TailwindFX;
-import io.github.yasmramos.tailwindfx.components.ComponentFactory;
+import io.github.yasmramos.tailwindfx.TwStyle;
+import io.github.yasmramos.tailwindfx.components.TwAvatar;
 import io.github.yasmramos.tailwindfx.components.TwDataTable;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -259,7 +258,7 @@ public class Dashboard {
         HBox info = new HBox(12);
         info.setAlignment(Pos.CENTER_LEFT);
 
-        StackPane avatar = ComponentFactory.avatar("JD", "blue", 44);
+        StackPane avatar = TwAvatar.create("JD", "blue", "md");
         TwStyle.apply(avatar, "rounded-full");
 
         VBox text = new VBox(4);
@@ -608,7 +607,7 @@ public class Dashboard {
         TwStyle.apply(userRole, "text-xs", "text-gray-500");
         userText.getChildren().addAll(userName, userRole);
 
-        StackPane userAvatar = ComponentFactory.avatar("JD", "blue", 38);
+        StackPane userAvatar = TwAvatar.create("JD", "blue", "md");
         TwStyle.apply(userAvatar, "rounded-full");
 
         Label dropdownArrow = new Label("▼");
@@ -640,7 +639,7 @@ public class Dashboard {
         header.setAlignment(Pos.CENTER_LEFT);
         TwStyle.apply(header, "p-4", "bg-gradient-to-r", "from-blue-50", "to-purple-50", "rounded-t-xl");
 
-        StackPane avatar = ComponentFactory.avatar("JD", "blue", 50);
+        StackPane avatar = TwAvatar.create("JD", "blue", "md");
         TwStyle.apply(avatar, "rounded-full");
 
         VBox userInfo = new VBox(4);

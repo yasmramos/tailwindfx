@@ -1,6 +1,5 @@
 package tailwindfx.examples;
 
-import io.github.yasmramos.tailwindfx.TailwindFX;
 import io.github.yasmramos.tailwindfx.TwInstall;
 import javafx.application.Application;
 import javafx.scene.Scene;
