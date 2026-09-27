@@ -411,5 +411,19 @@
                 <module>tailwindfx-benchmarks</module>
             </modules>
         </profile>
+
+        <!-- Examples profile: only build example applications when explicitly requested.
+             Keeps example modules out of the Maven Central publication. -->
+        <profile>
+            <id>examples</id>
+            <activation>
+                <property>
+                    <name>examples</name>
+                </property>
+            </activation>
+            <modules>
+                <module>examples/tailwindfx-demo-dashboard</module>
+            </modules>
+        </profile>
     </profiles>
 </project>

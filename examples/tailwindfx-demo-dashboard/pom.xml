@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.yasmramos</groupId>
+        <artifactId>tailwindfx-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>tailwindfx-demo-dashboard</artifactId>
+    <packaging>jar</packaging>
+
+    <name>TailwindFX Demo Dashboard</name>
+    <description>Example JavaFX admin dashboard exercising the full TailwindFX API: JIT styling, AOT CSS generation, dark mode, responsive breakpoints, components, effects, animations, batching and metrics</description>
+
+    <properties>
+        <!-- Skip artifacts not needed for an example module (keeps Maven Central publishing clean) -->
+        <maven.source.skip>true</maven.source.skip>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <jacoco.skip>true</jacoco.skip>
+    </properties>
+
+    <dependencies>
+        <!-- TailwindFX core utilities (TwStyle, TwInstall, TwTheme, layouts, effects) -->
+        <dependency>
+            <groupId>io.github.yasmramos</groupId>
+            <artifactId>tailwindfx-base</artifactId>
+            <version>${tailwindfx.version}</version>
+        </dependency>
+
+        <!-- TailwindFX pre-built components (TwButton, TwCard, TwAlert, ...) -->
+        <dependency>
+            <groupId>io.github.yasmramos</groupId>
+            <artifactId>tailwindfx-components</artifactId>
+            <version>${tailwindfx.version}</version>
+        </dependency>
+
+        <!-- JavaFX -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- TailwindFX Maven Plugin: AOT generation of css/tailwindfx-generated.css -->
+            <plugin>
+                <groupId>io.github.yasmramos</groupId>
+                <artifactId>tailwindfx-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-tailwind-css</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <includeBase>true</includeBase>
+                            <includeColors>true</includeColors>
+                            <minify>false</minify>
+                            <outputDirectory>${project.build.outputDirectory}/css</outputDirectory>
+                            <outputFileName>tailwindfx-generated.css</outputFileName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- JavaFX Maven Plugin: run with mvn javafx:run -->
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>io.github.yasmramos.tailwindfx.examples.dashboard.DashboardApp</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
