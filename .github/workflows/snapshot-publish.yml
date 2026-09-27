@@ -41,8 +41,17 @@ jobs:
           BASE=$(mvn -q -DforceStdout help:evaluate -Dexpression=revision)
           echo "SNAPSHOT_VERSION=${BASE%-SNAPSHOT}-SNAPSHOT" >> "$GITHUB_ENV"
 
+      # Run the full verify lifecycle (unit tests + integration tests) once, under
+      # a virtual display. The headless JavaFX properties (glass.platform=Monocle,
+      # monocle.platform=Headless, testfx.*, prism.*) are defined in the surefire
+      # systemPropertyVariables of each module pom.xml, so they must NOT be
+      # overridden here on the command line (overriding them caused
+      # ClassNotFoundExceptions such as
+      # "com.sun.glass.ui.monocle.MonoclePlatformPlatformFactory" due to
+      # mismatched/concatenated class names). This mirrors the CI test step in
+      # .github/workflows/maven.yml.
       - name: Build and test
-        run: xvfb-run -a mvn --batch-mode clean verify -Drevision=${SNAPSHOT_VERSION} -DskipTests=false -Dtestfx.headless=true -Dtestfx.robot=glass -Dtestfx.setup.timeout=2500 -Dglass.platform=monocle -Dmonocle.platform=headless
+        run: xvfb-run -a mvn --batch-mode clean verify -Drevision=${SNAPSHOT_VERSION}
 
       - name: Publish snapshot to Central Portal
         env:
