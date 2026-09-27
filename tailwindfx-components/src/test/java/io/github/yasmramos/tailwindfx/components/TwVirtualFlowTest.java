@@ -129,6 +129,9 @@ class TwVirtualFlowTest {
   void testClearSelection() {
     items.addAll("Item 1", "Item 2", "Item 3");
     virtualFlow.setItems(items);
+    // MULTIPLE is required: in SINGLE mode selectIndex replaces the selection,
+    // so selecting two indices sequentially would always leave exactly one.
+    virtualFlow.setSelectionMode(TwVirtualFlow.SelectionMode.MULTIPLE);
     virtualFlow.selectIndex(0);
     virtualFlow.selectIndex(1);
 

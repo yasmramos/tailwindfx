@@ -23,14 +23,14 @@ jobs:
     - name: Install xvfb
       run: sudo apt-get update && sudo apt-get install -y xvfb
     
-    # Package without running tests: Surefire requires a display (Monocle GTK),
-    # so the suite runs only in the dedicated xvfb step below.
+    # Package without running tests to keep the build step display-independent.
     - name: Build with Maven
       run: mvn -B package -DskipTests --file pom.xml
-      
-    # Test configuration comes from systemPropertyVariables in the module poms
-    # (glass.platform=com.sun.glass.ui.monocle.MonoclePlatform, monocle.platform=GTK).
-    # Do not override those properties here; xvfb provides the display GTK needs.
+
+    # Tests use the Monocle Headless platform configured in systemPropertyVariables
+    # of the module poms (glass.platform=Monocle, monocle.platform=Headless), which
+    # needs no native display at all. xvfb-run is kept as a safety net for any code
+    # path that still touches X11; do not override the pom properties here.
     - name: Run tests with headless JavaFX
       run: xvfb-run -a mvn -B test
     
