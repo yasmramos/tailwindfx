@@ -178,10 +178,22 @@ public class TwVirtualFlow<T> extends Region {
     }
     this.items.setAll(items);
     if (items != this.items) {
-      // Track the caller's list so direct changes (e.g. clearing it) automatically drop
-      // stale selections instead of leaving out-of-range indices behind.
+      // Keep the internal copy in sync with the caller's list: later mutations on the
+      // source (clear, remove, add, updates, permutations) must be reflected immediately,
+      // otherwise data and selections become stale. Resync first, then prune selections
+      // that fell out of range.
+      // Recursion check: this.items.setAll(...) fires the internal listener on {@code items}
+      // (sizeCacheDirty / scrollbar / cell refresh), which is desirable. That internal
+      // listener never mutates {@code sourceItems}, so no feedback loop is created.
       sourceItemsListener =
-          c -> selectedIndices.removeIf(idx -> idx < 0 || idx >= this.items.size());
+          c -> {
+            while (c.next()) {
+              // Consume the change and mirror the source state into the internal list.
+            }
+            this.items.setAll(sourceItems);
+            // Prune selections that are no longer valid after the sync above.
+            selectedIndices.removeIf(idx -> idx < 0 || idx >= this.items.size());
+          };
       sourceItems = items;
       sourceItems.addListener(sourceItemsListener);
     } else {
