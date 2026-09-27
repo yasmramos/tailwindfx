@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.yasmramos</groupId>
   <artifactId>tailwindfx-parent</artifactId>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
   <packaging>pom</packaging>
   <name>TailwindFX Parent</name>
   <description>Parent POM for TailwindFX - A Tailwind CSS-inspired utility-first styling framework for JavaFX applications</description>
@@ -41,10 +41,10 @@
     <central.publishing.version>0.8.0</central.publishing.version>
     <source.plugin.version>3.3.0</source.plugin.version>
     <mockito.version>5.11.0</mockito.version>
-    <tailwindfx.version>0.1.1</tailwindfx.version>
+    <tailwindfx.version>0.1.2</tailwindfx.version>
     <jacoco.version>0.8.14</jacoco.version>
     <surefire.version>3.2.5</surefire.version>
-    <revision>0.1.1</revision>
+    <revision>0.1.2</revision>
     <testfx.version>4.0.17</testfx.version>
     <failsafe.version>3.2.5</failsafe.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

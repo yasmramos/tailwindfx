@@ -1,35 +1,11 @@
-# Maven build artifacts
+# Build artifacts and generated files
 target/
-.flattened-pom.xml
 
-# Compiled class files
-*.class
-*.jar
-
-# Logs and temp files
-*.log
-*.tmp
-
-# Environment
-.env
-.env.local
-.env.*
-
-# Editors
-.vscode/
+# IDE and Editor settings
 .idea/
-*.swp
-*.swo
-*.bak
+.vscode/
+*.iml
 
-# System files
+# OS generated files
 .DS_Store
 Thumbs.db
-
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# Maven flattened poms (per module)
-**/.flattened-pom.xml

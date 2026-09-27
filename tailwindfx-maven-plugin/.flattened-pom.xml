@@ -5,17 +5,17 @@
   <parent>
     <groupId>io.github.yasmramos</groupId>
     <artifactId>tailwindfx-parent</artifactId>
-    <version>0.1.1</version>
+    <version>0.1.2</version>
   </parent>
   <artifactId>tailwindfx-maven-plugin</artifactId>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
   <packaging>maven-plugin</packaging>
   <name>TailwindFX Maven Plugin</name>
   <description>Maven plugin for generating optimized TailwindCSS for JavaFX at build time</description>
   <licenses>
     <license>
-      <name>MIT License</name>
-      <url>https://opensource.org/licenses/MIT</url>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
