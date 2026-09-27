@@ -5,8 +5,8 @@ import java.util.concurrent.TimeUnit;
 import javafx.application.Platform;
 
 /**
- * JUnit 5 bootstrap that initializes the JavaFX toolkit once per JVM, so plain
- * unit tests can instantiate JavaFX controls without a running Platform.
+ * JUnit 5 bootstrap that initializes the JavaFX toolkit once per JVM, so plain unit tests can
+ * instantiate JavaFX controls without a running Platform.
  */
 public final class ToolkitBootstrap {
 
