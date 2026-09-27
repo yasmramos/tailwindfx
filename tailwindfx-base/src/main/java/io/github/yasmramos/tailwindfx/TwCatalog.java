@@ -179,13 +179,12 @@ public final class TwCatalog {
     ThemeCssGenerator generator = new ThemeCssGenerator(config);
     css.append(generator.generateBaseCss());
     css.append("\n");
+      // Compile each utility class and append to CSS
 
-    // Compile each utility class and append to CSS
-    JitCompiler compiler = new JitCompiler();
     Set<String> allClasses = allUtilityClasses(config);
     for (String utilityClass : allClasses) {
       try {
-        JitCompiler.BatchResult result = compiler.compileBatch(utilityClass);
+        JitCompiler.BatchResult result = JitCompiler.compileBatch(utilityClass);
         if (result.hasInlineStyle()) {
           String classCss =
               "." + utilityClass + " {\n  " + result.inlineStyle().replace("; ", ";\n  ") + "\n}\n";
