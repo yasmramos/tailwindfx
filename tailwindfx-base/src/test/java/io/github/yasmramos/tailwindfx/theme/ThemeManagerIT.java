@@ -11,8 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.testfx.framework.junit5.ApplicationTest;
 
-@DisplayName("ThemeManager Tests")
-class ThemeManagerTest extends ApplicationTest {
+@DisplayName("ThemeManager Integration Tests")
+class ThemeManagerIT extends ApplicationTest {
 
   private Scene scene;
   private Pane root;
@@ -211,13 +211,21 @@ class ThemeManagerTest extends ApplicationTest {
   @Test
   @DisplayName("Should reset theme to default")
   void testReset() {
-    ThemeManager.forScene(scene).dark().apply();
-    assertTrue(scene.getRoot().getStyleClass().contains("dark"));
+    // Run all mutations and assertions on the JavaFX Application Thread so the test is
+    // deterministic: apply() schedules a deferred CSS refresh via Platform.runLater, which
+    // could otherwise race with the assertions below when executed from the FX thread.
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).dark().apply();
+          assertTrue(scene.getRoot().getStyleClass().contains("dark"));
 
-    ThemeManager.forScene(scene).reset();
+          ThemeManager.forScene(scene).reset();
 
-    assertTrue(scene.getRoot().getStyle().isEmpty());
-    assertFalse(scene.getRoot().getStyleClass().contains("dark"));
+          scene.getRoot().applyCss();
+          scene.getRoot().layout();
+          assertTrue(scene.getRoot().getStyle().isEmpty());
+          assertFalse(scene.getRoot().getStyleClass().contains("dark"));
+        });
   }
 
   @Test
