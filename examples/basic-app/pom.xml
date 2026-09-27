@@ -1,15 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.github.yasmramos</groupId>
+
+    <parent>
+        <groupId>io.github.yasmramos</groupId>
+        <artifactId>tailwindfx-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
     <artifactId>basic-app</artifactId>
-    <version>1.0</version>
     <packaging>jar</packaging>
+
+    <name>TailwindFX Example - Basic App</name>
+    <description>Basic TailwindFX usage: utility classes and JIT values on a simple JavaFX layout</description>
+
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>tailwindfx</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>io.github.yasmramos</groupId>
+            <artifactId>tailwindfx-base</artifactId>
+            <version>${tailwindfx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
@@ -33,17 +43,17 @@
         </dependency>
     </dependencies>
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>17</maven.compiler.release>
+        <!-- Example modules are not published: skip the Maven Central artifacts -->
+        <maven.source.skip>true</maven.source.skip>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <jacoco.skip>true</jacoco.skip>
         <exec.mainClass>io.github.yasmramos.tailwindfx.examples.BasicApp</exec.mainClass>
-        <javafx.version>17</javafx.version>
     </properties>
     <build>
         <plugins>
             <plugin>
                 <groupId>io.github.yasmramos</groupId>
                 <artifactId>tailwindfx-maven-plugin</artifactId>
-                <version>0.1.1</version>
                 <executions>
                     <execution>
                         <goals>
@@ -61,9 +71,8 @@
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
-                <version>0.0.8</version>
                 <configuration>
-                    <mainClass>io.github.yasmramos.tailwindfx.examples.BasicApp</mainClass>
+                    <mainClass>${exec.mainClass}</mainClass>
                 </configuration>
             </plugin>
         </plugins>

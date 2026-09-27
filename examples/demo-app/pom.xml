@@ -4,19 +4,25 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.yasmramos</groupId>
+    <parent>
+        <groupId>io.github.yasmramos</groupId>
+        <artifactId>tailwindfx-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
     <artifactId>demo-app</artifactId>
-    <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>TailwindFX Example</name>
-    <description>Example project demonstrating TailwindFX with Maven plugin</description>
+    <name>TailwindFX Example - FXML Demo</name>
+    <description>TailwindFX with FXML: loads a FXML view and processes the scene graph with TwFXML</description>
 
     <properties>
-        <maven.compiler.release>17</maven.compiler.release>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <javafx.version>17.0.2</javafx.version>
-        <tailwindfx.version>1.0-SNAPSHOT</tailwindfx.version>
+        <!-- Example modules are not published: skip the Maven Central artifacts -->
+        <maven.source.skip>true</maven.source.skip>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <jacoco.skip>true</jacoco.skip>
+        <exec.mainClass>com.example.HelloApplication</exec.mainClass>
     </properties>
 
     <dependencies>
@@ -35,7 +41,7 @@
         <!-- TailwindFX -->
         <dependency>
             <groupId>io.github.yasmramos</groupId>
-            <artifactId>tailwindfx</artifactId>
+            <artifactId>tailwindfx-base</artifactId>
             <version>${tailwindfx.version}</version>
         </dependency>
     </dependencies>
@@ -46,7 +52,6 @@
             <plugin>
                 <groupId>io.github.yasmramos</groupId>
                 <artifactId>tailwindfx-maven-plugin</artifactId>
-                <version>${tailwindfx.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -67,19 +72,8 @@
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
-                <version>0.0.8</version>
                 <configuration>
-                    <mainClass>com.example.HelloApplication</mainClass>
-                </configuration>
-            </plugin>
-
-            <!-- Compiler Plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
-                <configuration>
-                    <release>17</release>
+                    <mainClass>${exec.mainClass}</mainClass>
                 </configuration>
             </plugin>
         </plugins>

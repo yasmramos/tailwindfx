@@ -422,7 +422,11 @@
                 </property>
             </activation>
             <modules>
+                <module>examples/basic-app</module>
+                <module>examples/demo-app</module>
+                <module>examples/ecommerce-demo</module>
                 <module>examples/tailwindfx-demo-dashboard</module>
+                <module>examples/tailwindfx-examples</module>
             </modules>
         </profile>
     </profiles>
