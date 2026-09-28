@@ -19,7 +19,7 @@ class TwBatchTest extends ApplicationTest {
   public void start(javafx.stage.Stage stage) {
     javafx.scene.layout.StackPane root = new javafx.scene.layout.StackPane();
     javafx.scene.Scene scene = new javafx.scene.Scene(root, 800, 600);
-    TailwindFX.install(scene);
+    TwInstall.install(scene);
     stage.setScene(scene);
     stage.show();
   }

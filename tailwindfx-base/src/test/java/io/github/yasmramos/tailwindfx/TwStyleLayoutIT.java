@@ -30,7 +30,7 @@ public class TwStyleLayoutIT extends ApplicationTest {
     root.getChildren().addAll(hbox, vbox, grid);
 
     javafx.scene.Scene scene = new javafx.scene.Scene(root, 800, 600);
-    TailwindFX.install(scene);
+    TwInstall.install(scene);
     stage.setScene(scene);
     stage.show();
   }

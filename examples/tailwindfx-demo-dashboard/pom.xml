@@ -9,31 +9,38 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>basic-app</artifactId>
+    <artifactId>tailwindfx-demo-dashboard</artifactId>
     <packaging>jar</packaging>
 
-    <name>TailwindFX Example - Basic App</name>
-    <description>Basic TailwindFX usage: utility classes and JIT values on a simple JavaFX layout</description>
+    <name>TailwindFX Demo Dashboard</name>
+    <description>Example JavaFX admin dashboard exercising the full TailwindFX API: JIT styling, AOT CSS generation, dark mode, responsive breakpoints, components, effects, animations, batching and metrics</description>
+
+    <properties>
+        <!-- Skip artifacts not needed for an example module (keeps Maven Central publishing clean) -->
+        <maven.source.skip>true</maven.source.skip>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <jacoco.skip>true</jacoco.skip>
+    </properties>
 
     <dependencies>
+        <!-- TailwindFX core utilities (TwStyle, TwInstall, TwTheme, layouts, effects) -->
         <dependency>
             <groupId>io.github.yasmramos</groupId>
             <artifactId>tailwindfx-base</artifactId>
             <version>${tailwindfx.version}</version>
         </dependency>
+
+        <!-- TailwindFX pre-built components (TwButton, TwCard, TwAlert, ...) -->
+        <dependency>
+            <groupId>io.github.yasmramos</groupId>
+            <artifactId>tailwindfx-components</artifactId>
+            <version>${tailwindfx.version}</version>
+        </dependency>
+
+        <!-- JavaFX -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>${javafx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-graphics</artifactId>
-            <version>${javafx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-base</artifactId>
             <version>${javafx.version}</version>
         </dependency>
         <dependency>
@@ -42,37 +49,37 @@
             <version>${javafx.version}</version>
         </dependency>
     </dependencies>
-    <properties>
-        <!-- Example modules are not published: skip the Maven Central artifacts -->
-        <maven.source.skip>true</maven.source.skip>
-        <maven.javadoc.skip>true</maven.javadoc.skip>
-        <jacoco.skip>true</jacoco.skip>
-        <exec.mainClass>io.github.yasmramos.tailwindfx.examples.BasicApp</exec.mainClass>
-    </properties>
+
     <build>
         <plugins>
+            <!-- TailwindFX Maven Plugin: AOT generation of css/tailwindfx-generated.css -->
             <plugin>
                 <groupId>io.github.yasmramos</groupId>
                 <artifactId>tailwindfx-maven-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>generate-tailwind-css</id>
+                        <phase>process-classes</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
-                        <phase>process-resources</phase>
                         <configuration>
-                            <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+                            <includeBase>true</includeBase>
+                            <includeColors>true</includeColors>
+                            <minify>false</minify>
                             <outputDirectory>${project.build.outputDirectory}/css</outputDirectory>
                             <outputFileName>tailwindfx-generated.css</outputFileName>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- JavaFX Maven Plugin: run with mvn javafx:run -->
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>${exec.mainClass}</mainClass>
+                    <mainClass>io.github.yasmramos.tailwindfx.examples.dashboard.DashboardApp</mainClass>
                 </configuration>
             </plugin>
         </plugins>
