@@ -1,10 +1,13 @@
 package io.github.yasmramos.tailwindfx.core;
 
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javafx.scene.Node;
 
 /**
@@ -17,7 +20,8 @@ import javafx.scene.Node;
  * previous classes from that same category.
  *
  * <p>Result: apply(node, "w-4") → [w-4] apply(node, "w-8") → [w-8] ← w-4 removed apply(node, "p-2")
- * → [w-8, p-2] apply(node, "px-4") → [w-8, p-2, px-4] ← px does not conflict with p
+ * → [w-8, p-2] apply(node, "px-4") → [w-8, px-4] ← px-4 supersedes the horizontal sides of p-2;
+ * vertical sides (pt/pr/pb/pl) of p-2 survive because they cover different sides.
  *
  * <p>Note: only resolves CSS class conflicts (apply/remove). JIT inline styles (jit()) are managed
  * by StyleMerger which already overwrites by property, without need for this resolver.
@@ -46,10 +50,19 @@ public final class UtilityConflictResolver {
     definitions.put("min-h", new String[] {"min-h-"});
     definitions.put("max-h", new String[] {"max-h-"});
 
-    // Padding — all padding utilities conflict with each other.
-    // Applying a shorthand (p-) removes specific sides (px-, py-, etc.)
-    // and applying a specific side removes the shorthand.
-    definitions.put("padding", new String[] {"p-", "px-", "py-", "pt-", "pr-", "pb-", "pl-"});
+    // Padding — side-aware conflict categories (Tailwind precedence model).
+    // A shorthand only conflicts with classes that cover the SAME sides:
+    //   p-   covers all four sides   → conflicts with every other padding class
+    //   px-/py- cover two opposite sides → conflict with each axis's specific sides
+    //   pt-/pr-/pb-/pl- cover one side  → conflict only on that side
+    // This prevents apply(node, "p-4", "px-6") from silently dropping top/bottom padding.
+    definitions.put("padding-all", new String[] {"p-"});
+    definitions.put("padding-x", new String[] {"px-"});
+    definitions.put("padding-y", new String[] {"py-"});
+    definitions.put("padding-top", new String[] {"pt-"});
+    definitions.put("padding-right", new String[] {"pr-"});
+    definitions.put("padding-bottom", new String[] {"pb-"});
+    definitions.put("padding-left", new String[] {"pl-"});
 
     // Background colors
     definitions.put(
@@ -356,6 +369,7 @@ public final class UtilityConflictResolver {
    */
   private static final String CACHE_KEY = "tailwindfx.category.cache";
 
+
   @SuppressWarnings("unchecked")
   private static java.util.Map<String, String> getCache(Node node) {
     return (java.util.Map<String, String>)
@@ -507,20 +521,47 @@ public final class UtilityConflictResolver {
     }
     String category = findCategory(cssClass);
     if (category != null) {
-      var cache = getCache(node);
-      String prev = cache.get(category);
-      if (prev != null && !prev.equals(cssClass)) {
-        // Cache hit: remove exactly the previous class without list scan
-        node.getStyleClass().remove(prev);
-        TailwindFXMetrics.instance().recordConflictResolution(category);
-      } else if (prev == null) {
-        // Cache miss: first time this category on this node — defensive cleanup
-        removeCategory(node, category, cssClass);
-      }
-      cache.put(category, cssClass);
+      supersede(node, cssClass, category);
     }
     if (!node.getStyleClass().contains(cssClass)) {
       node.getStyleClass().add(cssClass);
+    }
+  }
+
+  /**
+   * Removes classes whose covered sides are fully covered by {@code newClass}, then records the new
+   * class in the per-category cache. Shared by {@link #apply} and {@link #applyAll}.
+   */
+  private static void supersede(Node node, String newClass, String category) {
+    java.util.Map<String, String> cache = getCache(node);
+    String prev = cache.get(category);
+    int removed = 0;
+    if (prev != null && !prev.equals(newClass)) {
+      // Fast path: the previously applied class of this exact category is superseded
+      // (same-category classes always cover identical sides).
+      if (node.getStyleClass().remove(prev)) {
+        removed++;
+      } else {
+        // Stale cache entry (class was removed externally) — fall back to defensive scan.
+        removed += removeCategory(node, category, newClass);
+      }
+    } else if (prev == null) {
+      // Cache miss: defensive cleanup of same-category leftovers.
+      removed += removeCategory(node, category, newClass);
+    }
+    // Side-aware cleanup for base-level padding classes only. Breakpoint-scoped
+    // paddings (e.g. "md:p-4") are never decomposed into side classes, so they must
+    // not participate in this logic — removing them would silently drop responsive
+    // padding at runtime.
+    boolean scoped = BP_PREFIX.matcher(newClass).matches();
+    if (!scoped) {
+      removed += supersedePadding(node, newClass, cache);
+    }
+    // Register the newcomer AFTER the side scan so it does not match against itself
+    // (a padding class trivially covers its own sides).
+    cache.put(category, newClass);
+    if (removed > 0) {
+      TailwindFXMetrics.instance().recordConflictResolution(category);
     }
   }
 
@@ -529,12 +570,114 @@ public final class UtilityConflictResolver {
    * spaces.
    */
   public static void applyAll(Node node, String... classes) {
+    java.util.List<String> flat = new java.util.ArrayList<>();
     for (String c : classes) {
       if (c == null || c.isBlank()) continue;
       for (String part : c.split("\\s+")) {
-        if (!part.isBlank()) apply(node, part);
+        if (!part.isBlank()) flat.add(part);
       }
     }
+
+    // Deduplicate identical tokens within the batch (last-wins collapses to a single
+    // occurrence). Without this, duplicate paddings such as "p-4 p-4" are treated as
+    // two independent side-owners by expandPaddingBatch: each removes the other's
+    // sides, both end up with an empty remaining set, and every padding class is
+    // silently dropped from the node.
+    java.util.List<String> unique = new java.util.ArrayList<>();
+    java.util.Set<String> seen = new java.util.HashSet<>();
+    for (String cls : flat) {
+      if (seen.add(cls)) unique.add(cls);
+    }
+    flat = unique;
+
+    // Phase 1 — intra-batch conflict resolution. Later tokens win over earlier ones in
+    // the same batch (last-wins semantics), so losers are dropped before touching the
+    // node. This prevents the old two-phase bug where each token superseded only the
+    // node's *previous* state: applying "p-4 px-6" resolved both newcomers against an
+    // empty cache, neither removed the other, and p-4 silently survived alongside px-6.
+    java.util.Map<String, String> batchByCategory = new java.util.HashMap<>(8);
+    java.util.Set<String> losers = new java.util.HashSet<>();
+    for (String cls : flat) {
+      String category = findCategory(cls);
+      if (category == null) continue;
+      String prev = batchByCategory.put(category, cls);
+      // The newcomer supersedes the previous winner of the same category. A token that
+      // is already a loser must not "revive" the current winner when it reappears later
+      // in the batch ("p-4 p-6 p-4": the trailing p-4 loses to p-6, and the duplicate
+      // must not resurrect the first p-4 slot — phase 2's contains() guard makes
+      // re-applying the winner idempotent).
+      if (prev != null && !losers.contains(cls)) {
+        losers.add(prev);
+      }
+    }
+    // Padding side-awareness within the batch: e.g. "p-4 px-6" must keep p-4's vertical
+    // sides (decomposed to py-4) instead of treating them as fully independent tokens.
+    java.util.List<String> expanded = expandPaddingBatch(flat, losers);
+
+    // Phase 2 — apply surviving tokens sequentially against the node's existing state,
+    // reusing the exact same supersede() path as single apply().
+    for (String cls : expanded) {
+      if (losers.contains(cls)) continue;
+      String category = findCategory(cls);
+      if (category != null) supersede(node, cls, category);
+      if (!node.getStyleClass().contains(cls)) node.getStyleClass().add(cls);
+    }
+  }
+
+  /**
+   * Pre-resolves padding interactions among the tokens of a single {@link #applyAll} batch,
+   * returning the effective token list (fully covered paddings removed, partially covered
+   * shorthands decomposed into their surviving-side equivalents). Non-padding tokens pass
+   * through untouched. Mirrors Tailwind CSS precedence at the class-set level (audit finding
+   * #8): "p-4 px-6" behaves like "px-6 py-4", and "px-6 py-2 p-8" collapses to "p-8".
+   */
+  private static java.util.List<String> expandPaddingBatch(
+      java.util.List<String> flat, java.util.Set<String> losers) {
+    java.util.List<String> out = new ArrayList<>(flat.size());
+    java.util.Set<String> emitted = new java.util.HashSet<>();
+    java.util.List<String> paddings = new ArrayList<>();
+    for (String cls : flat) {
+      if (losers.contains(cls)) continue;
+      if (paddingSides(cls).isEmpty() || BP_PREFIX.matcher(cls).matches()) {
+        out.add(cls);
+      } else {
+        paddings.add(cls);
+      }
+    }
+    // For every padding class, compute the sides still owned by a LATER padding token.
+    // A token whose remaining set is empty is fully overridden and dropped; a shorthand
+    // with leftovers is re-emitted as its uncovered-side equivalents ("p-4" minus the
+    // horizontal sides owned by a later "px-6" becomes "py-4").
+    int n = paddings.size();
+    java.util.List<java.util.Set<String>> remaining = new ArrayList<>(n);
+    for (int i = 0; i < n; i++) {
+      java.util.Set<String> sides = new java.util.HashSet<>(paddingSides(paddings.get(i)));
+      for (int j = i + 1; j < n; j++) {
+        sides.removeAll(paddingSides(paddings.get(j)));
+      }
+      remaining.add(sides);
+    }
+    for (int i = 0; i < n; i++) {
+      String cls = paddings.get(i);
+      java.util.Set<String> sides = remaining.get(i);
+      if (sides.isEmpty()) continue; // fully covered by later padding tokens
+      String effective;
+      if (sides.equals(paddingSides(cls))) {
+        effective = cls; // no partial override — keep the original token
+      } else {
+        String value = cls.substring(paddingPrefix(cls).length());
+        List<String> prefixes = decomposeSidePrefixes(sides);
+        // Emit every generated side class; the last one replaces the original slot to
+        // preserve ordering, the others are appended right after.
+        effective = prefixes.isEmpty() ? cls : prefixes.get(0) + value;
+        for (int k = 1; k < prefixes.size(); k++) {
+          String extra = prefixes.get(k) + value;
+          if (emitted.add(extra)) out.add(extra);
+        }
+      }
+      if (emitted.add(effective)) out.add(effective);
+    }
+    return out;
   }
 
   /**
@@ -574,11 +717,130 @@ public final class UtilityConflictResolver {
         .toList();
   }
 
-  // Internos
-
   // Breakpoint prefixes supported by TailwindFX responsive engine
   private static final java.util.regex.Pattern BP_PREFIX =
       java.util.regex.Pattern.compile("^(sm:|md:|lg:|xl:|2xl:|dark:)(.+)$");
+
+  // Padding side model
+
+  /** The four primitive sides every padding utility is built from. */
+  private static final String TOP = "top";
+  private static final String RIGHT = "right";
+  private static final String BOTTOM = "bottom";
+  private static final String LEFT = "left";
+
+  /**
+   * Returns the set of sides covered by a padding utility class (base or breakpoint-scoped), or an
+   * empty set if the class is not a padding utility. Unknown side names (e.g. {@code pc-}) map to
+   * the full set so they conservatively conflict with everything padding-related rather than being
+   * silently ignored.
+   */
+  static java.util.Set<String> paddingSides(String cssClass) {
+    if (cssClass == null) return java.util.Set.of();
+    java.util.regex.Matcher m = BP_PREFIX.matcher(cssClass);
+    String base = m.matches() ? m.group(2) : cssClass;
+    // Order matters: "px-" also starts with "p", so axis/side prefixes are tested first.
+    if (base.startsWith("px-")) return java.util.Set.of(LEFT, RIGHT);
+    if (base.startsWith("py-")) return java.util.Set.of(TOP, BOTTOM);
+    if (base.startsWith("pt-")) return java.util.Set.of(TOP);
+    if (base.startsWith("pr-")) return java.util.Set.of(RIGHT);
+    if (base.startsWith("pb-")) return java.util.Set.of(BOTTOM);
+    if (base.startsWith("pl-")) return java.util.Set.of(LEFT);
+    if (base.startsWith("p-")) return java.util.Set.of(TOP, RIGHT, BOTTOM, LEFT);
+    return java.util.Set.of();
+  }
+
+  /** True if {@code outer} covers every side in {@code inner}. */
+  private static boolean covers(java.util.Set<String> outer, java.util.Set<String> inner) {
+    return !inner.isEmpty() && outer.containsAll(inner);
+  }
+
+  /**
+   * Applies Tailwind's padding precedence model between {@code newClass} and the padding
+   * classes currently on the node:
+   *
+   * <ul>
+   *   <li>A class whose sides are fully covered by the newcomer is removed ("px-6 py-2" →
+   *       applying "p-8" removes both).
+   *   <li>A shorthand whose sides are NOT fully covered by the newcomer survives as its
+   *       uncovered-side equivalents: "p-4" + "px-6" keeps top/bottom via generated
+   *       "py-4" (so no vertical padding is silently lost — audit finding #8).
+   * </ul>
+   *
+   * @return number of style classes removed from the node
+   */
+  private static int supersedePadding(Node node, String newClass, Map<String, String> cache) {
+    Set<String> newSides = paddingSides(newClass);
+    if (newSides.isEmpty()) return 0; // not a padding utility
+
+    // Collect candidates from the category cache (only padding categories matter).
+    Map<String, String> victims = new LinkedHashMap<>();
+    for (Map.Entry<String, String> e : new ArrayList<>(cache.entrySet())) {
+      String cat = e.getKey();
+      if (!cat.startsWith("padding-")) continue;
+      String cls = e.getValue();
+      if (cls.equals(newClass)) continue;
+      Set<String> sides = paddingSides(cls);
+      if (sides.isEmpty() || BP_PREFIX.matcher(cls).matches()) continue;
+      if (covers(newSides, sides)) {
+        victims.put(cat, cls); // fully overridden by the newcomer
+      } else if (covers(sides, newSides)) {
+        // Existing broader shorthand (e.g. "p-4") vs narrower newcomer (e.g. "px-6"):
+        // keep coverage of the remaining sides by decomposing the shorthand, carrying
+        // over its value suffix ("p-4" -> "py-4").
+        victims.put(cat, cls);
+        Set<String> leftover = new LinkedHashSet<>(sides);
+        leftover.removeAll(newSides);
+        String value = cls.substring(paddingPrefix(cls).length());
+        for (String prefix : decomposeSidePrefixes(leftover)) {
+          String generated = prefix + value;
+          String genCat = findCategory(generated);
+          if (genCat == null) continue;
+          String existingForGen = cache.get(genCat);
+          // A more specific rule already on the node wins on those sides (Tailwind
+          // specificity): don't resurrect the shorthand's value there.
+          if (existingForGen == null || victims.containsValue(existingForGen)) {
+            cache.put(genCat, generated);
+            if (!node.getStyleClass().contains(generated)) node.getStyleClass().add(generated);
+          }
+        }
+      }
+    }
+    int removed = 0;
+    for (Map.Entry<String, String> e : victims.entrySet()) {
+      cache.remove(e.getKey());
+      if (node.getStyleClass().remove(e.getValue())) removed++;
+    }
+    return removed;
+  }
+
+  /** Returns the matched padding prefix of a class (e.g. "p-", "px-"), or "" if none. */
+  private static String paddingPrefix(String cssClass) {
+    for (String prefix : new String[] {"px-", "py-", "pt-", "pr-", "pb-", "pl-", "p-"}) {
+      if (cssClass.startsWith(prefix)) return prefix;
+    }
+    return "";
+  }
+
+  /** Converts a set of primitive sides back into canonical padding utility prefixes. */
+  private static List<String> decomposeSidePrefixes(Set<String> sides) {
+    List<String> out = new ArrayList<>(2);
+    boolean hasTop = sides.contains(TOP);
+    boolean hasBottom = sides.contains(BOTTOM);
+    boolean hasLeft = sides.contains(LEFT);
+    boolean hasRight = sides.contains(RIGHT);
+    if (hasTop && hasBottom && !hasLeft && !hasRight) out.add("py-");
+    else if (hasLeft && hasRight && !hasTop && !hasBottom) out.add("px-");
+    else {
+      if (hasTop) out.add("pt-");
+      if (hasRight) out.add("pr-");
+      if (hasBottom) out.add("pb-");
+      if (hasLeft) out.add("pl-");
+    }
+    return out;
+  }
+
+  // Internos
 
   /**
    * Finds the conflict category for a CSS class, with responsive prefix support.
@@ -628,12 +890,23 @@ public final class UtilityConflictResolver {
     return best;
   }
 
-  /** Removes all classes from the node that belong to a category */
-  private static void removeCategory(Node node, String category, String except) {
+  /**
+   * Removes all classes from the node that belong to a category.
+   *
+   * @return the number of classes actually removed
+   */
+  private static int removeCategory(Node node, String category, String except) {
     List<String> prefixes = CATEGORY_TO_PREFIXES.getOrDefault(category, List.of());
+    int[] count = {0};
     node.getStyleClass()
         .removeIf(
-            cls -> !cls.equals(except) && prefixes.stream().anyMatch(p -> matchesPrefix(cls, p)));
+            cls -> {
+              boolean hit =
+                  !cls.equals(except) && prefixes.stream().anyMatch(p -> matchesPrefix(cls, p));
+              if (hit) count[0]++;
+              return hit;
+            });
+    return count[0];
   }
 
   /** If a class matches a prefix (exact or as start) */
