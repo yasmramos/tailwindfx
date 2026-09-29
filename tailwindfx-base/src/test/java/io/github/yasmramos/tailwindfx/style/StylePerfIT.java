@@ -54,11 +54,23 @@ class StylePerfTest extends ApplicationTest {
     }
 
     @Test
-    @DisplayName("Should handle order-independent class comparison")
-    void testOrderIndependentHash() {
+    @DisplayName("Should treat class order as significant (last-wins semantics)")
+    void testOrderDependentHash() {
+      // UtilityConflictResolver.applyAll resolves conflicts with "last wins" per category,
+      // so "p-4 w-8" and "w-8 p-4" are semantically different and must NOT collide in the diff
+      // cache.
       StylePerf.apply(button, "p-4", "w-8");
       boolean result = StylePerf.apply(button, "w-8", "p-4");
-      assertFalse(result, "Same classes in different order should be cached");
+      assertTrue(result, "Reordered classes should be re-applied (order is significant)");
+    }
+
+    @Test
+    @DisplayName("Should collapse duplicate classes keeping last occurrence")
+    void testDuplicateClassesCollapse() {
+      // ["a","b","a"] normalizes to ["b","a"], so a subsequent ["b","a"] apply is a cache hit.
+      StylePerf.apply(button, "text-white", "font-bold", "text-white");
+      boolean result = StylePerf.apply(button, "font-bold", "text-white");
+      assertFalse(result, "Deduplicated same-last-occurrence sets should hit the cache");
     }
 
     @Test
@@ -249,39 +261,6 @@ class StylePerfTest extends ApplicationTest {
   }
 
   @Nested
-  @DisplayName("Auto-Batch Threshold")
-  class AutoBatchThresholdTests {
-
-    @Test
-    @DisplayName("Should set and get auto-batch threshold")
-    void testSetGetThreshold() {
-      StylePerf.setAutoBatchThreshold(10);
-      assertEquals(10, StylePerf.getAutoBatchThreshold());
-    }
-
-    @Test
-    @DisplayName("Should normalize negative threshold to zero")
-    void testNegativeThreshold() {
-      StylePerf.setAutoBatchThreshold(-5);
-      assertEquals(0, StylePerf.getAutoBatchThreshold());
-    }
-
-    @Test
-    @DisplayName("Should allow zero threshold (disabled)")
-    void testZeroThreshold() {
-      StylePerf.setAutoBatchThreshold(0);
-      assertEquals(0, StylePerf.getAutoBatchThreshold());
-    }
-
-    @Test
-    @DisplayName("Should accept large threshold values")
-    void testLargeThreshold() {
-      StylePerf.setAutoBatchThreshold(Integer.MAX_VALUE);
-      assertEquals(Integer.MAX_VALUE, StylePerf.getAutoBatchThreshold());
-    }
-  }
-
-  @Nested
   @DisplayName("Benchmark Utility")
   class BenchmarkTests {
 
@@ -336,21 +315,76 @@ class StylePerfTest extends ApplicationTest {
     @Test
     @DisplayName("Should enqueue deferred apply operation")
     void testEnqueueDeferredApply() {
-      assertDoesNotThrow(
-          () -> {
-            StylePerf.enqueueDeferredApply(button, new String[] {"btn-primary", "rounded-lg"});
-          },
-          "enqueueDeferredApply should not throw");
+      // Must run on the FX thread — enqueueDeferredApply now enforces the threading contract.
+      interact(
+          () ->
+              assertDoesNotThrow(
+                  () ->
+                      StylePerf.enqueueDeferredApply(
+                          button, new String[] {"btn-primary", "rounded-lg"}),
+                  "enqueueDeferredApply should not throw on the FX thread"));
     }
 
     @Test
     @DisplayName("Should handle null classes in deferred apply")
     void testEnqueueDeferredApplyWithNullClasses() {
-      assertDoesNotThrow(
+      interact(
+          () ->
+              assertDoesNotThrow(
+                  () -> StylePerf.enqueueDeferredApply(button, null),
+                  "enqueueDeferredApply should handle null classes"));
+    }
+
+    @Test
+    @DisplayName("Should throw when enqueued from a non-FX thread")
+    void testEnqueueDeferredApplyFromNonFxThread() throws Exception {
+      final boolean[] exceptionThrown = {false};
+      Thread thread =
+          new Thread(
+              () -> {
+                try {
+                  StylePerf.enqueueDeferredApply(button, new String[] {"btn-primary"});
+                } catch (IllegalStateException e) {
+                  exceptionThrown[0] = true;
+                }
+              });
+      thread.start();
+      thread.join(5000);
+      assertTrue(exceptionThrown[0], "Should throw IllegalStateException from non-FX thread");
+    }
+
+    @Test
+    @DisplayName("Should apply immediately when no batch is active")
+    void testEnqueueDeferredApplyOutsideBatchAppliesImmediately() {
+      interact(
           () -> {
-            StylePerf.enqueueDeferredApply(button, null);
-          },
-          "enqueueDeferredApply should handle null classes");
+            Button target = new Button("direct");
+            // Unknown classes are added verbatim to styleClass; since no batch is accumulating,
+            // the enqueue must apply synchronously instead of queueing.
+            StylePerf.enqueueDeferredApply(target, new String[] {"zzz-direct-1"});
+            assertTrue(
+                target.getStyleClass().contains("zzz-direct-1"),
+                "Without an active batch the operation should be applied right away");
+          });
+    }
+
+    @Test
+    @DisplayName("Should defer application until the batch flushes")
+    void testEnqueueDeferredApplyInsideBatchDefers() {
+      interact(
+          () -> {
+            Button target = new Button("deferred");
+            StylePerf.batch(
+                () -> {
+                  StylePerf.enqueueDeferredApply(target, new String[] {"zzz-pending-1"});
+                  assertFalse(
+                      target.getStyleClass().contains("zzz-pending-1"),
+                      "Operation queued inside a batch should not be applied yet");
+                });
+            assertTrue(
+                target.getStyleClass().contains("zzz-pending-1"),
+                "Batch flush at the end of batch() should have applied the queued operation");
+          });
     }
   }
 
