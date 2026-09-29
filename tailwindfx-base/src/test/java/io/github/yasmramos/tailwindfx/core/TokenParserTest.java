@@ -205,13 +205,15 @@ class TokenParserTest {
     // bg-blue-500: css class (named value, not arbitrary/numeric) (1)
     // gap-4: css class (named value) + layout-dependent + unknown (not in known utilities registry)
     // (3)
-    // flex: css class + layout-migration (no arbitrary values) (2)
+    // flex: css class + layout-migration + layout-dependent (bare "flex" also carries child-side
+    // grow/shrink semantics for LayoutApplier) (3)
     // hover:text-white: variant (1)
     // blur-sm: effect (1)
     assertEquals(4, result.cssClasses().size()); // btn-primary, bg-blue-500, gap-4, flex
     assertEquals(0, result.jitTokens().size()); // no arbitrary values
-    assertEquals(1, result.layoutDependentTokens().size()); // gap-4
+    assertEquals(2, result.layoutDependentTokens().size()); // gap-4, flex
     assertTrue(result.layoutDependentTokens().contains("gap-4"));
+    assertTrue(result.layoutDependentTokens().contains("flex"));
     assertEquals(1, result.layoutMigrationTokens().size()); // flex
     assertEquals(1, result.variantTokens().size()); // hover:text-white
     assertEquals(1, result.effectTokens().size()); // blur-sm
@@ -303,13 +305,14 @@ class TokenParserTest {
     // bg-blue-500: css class (named value) (1 token)
     // gap-4: css class + layout-dependent + unknown (not in known utilities registry) (3
     // classifications)
-    // flex: css class + layout-migration (1 token, classified in multiple categories) (2)
+    // flex: css class + layout-migration + layout-dependent (1 token, classified in multiple
+    // categories) (3)
     // hover:text-white: variant (1 token)
     // blur-sm: effect (1 token)
     // unknown-token: css class + unknown (1 token, classified in multiple categories) (2)
     // Total: 6 unique tokens
-    // Count by classification: 0(jit) + 1(layout-dep) + 1(layout-mig) + 1(variant) + 1(effect) +
-    // 4(css) + 2(unknown) = 10
-    assertEquals(10, result.totalTokenCount());
+    // Count by classification: 0(jit) + 2(layout-dep: gap-4, flex) + 1(layout-mig) + 1(variant) +
+    // 1(effect) + 4(css) + 2(unknown) = 11
+    assertEquals(11, result.totalTokenCount());
   }
 }

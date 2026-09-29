@@ -178,6 +178,14 @@ public final class TokenParser {
       // Check this BEFORE JIT to avoid misclassifying display properties as JIT tokens
       cssClasses.add(token);
       layoutMigrationTokens.add(token);
+      // Bare "flex" is dual-purpose: it requests container migration (display:flex) but also
+      // carries child-side flex semantics (Tailwind shorthand `flex: 1 1 0%`). Register it as
+      // layout-dependent too so LayoutApplier can apply grow/shrink when the node already lives
+      // inside a flex-capable parent (TwFlexPane/HBox/VBox). LayoutApplier no-ops otherwise.
+      // "grid"/"inline-flex" remain migration-only.
+      if (token.equals("flex")) {
+        layoutDependentTokens.add(token);
+      }
     } else if (TokenRegistry.requiresJitCompilation(token)) {
       // JIT tokens (arbitrary values, arbitrary properties, opacity modifiers on colors)
       jitTokens.add(token);

@@ -234,7 +234,9 @@ public final class TwGridPane extends Pane {
         }
       };
 
-  /** Children that currently have {@link #masonryHeightListener} attached to their heightProperty. */
+  /**
+   * Children that currently have {@link #masonryHeightListener} attached to their heightProperty.
+   */
   private final Set<Node> masonryMonitoredChildren = Collections.newSetFromMap(new WeakHashMap<>());
 
   // Construction
@@ -425,7 +427,19 @@ public final class TwGridPane extends Pane {
   }
 
   // Runtime mutators
+
+  /**
+   * Sets the number of grid columns at runtime.
+   *
+   * @param c column count; must be {@code >= 1} (the layout engine divides available width by this
+   *     value, so zero or negative counts would break auto-flow layout)
+   * @return this pane for chaining
+   * @throws IllegalArgumentException if {@code c < 1}
+   */
   public TwGridPane cols(int c) {
+    if (c < 1) {
+      throw new IllegalArgumentException("TwGridPane.cols: must be >= 1, got " + c);
+    }
     this.cols = c;
     requestLayout();
     return this;
@@ -456,7 +470,17 @@ public final class TwGridPane extends Pane {
     return this;
   }
 
+  /**
+   * Sets the row count at runtime.
+   *
+   * @param r row count; {@code 0} means "inferred from children", negative values are rejected
+   * @return this pane for chaining
+   * @throws IllegalArgumentException if {@code r < 0}
+   */
   public TwGridPane rows(int r) {
+    if (r < 0) {
+      throw new IllegalArgumentException("TwGridPane.rows: must be >= 0, got " + r);
+    }
     this.rows = r;
     requestLayout();
     return this;
@@ -566,8 +590,10 @@ public final class TwGridPane extends Pane {
     boolean isCol = autoFlow == AutoFlow.COL || autoFlow == AutoFlow.COL_DENSE;
     boolean dense = autoFlow == AutoFlow.ROW_DENSE || autoFlow == AutoFlow.COL_DENSE;
 
-    int gridCols = cols;
-    int gridRows = rows > 0 ? rows : (int) Math.ceil((double) children.size() / cols);
+    // Defensive clamp: cols is validated by the public setters/Builder, but guard here as well
+    // so a corrupted state can never cause an arithmetic exception or divide-by-zero below.
+    int gridCols = Math.max(1, cols);
+    int gridRows = rows > 0 ? rows : (int) Math.ceil((double) children.size() / gridCols);
 
     double cellW = (w - gapX * (gridCols - 1)) / gridCols;
     double cellH =
@@ -651,9 +677,12 @@ public final class TwGridPane extends Pane {
 
   // ── Area layout ──────────────────────────────────────────────────────────
   private void layoutByAreas(List<Node> children, double w, double h, double ox, double oy) {
-    // Count unique cols/rows in the area map
-    int gridCols = areaMap.values().stream().mapToInt(a -> a[0] + a[2]).max().orElse(cols);
-    int gridRows = areaMap.values().stream().mapToInt(a -> a[1] + a[3]).max().orElse(1);
+    // Count unique cols/rows in the area map. Guard against zero/negative spans so the
+    // division below can never produce NaN/Infinity or crash layout with a 0 denominator.
+    int gridCols =
+        Math.max(1, areaMap.values().stream().mapToInt(a -> a[0] + a[2]).max().orElse(cols));
+    int gridRows =
+        Math.max(1, areaMap.values().stream().mapToInt(a -> a[1] + a[3]).max().orElse(1));
 
     double cellW = (w - gapX * (gridCols - 1)) / gridCols;
     double cellH = (h - gapY * (gridRows - 1)) / gridRows;
@@ -694,13 +723,14 @@ public final class TwGridPane extends Pane {
 
   // ── Masonry layout ───────────────────────────────────────────────────────
   private void layoutMasonry(List<Node> children, double w, double h, double ox, double oy) {
-    double cellW = (w - gapX * (cols - 1)) / cols;
-    double[] colHeights = new double[cols];
+    int colsCount = Math.max(1, cols);
+    double cellW = (w - gapX * (colsCount - 1)) / colsCount;
+    double[] colHeights = new double[colsCount];
 
     for (Node child : children) {
       // Place in shortest column
       int shortestCol = 0;
-      for (int c = 1; c < cols; c++) {
+      for (int c = 1; c < colsCount; c++) {
         if (colHeights[c] < colHeights[shortestCol]) {
           shortestCol = c;
         }
@@ -745,7 +775,8 @@ public final class TwGridPane extends Pane {
 
   @Override
   protected double computePrefWidth(double height) {
-    return cols * 100 + gapX * (cols - 1) + padding.getLeft() + padding.getRight();
+    int colsCount = Math.max(1, cols);
+    return colsCount * 100 + gapX * (colsCount - 1) + padding.getLeft() + padding.getRight();
   }
 
   @Override

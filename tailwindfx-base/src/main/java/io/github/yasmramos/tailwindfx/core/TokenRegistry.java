@@ -219,8 +219,12 @@ public final class TokenRegistry {
       return false;
     }
 
-    // Check for exact matches first (grow, shrink)
-    if (token.equals("grow") || token.equals("shrink")) {
+    // Check for exact matches first (grow, shrink). Bare "flex" is also layout-dependent:
+    // when it lands on a node that is already inside a flex-capable container (TwFlexPane,
+    // HBox, VBox), LayoutApplier treats it as the Tailwind `flex: 1 1 0%` shorthand
+    // (grow=1, shrink=1) instead of a display-migration request. Tokens that genuinely need
+    // container migration are still routed through requiresMigration() first in TokenParser.
+    if (token.equals("grow") || token.equals("shrink") || token.equals("flex")) {
       return true;
     }
 

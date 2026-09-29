@@ -19,7 +19,6 @@ import io.github.yasmramos.tailwindfx.core.JitCompiler;
 import io.github.yasmramos.tailwindfx.core.Preconditions;
 import io.github.yasmramos.tailwindfx.core.StyleCache;
 import io.github.yasmramos.tailwindfx.core.TokenParser;
-import io.github.yasmramos.tailwindfx.core.TokenRegistry;
 import io.github.yasmramos.tailwindfx.core.UtilityConflictResolver;
 import io.github.yasmramos.tailwindfx.core.VariantManager;
 import io.github.yasmramos.tailwindfx.effect.EffectApplier;
@@ -27,16 +26,11 @@ import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
 import io.github.yasmramos.tailwindfx.style.LayoutApplier;
 import io.github.yasmramos.tailwindfx.style.StyleMerger;
 import io.github.yasmramos.tailwindfx.style.StylePerf;
-import io.github.yasmramos.tailwindfx.style.Styles;
 import io.github.yasmramos.tailwindfx.style.StylesheetApplier;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.scene.Node;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 
 /**
  * TwStyle — Style facade for utility classes and JIT tokens.
@@ -111,17 +105,17 @@ public final class TwStyle {
       }
     }
 
-    // If migration is needed, delegate to TwLayout and skip JIT for those tokens
-    // Moved to BEGINNING before any mutations to avoid leaving node half-styled
+    // Migration tokens detected (e.g. legacy "flex"/"grid" usage on a plain node): we log a
+    // warning and CONTINUE applying the remaining tokens. The node is therefore not left
+    // "half-styled" by an exception; only the migration-requiring tokens themselves are skipped,
+    // since turning a node into a container requires TwLayout.layout() rather than TwStyle.apply().
     if (!result.layoutMigrationTokens().isEmpty()) {
-      // Degrade gracefully with warning instead of throwing exception
-      // This prevents runtime crashes and allows consumer to continue
       LOGGER.log(
           Level.WARNING,
           "Layout classes requiring container migration ({0}) should be applied using TailwindFX.layout() instead of TwStyle.apply().",
           String.join(", ", result.layoutMigrationTokens()));
-      // Delegate these tokens to TwLayout for proper handling
-      // For now, we skip them to avoid partial styling
+      // These tokens are intentionally skipped here to avoid partial/incorrect styling;
+      // every other token in the call is still applied below.
     }
 
     if (!result.cssClasses().isEmpty()) {
@@ -161,482 +155,15 @@ public final class TwStyle {
     }
   }
 
-  /**
-   * Applies layout-dependent styles that require parent context (margins, gaps, flex). These cannot
-   * be handled by CSS alone in JavaFX.
-   */
-  private static void applyLayoutDependentStyles(Node node, java.util.List<String> tokens) {
-    javafx.scene.layout.Pane parent = getEffectiveParent(node);
-
-    for (String token : tokens) {
-      // For gap styles, the node itself is the container
-      if (token.startsWith("gap-") || token.startsWith("gap-x-") || token.startsWith("gap-y-")) {
-        if (node instanceof javafx.scene.layout.Pane pane) {
-          applyGapStyle(pane, token);
-        }
-        continue;
-      }
-
-      // For margin and flex styles, we need the parent
-      if (parent == null) {
-        // Parent not available yet - register listener to apply when attached
-        registerLayoutListener(node, tokens);
-        return;
-      }
-
-      applySingleLayoutStyle(node, parent, token);
-    }
-  }
-
-  /** Gets the effective parent pane, handling special cases like TwFlexPane. */
-  private static javafx.scene.layout.Pane getEffectiveParent(Node node) {
-    javafx.scene.Parent parent = node.getParent();
-    if (parent instanceof javafx.scene.layout.Pane) {
-      return (javafx.scene.layout.Pane) parent;
-    }
-    return null;
-  }
-
-  /** Applies a single layout-dependent style token to a node. */
-  private static void applySingleLayoutStyle(
-      Node node, javafx.scene.layout.Pane parent, String token) {
-    if (token.startsWith("m-")
-        || token.startsWith("mx-")
-        || token.startsWith("my-")
-        || token.startsWith("mt-")
-        || token.startsWith("mr-")
-        || token.startsWith("mb-")
-        || token.startsWith("ml-")) {
-      // Delegate to Styles.java for margin handling
-      applyMarginStyleViaStyles(node, token);
-    } else if (token.startsWith("gap-")
-        || token.startsWith("gap-x-")
-        || token.startsWith("gap-y-")) {
-      applyGapStyle(parent, token);
-    } else if (token.startsWith("flex-") || token.equals("grow") || token.equals("shrink")) {
-      // Delegate to Styles.java for flex handling
-      applyFlexStyleViaStyles(node, parent, token);
-    } else if (token.startsWith("grid-cols-")
-        || token.startsWith("grid-rows-")
-        || token.startsWith("grid-flow-")) {
-      // Grid container styles: apply to the node itself if it's a Pane
-      if (node instanceof javafx.scene.layout.Pane pane) {
-        applyGridContainerStyle(pane, token);
-      }
-    } else if (token.startsWith("col-span-") || token.startsWith("row-span-")) {
-      // Grid item styles: apply via parent TwGridPane
-      if (parent instanceof io.github.yasmramos.tailwindfx.layout.TwGridPane gridPane) {
-        applyGridItemStyle(node, gridPane, token);
-      }
-    }
-  }
-
-  /**
-   * Delegates margin application to Styles.java methods. Supports both numeric values (m-4) and
-   * arbitrary values (m-[20px]).
-   */
-  private static void applyMarginStyleViaStyles(Node node, String token) {
-    // Check for arbitrary value syntax: m-[20px], m-[2.5rem], etc.
-    if (token.contains("[")) {
-      int start = token.indexOf('[') + 1;
-      int end = token.indexOf(']');
-      if (start > 0 && end > start) {
-        String valueStr = token.substring(start, end);
-        double px = parseCssValue(valueStr);
-
-        if (token.startsWith("m-[")) {
-          Styles.margin(node, px, px, px, px);
-        } else if (token.startsWith("mx-[")) {
-          Styles.margin(node, 0, px, 0, px);
-        } else if (token.startsWith("my-[")) {
-          Styles.margin(node, px, 0, px, 0);
-        } else if (token.startsWith("mt-[")) {
-          Styles.margin(node, px, 0, 0, 0);
-        } else if (token.startsWith("mr-[")) {
-          Styles.margin(node, 0, px, 0, 0);
-        } else if (token.startsWith("mb-[")) {
-          Styles.margin(node, 0, 0, px, 0);
-        } else if (token.startsWith("ml-[")) {
-          Styles.margin(node, 0, 0, 0, px);
-        }
-        return;
-      }
-    }
-
-    // Fallback to numeric parsing for standard values
-    double value = parseTailwindValue(token);
-
-    if (token.startsWith("m-")) {
-      Styles.m(node, (int) value);
-    } else if (token.startsWith("mx-")) {
-      Styles.mx(node, (int) value);
-    } else if (token.startsWith("my-")) {
-      Styles.my(node, (int) value);
-    } else if (token.startsWith("mt-")) {
-      Styles.mt(node, (int) value);
-    } else if (token.startsWith("mr-")) {
-      Styles.mr(node, (int) value);
-    } else if (token.startsWith("mb-")) {
-      Styles.mb(node, (int) value);
-    } else if (token.startsWith("ml-")) {
-      Styles.ml(node, (int) value);
-    }
-  }
-
-  /** Delegates flex application to TwFlexPane or Styles.java methods. */
-  private static void applyFlexStyleViaStyles(
-      Node node, javafx.scene.layout.Pane parent, String token) {
-    // Prioritize TwFlexPane if parent is TwFlexPane
-    if (parent instanceof io.github.yasmramos.tailwindfx.layout.TwFlexPane flexPane) {
-      applyFlexForTwFlexPane(node, token);
-      return;
-    }
-
-    // Fallback to HBox/VBox with Styles.java
-    if (token.equals("grow") || token.equals("flex-1")) {
-      if (parent instanceof HBox) {
-        Styles.flex1(node);
-      } else if (parent instanceof VBox) {
-        Styles.vgrow(node);
-      }
-    } else if (token.equals("shrink") || token.equals("flex-none")) {
-      Styles.growNone(node);
-    } else if (token.equals("flex-auto")) {
-      if (parent instanceof HBox) {
-        Styles.flexAuto(node);
-      } else if (parent instanceof VBox) {
-        VBox.setVgrow(node, Priority.SOMETIMES);
-      }
-    } else if (token.equals("flex-initial")) {
-      if (parent instanceof HBox) {
-        HBox.setHgrow(node, Priority.SOMETIMES);
-      } else if (parent instanceof VBox) {
-        VBox.setVgrow(node, Priority.SOMETIMES);
-      }
-    } else if (token.startsWith("flex-")) {
-      // Handle arbitrary flex values like flex-[2]
-      try {
-        String value = token.substring(5);
-        if (value.startsWith("[") && value.endsWith("]")) {
-          value = value.substring(1, value.length() - 1);
-        }
-        double flexValue = Double.parseDouble(value);
-        // For arbitrary flex values in HBox/VBox, use ALWAYS priority with the actual factor
-        // Note: JavaFX HBox/VBox only supports Priority enum (NEVER/SOMETIMES/ALWAYS)
-        // and does not expose a public API to set custom grow factors.
-        // For precise flex factor control, use TwFlexPane instead of HBox/VBox.
-        // This maps flex-[N] where N > 0 to ALWAYS priority (equivalent to flex-1 behavior)
-        // while documenting the limitation for HBox/VBox containers.
-        if (parent instanceof HBox) {
-          HBox.setHgrow(node, flexValue > 0 ? Priority.ALWAYS : Priority.NEVER);
-        } else if (parent instanceof VBox) {
-          VBox.setVgrow(node, flexValue > 0 ? Priority.ALWAYS : Priority.NEVER);
-        }
-      } catch (NumberFormatException e) {
-        // Ignore invalid flex values
-      }
-    }
-  }
-
-  /** Applies flex styles specifically for TwFlexPane container. */
-  private static void applyFlexForTwFlexPane(Node node, String token) {
-    if (token.equals("grow") || token.equals("flex-1")) {
-      io.github.yasmramos.tailwindfx.layout.TwFlexPane.setGrow(node, 1);
-    } else if (token.equals("shrink") || token.equals("flex-none")) {
-      io.github.yasmramos.tailwindfx.layout.TwFlexPane.setShrink(node, 0);
-    } else if (token.equals("flex-auto")) {
-      io.github.yasmramos.tailwindfx.layout.TwFlexPane.setGrow(node, 1);
-      io.github.yasmramos.tailwindfx.layout.TwFlexPane.setShrink(node, 1);
-    } else if (token.equals("flex-initial")) {
-      io.github.yasmramos.tailwindfx.layout.TwFlexPane.setGrow(node, 0);
-      io.github.yasmramos.tailwindfx.layout.TwFlexPane.setShrink(node, 1);
-    } else if (token.startsWith("flex-")) {
-      // Handle arbitrary flex values like flex-[2]
-      try {
-        String value = token.substring(5);
-        if (value.startsWith("[") && value.endsWith("]")) {
-          value = value.substring(1, value.length() - 1);
-        }
-        double flexValue = Double.parseDouble(value);
-        io.github.yasmramos.tailwindfx.layout.TwFlexPane.setGrow(node, flexValue);
-      } catch (NumberFormatException e) {
-        // Ignore invalid flex values
-      }
-    }
-  }
-
-  /**
-   * Parses gap value from token and applies it to parent container. Supports both numeric values
-   * (gap-4) and arbitrary values (gap-[20px]).
-   */
-  private static void applyGapStyle(javafx.scene.layout.Pane parent, String token) {
-    double px;
-
-    // Check for arbitrary value syntax: gap-[20px], gap-[2.5rem], etc.
-    if (token.contains("[")) {
-      int start = token.indexOf('[') + 1;
-      int end = token.indexOf(']');
-      if (start > 0 && end > start) {
-        String value = token.substring(start, end);
-        px = parseCssValue(value);
-      } else {
-        double value = parseTailwindValue(token);
-        px = value * TwConfig.unit();
-      }
-    } else {
-      double value = parseTailwindValue(token);
-      px = value * TwConfig.unit();
-    }
-
-    // Prioritize TwFlexPane if parent is TwFlexPane
-    if (parent instanceof io.github.yasmramos.tailwindfx.layout.TwFlexPane flexPane) {
-      if (token.startsWith("gap-x-")) {
-        flexPane.gapX(px);
-      } else if (token.startsWith("gap-y-")) {
-        flexPane.gapY(px);
-      } else {
-        flexPane.gap(px);
-      }
-      return;
-    }
-
-    // Prioritize TwGridPane if parent is TwGridPane
-    if (parent instanceof io.github.yasmramos.tailwindfx.layout.TwGridPane gridPane) {
-      if (token.startsWith("gap-x-")) {
-        gridPane.gapX(px);
-      } else if (token.startsWith("gap-y-")) {
-        gridPane.gapY(px);
-      } else {
-        gridPane.gap(px);
-      }
-      return;
-    }
-
-    // Fallback to standard JavaFX panes
-    if (parent instanceof HBox hbox) {
-      if (token.startsWith("gap-x-")) {
-        hbox.setSpacing(px);
-      } else if (token.startsWith("gap-y-")) {
-        // HBox doesn't support vertical gap directly
-      } else {
-        hbox.setSpacing(px);
-      }
-    } else if (parent instanceof VBox vbox) {
-      if (token.startsWith("gap-y-")) {
-        vbox.setSpacing(px);
-      } else if (token.startsWith("gap-x-")) {
-        // VBox doesn't support horizontal gap directly
-      } else {
-        vbox.setSpacing(px);
-      }
-    } else if (parent instanceof GridPane grid) {
-      if (token.startsWith("gap-x-")) {
-        grid.setHgap(px);
-      } else if (token.startsWith("gap-y-")) {
-        grid.setVgap(px);
-      } else {
-        grid.setHgap(px);
-        grid.setVgap(px);
-      }
-    }
-  }
-
-  /** Applies grid container styles (grid-cols-*, grid-rows-*, grid-flow-*) to a Pane node. */
-  private static void applyGridContainerStyle(javafx.scene.layout.Pane pane, String token) {
-    // Only applies if the pane is a TwGridPane
-    if (!(pane instanceof io.github.yasmramos.tailwindfx.layout.TwGridPane gridPane)) {
-      return;
-    }
-
-    if (token.startsWith("grid-cols-")) {
-      int cols = (int) parseTailwindValue(token);
-      gridPane.cols(cols);
-    } else if (token.startsWith("grid-rows-")) {
-      int rows = (int) parseTailwindValue(token);
-      gridPane.rows(rows);
-    } else if (token.equals("grid-flow-row")) {
-      gridPane.autoFlow(io.github.yasmramos.tailwindfx.layout.TwGridPane.AutoFlow.ROW);
-    } else if (token.equals("grid-flow-col")) {
-      gridPane.autoFlow(io.github.yasmramos.tailwindfx.layout.TwGridPane.AutoFlow.COL);
-    } else if (token.equals("grid-flow-dense") || token.equals("grid-flow-row-dense")) {
-      gridPane.autoFlow(io.github.yasmramos.tailwindfx.layout.TwGridPane.AutoFlow.ROW_DENSE);
-    } else if (token.equals("grid-flow-col-dense")) {
-      gridPane.autoFlow(io.github.yasmramos.tailwindfx.layout.TwGridPane.AutoFlow.COL_DENSE);
-    }
-  }
-
-  /** Applies grid item styles (col-span-*, row-span-*) to a node via its parent TwGridPane. */
-  private static void applyGridItemStyle(
-      Node node, io.github.yasmramos.tailwindfx.layout.TwGridPane gridPane, String token) {
-    if (token.startsWith("col-span-")) {
-      int span = (int) parseTailwindValue(token);
-      io.github.yasmramos.tailwindfx.layout.TwGridPane.setColSpan(node, span);
-    } else if (token.startsWith("row-span-")) {
-      int span = (int) parseTailwindValue(token);
-      io.github.yasmramos.tailwindfx.layout.TwGridPane.setRowSpan(node, span);
-    }
-  }
-
-  /** Parses CSS value string to pixels using configured unit size. */
-  private static double parseCssValue(String value) {
-    if (value.endsWith("px")) {
-      try {
-        return Double.parseDouble(value.substring(0, value.length() - 2));
-      } catch (NumberFormatException e) {
-        LOGGER.log(Level.WARNING, "Invalid px value: {0}", value);
-        return 0;
-      }
-    } else if (value.endsWith("rem")) {
-      try {
-        double rem = Double.parseDouble(value.substring(0, value.length() - 3));
-        return rem * TwConfig.unit();
-      } catch (NumberFormatException e) {
-        LOGGER.log(Level.WARNING, "Invalid rem value: {0}", value);
-        return 0;
-      }
-    } else if (value.endsWith("em")) {
-      try {
-        double em = Double.parseDouble(value.substring(0, value.length() - 2));
-        return em * TwConfig.unit();
-      } catch (NumberFormatException e) {
-        LOGGER.log(Level.WARNING, "Invalid em value: {0}", value);
-        return 0;
-      }
-    } else {
-      try {
-        return Double.parseDouble(value);
-      } catch (NumberFormatException e) {
-        LOGGER.log(Level.WARNING, "Invalid numeric value: {0}", value);
-        return 0;
-      }
-    }
-  }
-
-  /** Parses numeric value from Tailwind token (e.g., "m-4" -> 4, "p-[16px]" -> 4). */
-  private static double parseTailwindValue(String token) {
-    // Handle arbitrary values like m-[16px]
-    if (token.contains("[")) {
-      int start = token.indexOf('[') + 1;
-      int end = token.indexOf(']');
-
-      // Verify closing bracket exists to avoid StringIndexOutOfBoundsException
-      if (end == -1) {
-        LOGGER.log(Level.WARNING, "Missing closing bracket in token: {0}", token);
-        return 0;
-      }
-
-      String value = token.substring(start, end);
-      if (value.endsWith("px")) {
-        try {
-          // Use double arithmetic respecting TwConfig.unit() like parseCssValue does for rem/em
-          double pxValue = Double.parseDouble(value.substring(0, value.length() - 2));
-          return pxValue / TwConfig.unit();
-        } catch (NumberFormatException e) {
-          LOGGER.log(Level.WARNING, "Invalid px value in token: {0}", token);
-          return 0;
-        }
-      }
-      try {
-        return Double.parseDouble(value);
-      } catch (NumberFormatException e) {
-        LOGGER.log(Level.WARNING, "Invalid numeric value in token: {0}", token);
-        return 0;
-      }
-    }
-
-    // Handle negative values
-    boolean negative = token.startsWith("-");
-    String cleanToken = negative ? token.substring(1) : token;
-
-    // Extract numeric part after last hyphen
-    int lastHyphen = cleanToken.lastIndexOf('-');
-    if (lastHyphen >= 0 && lastHyphen < cleanToken.length() - 1) {
-      String numPart = cleanToken.substring(lastHyphen + 1);
-      try {
-        int value = Integer.parseInt(numPart);
-        return negative ? -value : value;
-      } catch (NumberFormatException e) {
-        // Handle non-numeric values like "auto", "full"
-        LOGGER.log(Level.WARNING, "Non-numeric value in token: {0}", token);
-        return 0;
-      }
-    }
-    return 0;
-  }
-
-  /**
-   * Registers a listener to apply layout styles when node is attached to parent. Uses WeakReference
-   * to prevent memory leaks.
-   */
-  private static void registerLayoutListener(Node node, java.util.List<String> tokens) {
-    // Check if node is already attached (race condition)
-    if (node.getParent() instanceof javafx.scene.layout.Pane pane) {
-      for (String token : tokens) {
-        applySingleLayoutStyle(node, pane, token);
-      }
-      return;
-    }
-
-    // Use WeakReference to prevent memory leaks if node is garbage collected
-    java.lang.ref.WeakReference<Node> weakNode = new java.lang.ref.WeakReference<>(node);
-
-    // Create wrapper to hold listener reference
-    class ListenerWrapper {
-      javafx.beans.value.ChangeListener<javafx.scene.Parent> listener;
-    }
-    final ListenerWrapper wrapper = new ListenerWrapper();
-
-    wrapper.listener =
-        (obs, oldParent, newParent) -> {
-          Node actualNode = weakNode.get();
-          if (actualNode == null) {
-            // Node was garbage collected, remove listener
-            if (wrapper.listener != null) {
-              obs.removeListener(wrapper.listener);
-            }
-            return;
-          }
-
-          if (newParent instanceof javafx.scene.layout.Pane pane) {
-            // Remove this listener after applying
-            if (wrapper.listener != null) {
-              obs.removeListener(wrapper.listener);
-              wrapper.listener = null;
-            }
-            // Apply layout styles now that we have a parent
-            for (String token : tokens) {
-              applySingleLayoutStyle(actualNode, pane, token);
-            }
-          }
-        };
-
-    node.parentProperty().addListener(wrapper.listener);
-  }
-
-  /**
-   * Checks if a token requires layout context (parent container) to be applied.
-   *
-   * @deprecated Use {@link TokenRegistry#isLayoutDependent(String)} instead. This method is kept
-   *     for backward compatibility but delegates to TokenRegistry.
-   */
-  @Deprecated
-  private static boolean isLayoutDependent(String token) {
-    return TokenRegistry.isLayoutDependent(token);
-  }
-
-  /**
-   * Checks if a token requires container migration (flex, grid).
-   *
-   * @deprecated Use {@link TokenRegistry#requiresMigration(String)} instead. This method is kept
-   *     for backward compatibility but delegates to TokenRegistry.
-   */
-  @Deprecated
-  private static boolean requiresMigration(String token) {
-    return TokenRegistry.requiresMigration(token);
-  }
+  // NOTE: All layout-dependent style logic (margins, gaps, flex, grid) lives exclusively in
+  // io.github.yasmramos.tailwindfx.style.LayoutApplier. It used to be duplicated here as a set of
+  // private copies that could silently drift out of sync with LayoutApplier. Those duplicates were
+  // removed; applyInternal() above delegates directly to LayoutApplier.applyLayoutDependentStyles.
 
   /** Applies utility classes WITHOUT conflict resolution. */
   public static void applyRaw(Node node, String... classes) {
+    Preconditions.requireNode(node, "TwStyle.applyRaw");
+    if (classes == null) return;
     for (String c : classes) {
       if (c == null || c.isBlank()) continue;
       for (String part : c.split("\\s+")) {
@@ -649,12 +176,15 @@ public final class TwStyle {
 
   /** Removes CSS classes from a node. */
   public static void remove(Node node, String... classes) {
+    Preconditions.requireNode(node, "TwStyle.remove");
+    if (classes == null || classes.length == 0) return;
     node.getStyleClass().removeAll(Arrays.asList(classes));
   }
 
   /** Replaces all CSS classes on a node. */
   public static void replace(Node node, String... classes) {
-    node.getStyleClass().setAll(Arrays.asList(classes));
+    Preconditions.requireNode(node, "TwStyle.replace");
+    node.getStyleClass().setAll(Arrays.asList(classes == null ? new String[0] : classes));
   }
 
   /** Toggles a CSS class on a node. */
@@ -691,79 +221,11 @@ public final class TwStyle {
     StyleCache.invalidateCategory(node, category);
   }
 
-  /**
-   * Detects if a token should be compiled as JIT. Uses strict prefix matching +
-   * numeric/arbitrary/negative pattern validation. Eliminates false positives like "card-2" or
-   * "panel-v2".
-   *
-   * <p>This method strips variant prefixes (hover:, focus:, dark:, sm:, etc.) before checking, so
-   * that "hover:bg-blue-500" is correctly identified as a JIT token.
-   *
-   * @param token the token to check
-   * @return true if this token should be compiled as JIT
-   */
-  private static boolean isJitToken(String token) {
-    // Delegate to TokenRegistry for centralized JIT detection
-    return TokenRegistry.isJitPrefix(token);
-  }
+  // The following private helpers (isJitToken, stripVariantPrefix, isValidColorUtilityBase,
+  // isEffectToken, applyEffectToken) were removed after confirming via grep that they had no
+  // callers (direct or reflective). Their canonical replacements are:
+  //   TokenRegistry.isJitPrefix / TokenRegistry.stripVariantPrefix /
+  //   ColorUtilityValidator.isValidColorUtilityBase / TokenRegistry.isEffectToken /
+  //   EffectApplier.applyEffectToken.
 
-  /**
-   * Strips variant prefixes from a token. Examples: "hover:bg-blue-500" -> "bg-blue-500",
-   * "dark:hover:text-white" -> "text-white", "md:w-full" -> "w-full"
-   */
-  private static String stripVariantPrefix(String token) {
-    if (token == null || !token.contains(":")) {
-      return token;
-    }
-    // Find the last colon to handle chained variants like "dark:hover:bg-blue-500"
-    int lastColon = token.lastIndexOf(':');
-    if (lastColon >= 0 && lastColon < token.length() - 1) {
-      return token.substring(lastColon + 1);
-    }
-    return token;
-  }
-
-  /**
-   * Validates if a base token (before /) is a valid color utility that can have opacity. Prevents
-   * false positives like "icon/large" being treated as JIT.
-   *
-   * @param base the token before the '/' modifier
-   * @return true if this is a valid color utility base
-   * @see io.github.yasmramos.tailwindfx.core.ColorUtilityValidator#isValidColorUtilityBase(String)
-   * @deprecated Use ColorUtilityValidator directly or StylesheetApplier instead.
-   */
-  @Deprecated
-  private static boolean isValidColorUtilityBase(String base) {
-    return io.github.yasmramos.tailwindfx.core.ColorUtilityValidator.isValidColorUtilityBase(base);
-  }
-
-  /**
-   * Checks if a token is a filter/effect token that should be handled via TwEffect. Effect tokens
-   * include: blur, brightness, contrast, grayscale, invert, sepia, hue-rotate, saturate,
-   * drop-shadow, backdrop-blur.
-   *
-   * @param token the base token (without variant prefix)
-   * @return true if this token should be applied via TwEffect instead of CSS
-   * @deprecated Use {@link TokenRegistry#isEffectToken(String)} instead. This method is kept for
-   *     backward compatibility but delegates to TokenRegistry.
-   */
-  @Deprecated
-  private static boolean isEffectToken(String token) {
-    return TokenRegistry.isEffectToken(token);
-  }
-
-  /**
-   * Applies an effect token to a node via TwEffect. Parses the token and calls the appropriate
-   * TwEffect method.
-   *
-   * @param node the node to apply the effect to
-   * @param token the effect token (e.g., "blur-sm", "brightness-125", "grayscale")
-   * @deprecated Use {@link EffectApplier#applyEffectToken(Node, String)} instead. This method is
-   *     kept for backward compatibility but will be removed in a future version.
-   */
-  @Deprecated
-  private static void applyEffectToken(javafx.scene.Node node, String token) {
-    // Delegate to EffectApplier for proper error handling
-    EffectApplier.applyEffectToken(node, token);
-  }
 }
