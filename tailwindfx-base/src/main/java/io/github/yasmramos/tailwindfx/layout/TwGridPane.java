@@ -17,9 +17,15 @@ package io.github.yasmramos.tailwindfx.layout;
 
 import io.github.yasmramos.tailwindfx.core.Preconditions;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
+import java.util.logging.Logger;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
@@ -195,6 +201,9 @@ public final class TwGridPane extends Pane {
     }
   }
 
+  /** Logger used to surface area-layout misconfigurations in {@link #layoutByAreas}. */
+  private static final Logger AREA_LOG = Logger.getLogger("TailwindFX.GridPane");
+
   // State
   private int cols;
   private int rows;
@@ -211,6 +220,22 @@ public final class TwGridPane extends Pane {
   private static final String COL_SPAN_KEY = "tailwindfx.grid.col-span";
   private static final String ROW_SPAN_KEY = "tailwindfx.grid.row-span";
   private static final String AREA_KEY = "tailwindfx.grid.area";
+
+  /**
+   * Single shared listener that invalidates layout when a masonry child changes height. One
+   * instance per pane avoids creating duplicate ChangeListeners on every layout pass (the old code
+   * added a new lambda each pass and could never remove it, because removeListener with a fresh
+   * lambda is a no-op).
+   */
+  private final javafx.beans.value.ChangeListener<Number> masonryHeightListener =
+      (obs, oldVal, newVal) -> {
+        if (oldVal.doubleValue() != newVal.doubleValue()) {
+          requestLayout();
+        }
+      };
+
+  /** Children that currently have {@link #masonryHeightListener} attached to their heightProperty. */
+  private final Set<Node> masonryMonitoredChildren = Collections.newSetFromMap(new WeakHashMap<>());
 
   // Construction
   private TwGridPane(Builder b) {
@@ -643,7 +668,25 @@ public final class TwGridPane extends Pane {
         double ch = cellH * def[3] + gapY * (def[3] - 1);
         child.resizeRelocate(cx, cy, cw, ch);
       } else {
-        // Unmapped child — hide or place at origin
+        // Unmapped child — collapse it at the origin, but surface the misconfiguration:
+        // either AREA_KEY is missing or the referenced area is not part of the template.
+        String description =
+            (areaName == null)
+                ? "child has no '" + AREA_KEY + "' property"
+                : "area '" + areaName + "' is not defined in the template";
+        if (Boolean.getBoolean("tailwindfx.debug")) {
+          throw new IllegalStateException(
+              "TwGridPane.layoutByAreas: cannot place child in area layout ("
+                  + description
+                  + "). Defined areas: "
+                  + areaMap.keySet());
+        }
+        AREA_LOG.warning(
+            "TwGridPane.layoutByAreas: cannot place child in area layout ("
+                + description
+                + "). Defined areas: "
+                + areaMap.keySet()
+                + ". Child collapsed at origin.");
         child.resizeRelocate(ox, oy, 0, 0);
       }
     }
@@ -668,20 +711,26 @@ public final class TwGridPane extends Pane {
       child.resizeRelocate(cx, cy, cellW, childPrefH);
       colHeights[shortestCol] += childPrefH + gapY;
 
-      // CRITICAL FIX: Add height listener to invalidate layout when child content changes
-      // This ensures the masonry layout adapts when nodes grow/shrink dynamically
-      if (child instanceof Region region) {
-        // Remove any existing listener first to avoid duplicates
-        region.heightProperty().removeListener((obs, old, newVal) -> requestLayout());
-        // Add new listener
-        region
-            .heightProperty()
-            .addListener(
-                (obs, old, newVal) -> {
-                  if (old.doubleValue() != newVal.doubleValue()) {
-                    requestLayout();
-                  }
-                });
+      // Attach the SHARED height listener so the masonry layout adapts when a Region
+      // child grows/shrinks dynamically. The tracked set guarantees each child gets the
+      // listener at most once (no duplicates across layout passes).
+      if (child instanceof Region region && !masonryMonitoredChildren.contains(region)) {
+        region.heightProperty().addListener(masonryHeightListener);
+        masonryMonitoredChildren.add(region);
+      }
+    }
+
+    // Detach the listener from children that left this pane (removed/re-parented) and
+    // from non-Region children that can no longer be monitored.
+    Set<Node> current = new HashSet<>(children);
+    Iterator<Node> it = masonryMonitoredChildren.iterator();
+    while (it.hasNext()) {
+      Node monitored = it.next();
+      if (!current.contains(monitored)) {
+        if (monitored instanceof Region region) {
+          region.heightProperty().removeListener(masonryHeightListener);
+        }
+        it.remove();
       }
     }
   }

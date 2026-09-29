@@ -188,7 +188,15 @@ public class TwFlexPane extends Pane {
    * overhead in hot layout loops.
    */
   private static FlexData getFlexData(Node node) {
-    return flexDataCache.computeIfAbsent(node, k -> new FlexData());
+    return flexDataCache.computeIfAbsent(
+        node,
+        k -> {
+          // Populate the freshly created cache entry from the node's actual properties;
+          // otherwise defaults (grow=0, shrink=1...) would shadow values set before first layout.
+          FlexData data = new FlexData();
+          data.update(node);
+          return data;
+        });
   }
 
   /** Invalidates cached flex data for a node when its properties change. */
@@ -335,8 +343,9 @@ public class TwFlexPane extends Pane {
                     opacityProperty(), 0.0, javafx.animation.Interpolator.EASE_IN)));
     fadeOut.setOnFinished(
         e -> {
-          direction = d;
-          requestLayout();
+          // Route through setDirection() so the change is consistent with every other
+          // direction mutation (validation + layout invalidation in one place).
+          setDirection(d);
           javafx.animation.Timeline fadeIn =
               new javafx.animation.Timeline(
                   new javafx.animation.KeyFrame(
@@ -608,6 +617,11 @@ public class TwFlexPane extends Pane {
           "TwFlexPane.setBasis: basis must be >= -1 (use -1 for auto), got: " + basis);
     }
     node.getProperties().put(BASIS_KEY, basis);
+    // Keep the shared FlexData cache coherent for this node. Note: FlexData does not cache
+    // the basis value today (it is read directly from the property via getBasis()); this
+    // call refreshes grow/shrink/order/self-align and documents the invalidation contract
+    // used by every other flex setter.
+    invalidateFlexData(node);
     if (node.getParent() instanceof TwFlexPane fp) {
       fp.requestLayout();
     } else {
@@ -961,7 +975,9 @@ public class TwFlexPane extends Pane {
         }
       }
       case AROUND -> {
-        double unit = free / sizes.length;
+        // Clamp free space to zero: with overflow (free < 0) a negative unit would
+        // produce negative item positions.
+        double unit = Math.max(0, free) / sizes.length;
         double x = unit / 2;
         for (int i = 0; i < sizes.length; i++) {
           pos[i] = x;
@@ -969,7 +985,8 @@ public class TwFlexPane extends Pane {
         }
       }
       case EVENLY -> {
-        double unit = free / (sizes.length + 1);
+        // Same clamp as AROUND to avoid negative start positions on overflow.
+        double unit = Math.max(0, free) / (sizes.length + 1);
         double x = unit;
         for (int i = 0; i < sizes.length; i++) {
           pos[i] = x;
