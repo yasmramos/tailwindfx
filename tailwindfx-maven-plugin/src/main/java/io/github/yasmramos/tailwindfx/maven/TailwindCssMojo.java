@@ -553,14 +553,13 @@ public class TailwindCssMojo extends AbstractMojo {
     return selector.toString();
   }
 
-  /** Escapes special CSS characters in class names. */
+  /**
+   * Escapes special CSS characters in class names. Delegates to the shared
+   * {@link io.github.yasmramos.tailwindfx.core.CssIdentEscaper} utility so runtime
+   * (TwCatalog) and build-time (this plugin) output stay consistent.
+   */
   private String escapeCssClassName(String className) {
-    return className
-        .replace("\\", "\\\\")
-        .replace("[", "\\[")
-        .replace("]", "\\]")
-        .replace(":", "\\:")
-        .replace(".", "\\.");
+    return io.github.yasmramos.tailwindfx.core.CssIdentEscaper.escape(className);
   }
 
   /** Basic CSS minification. */

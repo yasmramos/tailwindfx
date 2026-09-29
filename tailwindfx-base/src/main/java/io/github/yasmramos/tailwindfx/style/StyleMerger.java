@@ -56,12 +56,29 @@ public final class StyleMerger {
       node.setStyle(merged);
     }
 
-    // 2. CSS classes fallback (tokens desconocidos o que mapean a clases)
+    // 2. CSS classes fallback (tokens desconocidos o que mapean a clases).
+    // Tracked in node properties so replaceJit() can remove only framework-added classes.
+    Set<String> tracked = trackedClasses(node);
     for (String cls : result.cssClasses()) {
       if (!node.getStyleClass().contains(cls)) {
         node.getStyleClass().add(cls);
       }
+      tracked.add(cls);
     }
+  }
+
+  /** Property key under which StyleMerger tracks the CSS classes it added to a node. */
+  private static final String JIT_CLASSES_KEY = "tailwindfx.jit.classes";
+
+  @SuppressWarnings("unchecked")
+  private static Set<String> trackedClasses(Node node) {
+    return (Set<String>)
+        node.getProperties()
+            .computeIfAbsent(
+                JIT_CLASSES_KEY,
+                k ->
+                    java.util.Collections.newSetFromMap(
+                        new java.util.LinkedHashMap<String, Boolean>()));
   }
 
   /**
@@ -76,15 +93,27 @@ public final class StyleMerger {
       node.setStyle(cleaned);
     }
 
+    Set<String> tracked = trackedClasses(node);
     for (String cls : result.cssClasses()) {
       node.getStyleClass().remove(cls);
+      tracked.remove(cls);
     }
   }
 
-  // Replaces the entire JIT inline style (removes previous and applies new).
+  /**
+   * Replaces the entire JIT inline style (removes previous and applies new).
+   *
+   * <p>Only removes what this framework owns: the inline style string and the CSS classes that were
+   * previously added by {@link #applyJit} (tracked in node properties). User-managed style classes
+   * are never touched.
+   */
   public static void replaceJit(Node node, String... tokens) {
     node.setStyle("");
-    node.getStyleClass().removeIf(cls -> !cls.isBlank());
+    Set<String> tracked = trackedClasses(node);
+    if (!tracked.isEmpty()) {
+      node.getStyleClass().removeAll(tracked);
+      tracked.clear();
+    }
     applyJit(node, tokens);
   }
 
@@ -103,7 +132,7 @@ public final class StyleMerger {
   }
 
   /** Elimina del 'existing' todas las propiedades presentes en 'toRemove'. */
-  static String removeProperties(String existing, String toRemove) {
+  public static String removeProperties(String existing, String toRemove) {
     Map<String, String> props = parseStyle(existing);
     Set<String> keysToRemove = parseStyle(toRemove).keySet();
     props.keySet().removeAll(keysToRemove);

@@ -361,27 +361,31 @@ public class VariantManager {
     }
   }
 
-  /** Applies a style to a node, avoiding duplicates. */
+  /**
+   * Applies a style to a node, merging by property (no destructive string concat). Delegates to
+   * {@link io.github.yasmramos.tailwindfx.style.StyleMerger#merge} so existing inline properties
+   * are preserved and duplicates are overwritten cleanly with proper separators.
+   */
   private static void applyStyle(Node node, String style) {
     if (style == null || style.isEmpty()) {
       return;
     }
-
-    String currentStyle = node.getStyle();
-    if (!currentStyle.contains(style)) {
-      node.setStyle(currentStyle + style);
-    }
+    node.setStyle(io.github.yasmramos.tailwindfx.style.StyleMerger.merge(node.getStyle(), style));
   }
 
-  /** Removes a style from a node. */
+  /**
+   * Removes the properties contained in {@code style} from the node's inline style. Uses
+   * property-level removal ({@link
+   * io.github.yasmramos.tailwindfx.style.StyleMerger#removeProperties}) instead of substring
+   * replacement, which previously corrupted longer values sharing a prefix (e.g. removing
+   * "-fx-padding:4px" would break "-fx-padding:40px").
+   */
   private static void removeStyle(Node node, String style) {
     if (style == null || style.isEmpty()) {
       return;
     }
-
-    String currentStyle = node.getStyle();
-    String newStyle = currentStyle.replace(style, "");
-    node.setStyle(newStyle);
+    node.setStyle(
+        io.github.yasmramos.tailwindfx.style.StyleMerger.removeProperties(node.getStyle(), style));
   }
 
   /**

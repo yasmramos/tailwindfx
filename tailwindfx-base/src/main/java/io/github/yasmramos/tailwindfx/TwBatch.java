@@ -29,20 +29,15 @@ import io.github.yasmramos.tailwindfx.style.StylePerf;
  */
 public final class TwBatch {
 
-    private TwBatch() {
-    }
+  private TwBatch() {}
 
-    /**
-     * Executes a batch of style operations efficiently.
-     */
-    public static void run(Runnable action) {
-        StylePerf.batch(action);
-    }
+  /** Executes a batch of style operations efficiently. */
+  public static void run(Runnable action) {
+    StylePerf.batch(action);
+  }
 
-    /**
-     * Executes a batch of style operations asynchronously.
-     */
-    public static void runAsync(Runnable action) {
-        StylePerf.batchAsync(action);
-    }
+  /** Executes a batch of style operations asynchronously. */
+  public static void runAsync(Runnable action) {
+    StylePerf.batchAsync(action);
+  }
 }
