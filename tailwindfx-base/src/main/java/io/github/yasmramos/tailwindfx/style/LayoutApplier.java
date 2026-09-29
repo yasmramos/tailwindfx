@@ -21,6 +21,7 @@ import io.github.yasmramos.tailwindfx.layout.TwGridPane;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -40,8 +41,9 @@ import javafx.scene.layout.VBox;
  * <p>Key features:
  *
  * <ul>
- *   <li>Margin application via Styles utility methods
- *   <li>Gap application to parent containers (HBox, VBox, GridPane, TwFlexPane, TwGridPane)
+ *   <li>Margin application via Styles utility methods (including negative margins such as -m-4)
+ *   <li>Gap application to the container node itself (HBox, VBox, GridPane, TwFlexPane, TwGridPane)
+ *       — gap-* is a container property and never mutates a parent from a child token
  *   <li>Flex grow/shrink factors for HBox, VBox, and TwFlexPane
  *   <li>Grid column/row configuration for TwGridPane
  *   <li>Automatic retry via parent property listener when node is not yet attached
@@ -55,6 +57,8 @@ import javafx.scene.layout.VBox;
  */
 public final class LayoutApplier {
 
+  private static final Logger LOGGER = Logger.getLogger(LayoutApplier.class.getName());
+
   private LayoutApplier() {
     // Utility class - prevent instantiation
   }
@@ -66,22 +70,26 @@ public final class LayoutApplier {
    * correctly. This method handles:
    *
    * <ul>
-   *   <li>Margin styles (m-*, mx-*, my-*, mt-*, mr-*, mb-*, ml-*)
+   *   <li>Margin styles (m-*, mx-*, my-*, mt-*, mr-*, mb-*, ml-* and negative variants -m-*)
    *   <li>Gap styles (gap-*, gap-x-*, gap-y-*) - applied to the node if it's a Pane
-   *   <li>Flex styles (flex-*, grow, shrink) - applied based on parent type
+   *   <li>Flex styles (flex, flex-*, grow, shrink) - applied based on parent type
    *   <li>Grid styles (grid-cols-*, grid-rows-*, grid-flow-*) - applied to TwGridPane
    *   <li>Grid item styles (col-span-*, row-span-*) - applied via TwGridPane
    * </ul>
+   *
+   * <p><b>Gap semantics:</b> {@code gap-*} is a <i>container</i> property. It is only ever applied
+   * to the node that carries the token (when that node is a Pane). A gap token written on a child
+   * never mutates its parent — apply the gap class to the container itself instead.
    *
    * @param node the node to apply styles to
    * @param tokens list of layout-dependent tokens to apply
    */
   public static void applyLayoutDependentStyles(Node node, List<String> tokens) {
-    Pane parent = getEffectiveParent(node);
-
     for (String token : tokens) {
-      // For gap styles, the node itself is the container
-      if (token.startsWith("gap-") || token.startsWith("gap-x-") || token.startsWith("gap-y-")) {
+      // Gap is a container property: apply it to THIS node when it is a Pane. If the node is not
+      // a Pane yet, keep the retry listener alive so the gap can still be applied after the node
+      // is re-parented or swapped for a Pane-backed implementation (virtualization scenarios).
+      if (isGapToken(token)) {
         if (node instanceof Pane pane) {
           applyGapStyle(pane, token);
         } else {
@@ -94,6 +102,7 @@ public final class LayoutApplier {
       }
 
       // For margin and flex styles, we need the parent
+      Pane parent = getEffectiveParent(node);
       if (parent == null) {
         // Parent not available yet - register listener to apply when attached
         registerLayoutListener(node, tokens);
@@ -102,6 +111,11 @@ public final class LayoutApplier {
 
       applySingleLayoutStyle(node, parent, token);
     }
+  }
+
+  /** Returns true when the token belongs to the gap family (gap-, gap-x-, gap-y-). */
+  private static boolean isGapToken(String token) {
+    return token.startsWith("gap-") || token.startsWith("gap-x-") || token.startsWith("gap-y-");
   }
 
   /**
@@ -136,20 +150,22 @@ public final class LayoutApplier {
    * @param token the layout token to apply
    */
   private static void applySingleLayoutStyle(Node node, Pane parent, String token) {
-    if (token.startsWith("m-")
-        || token.startsWith("mx-")
-        || token.startsWith("my-")
-        || token.startsWith("mt-")
-        || token.startsWith("mr-")
-        || token.startsWith("mb-")
-        || token.startsWith("ml-")) {
-      // Delegate to Styles.java for margin handling
+    if (isMarginToken(token)) {
+      // Delegate to Styles.java for margin handling (supports negative -m-* tokens)
       applyMarginStyleViaStyles(node, token);
-    } else if (token.startsWith("gap-")
-        || token.startsWith("gap-x-")
-        || token.startsWith("gap-y-")) {
-      applyGapStyle(parent, token);
-    } else if (token.startsWith("flex-") || token.equals("grow") || token.equals("shrink")) {
+    } else if (isGapToken(token)) {
+      // Gap is a container property. A gap token written on a CHILD must never mutate the parent:
+      // this branch is intentionally a no-op fallback for deferred/retry application paths where
+      // the original token was already handled against the node itself in
+      // applyLayoutDependentStyles(). Apply gap classes to the container node instead.
+      if (!(node instanceof Pane pane) || pane != parent) {
+        return;
+      }
+      applyGapStyle(pane, token);
+    } else if (token.equals("flex")
+        || token.startsWith("flex-")
+        || token.equals("grow")
+        || token.equals("shrink")) {
       // Delegate to Styles.java for flex handling
       applyFlexStyleViaStyles(node, parent, token);
     } else if (token.startsWith("grid-cols-")
@@ -168,57 +184,88 @@ public final class LayoutApplier {
   }
 
   /**
-   * Delegates margin application to Styles.java methods. Supports both numeric values (m-4) and
-   * arbitrary values (m-[20px]).
+   * Returns true when the token belongs to the margin family, including Tailwind's negative
+   * variants (-m-*, -mx-*, -my-*, -mt-*, -mr-*, -mb-*, -ml-*).
+   */
+  private static boolean isMarginToken(String token) {
+    // Negative margins: the leading "-" is followed by the margin prefix (e.g. "-m-4", "-ml-[8px]")
+    if (token.startsWith("-m-")
+        || token.startsWith("-mx-")
+        || token.startsWith("-my-")
+        || token.startsWith("-mt-")
+        || token.startsWith("-mr-")
+        || token.startsWith("-mb-")
+        || token.startsWith("-ml-")) {
+      return true;
+    }
+    return token.startsWith("m-")
+        || token.startsWith("mx-")
+        || token.startsWith("my-")
+        || token.startsWith("mt-")
+        || token.startsWith("mr-")
+        || token.startsWith("mb-")
+        || token.startsWith("ml-");
+  }
+
+  /**
+   * Delegates margin application to Styles.java methods. Supports numeric values (m-4), arbitrary
+   * values (m-[20px]) and Tailwind negative margins (-m-4, -ml-[8px]).
    *
-   * @param node the node to apply margin to
-   * @param token the margin token (e.g., "m-4", "m-[20px]")
+   * <p>Negative insets are valid for {@code HBox.setMargin} / {@code VBox.setMargin} / {@code
+   * GridPane.setMargin} in JavaFX: the layout managers add the margin value to the node position,
+   * so a negative margin simply shifts/overlaps the child toward its neighbours.
    */
   private static void applyMarginStyleViaStyles(Node node, String token) {
-    // Check for arbitrary value syntax: m-[20px], m-[2.5rem], etc.
-    if (token.contains("[")) {
-      int start = token.indexOf('[') + 1;
-      int end = token.indexOf(']');
-      if (start > 0 && end > start) {
-        String valueStr = token.substring(start, end);
-        double px = parseCssValue(valueStr);
-
-        if (token.startsWith("m-[")) {
-          Styles.margin(node, px, px, px, px);
-        } else if (token.startsWith("mx-[")) {
-          Styles.margin(node, 0, px, 0, px);
-        } else if (token.startsWith("my-[")) {
-          Styles.margin(node, px, 0, px, 0);
-        } else if (token.startsWith("mt-[")) {
-          Styles.margin(node, px, 0, 0, 0);
-        } else if (token.startsWith("mr-[")) {
-          Styles.margin(node, 0, px, 0, 0);
-        } else if (token.startsWith("mb-[")) {
-          Styles.margin(node, 0, 0, px, 0);
-        } else if (token.startsWith("ml-[")) {
-          Styles.margin(node, 0, 0, 0, px);
-        }
-        return;
-      }
+    // Normalize negative margin tokens: strip the leading "-", parse the remainder, negate result.
+    boolean negative = token.startsWith("-");
+    if (negative) {
+      token = token.substring(1);
     }
 
-    // Fallback to numeric parsing for standard values
-    double value = parseTailwindValue(token);
+    // Compute the margin in PIXELS up front. Every branch below routes through
+    // Styles.margin(node, topPx, rightPx, bottomPx, leftPx), which takes raw pixel values.
+    // The Styles.m/mx/my/... helpers must NOT be used here: they multiply by their own
+    // hardcoded UNIT (4.0), while LayoutApplier already honors TwConfig.unit(), so mixing
+    // both paths would double-scale margins under non-default unit configurations.
+    double px;
+    if (token.contains("[")) {
+      // Arbitrary value syntax: m-[20px], m-[2.5rem], etc. — parseCssValue returns pixels.
+      int start = token.indexOf('[') + 1;
+      int end = token.indexOf(']');
+      if (start <= 0 || end <= start) {
+        return; // Malformed bracket syntax - skip silently (parseTailwindValue logs in debug)
+      }
+      px = parseCssValue(token.substring(start, end));
+    } else {
+      // Numeric Tailwind scale value (m-4): parseTailwindValue returns scale units, convert once.
+      double value = parseTailwindValue(token);
+      if (Double.isNaN(value)) {
+        return; // Invalid / non-numeric tail (e.g. "mx-auto") - skip application
+      }
+      px = value * TwConfig.unit();
+    }
+
+    if (Double.isNaN(px)) {
+      return; // Invalid value - skip application instead of silently using 0
+    }
+    if (negative) {
+      px = -px;
+    }
 
     if (token.startsWith("m-")) {
-      Styles.m(node, (int) value);
+      Styles.margin(node, px, px, px, px);
     } else if (token.startsWith("mx-")) {
-      Styles.mx(node, (int) value);
+      Styles.margin(node, 0, px, 0, px);
     } else if (token.startsWith("my-")) {
-      Styles.my(node, (int) value);
+      Styles.margin(node, px, 0, px, 0);
     } else if (token.startsWith("mt-")) {
-      Styles.mt(node, (int) value);
+      Styles.margin(node, px, 0, 0, 0);
     } else if (token.startsWith("mr-")) {
-      Styles.mr(node, (int) value);
+      Styles.margin(node, 0, px, 0, 0);
     } else if (token.startsWith("mb-")) {
-      Styles.mb(node, (int) value);
+      Styles.margin(node, 0, 0, px, 0);
     } else if (token.startsWith("ml-")) {
-      Styles.ml(node, (int) value);
+      Styles.margin(node, 0, 0, 0, px);
     }
   }
 
@@ -240,7 +287,9 @@ public final class LayoutApplier {
     }
 
     // Fallback to HBox/VBox with Styles.java
-    if (token.equals("grow") || token.equals("flex-1")) {
+    // Bare "flex" mirrors Tailwind's `display:flex` shorthand behavior on children:
+    // equivalent to flex: 1 1 0% (grow=1, shrink=1), same treatment as flex-1/flex-auto.
+    if (token.equals("grow") || token.equals("flex-1") || token.equals("flex")) {
       if (parent instanceof HBox) {
         Styles.flex1(node);
       } else if (parent instanceof VBox) {
@@ -294,8 +343,12 @@ public final class LayoutApplier {
    * @param token the flex token
    */
   private static void applyFlexForTwFlexPane(Node node, String token) {
+    // Bare "flex" == flex: 1 1 0% (grow=1, shrink=1), matching Tailwind's default flex item sizing.
     if (token.equals("grow") || token.equals("flex-1")) {
       TwFlexPane.setGrow(node, 1);
+    } else if (token.equals("flex")) {
+      TwFlexPane.setGrow(node, 1);
+      TwFlexPane.setShrink(node, 1);
     } else if (token.equals("shrink") || token.equals("flex-none")) {
       TwFlexPane.setShrink(node, 0);
     } else if (token.equals("flex-auto")) {
@@ -320,13 +373,13 @@ public final class LayoutApplier {
   }
 
   /**
-   * Parses gap value from token and applies it to parent container. Supports both numeric values
-   * (gap-4) and arbitrary values (gap-[20px]).
+   * Parses gap value from token and applies it to the container pane that carries the token.
+   * Supports both numeric values (gap-4) and arbitrary values (gap-[20px]).
    *
-   * @param parent the parent pane to apply gap to
+   * @param container the pane to apply gap to (the node annotated with the gap-* class)
    * @param token the gap token (e.g., "gap-4", "gap-[20px]")
    */
-  private static void applyGapStyle(Pane parent, String token) {
+  private static void applyGapStyle(Pane container, String token) {
     double px;
 
     // Check for arbitrary value syntax: gap-[20px], gap-[2.5rem], etc.
@@ -338,15 +391,24 @@ public final class LayoutApplier {
         px = parseCssValue(value);
       } else {
         double value = parseTailwindValue(token);
+        if (Double.isNaN(value)) {
+          return;
+        }
         px = value * TwConfig.unit();
       }
     } else {
       double value = parseTailwindValue(token);
+      if (Double.isNaN(value)) {
+        return;
+      }
       px = value * TwConfig.unit();
+    }
+    if (Double.isNaN(px)) {
+      return;
     }
 
     // Prioritize TwFlexPane if parent is TwFlexPane
-    if (parent instanceof TwFlexPane flexPane) {
+    if (container instanceof TwFlexPane flexPane) {
       if (token.startsWith("gap-x-")) {
         flexPane.gapX(px);
       } else if (token.startsWith("gap-y-")) {
@@ -358,7 +420,7 @@ public final class LayoutApplier {
     }
 
     // Prioritize TwGridPane if parent is TwGridPane
-    if (parent instanceof TwGridPane gridPane) {
+    if (container instanceof TwGridPane gridPane) {
       if (token.startsWith("gap-x-")) {
         gridPane.gapX(px);
       } else if (token.startsWith("gap-y-")) {
@@ -370,7 +432,7 @@ public final class LayoutApplier {
     }
 
     // Fallback to standard JavaFX panes
-    if (parent instanceof HBox hbox) {
+    if (container instanceof HBox hbox) {
       if (token.startsWith("gap-x-")) {
         hbox.setSpacing(px);
       } else if (token.startsWith("gap-y-")) {
@@ -378,7 +440,7 @@ public final class LayoutApplier {
       } else {
         hbox.setSpacing(px);
       }
-    } else if (parent instanceof VBox vbox) {
+    } else if (container instanceof VBox vbox) {
       if (token.startsWith("gap-y-")) {
         vbox.setSpacing(px);
       } else if (token.startsWith("gap-x-")) {
@@ -386,7 +448,7 @@ public final class LayoutApplier {
       } else {
         vbox.setSpacing(px);
       }
-    } else if (parent instanceof GridPane grid) {
+    } else if (container instanceof GridPane grid) {
       if (token.startsWith("gap-x-")) {
         grid.setHgap(px);
       } else if (token.startsWith("gap-y-")) {
@@ -411,10 +473,37 @@ public final class LayoutApplier {
     }
 
     if (token.startsWith("grid-cols-")) {
-      int cols = (int) parseTailwindValue(token);
+      double parsed = parseTailwindValue(token);
+      if (Double.isNaN(parsed)) {
+        LOGGER.warning(
+            "Invalid grid-cols value in token '" + token + "': could not be parsed; skipped.");
+        return;
+      }
+      int cols = (int) parsed;
+      if (cols <= 0) {
+        // Guard against division-by-zero in the layout engine (cellW = w / gridCols).
+        LOGGER.warning(
+            "Invalid grid-cols value in token '"
+                + token
+                + "': must be >= 1; grid configuration skipped.");
+        return;
+      }
       gridPane.cols(cols);
     } else if (token.startsWith("grid-rows-")) {
-      int rows = (int) parseTailwindValue(token);
+      double parsed = parseTailwindValue(token);
+      if (Double.isNaN(parsed)) {
+        LOGGER.warning(
+            "Invalid grid-rows value in token '" + token + "': could not be parsed; skipped.");
+        return;
+      }
+      int rows = (int) parsed;
+      if (rows < 0) {
+        LOGGER.warning(
+            "Invalid grid-rows value in token '"
+                + token
+                + "': must be >= 0 (0 = inferred); grid configuration skipped.");
+        return;
+      }
       gridPane.rows(rows);
     } else if (token.equals("grid-flow-row")) {
       gridPane.autoFlow(TwGridPane.AutoFlow.ROW);
@@ -436,11 +525,19 @@ public final class LayoutApplier {
    */
   private static void applyGridItemStyle(Node node, TwGridPane gridPane, String token) {
     if (token.startsWith("col-span-")) {
-      int span = (int) parseTailwindValue(token);
-      TwGridPane.setColSpan(node, span);
+      double parsed = parseTailwindValue(token);
+      if (Double.isNaN(parsed) || parsed < 1) {
+        LOGGER.warning("Invalid span value in token '" + token + "': must be >= 1; skipped.");
+        return;
+      }
+      TwGridPane.setColSpan(node, (int) parsed);
     } else if (token.startsWith("row-span-")) {
-      int span = (int) parseTailwindValue(token);
-      TwGridPane.setRowSpan(node, span);
+      double parsed = parseTailwindValue(token);
+      if (Double.isNaN(parsed) || parsed < 1) {
+        LOGGER.warning("Invalid span value in token '" + token + "': must be >= 1; skipped.");
+        return;
+      }
+      TwGridPane.setRowSpan(node, (int) parsed);
     }
   }
 
@@ -467,7 +564,7 @@ public final class LayoutApplier {
         if (TwConfig.isDebug()) {
           System.out.println("[TailwindFX Warning] Invalid px value: " + value);
         }
-        return 0;
+        return Double.NaN;
       }
     } else if (value.endsWith("rem")) {
       try {
@@ -477,7 +574,7 @@ public final class LayoutApplier {
         if (TwConfig.isDebug()) {
           System.out.println("[TailwindFX Warning] Invalid rem value: " + value);
         }
-        return 0;
+        return Double.NaN;
       }
     } else if (value.endsWith("em")) {
       try {
@@ -487,7 +584,7 @@ public final class LayoutApplier {
         if (TwConfig.isDebug()) {
           System.out.println("[TailwindFX Warning] Invalid em value: " + value);
         }
-        return 0;
+        return Double.NaN;
       }
     } else {
       try {
@@ -496,7 +593,7 @@ public final class LayoutApplier {
         if (TwConfig.isDebug()) {
           System.out.println("[TailwindFX Warning] Invalid numeric value: " + value);
         }
-        return 0;
+        return Double.NaN;
       }
     }
   }
@@ -513,7 +610,9 @@ public final class LayoutApplier {
    * </ul>
    *
    * @param token the Tailwind token to parse
-   * @return the numeric value respecting TwConfig.unit()
+   * @return the numeric value respecting TwConfig.unit(), or {@link Double#NaN} when the value
+   *     cannot be parsed. NaN is an error sentinel only — a literal {@code 0} (e.g. "m-0") is a
+   *     legitimate parsed result and must never be confused with a parse failure.
    */
   private static double parseTailwindValue(String token) {
     // Handle arbitrary values like m-[16px]
@@ -526,7 +625,7 @@ public final class LayoutApplier {
         if (TwConfig.isDebug()) {
           System.out.println("[TailwindFX Warning] Missing closing bracket in token: " + token);
         }
-        return 0;
+        return Double.NaN;
       }
 
       String value = token.substring(start, end);
@@ -539,7 +638,7 @@ public final class LayoutApplier {
           if (TwConfig.isDebug()) {
             System.out.println("[TailwindFX Warning] Invalid px value in token: " + token);
           }
-          return 0;
+          return Double.NaN;
         }
       }
       try {
@@ -548,7 +647,7 @@ public final class LayoutApplier {
         if (TwConfig.isDebug()) {
           System.out.println("[TailwindFX Warning] Invalid numeric value in token: " + token);
         }
-        return 0;
+        return Double.NaN;
       }
     }
 
@@ -568,21 +667,26 @@ public final class LayoutApplier {
         if (TwConfig.isDebug()) {
           System.out.println("[TailwindFX Warning] Non-numeric value in token: " + token);
         }
-        return 0;
+        return Double.NaN;
       }
     }
-    return 0;
+    return Double.NaN;
   }
 
   /**
-   * Registers a listener to apply layout styles when node is attached to parent. Uses WeakReference
-   * to prevent memory leaks.
+   * Registers a listener to apply layout styles when the node is attached to (or re-attached under)
+   * a Pane parent. Uses WeakReference to prevent memory leaks.
+   *
+   * <p><b>Re-parenting design decision:</b> the listener intentionally stays alive after the first
+   * successful application so that layout styles are re-applied whenever the node moves between
+   * parents (virtualization / cell recycling scenarios). It only removes itself once the node has
+   * been garbage collected (weak reference cleared), which bounds its lifetime without leaking.
    *
    * <p>Bug #10 fix: Converted local ListenerWrapper class to use AtomicReference for safe
-   * self-removal of the listener after application.
+   * self-removal of the listener when the node becomes unreachable.
    *
    * @param node the node to register listener for
-   * @param tokens the tokens to apply when parent becomes available
+   * @param tokens the tokens to apply when a Pane parent becomes available
    */
   private static void registerLayoutListener(Node node, List<String> tokens) {
     // Check if node is already attached (race condition)
@@ -596,14 +700,14 @@ public final class LayoutApplier {
     // Use WeakReference to prevent memory leaks if node is garbage collected
     WeakReference<Node> weakNode = new WeakReference<>(node);
 
-    // Use AtomicReference for safe self-removal of listener (Bug #10 fix)
+    // Use AtomicReference for safe self-removal of the listener (Bug #10 fix)
     AtomicReference<ChangeListener<Parent>> listenerRef = new AtomicReference<>();
 
     ChangeListener<Parent> listener =
         (obs, oldParent, newParent) -> {
           Node actualNode = weakNode.get();
           if (actualNode == null) {
-            // Node was garbage collected, remove listener
+            // Node was garbage collected, remove listener — this is the ONLY self-removal path.
             ChangeListener<Parent> listenerToRemove = listenerRef.getAndSet(null);
             if (listenerToRemove != null) {
               obs.removeListener(listenerToRemove);
@@ -612,12 +716,8 @@ public final class LayoutApplier {
           }
 
           if (newParent instanceof Pane pane) {
-            // Remove this listener after applying
-            ChangeListener<Parent> listenerToRemove = listenerRef.getAndSet(null);
-            if (listenerToRemove != null) {
-              obs.removeListener(listenerToRemove);
-            }
-            // Apply layout styles now that we have a parent
+            // Keep the listener registered so future re-parenting events re-apply the layout
+            // styles against the new parent (supports virtualized/recycled cell containers).
             for (String token : tokens) {
               applySingleLayoutStyle(actualNode, pane, token);
             }
@@ -626,63 +726,5 @@ public final class LayoutApplier {
 
     listenerRef.set(listener);
     node.parentProperty().addListener(listener);
-  }
-
-  /**
-   * Checks if a token requires layout context (parent container) to be applied.
-   *
-   * @param token the token to check
-   * @return true if the token is layout-dependent
-   */
-  public static boolean isLayoutDependent(String token) {
-    // Exact matches for flex utilities
-    if (token.equals("grow") || token.equals("shrink")) {
-      return true;
-    }
-
-    // Prefix-based matching for layout token families
-    return token.startsWith("m-")
-        || token.startsWith("mx-")
-        || token.startsWith("my-")
-        || token.startsWith("mt-")
-        || token.startsWith("mr-")
-        || token.startsWith("mb-")
-        || token.startsWith("ml-")
-        || token.startsWith("gap-")
-        || token.startsWith("gap-x-")
-        || token.startsWith("gap-y-")
-        || token.startsWith("flex-")
-        || token.startsWith("grid-cols-")
-        || token.startsWith("grid-rows-")
-        || token.startsWith("grid-flow-")
-        || token.startsWith("col-span-")
-        || token.startsWith("row-span-");
-  }
-
-  /**
-   * Checks if a token is an effect token (blur, brightness, grayscale, invert, etc.).
-   *
-   * <p>Effect tokens are distinct from layout tokens and are applied via TwEffect.
-   *
-   * @param token the token to check
-   * @return true if the token is an effect token
-   */
-  public static boolean isEffectToken(String token) {
-    // Exact matches for effect utilities
-    if (token.equals("grayscale") || token.equals("invert")) {
-      return true;
-    }
-
-    // Prefix-based matching for effect token families
-    return token.startsWith("blur-")
-        || token.startsWith("brightness-")
-        || token.startsWith("contrast-")
-        || token.startsWith("drop-shadow-")
-        || token.startsWith("hue-rotate-")
-        || token.startsWith("saturate-")
-        || token.startsWith("sepia-")
-        || token.startsWith("grayscale-")
-        || token.startsWith("invert-")
-        || token.startsWith("opacity-");
   }
 }

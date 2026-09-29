@@ -54,6 +54,9 @@ public final class JitCompiler {
   private final StyleResolver resolver;
   private final CssPropertyMapper propertyMapper;
 
+  /** The theme configuration this instance compiles against (used as cache discriminator). */
+  private final ThemeConfig themeConfig;
+
   // Global cache: raw token → compiled result
   // Thread-safe LRU cache with bounded size — prevents unbounded growth in long-running apps
   /** Maximum number of compiled tokens to keep in the cache. */
@@ -79,6 +82,7 @@ public final class JitCompiler {
   }
 
   public JitCompiler(ThemeConfig themeConfig) {
+    this.themeConfig = themeConfig;
     this.resolver = new StyleResolver(themeConfig);
     this.propertyMapper = new CssPropertyMapper(themeConfig);
   }
@@ -159,9 +163,7 @@ public final class JitCompiler {
    *
    * @param base the token before the '/' modifier
    * @return true if this is a valid color utility base
-   * @deprecated Use {@link ColorUtilityValidator#isValidColorUtilityBase(String)} instead.
    */
-  @Deprecated(since = "1.0.0", forRemoval = true)
   private static boolean isValidColorUtilityBase(String base) {
     // Delegate to shared utility class
     return ColorUtilityValidator.isValidColorUtilityBase(base);
@@ -309,16 +311,16 @@ public final class JitCompiler {
 
     // Apply modifiers if needed
     if (isImportant && result.hasInlineStyle()) {
-      // JavaFX doesn't support !important in inline styles
-      // We mark it by adding a comment or keeping as-is for future stylesheet processing
-      // For now, log a warning that !important is not supported in JavaFX inline styles
+      // JavaFX inline styles have no notion of !important, so the flag is intentionally
+      // ignored here: the token is compiled exactly as if the '!' suffix were absent.
+      // Nothing is stored or marked on the result — we only warn once per compilation
+      // (the CACHE below prevents repeated warnings for the same token). If external-CSS
+      // export ever needs it, the original token (with '!') is the source of truth.
       LOG.warning(
           "TailwindFX: !important modifier is not supported in JavaFX inline styles. "
               + "Token '"
               + token
               + "' will be compiled without !important.");
-      // Note: We keep the token as-is since JavaFX doesn't have !important support
-      // This could be used later if exporting to external CSS
     }
 
     if (isDarkMode) {
@@ -334,6 +336,83 @@ public final class JitCompiler {
     CompileResult existing = CACHE.putIfAbsent(cacheKey, result);
     if (existing != null) {
       // Another thread compiled it first, use their result
+      TailwindFXMetrics.instance().recordCacheHit();
+      return existing;
+    }
+
+    TailwindFXMetrics.instance().recordCacheMiss();
+    return result;
+  }
+
+  /**
+   * Compiles a single token using <em>this instance's</em> {@link ThemeConfig} resolver and
+   * property mapper, honoring the same modifier rules as {@link #compile(String)} ('!' suffix and
+   * 'dark:' prefix).
+   *
+   * <p>Results are cached in the shared LRU cache under a theme-discriminated key (the identity
+   * hash of this compiler's {@code ThemeConfig}), so two compilers built from different themes
+   * never observe each other's cached output for the same token. Compilers that share the same
+   * {@code ThemeConfig} instance intentionally share cache entries.
+   *
+   * @param token the raw token (may include modifiers), e.g. {@code "dark:bg-gray-800"} or {@code
+   *     "p-4!"}
+   * @return the compiled result with inline style and/or CSS class
+   * @throws IllegalArgumentException if token is null
+   */
+  public CompileResult compileToken(String token) {
+    if (token == null) {
+      throw new IllegalArgumentException("JitCompiler.compileToken: token cannot be null");
+    }
+    if (token.isBlank()) {
+      return CompileResult.unknown(token);
+    }
+
+    // Extract modifiers before caching (same semantics as the static compile()).
+    boolean isImportant = false;
+    boolean isDarkMode = false;
+    String baseToken = token.trim();
+
+    if (baseToken.endsWith(IMPORTANT_SUFFIX)) {
+      isImportant = true;
+      baseToken = baseToken.substring(0, baseToken.length() - 1);
+    }
+    if (baseToken.startsWith(DARK_PREFIX)) {
+      isDarkMode = true;
+      baseToken = baseToken.substring(DARK_PREFIX.length());
+    }
+
+    // Theme discriminator: System.identityHashCode distinguishes ThemeConfig instances
+    // (ThemeConfig does not implement equals/hashCode, so identity is the right granularity).
+    String cacheKey =
+        Integer.toHexString(System.identityHashCode(themeConfig)) + ":" + token.trim();
+
+    CompileResult result = CACHE.get(cacheKey);
+    if (result != null) {
+      TailwindFXMetrics.instance().recordCacheHit();
+      return result;
+    }
+
+    long t0 = System.nanoTime();
+    result = doCompile(baseToken);
+    TailwindFXMetrics.instance().recordCompilation(System.nanoTime() - t0);
+
+    if (isImportant && result.hasInlineStyle()) {
+      // Same policy as compile(): JavaFX inline styles have no !important, the flag is ignored.
+      LOG.warning(
+          "TailwindFX: !important modifier is not supported in JavaFX inline styles. "
+              + "Token '"
+              + token
+              + "' will be compiled without !important.");
+    }
+
+    if (isDarkMode) {
+      result =
+          new CompileResult(
+              result.inlineStyle(), result.cssClass(), result.isKnown(), true /* isDarkMode */);
+    }
+
+    CompileResult existing = CACHE.putIfAbsent(cacheKey, result);
+    if (existing != null) {
       TailwindFXMetrics.instance().recordCacheHit();
       return existing;
     }
@@ -385,15 +464,17 @@ public final class JitCompiler {
         // Check for !important
         if (t.endsWith("!")) {
           hasImportant = true;
-          cleanToken = t.substring(0, t.length() - 1);
+          cleanToken = cleanToken.substring(0, t.length() - 1);
           LOG.warning(() -> "JavaFX does not support !important in inline styles. Token: " + t);
         }
 
-        // Check for dark mode
-        if (cleanToken.startsWith("dark:")) {
+        // Check for dark mode: remember the variant but DO NOT strip the prefix here.
+        // compile() already understands "dark:" (sets CompileResult.isDarkMode and keeps a
+        // dedicated cache entry per full token), so passing the prefixed token preserves the
+        // dark flag on the per-token result instead of losing it via manual stripping.
+        boolean isDarkVariant = cleanToken.startsWith(DARK_PREFIX);
+        if (isDarkVariant) {
           hasDarkMode = true;
-          cleanToken = cleanToken.substring(5);
-          // Dark mode logic usually requires CSS classes or bindings
         }
 
         CompileResult result = compile(cleanToken);
@@ -404,9 +485,15 @@ public final class JitCompiler {
           cssClasses.add(result.cssClass());
         }
 
-        // Try specialized processors for unrecognized tokens
+        // Try specialized processors for unrecognized tokens. Use the modifier-free token
+        // (no '!' suffix, no 'dark:' prefix) so processors match the bare utility; the dark
+        // flag is preserved separately via result.isDarkMode() and hasDarkMode above.
+        String specializedToken = cleanToken;
+        if (specializedToken.startsWith(DARK_PREFIX)) {
+          specializedToken = specializedToken.substring(DARK_PREFIX.length());
+        }
         if (!result.isKnown()) {
-          String specializedStyle = processSpecializedToken(cleanToken);
+          String specializedStyle = processSpecializedToken(specializedToken);
           if (specializedStyle != null) {
             inlineStyle.append(specializedStyle).append(" ");
           } else {
@@ -466,10 +553,11 @@ public final class JitCompiler {
       return result != null ? result.inlineStyle() : null;
     }
 
-    // Arbitrary properties [...:...]
+    // Arbitrary properties [...:...] are not handled by the specialized processors above.
+    // Returning null here lets compileBatch fall through to its unknown-token heuristic:
+    // tokens that *look* like JIT utilities (contain numbers, '/', '[') are logged as a
+    // warning; everything else silently degrades to a CSS class for stylesheet processing.
     if (token.startsWith("[") && token.endsWith("]")) {
-      // For now, return null - arbitrary properties need instance method
-      // This will be handled by the heuristic below
       return null;
     }
 
@@ -536,23 +624,6 @@ public final class JitCompiler {
 
   // Legacy static methods REMOVED - all logic is now in StyleResolver and CssPropertyMapper
   // compileScale, compileColor, compileArbitrary, compileNamed have been removed
-
-  // Deprecated gradient methods - use GradientProcessor instead
-  /**
-   * @deprecated Use {@link GradientProcessor#processGradientTokens(String[])} instead.
-   */
-  @Deprecated(since = "0.1.0", forRemoval = true)
-  private static String resolveGradientColor(String colorToken) {
-    // Delegate to GradientProcessor for consistency
-    return null; // This method is no longer used internally
-  }
-
-  /**
-   * @deprecated Use {@link GradientProcessor#processGradientTokens(String[])} instead.
-   */
-  @Deprecated(since = "0.1.0", forRemoval = true)
-  private static String buildGradient(String direction, String from, String via, String to) {
-    // Delegate to GradientProcessor for consistency
-    return null; // This method is no longer used internally
-  }
+  // Deprecated gradient helpers resolveGradientColor/buildGradient have been removed;
+  // use GradientProcessor.processGradientTokens(String[]) instead.
 }

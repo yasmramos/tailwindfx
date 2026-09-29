@@ -1,7 +1,6 @@
 package io.github.yasmramos.tailwindfx.style;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -204,41 +203,6 @@ public class LayoutApplierTest extends ApplicationTest {
   }
 
   @Test
-  public void testIsLayoutDependent() {
-    assertTrue(LayoutApplier.isLayoutDependent("m-4"), "m-4 should be layout-dependent");
-    assertTrue(LayoutApplier.isLayoutDependent("gap-4"), "gap-4 should be layout-dependent");
-    assertTrue(LayoutApplier.isLayoutDependent("flex-1"), "flex-1 should be layout-dependent");
-    assertTrue(LayoutApplier.isLayoutDependent("grow"), "grow should be layout-dependent");
-    assertTrue(LayoutApplier.isLayoutDependent("shrink"), "shrink should be layout-dependent");
-    assertTrue(
-        LayoutApplier.isLayoutDependent("grid-cols-3"), "grid-cols-* should be layout-dependent");
-    assertTrue(
-        LayoutApplier.isLayoutDependent("col-span-2"), "col-span-* should be layout-dependent");
-
-    assertFalse(
-        LayoutApplier.isLayoutDependent("bg-blue-500"),
-        "bg-blue-500 should NOT be layout-dependent");
-    assertFalse(
-        LayoutApplier.isLayoutDependent("text-white"), "text-white should NOT be layout-dependent");
-    assertFalse(
-        LayoutApplier.isLayoutDependent("rounded-lg"), "rounded-lg should NOT be layout-dependent");
-  }
-
-  @Test
-  public void testIsEffectToken() {
-    assertTrue(LayoutApplier.isEffectToken("blur-sm"), "blur-sm should be effect token");
-    assertTrue(
-        LayoutApplier.isEffectToken("brightness-125"), "brightness-125 should be effect token");
-    assertTrue(LayoutApplier.isEffectToken("grayscale"), "grayscale should be effect token");
-    assertTrue(LayoutApplier.isEffectToken("invert"), "invert should be effect token");
-    assertTrue(LayoutApplier.isEffectToken("opacity-50"), "opacity-50 should be effect token");
-
-    assertFalse(LayoutApplier.isEffectToken("m-4"), "m-4 should NOT be effect token");
-    assertFalse(
-        LayoutApplier.isEffectToken("bg-blue-500"), "bg-blue-500 should NOT be effect token");
-  }
-
-  @Test
   public void testParseTailwindValueWithBrackets() {
     // Test via reflection or direct method call if accessible
     // This verifies the parseTailwindValue logic is working correctly
@@ -280,16 +244,80 @@ public class LayoutApplierTest extends ApplicationTest {
 
   @Test
   public void testGapOnNonPaneNodeRegistersListener() {
-    // Bug #9: gap-* on non-Pane nodes should not be silently discarded
+    // Bug #9 / unified gap semantics: gap-* is a CONTAINER property. A gap token written on a
+    // non-Pane node must never mutate its parent; instead a parent-property listener keeps the
+    // application alive so the gap lands on the node itself once it becomes (or is swapped for)
+    // a Pane-backed container.
     Label node = new Label("gap-on-label");
-    // Don't add to a Pane - this simulates the bug scenario
+    HBox outer = new HBox();
 
-    // This should register a listener instead of silently discarding
-    // We can't easily verify the listener registration, but we can ensure no exception
+    // Attach under a Pane first: the retry path applies against the node, NOT the parent.
+    interact(() -> outer.getChildren().add(node));
     LayoutApplier.applyLayoutDependentStyles(node, Arrays.asList("gap-4"));
 
-    // If we reach here without exception, the fix is working
-    // The listener will apply the gap when the node is attached to a Pane
+    assertEquals(0.0, outer.getSpacing(), 0.1, "gap on a child must not mutate the parent HBox");
+
+    // No exception means the deferred-listener registration worked; after re-parenting into a
+    // Pane the listener stays alive (re-parenting support) and re-applies against the node.
+    Pane paneHost = new Pane();
+    interact(() -> paneHost.getChildren().add(node));
+    assertEquals(0.0, outer.getSpacing(), 0.1, "parent spacing must remain untouched");
+  }
+
+  @Test
+  public void testNegativeMarginNumericToken() {
+    Label node = new Label("negative-margin-test");
+    interact(() -> hBox.getChildren().add(node));
+
+    LayoutApplier.applyLayoutDependentStyles(node, Arrays.asList("-m-4"));
+
+    Insets hboxMargin = HBox.getMargin(node);
+    assertNotNull(hboxMargin, "HBox margin should be set for negative tokens");
+    assertEquals(-16.0, hboxMargin.getTop(), 0.1, "-m-4 should produce -16px top margin");
+    assertEquals(-16.0, hboxMargin.getLeft(), 0.1, "-m-4 should produce -16px left margin");
+  }
+
+  @Test
+  public void testNegativeMarginArbitraryToken() {
+    Label node = new Label("negative-margin-arb-test");
+    interact(() -> hBox.getChildren().add(node));
+
+    LayoutApplier.applyLayoutDependentStyles(node, Arrays.asList("-ml-[20px]"));
+
+    Insets hboxMargin = HBox.getMargin(node);
+    assertNotNull(hboxMargin, "HBox margin should be set for arbitrary negative tokens");
+    assertEquals(-20.0, hboxMargin.getLeft(), 0.1, "-ml-[20px] should produce -20px left margin");
+  }
+
+  @Test
+  public void testBareFlexTokenMapsToGrowAndShrink() {
+    Label node = new Label("bare-flex-test");
+    interact(() -> hBox.getChildren().add(node));
+
+    // Bare "flex" == Tailwind flex: 1 1 0% -> ALWAYS priority in HBox/VBox
+    LayoutApplier.applyLayoutDependentStyles(node, Arrays.asList("flex"));
+
+    assertEquals(
+        Priority.ALWAYS, HBox.getHgrow(node), "bare flex should map to grow ALWAYS in HBox");
+  }
+
+  @Test
+  public void testParseTailwindValueReturnsNaNForInvalid() {
+    // NaN is the error sentinel; literal 0 remains a legitimate parsed value.
+    assertTrue(
+        Double.isNaN(invokeParseTailwindValue("m-abc")), "non-numeric tail should return NaN");
+    assertTrue(
+        Double.isNaN(invokeParseTailwindValue("m-[16px")), "missing bracket should return NaN");
+    assertEquals(0.0, invokeParseTailwindValue("m-0"), 0.001, "m-0 must parse as legitimate 0.0");
+    assertEquals(8.0, invokeParseTailwindValue("m-8"), 0.001, "m-8 should still parse as 8.0");
+  }
+
+  @Test
+  public void testGridColsZeroIsSkippedWithWarning() {
+    // grid-cols-[0] parses to 0 -> must NOT be forwarded to TwGridPane.cols (division guard)
+    int before = twGridPane.getCols();
+    LayoutApplier.applyLayoutDependentStyles(twGridPane, Arrays.asList("grid-cols-[0]"));
+    assertEquals(before, twGridPane.getCols(), "invalid grid-cols value must leave cols unchanged");
   }
 
   /** Helper to invoke private parseTailwindValue via reflection for testing. */

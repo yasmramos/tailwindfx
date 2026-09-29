@@ -11,6 +11,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -40,12 +41,16 @@ public class TwVirtualFlow<T> extends Region {
 
   // State & Cache
   private final ObservableList<T> items = FXCollections.observableArrayList();
-  private Function<T, Node> cellFactory =
-      item -> {
-        var label = new javafx.scene.control.Label(String.valueOf(item));
-        label.setStyle("-fx-padding: 8;");
-        return label;
-      };
+  private Function<T, Node> cellFactory = defaultCellFactory();
+
+  /**
+   * Optional callback that reconfigures a recycled cell node for a new item. When set, cells that
+   * leave the viewport are returned to an internal reuse pool and later handed back (after {@code
+   * cellUpdater.accept(node, item)}) instead of being recreated through {@code cellFactory}. This
+   * is the minimal viable recycling API: it keeps the existing {@code Function<T, Node>} factory
+   * contract fully backward compatible — without an updater every cell is created fresh as before.
+   */
+  private BiConsumer<Node, T> cellUpdater = null;
 
   /**
    * Default cell factory that renders each item as a simple padded {@link
@@ -85,6 +90,19 @@ public class TwVirtualFlow<T> extends Region {
   private final ScrollBar scrollBar = new ScrollBar();
   private final Map<Integer, Node> visibleCells = new HashMap<>();
 
+  /** Pool of detached cell nodes available for reuse (only used when a cellUpdater is set). */
+  private final Deque<Node> cellPool = new ArrayDeque<>();
+
+  /** Upper bound for the reuse pool; surplus cells are dropped instead of pooled. */
+  private static final int MAX_POOL_SIZE = 200;
+
+  // Listener references kept as fields so dispose() can detach them from their observables.
+  private ChangeListener<Number> scrollValueListener;
+  private ListChangeListener<T> itemsListener;
+  private ChangeListener<Number> widthListener;
+  private ChangeListener<Number> heightListener;
+  private ChangeListener<Insets> paddingListener;
+
   // Drag & Drop
   private final Region dropIndicator = new Region();
   private int dragSourceIndex = -1;
@@ -122,31 +140,33 @@ public class TwVirtualFlow<T> extends Region {
 
     // Scroll config
     scrollBar.setOrientation(orientation);
-    scrollBar
-        .valueProperty()
-        .addListener(
-            (obs, oldVal, newVal) -> {
-              scrollPosition = newVal.doubleValue();
-              updateVisibleCells();
-            });
+    scrollValueListener =
+        (obs, oldVal, newVal) -> {
+          scrollPosition = newVal.doubleValue();
+          updateVisibleCells();
+        };
+    scrollBar.valueProperty().addListener(scrollValueListener);
 
     // Data changes
-    items.addListener(
-        (ListChangeListener<T>)
-            c -> {
-              sizeCacheDirty = true;
-              updateScrollBar();
-              updateVisibleCells();
-            });
+    itemsListener =
+        c -> {
+          sizeCacheDirty = true;
+          updateScrollBar();
+          updateVisibleCells();
+        };
+    items.addListener(itemsListener);
 
     // Size changes
-    widthProperty().addListener((obs, o, n) -> updateVisibleCells());
-    heightProperty().addListener((obs, o, n) -> updateVisibleCells());
-    viewportPadding.addListener(
+    widthListener = (obs, o, n) -> updateVisibleCells();
+    heightListener = (obs, o, n) -> updateVisibleCells();
+    paddingListener =
         (obs, o, n) -> {
           requestLayout();
           updateVisibleCells();
-        });
+        };
+    widthProperty().addListener(widthListener);
+    heightProperty().addListener(heightListener);
+    viewportPadding.addListener(paddingListener);
 
     // EVENT DELEGATION (Container-level)
     cellContainer.setOnMousePressed(e -> handleSelection(e));
@@ -217,6 +237,9 @@ public class TwVirtualFlow<T> extends Region {
     }
     visibleCells.values().forEach(cellContainer.getChildren()::remove);
     visibleCells.clear();
+    // Pooled cells were built by the previous factory contract; drop them to avoid
+    // handing stale nodes to the new factory/updater pairing.
+    cellPool.clear();
     updateVisibleCells();
   }
 
@@ -229,6 +252,38 @@ public class TwVirtualFlow<T> extends Region {
    */
   public Function<T, Node> getCellFactory() {
     return cellFactory;
+  }
+
+  /**
+   * Sets the optional cell updater that enables node recycling. When non-null, cells leaving the
+   * viewport are parked in an internal pool and later reused: before a pooled node becomes visible
+   * again, {@code updater.accept(node, newItem)} is invoked so the caller can rebind its content
+   * (text, graphics, style classes...). Passing {@code null} disables recycling and restores the
+   * original create-a-node-per-item behavior, keeping full compatibility with plain {@code
+   * Function<T, Node>} factories.
+   *
+   * <pre>{@code
+   * flow.setCellFactory(item -> new Label());
+   * flow.setCellUpdater((node, item) -> ((Label) node).setText(item));
+   * }</pre>
+   *
+   * @param updater the recycler callback, or null to disable pooling
+   */
+  public void setCellUpdater(BiConsumer<Node, T> updater) {
+    this.cellUpdater = updater;
+    if (updater == null) {
+      // Recycling disabled: discard pooled nodes so they do not linger on the scene graph owner.
+      cellPool.clear();
+    }
+  }
+
+  /**
+   * Returns the currently configured cell updater, or {@code null} when recycling is disabled.
+   *
+   * @return the cell updater callback, or null
+   */
+  public BiConsumer<Node, T> getCellUpdater() {
+    return cellUpdater;
   }
 
   public void setCellSizeProvider(Function<T, Double> provider) {
@@ -564,7 +619,14 @@ public class TwVirtualFlow<T> extends Region {
             idx -> {
               if (idx < firstVisibleIndex || idx > lastVisibleIndex) {
                 Node n = visibleCells.get(idx);
-                if (n != null) cellContainer.getChildren().remove(n);
+                if (n != null) {
+                  cellContainer.getChildren().remove(n);
+                  // Recycle: when an updater is configured, detached cells go back to the
+                  // pool instead of being discarded, so they can be rebound to other items.
+                  if (cellUpdater != null && cellPool.size() < MAX_POOL_SIZE) {
+                    cellPool.addLast(n);
+                  }
+                }
                 return true;
               }
               return false;
@@ -573,10 +635,20 @@ public class TwVirtualFlow<T> extends Region {
     for (int i = firstVisibleIndex; i <= lastVisibleIndex; i++) {
       if (!visibleCells.containsKey(i)) {
         T item = items.get(i);
-        Node cell = cellFactory.apply(item);
+        Node cell = null;
+        if (cellUpdater != null && !cellPool.isEmpty()) {
+          // Reuse a pooled cell and rebind it to the new item via the updater callback.
+          cell = cellPool.removeFirst();
+          cellUpdater.accept(cell, item);
+        }
+        if (cell == null) {
+          cell = cellFactory.apply(item);
+        }
         if (cell == null) continue;
         // Attach visual selection state if needed
-        cell.getStyleClass().add("fx-virtualflow-cell");
+        if (!cell.getStyleClass().contains("fx-virtualflow-cell")) {
+          cell.getStyleClass().add("fx-virtualflow-cell");
+        }
         visibleCells.put(i, cell);
         cellContainer.getChildren().add(cell);
       }
@@ -602,14 +674,23 @@ public class TwVirtualFlow<T> extends Region {
 
   // Internal Logic - Event Delegation
   private int getIndexAtMouseEvent(MouseEvent e) {
+    ensureSizeCache();
+    Insets pad = viewportPadding.get();
     double local = orientation == Orientation.VERTICAL ? e.getY() : e.getX();
-    return findCellIndexForPosition(local + scrollPosition);
+    // Subtract the leading viewport padding so hit-testing matches the offset used when
+    // placing cells in updateVisibleCells (resizeRelocate adds pad.getTop()/pad.getLeft()).
+    double offset = orientation == Orientation.VERTICAL ? pad.getTop() : pad.getLeft();
+    return findCellIndexForPosition(local - offset + scrollPosition);
   }
 
   // Helper for DragEvents which don't extend MouseEvent
   private int getIndexAtDragEvent(DragEvent e) {
+    ensureSizeCache();
+    Insets pad = viewportPadding.get();
     double local = orientation == Orientation.VERTICAL ? e.getY() : e.getX();
-    return findCellIndexForPosition(local + scrollPosition);
+    // Same padding compensation as getIndexAtMouseEvent.
+    double offset = orientation == Orientation.VERTICAL ? pad.getTop() : pad.getLeft();
+    return findCellIndexForPosition(local - offset + scrollPosition);
   }
 
   private void handleSelection(MouseEvent e) {
@@ -655,13 +736,17 @@ public class TwVirtualFlow<T> extends Region {
     ClipboardContent content = new ClipboardContent();
     content.putString(String.valueOf(idx));
     db.setContent(content);
-    db.setDragView(cellContainer.snapshot(null, null));
+    // Snapshot only the dragged cell, not the whole container (which includes non-visible
+    // children and the scroll bar). Fall back to the container if the cell is unavailable.
+    Node draggedCell = visibleCells.get(idx);
+    db.setDragView((draggedCell != null ? draggedCell : cellContainer).snapshot(null, null));
   }
 
   private void handleDragOver(DragEvent e) {
     if (dragSourceIndex < 0 || !e.getDragboard().hasString()) return;
     e.acceptTransferModes(TransferMode.MOVE);
 
+    ensureSizeCache();
     int idx = getIndexAtDragEvent(e);
     if (idx == dragSourceIndex) {
       dropIndicator.setVisible(false);
@@ -792,8 +877,23 @@ public class TwVirtualFlow<T> extends Region {
 
   public void dispose() {
     if (scrollAnimation != null) scrollAnimation.stop();
+
+    // Detach every listener registered in the constructor / setItems so the control can be
+    // garbage-collected even while its observables (or an external source list) stay alive.
+    scrollBar.valueProperty().removeListener(scrollValueListener);
+    items.removeListener(itemsListener);
+    widthProperty().removeListener(widthListener);
+    heightProperty().removeListener(heightListener);
+    viewportPadding.removeListener(paddingListener);
+    if (sourceItems != null && sourceItemsListener != null) {
+      sourceItems.removeListener(sourceItemsListener);
+    }
+    sourceItems = null;
+    sourceItemsListener = null;
+
     visibleCells.values().forEach(cellContainer.getChildren()::remove);
     visibleCells.clear();
+    cellPool.clear();
     items.clear();
     selectedIndices.clear();
     prefixSums = new double[0];
