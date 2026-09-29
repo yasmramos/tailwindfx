@@ -19,7 +19,10 @@ import io.github.yasmramos.tailwindfx.core.Preconditions;
 import io.github.yasmramos.tailwindfx.core.UtilityConflictResolver;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.scene.Node;
 
@@ -42,11 +45,13 @@ import javafx.scene.Node;
  * StylePerf.apply(button, "btn-primary rounded-lg"); // skipped
  * </pre>
  *
- * <h3>BatchApply — defer writes to one frame</h3>
+ * <h3>BatchApply — consolidate writes into one pass</h3>
  *
  * <p>JavaFX's CSS engine re-evaluates styles every frame it detects a change. Applying utilities to
- * many nodes individually fires one re-evaluation per node. Batching defers all writes to a single
- * {@code Platform.runLater} call so the CSS engine sees one consolidated change:
+ * many nodes individually fires one re-evaluation per node. {@link #batch} collects the deferred
+ * applies and executes them <b>synchronously in a single consolidated pass at the end of the call
+ * block</b>, so the CSS engine sees one batched change on the next frame. The variant that defers
+ * the whole block to the next frame via {@code Platform.runLater} is {@link #batchAsync}:
  *
  * <pre>
  * // Without batch: 3 CSS engine passes
@@ -87,6 +92,11 @@ public final class StylePerf {
    * <p>On a cache hit (identical classes), the call is a no-op. On a cache miss, delegates to
    * {@link UtilityConflictResolver#applyAll} and stores the new hash.
    *
+   * <p><b>Note:</b> the diff cache tracks only classes passed through this method. If you modify
+   * {@code node.getStyleClass()} directly (outside {@link #apply}), the cached hash becomes stale
+   * and a subsequent identical {@code apply} call may be skipped incorrectly. Call {@link
+   * #invalidate(Node)} after any external mutation of the style-class list.
+   *
    * @param node the node to apply classes to
    * @param classes utility classes to apply
    * @return {@code true} if classes were actually applied, {@code false} if skipped
@@ -104,7 +114,16 @@ public final class StylePerf {
 
     node.getProperties().put(DIFF_KEY, hash);
     UtilityConflictResolver.applyAll(node, classes);
-    TailwindFXMetrics.instance().recordApply(classes.length);
+    // Record the number of individual class tokens (applyAll splits whitespace-separated
+    // entries), not the varargs length, so metrics match actual applied work.
+    int tokenCount = 0;
+    for (String c : classes) {
+      if (c == null || c.isBlank()) continue;
+      for (String part : c.split("\\s+")) {
+        if (!part.isBlank()) tokenCount++;
+      }
+    }
+    if (tokenCount > 0) TailwindFXMetrics.instance().recordApply(tokenCount);
     return true;
   }
 
@@ -134,25 +153,38 @@ public final class StylePerf {
 
   // BatchApply
 
-  /**
-   * Whether a batch is currently accumulating (used on FX thread only). Not volatile — batch is
-   * always called on the FX thread.
-   */
-  private static boolean batchActive = false;
+  private static final Logger LOGGER = Logger.getLogger(StylePerf.class.getName());
 
   /**
-   * Pending batch operations (pairs of [node, classes[]]). Built up during batch(), flushed at the
-   * end.
+   * Whether a batch is currently accumulating. Volatile because {@link #isBatchActive()} is public
+   * and may be queried from other threads; enqueueing itself is still FX-thread only.
    */
-  private static final java.util.List<Object[]> pendingOps = new ArrayList<>();
+  private static volatile boolean batchActive = false;
 
   /**
-   * Executes {@code work} in batch mode: all {@code UtilityConflictResolver.applyAll} calls inside
-   * {@code work} are collected and flushed in a single pass at the end, triggering one CSS engine
-   * re-evaluation instead of one per node.
+   * Pending batch operations. Built up during {@code batch()}, flushed synchronously at the end.
+   */
+  private static final List<PendingOp> pendingOps = new ArrayList<>();
+
+  /**
+   * Re-entrancy guard: true while {@link #flushBatch()} is running, so nested enqueues (triggered
+   * by apply hooks invoked from within the flush) execute immediately instead of being lost —
+   * {@code batch()} clears the queue in its finally block.
+   */
+  private static boolean flushing = false;
+
+  /** A single deferred apply operation queued while a batch is active. */
+  private record PendingOp(Node node, String[] classes) {}
+
+  /**
+   * Executes {@code work} in batch mode: all deferred apply calls collected inside {@code work}
+   * (queued by {@link io.github.yasmramos.tailwindfx.TwStyle#apply}) are flushed <b>synchronously
+   * in a single consolidated pass at the end of this method</b>, triggering one CSS engine
+   * re-evaluation instead of one per node. If you need the flush to happen on the next frame
+   * instead, use {@link #batchAsync}.
    *
-   * <p>Batch mode is transparent to callers of {@link TailwindFX#apply} and {@link StylePerf#apply}
-   * — they do not need modification.
+   * <p>Batch mode is transparent to callers of {@link io.github.yasmramos.tailwindfx.TwStyle#apply}
+   * and {@link StylePerf#apply} — they do not need modification.
    *
    * <p>Must be called on the JavaFX Application Thread.
    *
@@ -189,53 +221,94 @@ public final class StylePerf {
   }
 
   /**
-   * Returns whether a batch is currently accumulating. Used internally by {@link TailwindFX#apply}
-   * to decide whether to defer.
+   * Returns whether a batch is currently accumulating. Used by {@link
+   * io.github.yasmramos.tailwindfx.TwStyle#apply} to decide whether to defer.
    */
   public static boolean isBatchActive() {
     return batchActive;
   }
 
-  // Auto-batch threshold
-
   /**
-   * Minimum number of nodes that triggers automatic batch mode when {@link
-   * TailwindFX#configure()}.{@code autoBatch(threshold)} is set. 0 = disabled (default).
-   */
-  static volatile int autoBatchThreshold = 0;
-
-  /** Enables automatic batching when at least {@code threshold} nodes are queued. */
-  public static void setAutoBatchThreshold(int threshold) {
-    autoBatchThreshold = Math.max(0, threshold);
-  }
-
-  /** Returns the current auto-batch threshold (0 = disabled). */
-  public static int getAutoBatchThreshold() {
-    return autoBatchThreshold;
-  }
-
-  /**
-   * Enqueues a deferred apply operation. Called by TwStyle.apply() when a batch is active. Do not
-   * call directly.
+   * Enqueues a deferred apply operation. Called by {@link io.github.yasmramos.tailwindfx.TwStyle}
+   * while a {@link #batch} block is active; outside a batch the operation is applied immediately
+   * (there is no frame boundary at which a later flush would be safe, so nothing is queued).
+   *
+   * <p><b>Threading contract:</b> must be called on the JavaFX Application Thread, same as {@link
+   * #batch}.
    *
    * @param node the node to apply to
-   * @param classes the classes to apply
+   * @param classes the classes to apply (defensively copied)
+   * @throws IllegalStateException if called from a non-FX thread
    */
   public static void enqueueDeferredApply(Node node, String[] classes) {
-    pendingOps.add(new Object[] {node, classes});
+    Preconditions.requireNode(node, "StylePerf.enqueueDeferredApply");
+    if (!Platform.isFxApplicationThread()) {
+      throw new IllegalStateException(
+          "StylePerf.enqueueDeferredApply: must be called on the JavaFX Application Thread");
+    }
+    if (classes == null || classes.length == 0) return;
+
+    if (!batchActive) {
+      // No batch accumulating — apply right away instead of queueing work that nobody would
+      // flush deterministically. (An earlier "auto-batch threshold" variant was removed: with
+      // only one enqueue site, TwStyle.apply inside batch(), implicit mid-loop flushes added
+      // complexity without a real use case.)
+      applyNow(node, classes);
+      return;
+    }
+
+    // Nested enqueue during a flush: apply immediately instead of queueing, because the outer
+    // flush already swapped the queue and batch() clears leftovers in its finally block.
+    if (flushing) {
+      applyNow(node, classes);
+      return;
+    }
+
+    pendingOps.add(new PendingOp(node, classes.clone()));
+  }
+
+  /** Applies classes directly, logging (instead of propagating) failures, for enqueue callers. */
+  private static void applyNow(Node node, String[] classes) {
+    try {
+      UtilityConflictResolver.applyAll(node, classes);
+    } catch (RuntimeException ex) {
+      LOGGER.log(Level.WARNING, "StylePerf.enqueueDeferredApply: immediate apply failed.", ex);
+    }
   }
 
   private static void flushBatch() {
     if (pendingOps.isEmpty()) return;
-    int count = 0;
-    for (Object[] op : pendingOps) {
-      Node node = (Node) op[0];
-      String[] cls = (String[]) op[1];
-      UtilityConflictResolver.applyAll(node, cls);
-      count += cls.length;
-    }
-    TailwindFXMetrics.instance().recordApply(count);
+    // Copy first so partial state survives an exception mid-flush; then clear the shared queue
+    // in a finally block so nothing is lost no matter how the loop exits.
+    List<PendingOp> ops = new ArrayList<>(pendingOps);
     pendingOps.clear();
+    // Re-entrancy guard: nested enqueueDeferredApply calls (triggered by apply hooks running
+    // inside this flush) execute immediately instead of piling up in a queue that batch()'s
+    // finally block would later discard.
+    boolean outerFlushing = flushing;
+    flushing = true;
+    int appliedClasses = 0;
+    try {
+      for (PendingOp op : ops) {
+        try {
+          UtilityConflictResolver.applyAll(op.node(), op.classes());
+          appliedClasses += op.classes().length;
+        } catch (RuntimeException ex) {
+          // A single bad token must not discard the rest of the batch.
+          LOGGER.log(
+              Level.WARNING,
+              "StylePerf.flushBatch: failed to apply classes "
+                  + java.util.Arrays.toString(op.classes())
+                  + " — skipping this operation.",
+              ex);
+        }
+      }
+    } finally {
+      flushing = outerFlushing;
+    }
+    if (appliedClasses > 0) {
+      TailwindFXMetrics.instance().recordApply(appliedClasses);
+    }
   }
 
   // Async batch — for non-FX-thread callers
@@ -282,6 +355,11 @@ public final class StylePerf {
    * System.out.printf("No batch: %.2f ms, Batch: %.2f ms%n", noBatch, withBatch);
    * </pre>
    *
+   * <p><b>This helper is indicative only:</b> it measures raw wall-clock time of the loop without
+   * JIT warm-up, GC pauses control or variance measurement. Do not use it for rigorous benchmarking
+   * (use JMH for that). Note that work scheduled via {@code Platform.runLater} is <em>not</em>
+   * waited on — only the enqueueing cost is measured.
+   *
    * @param count number of iterations
    * @param work function receiving the iteration index
    * @return elapsed wall-clock time in milliseconds
@@ -298,15 +376,20 @@ public final class StylePerf {
   // Helpers
 
   private static int computeHash(String[] classes) {
-    // Order-independent hash: sort to normalize "p-4 w-8" == "w-8 p-4"
-    String[] sorted = classes.clone();
-    // Inline sort to avoid Arrays.sort allocation in hot path
-    if (sorted.length > 1) {
-      Arrays.sort(sorted);
+    // Order-dependent hash: UtilityConflictResolver.applyAll resolves conflicts with "last wins"
+    // per category, so "p-4 p-8" and "p-8 p-4" are semantically different and must not collide.
+    // LinkedHashSet keeps first-insertion order; removing before re-adding collapses duplicates
+    // conservatively keeping the LAST occurrence position of each class (["a","b","a"] ->
+    // ["b","a"]).
+    LinkedHashSet<String> dedup = new LinkedHashSet<>();
+    for (String s : classes) {
+      if (s == null) continue;
+      dedup.remove(s);
+      dedup.add(s);
     }
     int h = 1;
-    for (String s : sorted) {
-      if (s != null) h = 31 * h + s.hashCode();
+    for (String s : dedup) {
+      h = 31 * h + s.hashCode();
     }
     return h;
   }
