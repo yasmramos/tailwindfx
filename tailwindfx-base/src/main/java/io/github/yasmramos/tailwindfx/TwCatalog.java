@@ -179,21 +179,25 @@ public final class TwCatalog {
     ThemeCssGenerator generator = new ThemeCssGenerator(config);
     css.append(generator.generateBaseCss());
     css.append("\n");
-      // Compile each utility class and append to CSS
+    // Compile each utility class and append to CSS
 
     Set<String> allClasses = allUtilityClasses(config);
+    java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TwCatalog.class.getName());
     for (String utilityClass : allClasses) {
       try {
         JitCompiler.BatchResult result = JitCompiler.compileBatch(utilityClass);
         if (result.hasInlineStyle()) {
+          // Escape the raw class name so selectors like ".w-1\/2" or ".top-\[50\%\]" are valid CSS.
+          String selector =
+              io.github.yasmramos.tailwindfx.core.CssIdentEscaper.toSelector(utilityClass);
           String classCss =
-              "." + utilityClass + " {\n  " + result.inlineStyle().replace("; ", ";\n  ") + "\n}\n";
+              selector + " {\n  " + result.inlineStyle().replace("; ", ";\n  ") + "\n}\n";
           css.append(classCss);
         }
       } catch (Exception e) {
-        // Skip utilities that fail to compile
-        System.getLogger(TwCatalog.class.getName())
-            .log(System.Logger.Level.DEBUG, "Failed to compile utility: " + utilityClass, e);
+        // Skip utilities that fail to compile but surface the failure loudly (no silent drops).
+        logger.log(
+            java.util.logging.Level.WARNING, "Failed to compile utility: " + utilityClass, e);
       }
     }
 
