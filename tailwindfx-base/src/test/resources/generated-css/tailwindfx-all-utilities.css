@@ -429,190 +429,190 @@
     -shadow-none: 0px;
 }
 
-.-rotate-1 {
+.\-rotate-1 {
   -fx-rotate: -1;
 }
-.-rotate-12 {
+.\-rotate-12 {
   -fx-rotate: -12;
 }
-.-rotate-180 {
+.\-rotate-180 {
   -fx-rotate: -180;
 }
-.-rotate-2 {
+.\-rotate-2 {
   -fx-rotate: -2;
 }
-.-rotate-3 {
+.\-rotate-3 {
   -fx-rotate: -3;
 }
-.-rotate-45 {
+.\-rotate-45 {
   -fx-rotate: -45;
 }
-.-rotate-6 {
+.\-rotate-6 {
   -fx-rotate: -6;
 }
-.-rotate-90 {
+.\-rotate-90 {
   -fx-rotate: -90;
 }
-.-translate-x-0 {
+.\-translate-x-0 {
   -fx-translate-x: 0px;
 }
-.-translate-x-1 {
+.\-translate-x-1 {
   -fx-translate-x: -2px;
 }
-.-translate-x-10 {
+.\-translate-x-10 {
   -fx-translate-x: -40px;
 }
-.-translate-x-11 {
+.\-translate-x-11 {
   -fx-translate-x: -44px;
 }
-.-translate-x-12 {
+.\-translate-x-12 {
   -fx-translate-x: -48px;
 }
-.-translate-x-14 {
+.\-translate-x-14 {
   -fx-translate-x: -56px;
 }
-.-translate-x-16 {
+.\-translate-x-16 {
   -fx-translate-x: -64px;
 }
-.-translate-x-2 {
+.\-translate-x-2 {
   -fx-translate-x: -4px;
 }
-.-translate-x-20 {
+.\-translate-x-20 {
   -fx-translate-x: -80px;
 }
-.-translate-x-24 {
+.\-translate-x-24 {
   -fx-translate-x: -96px;
 }
-.-translate-x-28 {
+.\-translate-x-28 {
   -fx-translate-x: -112px;
 }
-.-translate-x-3 {
+.\-translate-x-3 {
   -fx-translate-x: -6px;
 }
-.-translate-x-32 {
+.\-translate-x-32 {
   -fx-translate-x: -128px;
 }
-.-translate-x-36 {
+.\-translate-x-36 {
   -fx-translate-x: -144px;
 }
-.-translate-x-4 {
+.\-translate-x-4 {
   -fx-translate-x: -16px;
 }
-.-translate-x-40 {
+.\-translate-x-40 {
   -fx-translate-x: -160px;
 }
-.-translate-x-44 {
+.\-translate-x-44 {
   -fx-translate-x: -176px;
 }
-.-translate-x-48 {
+.\-translate-x-48 {
   -fx-translate-x: -192px;
 }
-.-translate-x-5 {
+.\-translate-x-5 {
   -fx-translate-x: -20px;
 }
-.-translate-x-52 {
+.\-translate-x-52 {
   -fx-translate-x: -208px;
 }
-.-translate-x-56 {
+.\-translate-x-56 {
   -fx-translate-x: -224px;
 }
-.-translate-x-6 {
+.\-translate-x-6 {
   -fx-translate-x: -24px;
 }
-.-translate-x-60 {
+.\-translate-x-60 {
   -fx-translate-x: -240px;
 }
-.-translate-x-64 {
+.\-translate-x-64 {
   -fx-translate-x: -256px;
 }
-.-translate-x-7 {
+.\-translate-x-7 {
   -fx-translate-x: -28px;
 }
-.-translate-x-8 {
+.\-translate-x-8 {
   -fx-translate-x: -32px;
 }
-.-translate-x-9 {
+.\-translate-x-9 {
   -fx-translate-x: -36px;
 }
-.-translate-y-0 {
+.\-translate-y-0 {
   -fx-translate-y: 0px;
 }
-.-translate-y-1 {
+.\-translate-y-1 {
   -fx-translate-y: -2px;
 }
-.-translate-y-10 {
+.\-translate-y-10 {
   -fx-translate-y: -40px;
 }
-.-translate-y-11 {
+.\-translate-y-11 {
   -fx-translate-y: -44px;
 }
-.-translate-y-12 {
+.\-translate-y-12 {
   -fx-translate-y: -48px;
 }
-.-translate-y-14 {
+.\-translate-y-14 {
   -fx-translate-y: -56px;
 }
-.-translate-y-16 {
+.\-translate-y-16 {
   -fx-translate-y: -64px;
 }
-.-translate-y-2 {
+.\-translate-y-2 {
   -fx-translate-y: -4px;
 }
-.-translate-y-20 {
+.\-translate-y-20 {
   -fx-translate-y: -80px;
 }
-.-translate-y-24 {
+.\-translate-y-24 {
   -fx-translate-y: -96px;
 }
-.-translate-y-28 {
+.\-translate-y-28 {
   -fx-translate-y: -112px;
 }
-.-translate-y-3 {
+.\-translate-y-3 {
   -fx-translate-y: -6px;
 }
-.-translate-y-32 {
+.\-translate-y-32 {
   -fx-translate-y: -128px;
 }
-.-translate-y-36 {
+.\-translate-y-36 {
   -fx-translate-y: -144px;
 }
-.-translate-y-4 {
+.\-translate-y-4 {
   -fx-translate-y: -16px;
 }
-.-translate-y-40 {
+.\-translate-y-40 {
   -fx-translate-y: -160px;
 }
-.-translate-y-44 {
+.\-translate-y-44 {
   -fx-translate-y: -176px;
 }
-.-translate-y-48 {
+.\-translate-y-48 {
   -fx-translate-y: -192px;
 }
-.-translate-y-5 {
+.\-translate-y-5 {
   -fx-translate-y: -20px;
 }
-.-translate-y-52 {
+.\-translate-y-52 {
   -fx-translate-y: -208px;
 }
-.-translate-y-56 {
+.\-translate-y-56 {
   -fx-translate-y: -224px;
 }
-.-translate-y-6 {
+.\-translate-y-6 {
   -fx-translate-y: -24px;
 }
-.-translate-y-60 {
+.\-translate-y-60 {
   -fx-translate-y: -240px;
 }
-.-translate-y-64 {
+.\-translate-y-64 {
   -fx-translate-y: -256px;
 }
-.-translate-y-7 {
+.\-translate-y-7 {
   -fx-translate-y: -28px;
 }
-.-translate-y-8 {
+.\-translate-y-8 {
   -fx-translate-y: -32px;
 }
-.-translate-y-9 {
+.\-translate-y-9 {
   -fx-translate-y: -36px;
 }
 .aspect-auto {
