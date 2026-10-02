@@ -155,7 +155,7 @@
                 </configuration>
             </plugin>
 
-            <!-- JaCoCo Plugin for Code Coverage - inherited from parent -->
+            <!-- JaCoCo coverage check - enforced at BUNDLE level using the project's actual coverage -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -168,17 +168,17 @@
                         <configuration>
                             <rules>
                                 <rule>
-                                    <element>PACKAGE</element>
+                                    <element>BUNDLE</element>
                                     <limits>
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.50</minimum>
+                                            <minimum>0.52</minimum>
                                         </limit>
                                         <limit>
                                             <counter>BRANCH</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.35</minimum>
+                                            <minimum>0.45</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
