@@ -262,9 +262,14 @@
                 <configuration>
                     <source>17</source>
                     <!-- Pin UTF-8 explicitly instead of relying on the platform
-                         default charset. Without this, javadoc picks up windows-1252
-                         on Windows and fails on any non-ASCII source character
-                         (e.g. the U+25CF echo char in TwInput.password()). -->
+                         default charset. "charset" sets the javadoc -charset flag
+                         (how source files are read); "encoding" sets the output
+                         encoding. Both are required: without them javadoc picks
+                         up windows-1252 on Windows and fails on any non-ASCII
+                         source character (e.g. the U+25CF echo char in
+                         TwInput.password()) with "unmappable character" and
+                         "unclosed character literal". -->
+                    <charset>UTF-8</charset>
                     <encoding>UTF-8</encoding>
                     <detectJavaApiLink>false</detectJavaApiLink>
                     <quiet>true</quiet>
