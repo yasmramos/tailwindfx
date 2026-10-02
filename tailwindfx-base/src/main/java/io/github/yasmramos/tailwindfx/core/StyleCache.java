@@ -1,6 +1,8 @@
 package io.github.yasmramos.tailwindfx.core;
 
+import javafx.beans.value.ChangeListener;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 
 /**
  * StyleCache - Centralized cache management for TailwindFX styles.
@@ -36,7 +38,9 @@ public final class StyleCache {
   public static void invalidate(Node node) {
     Preconditions.requireNode(node, "StyleCache.invalidate");
     node.getProperties().remove(CATEGORY_CACHE_KEY);
-    node.getProperties().remove(CLEANUP_LISTENER_KEY);
+    // Detach the change listener as well: dropping only the property would leave the listener
+    // attached to sceneProperty(), keeping the node (and its callback) reachable.
+    removeCleanupListener(node);
   }
 
   /**
@@ -87,24 +91,55 @@ public final class StyleCache {
   }
 
   /**
-   * Stores a cleanup listener reference for a node.
+   * Registers a cleanup listener that is run when the node leaves the scene graph.
+   *
+   * <p>The listener is attached to {@link Node#sceneProperty()}: when the node is removed from a
+   * scene (detached, or its window closed) the action runs and the registration is dropped. Passing
+   * {@code null} clears the registration without running anything.
+   *
+   * <p>Re-registering on the same node replaces both the stored action and the change listener.
    *
    * @param node the node to attach the listener to
-   * @param listener the listener object to store
+   * @param listener the action to run on detach, or {@code null} to clear the registration
    */
-  public static void setCleanupListener(Node node, Object listener) {
+  public static void setCleanupListener(Node node, Runnable listener) {
     Preconditions.requireNode(node, "StyleCache.setCleanupListener");
-    node.getProperties().put(CLEANUP_LISTENER_KEY, listener);
+    Object existing = node.getProperties().get(CLEANUP_LISTENER_KEY);
+    if (existing != null) {
+      node.sceneProperty().removeListener((ChangeListener<Scene>) existing);
+      node.getProperties().remove(CLEANUP_LISTENER_KEY);
+    }
+    if (listener == null) return;
+
+    ChangeListener<Scene> onDetach =
+        (obs, oldScene, newScene) -> {
+          // Only a real detach (scene -> null) triggers cleanup; re-parenting within a scene or
+          // moving between scenes must not.
+          if (newScene != null) return;
+          try {
+            listener.run();
+          } catch (RuntimeException e) {
+            // Never let a user callback break the scene graph transition that triggered it.
+            Preconditions.LOG.log(
+                java.util.logging.Level.WARNING, "StyleCache cleanup listener failed.", e);
+          }
+        };
+    node.getProperties().put(CLEANUP_LISTENER_KEY, onDetach);
+    node.sceneProperty().addListener(onDetach);
   }
 
   /**
-   * Removes the cleanup listener reference from a node.
+   * Removes the cleanup listener reference from a node without running it.
    *
    * @param node the node whose listener should be removed
    */
   public static void removeCleanupListener(Node node) {
     Preconditions.requireNode(node, "StyleCache.removeCleanupListener");
-    node.getProperties().remove(CLEANUP_LISTENER_KEY);
+    Object existing = node.getProperties().get(CLEANUP_LISTENER_KEY);
+    if (existing != null) {
+      node.sceneProperty().removeListener((ChangeListener<Scene>) existing);
+      node.getProperties().remove(CLEANUP_LISTENER_KEY);
+    }
   }
 
   /**

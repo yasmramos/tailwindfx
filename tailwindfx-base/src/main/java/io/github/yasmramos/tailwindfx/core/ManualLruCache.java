@@ -1,5 +1,9 @@
 package io.github.yasmramos.tailwindfx.core;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -45,9 +49,6 @@ public class ManualLruCache<K, V> {
 
   /** Interval at which to check for cleanup (number of accesses). */
   private static final int CLEANUP_INTERVAL = 100;
-
-  /** Overhead factor for cleanup trigger (cleanup when size > maxSize * 1.2). */
-  private static final double OVERHEAD_FACTOR = 1.2;
 
   /**
    * Creates a new LRU cache with the specified maximum size.
@@ -99,11 +100,9 @@ public class ManualLruCache<K, V> {
 
     CacheEntry<V> oldEntry = storage.put(key, newEntry);
 
-    // Check if cleanup is needed - trigger immediately when over threshold
-    if (storage.size() > (int) (maxSize * OVERHEAD_FACTOR)) {
-      cleanup();
-    } else if (storage.size() > maxSize) {
-      // Also cleanup if we're over max but under overhead threshold
+    // Evict as soon as the hard bound is exceeded. Both branches previously called cleanup(), which
+    // made OVERHEAD_FACTOR dead weight: the soft threshold could never delay an eviction.
+    if (storage.size() > maxSize) {
       cleanup();
     }
 
@@ -123,7 +122,7 @@ public class ManualLruCache<K, V> {
 
     if (oldEntry == null) {
       // New entry was added, check if cleanup is needed
-      if (storage.size() > (int) (maxSize * OVERHEAD_FACTOR)) {
+      if (storage.size() > maxSize) {
         cleanup();
       }
       return null;
@@ -208,16 +207,24 @@ public class ManualLruCache<K, V> {
       return;
     }
 
-    // Find and remove the oldest entries based on access time
-    // We need to remove enough entries to get under the limit
-    int toRemove = storage.size() - maxSize;
-
-    // Get a snapshot of entries sorted by access time
-    storage.entrySet().stream()
-        .sorted(
-            (e1, e2) -> Long.compare(e1.getValue().lastAccessTime, e2.getValue().lastAccessTime))
-        .limit(toRemove)
-        .forEach(entry -> storage.remove(entry.getKey()));
+    // Evict the least recently used entries. The candidate list is materialized before any removal
+    // so the iteration never observes concurrent structural changes, and removals are verified so
+    // the cache cannot stay above the bound when another thread wins the race for the same key.
+    while (storage.size() > maxSize) {
+      List<Map.Entry<K, CacheEntry<V>>> candidates =
+          new ArrayList<>(storage.entrySet());
+      candidates.sort(
+          Comparator.comparingLong(e -> e.getValue().lastAccessTime));
+      boolean evicted = false;
+      for (Map.Entry<K, CacheEntry<V>> candidate : candidates) {
+        if (storage.remove(candidate.getKey(), candidate.getValue())) {
+          evicted = true;
+          if (storage.size() <= maxSize) break;
+        }
+      }
+      // Every candidate was concurrently removed or replaced: nothing left to evict this round.
+      if (!evicted) return;
+    }
   }
 
   /**
