@@ -136,7 +136,11 @@ public class TwInput extends TextField {
    */
   public static TwInput password() {
     TwInput input = new TwInput("Password");
-    input.setEchoChar('●');
+    // U+25CF BLACK CIRCLE, written as a Unicode escape on purpose. A literal non-ASCII char in a
+    // character literal makes javadoc fail with "unmappable character" whenever the source
+    // encoding is not honoured (javadoc ignores -encoding for sources read through --patch-module),
+    // which breaks the release build. The escape keeps the source pure ASCII.
+    input.setEchoChar('\u25CF');
     return input;
   }
 
