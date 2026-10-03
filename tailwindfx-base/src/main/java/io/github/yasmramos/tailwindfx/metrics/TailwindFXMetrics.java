@@ -44,8 +44,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * // Uptime:            00:04:32
  * </pre>
  *
- * <p>Reset counters at any point with {@link #reset()}. Metrics are disabled by default — enable
- * with {@link #setEnabled(boolean)}.
+ * <p>Reset counters at any point with {@link #reset()}. Metrics are <b>enabled by default</b> —
+ * disable them with {@link #setEnabled(false)} when the counters are not wanted.
  */
 public final class TailwindFXMetrics {
 
@@ -62,6 +62,9 @@ public final class TailwindFXMetrics {
 
   private volatile boolean enabled = true;
   private final long startTime = System.currentTimeMillis();
+
+  /** Number of cache misses between two threshold evaluations. */
+  private static final long ALERT_SAMPLE_INTERVAL = 50;
 
   // JIT cache
   private final AtomicLong jitCacheHits = new AtomicLong();
@@ -98,9 +101,11 @@ public final class TailwindFXMetrics {
   /** Records a JIT cache miss. */
   public void recordCacheMiss() {
     if (!enabled) return;
-    jitCacheMisses.incrementAndGet();
-    // Sample alerts every 50 misses to avoid overhead
-    if (jitCacheMisses.get() % 50 == 0) checkAlerts();
+    // Use the value returned by incrementAndGet instead of re-reading the counter. A separate
+    // get() can observe a different thread's increment, so two threads could both see a multiple
+    // of SAMPLE_INTERVAL and fire the same alert, or none would fire for a given interval.
+    long count = jitCacheMisses.incrementAndGet();
+    if (count % ALERT_SAMPLE_INTERVAL == 0) checkAlerts();
   }
 
   /** Records a JIT compilation. */
@@ -255,7 +260,7 @@ public final class TailwindFXMetrics {
   // Control
 
   /**
-   * Enables or disables metric collection. Disabled by default. When disabled, all {@code
+   * Enables or disables metric collection. Enabled by default. When disabled, all {@code
    * record*()} calls are no-ops.
    *
    * @param enabled {@code true} to enable, {@code false} to disable
@@ -536,12 +541,18 @@ public final class TailwindFXMetrics {
               "Pre-compile common tokens at startup using apply() which auto-detects JIT tokens"));
     }
 
-    if (!enabled || (cacheHits() == 0 && cacheMisses() == 0 && compilations() == 0)) {
+    if (!enabled) {
+      issues.add(
+          new HealthIssue(
+              "WARN",
+              "Metric collection is disabled",
+              "Call TwMetrics.setEnabled(true) before running your app to collect data"));
+    } else if (cacheHits() == 0 && cacheMisses() == 0 && compilations() == 0) {
       issues.add(
           new HealthIssue(
               "WARN",
               "No metrics data collected",
-              "Call TwMetrics.setEnabled(true) before running your app"));
+              "Metrics are enabled but nothing has been recorded yet; exercise the styled nodes first"));
     }
 
     return java.util.Collections.unmodifiableList(issues);

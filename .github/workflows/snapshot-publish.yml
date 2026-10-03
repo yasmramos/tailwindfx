@@ -58,8 +58,11 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
         run: |
-          # Deploy snapshot to Maven Central via Central Portal snapshots endpoint
-          mvn --batch-mode clean deploy \
+          # Deploy snapshot to Maven Central through the Central Publishing Portal.
+          # "clean" is intentionally omitted: the previous step already ran
+          # "clean verify", so cleaning again would delete the verified build
+          # output and force a full recompilation before every deployment.
+          mvn --batch-mode deploy \
             -P snapshot \
             -Drevision=${SNAPSHOT_VERSION} \
             -DskipTests
@@ -68,5 +71,10 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: maven-snapshot-artifacts
+          # The root aggregator produces no jar, so the module paths must be
+          # listed explicitly for a multi-module build.
           path: |
-            target/*.jar
+            tailwindfx-base/target/*.jar
+            tailwindfx-components/target/*.jar
+            tailwindfx-maven-plugin/target/*.jar
+          if-no-files-found: error

@@ -398,13 +398,23 @@ public class TwVirtualFlow<T> extends Region {
    * @param index the index to select; ignored when out of bounds
    */
   public void selectIndex(int index) {
+    if (selectionMode.get() == SelectionMode.NONE) return;
     if (index < 0 || index >= items.size()) return;
+    selectIndexInternal(index);
+    if (onSelectionChange != null) onSelectionChange.accept(getSelectedItems());
+  }
+
+  /**
+   * Performs the selection mutation without notifying {@link #onSelectionChange}. Callers that need
+   * to fire the callback exactly once (such as {@link #handleSelection}) use this and notify
+   * themselves after the whole interaction is resolved.
+   */
+  private void selectIndexInternal(int index) {
     if (selectionMode.get() == SelectionMode.MULTIPLE) {
       if (!selectedIndices.contains(index)) selectedIndices.add(index);
     } else {
       selectedIndices.setAll(index);
     }
-    if (onSelectionChange != null) onSelectionChange.accept(getSelectedItems());
   }
 
   // Public API - Scrolling & Animation
@@ -701,8 +711,11 @@ public class TwVirtualFlow<T> extends Region {
       return;
     }
 
+    // Every branch below mutates the selection at most once, and the callback is fired once at the
+    // end. Calling the public selectIndex() here used to fire onSelectionChange twice, because it
+    // notifies internally as well.
     if (selectionMode.get() == SelectionMode.SINGLE) {
-      selectIndex(idx);
+      selectIndexInternal(idx);
     } else if (selectionMode.get() == SelectionMode.MULTIPLE) {
       if (e.isShiftDown() && !selectedIndices.isEmpty()) {
         int last = selectedIndices.get(selectedIndices.size() - 1);
@@ -713,7 +726,7 @@ public class TwVirtualFlow<T> extends Region {
         if (selectedIndices.contains(idx)) selectedIndices.remove(Integer.valueOf(idx));
         else selectedIndices.add(idx);
       } else {
-        selectIndex(idx);
+        selectIndexInternal(idx);
       }
     }
     if (onSelect != null) onSelect.accept(idx);

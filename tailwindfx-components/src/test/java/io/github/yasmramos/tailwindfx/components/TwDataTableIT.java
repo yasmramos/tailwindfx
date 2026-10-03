@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Comparator;
 import java.util.List;
 import javafx.application.Platform;
 import javafx.scene.control.TableView;
@@ -193,11 +194,108 @@ public class TwDataTableIT extends ApplicationTest {
       t.clearFilter();
       assertEquals(5, t.filteredSize());
     }
+
+    @Test
+    @DisplayName("Programmatic filter survives a search-bar filter (combined with AND)")
+    void testSetFilterCombinesWithSearch() {
+      TwDataTable<Person> t =
+          TwDataTable.of(Person.class)
+              .column("Name", Person::name)
+              .column("Email", Person::email)
+              .searchable(true)
+              .build();
+      t.setItems(sampleData());
+
+      // Programmatic filter alone: age < 30 -> Bob(25), Diana(28), Eve(22)
+      t.setFilter(p -> p.age() < 30);
+      assertEquals(3, t.filteredSize());
+
+      // Now type a search term that must narrow the SAME programmatic filter instead of
+      // replacing it. Before the fix, the search listener overwrote filtered's predicate, so the
+      // programmatic filter was silently dropped and all 5 rows matched the term.
+      t.container();
+      searchFieldOf(t).setText("e");
+      awaitSearchDebounce();
+      // Rows matching "e" in name or email AND age < 30.
+      assertEquals(2, t.filteredSize(), "search must combine with the programmatic filter");
+
+      // Removing the search term restores the programmatic filter result.
+      searchFieldOf(t).setText("");
+      awaitSearchDebounce();
+      assertEquals(3, t.filteredSize(), "clearing the search restores the programmatic filter");
+    }
+
+    @Test
+    @DisplayName("Programmatic filter still applies after clearFilter with an active search")
+    void testClearFilterKeepsSearch() {
+      TwDataTable<Person> t =
+          TwDataTable.of(Person.class)
+              .column("Name", Person::name)
+              .searchable(true)
+              .build();
+      t.setItems(sampleData());
+
+      t.setFilter(p -> p.age() >= 28);
+      searchFieldOf(t).setText("a");
+      awaitSearchDebounce();
+      int combined = t.filteredSize();
+
+      t.clearFilter();
+      // After clearing the programmatic filter only the search term remains.
+      int searchOnly = t.filteredSize();
+      assertTrue(searchOnly >= combined, "clearing the filter cannot narrow the result set");
+    }
+
+    /** Reaches the private search field of a searchable table through the public container. */
+    private javafx.scene.control.TextField searchFieldOf(TwDataTable<Person> table) {
+      javafx.scene.Node searchBar =
+          table.container().getChildren().stream()
+              .filter(n -> n.getStyleClass().contains("search-bar"))
+              .findFirst()
+              .orElseThrow(() -> new AssertionError("search bar not found in container"));
+      return (javafx.scene.control.TextField) ((javafx.scene.layout.HBox) searchBar).getChildren().get(0);
+    }
+
+    /** The search field is debounced with a 250ms PauseTransition; wait for it to fire. */
+    private void awaitSearchDebounce() {
+      org.testfx.util.WaitForAsyncUtils.waitFor(
+          2, java.util.concurrent.TimeUnit.SECONDS);
+    }
   }
 
   @Nested
   @DisplayName("Pagination")
   class Pagination {
+
+    @Test
+    @DisplayName("Sorting reorders the visible page when pagination is enabled")
+    void testSortingWithPaginationReordersVisibleItems() {
+      TwDataTable<Person> t =
+          TwDataTable.of(Person.class)
+              .column("Name", Person::name)
+              .pageSize(2)
+              .build();
+
+      // Unsorted input: Alice, Bob, Diana, Eve, Frank
+      t.setItems(sampleData());
+      assertEquals(List.of("Alice", "Bob"), visibleNames(t));
+
+      // Change the comparator the way TableView does when a column header is clicked.
+      t.getComparatorProperty().set(String::compareTo);
+      // With the fix the page is re-sliced from the sorted view, so the first page is the
+      // alphabetically first pair. Before the fix the materialized copy was never refreshed and
+      // the visible rows stayed "Alice, Bob" no matter what the comparator was.
+      assertEquals(List.of("Alice", "Bob"), visibleNames(t));
+
+      t.getComparatorProperty().set(Comparator.<Person, String>comparing(Person::name).reversed());
+      assertEquals(
+          List.of("Frank", "Eve"), visibleNames(t), "descending sort must re-slice the visible page");
+    }
+
+    /** Reads the rendered column values of the current page. */
+    private List<String> visibleNames(TwDataTable<Person> table) {
+      return table.getItems().stream().map(Person::name).toList();
+    }
 
     @Test
     @DisplayName("Page count calculation")

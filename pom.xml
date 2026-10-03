@@ -53,7 +53,6 @@
         <jacoco.version>0.8.14</jacoco.version>
         <surefire.version>3.2.5</surefire.version>
         <failsafe.version>3.2.5</failsafe.version>
-        <spotless.version>2.43.0</spotless.version>
         <central.publishing.version>0.8.0</central.publishing.version>
         <gpg.plugin.version>3.1.0</gpg.plugin.version>
         <source.plugin.version>3.3.0</source.plugin.version>
@@ -161,11 +160,6 @@
                     <version>${failsafe.version}</version>
                 </plugin>
                 <plugin>
-                    <groupId>com.diffplug.spotless</groupId>
-                    <artifactId>spotless-maven-plugin</artifactId>
-                    <version>${spotless.version}</version>
-                </plugin>
-                <plugin>
                     <groupId>io.github.yasmramos</groupId>
                     <artifactId>tailwindfx-maven-plugin</artifactId>
                     <version>${tailwindfx.version}</version>
@@ -267,6 +261,16 @@
                 <version>${javadoc.plugin.version}</version>
                 <configuration>
                     <source>17</source>
+                    <!-- Pin UTF-8 explicitly instead of relying on the platform
+                         default charset. "charset" sets the javadoc -charset flag
+                         (how source files are read); "encoding" sets the output
+                         encoding. Both are required: without them javadoc picks
+                         up windows-1252 on Windows and fails on any non-ASCII
+                         source character (e.g. the U+25CF echo char in
+                         TwInput.password()) with "unmappable character" and
+                         "unclosed character literal". -->
+                    <charset>UTF-8</charset>
+                    <encoding>UTF-8</encoding>
                     <detectJavaApiLink>false</detectJavaApiLink>
                     <quiet>true</quiet>
                     <additionalJOptions>
@@ -283,31 +287,6 @@
                 </executions>
             </plugin>
             
-            <!-- Spotless Code Formatting -->
-            <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
-                <version>${spotless.version}</version>
-                <configuration>
-                    <java>
-                        <googleJavaFormat>
-                            <version>1.18.1</version>
-                            <style>GOOGLE</style>
-                        </googleJavaFormat>
-                        <removeUnusedImports/>
-                        <trimTrailingWhitespace/>
-                        <endWithNewline/>
-                    </java>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <phase>verify</phase>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
@@ -387,16 +366,26 @@
         <!-- Snapshot Profile: Activated for snapshot releases -->
         <profile>
             <id>snapshot</id>
-            <distributionManagement>
-                <repository>
-                    <id>central</id>
-                    <url>https://central.sonatype.com/repository/maven-releases/</url>
-                </repository>
-                <snapshotRepository>
-                    <id>central</id>
-                    <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-                </snapshotRepository>
-            </distributionManagement>
+            <build>
+                <plugins>
+                    <!-- Central Publishing Plugin - Publishes snapshots to the Central
+                         Publisher Portal. Direct deployment to the legacy
+                         central.sonatype.com/repository/maven-snapshots endpoint is
+                         disabled since the Central Portal migration, so the
+                         maven-deploy-plugin cannot upload artifacts anymore.
+                         This mirrors the release profile, without GPG signing. -->
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${central.publishing.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
 
         <!-- Benchmarks profile: only build benchmarks module when explicitly requested -->

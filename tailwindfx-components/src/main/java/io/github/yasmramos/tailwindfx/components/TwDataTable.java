@@ -70,7 +70,15 @@ public final class TwDataTable<T> extends TableView<T> {
 
   // Builder
 
-  /** Creates a new builder for type {@code T}. */
+  /**
+   * Creates a new builder for type {@code T}.
+   *
+   * <p>The {@code type} argument is only a compile-time convenience for inference; column extractors
+   * are not validated against it at runtime.
+   *
+   * @param type the item type, used for type inference
+   * @return a new builder
+   */
   public static <T> Builder<T> of(Class<T> type) {
     return new Builder<>();
   }
@@ -164,6 +172,32 @@ public final class TwDataTable<T> extends TableView<T> {
   private final SortedList<T> sorted;
   private final VBox container;
 
+  /** Current search-bar term, or {@code null} when the table is not searchable. */
+  private String searchTerm = null;
+
+  /**
+   * Rebuilds {@link #filtered}'s predicate from the two independent filter sources: the
+   * programmatic filter set through {@link #setFilter} and the search-bar term. They are combined
+   * with AND, so neither one silently replaces the other.
+   */
+  private void recomputeFilter() {
+    Predicate<T> program = programFilter;
+    String term = searchTerm;
+    if (program == null && (term == null || term.isBlank())) {
+      filtered.setPredicate(p -> true);
+      return;
+    }
+    filtered.setPredicate(
+        item -> {
+          if (program != null && !program.test(item)) return false;
+          if (term == null || term.isBlank()) return true;
+          // Search across all column values.
+          return cols.stream()
+              .map(col -> col.value().apply(item))
+              .anyMatch(val -> val != null && val.toLowerCase().contains(term));
+        });
+  }
+
   // Pagination state
   private final boolean paginated;
   private final int pageSize;
@@ -171,6 +205,12 @@ public final class TwDataTable<T> extends TableView<T> {
 
   // Search
   private final TextField searchField;
+
+  /** Column definitions, retained so {@link #recomputeFilter()} can search across them. */
+  private final List<ColDef<T>> cols;
+
+  /** Programmatic filter set through {@link #setFilter}; combined with {@link #searchTerm}. */
+  private Predicate<T> programFilter = null;
 
   // Construction
 
@@ -181,6 +221,7 @@ public final class TwDataTable<T> extends TableView<T> {
     this.filtered = new FilteredList<>(source, p -> true);
     this.sorted = new SortedList<>(filtered);
     this.searchField = b.searchable ? new TextField() : null;
+    this.cols = List.copyOf(b.cols);
 
     buildColumns(b.cols);
     configureTable(b);
@@ -230,7 +271,8 @@ public final class TwDataTable<T> extends TableView<T> {
    * @param predicate the filter condition (null = show all)
    */
   public void setFilter(Predicate<T> predicate) {
-    filtered.setPredicate(predicate != null ? predicate : p -> true);
+    this.programFilter = predicate;
+    recomputeFilter();
     if (paginated) {
       currentPage = 0;
       applyPage();
@@ -306,6 +348,13 @@ public final class TwDataTable<T> extends TableView<T> {
       getColumns().add(col);
     }
     sorted.comparatorProperty().bind(comparatorProperty());
+
+    // With pagination the TableView holds a materialized copy of the current page, so a change of
+    // comparator reorders the sorted view but never reaches the visible items. Re-slice the page
+    // whenever the sort order changes, otherwise clicking a column header does nothing.
+    comparatorProperty().addListener((obs, oldComp, newComp) -> {
+          if (paginated) applyPage();
+        });
   }
 
   private void configureTable(Builder<T> b) {
@@ -364,15 +413,8 @@ public final class TwDataTable<T> extends TableView<T> {
               (obs, ov, nv) -> {
                 debounce.setOnFinished(
                     e -> {
-                      String lower = nv == null ? "" : nv.toLowerCase();
-                      filtered.setPredicate(
-                          item -> {
-                            if (lower.isBlank()) return true;
-                            // Search across all column values
-                            return b.cols.stream()
-                                .map(col -> col.value().apply(item))
-                                .anyMatch(val -> val != null && val.toLowerCase().contains(lower));
-                          });
+                      searchTerm = nv == null ? "" : nv.toLowerCase();
+                      recomputeFilter();
                       if (paginated) {
                         currentPage = 0;
                         applyPage();

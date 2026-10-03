@@ -540,19 +540,28 @@ public final class ThemeManager {
   }
 
   /**
-   * Safely applies CSS to a node, catching any NPEs that may occur if the node is not fully
-   * initialized.
+   * Safely applies CSS to a node, absorbing the failures JavaFX can raise when {@code applyCss()}
+   * runs before the node is fully attached to the scene graph.
    *
-   * <p>JavaFX's internal CSS processing can throw NPEs when applyCss() is called before the node is
-   * fully attached to the scene graph or during early initialization phases.
+   * <p>JavaFX's internal CSS processing does not only throw {@link NullPointerException}. When the
+   * node tree is in a transient state, {@code StyleMap.getCascadingStyles} can fail with an {@link
+   * AssertionError}. {@link AssertionError} is an {@link Error}, not an {@link Exception}, so a
+   * {@code catch (NullPointerException)} block does not contain it: the error escaped {@code
+   * safeApplyCss}, aborted the deferred refresh scheduled by {@link #forceStyleRefresh} and
+   * surfaced on the JavaFX Application Thread. Catching {@link Throwable} keeps the refresh best
+   * effort as documented.
+   *
+   * @param node the node whose CSS should be refreshed; ignored when {@code null}
    */
   private static void safeApplyCss(Node node) {
     if (node == null) return;
     try {
       node.applyCss();
-    } catch (NullPointerException e) {
-      // Ignore NPEs during CSS application - node may not be fully initialized yet
-      // This is expected behavior in some edge cases during scene graph transitions
+    } catch (RuntimeException | Error e) {
+      // The node may not be fully initialized yet. This is expected during scene graph
+      // transitions, so the failure is logged at FINE level and must never propagate to the
+      // caller or to the JavaFX Application Thread.
+      Preconditions.LOG.log(java.util.logging.Level.FINE, "ThemeManager.safeApplyCss: skipped.", e);
     }
   }
 

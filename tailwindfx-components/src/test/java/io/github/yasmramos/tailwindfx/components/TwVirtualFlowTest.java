@@ -324,6 +324,51 @@ class TwVirtualFlowTest {
   }
 
   @Test
+  @DisplayName("selectIndex must be a no-op when selection mode is NONE")
+  void testSelectIndexIgnoredWhenModeNone() {
+    items.addAll("Item 1", "Item 2", "Item 3");
+    virtualFlow.setItems(items);
+    virtualFlow.setSelectionMode(TwVirtualFlow.SelectionMode.NONE);
+
+    virtualFlow.selectIndex(1);
+
+    assertTrue(
+        virtualFlow.getSelectedIndices().isEmpty(),
+        "NONE mode must not allow selectIndex to build a selection");
+  }
+
+  @Test
+  @DisplayName("onSelectionChange must fire exactly once per programmatic selection")
+  void testOnSelectionChangeFiresOnceForSelectIndex() {
+    items.addAll("Item 1", "Item 2", "Item 3");
+    virtualFlow.setItems(items);
+    virtualFlow.setSelectionMode(TwVirtualFlow.SelectionMode.SINGLE);
+
+    int[] calls = {0};
+    virtualFlow.onSelectionChange(sel -> calls[0]++);
+
+    virtualFlow.selectIndex(1);
+
+    assertEquals(1, calls[0], "selectIndex must notify onSelectionChange exactly once");
+    assertEquals(List.of(1), virtualFlow.getSelectedIndices());
+  }
+
+  @Test
+  @DisplayName("onSelectionChange must not fire when NONE mode discards the selection")
+  void testOnSelectionChangeNotFiredInNoneMode() {
+    items.addAll("Item 1", "Item 2");
+    virtualFlow.setItems(items);
+    virtualFlow.setSelectionMode(TwVirtualFlow.SelectionMode.NONE);
+
+    int[] calls = {0};
+    virtualFlow.onSelectionChange(sel -> calls[0]++);
+
+    virtualFlow.selectIndex(0);
+
+    assertEquals(0, calls[0], "a discarded selection must not raise onSelectionChange");
+  }
+
+  @Test
   @DisplayName("Should handle invalid index gracefully in selectIndex")
   void testSelectInvalidIndex() {
     items.add("Only Item");
