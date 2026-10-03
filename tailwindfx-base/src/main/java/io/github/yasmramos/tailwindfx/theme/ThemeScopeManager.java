@@ -264,11 +264,11 @@ public final class ThemeScopeManager {
     }
 
     /**
-     * Solo actualiza variables específicas sin tocar el resto del scope. Útil para cambios
-     * dinámicos (e.g., acento que cambia según estado).
+     * Updates only the scope-specific variables, leaving the rest of the scope untouched. Useful
+     * for dynamic changes (e.g. an accent that varies with state).
      */
     public void update() {
-      apply(); // mismo comportamiento — merge es no destructivo
+      apply(); // same behavior - the merge is non-destructive
     }
   }
 
