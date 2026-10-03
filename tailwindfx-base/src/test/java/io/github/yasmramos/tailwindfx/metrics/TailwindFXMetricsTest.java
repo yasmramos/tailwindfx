@@ -2,6 +2,7 @@ package io.github.yasmramos.tailwindfx.metrics;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -143,6 +144,118 @@ class TailwindFXMetricsTest {
 
       metrics.setEnabled(true);
       assertTrue(metrics.isEnabled());
+    }
+
+    @Test
+    @DisplayName("Alert sampling fires exactly once per 50 cache misses")
+    void testAlertSamplingIsExactlyOncePerInterval() {
+      int[] alerts = {0};
+      metrics.setEnabled(true);
+      // Seed hits so that hits+misses is already above the 100-lookup warm-up gate; otherwise
+      // checkAlerts() would bail out before ever evaluating a threshold.
+      for (int i = 0; i < 200; i++) {
+        metrics.recordCacheHit();
+      }
+      // A ratio of 1.0 can never be met with any miss recorded, so every evaluation alerts.
+      metrics.alertOnLowCacheHitRatio(1.0);
+      metrics.onAlert((metric, current, threshold) -> alerts[0]++);
+
+      // 200 misses == 4 sampling intervals, so exactly 4 threshold evaluations must be delivered.
+      for (int i = 0; i < 200; i++) {
+        metrics.recordCacheMiss();
+      }
+
+      assertEquals(
+          4,
+          alerts[0],
+          "alerts must fire once per completed 50-miss interval, not once per miss");
+    }
+
+    @Test
+    @DisplayName("A partial sampling interval fires no alert")
+    void testNoAlertForPartialInterval() {
+      int[] alerts = {0};
+      metrics.setEnabled(true);
+      for (int i = 0; i < 200; i++) {
+        metrics.recordCacheHit();
+      }
+      metrics.alertOnLowCacheHitRatio(1.0);
+      metrics.onAlert((metric, current, threshold) -> alerts[0]++);
+
+      for (int i = 0; i < 49; i++) {
+        metrics.recordCacheMiss();
+      }
+
+      assertEquals(0, alerts[0], "49 misses must not complete a 50-miss interval");
+    }
+
+    @Test
+    @DisplayName("Concurrent misses sample every interval exactly once")
+    void testAlertSamplingIsNotLostUnderConcurrency() throws InterruptedException {
+      // The regression this guards: recordCacheMiss() used to re-read the counter with get()
+      // instead of using the value returned by its own incrementAndGet(). Under concurrency the
+      // re-read observes another thread's increment, so whole 50-miss intervals could be skipped
+      // and the alert count came out below the expected value.
+      int[] alerts = {0};
+      metrics.setEnabled(true);
+      for (int i = 0; i < 200; i++) {
+        metrics.recordCacheHit();
+      }
+      metrics.alertOnLowCacheHitRatio(1.0);
+      metrics.onAlert((metric, current, threshold) -> alerts[0]++);
+
+      Thread[] threads = new Thread[8];
+      for (int t = 0; t < threads.length; t++) {
+        threads[t] =
+            new Thread(
+                () -> {
+                  for (int i = 0; i < 50; i++) {
+                    metrics.recordCacheMiss();
+                  }
+                });
+      }
+      for (Thread thread : threads) {
+        thread.start();
+      }
+      for (Thread thread : threads) {
+        thread.join();
+      }
+
+      assertEquals(400, metrics.cacheMisses(), "all misses must be counted");
+      assertEquals(
+          8,
+          alerts[0],
+          "400 concurrent misses must yield exactly 8 sampling intervals, none lost or duplicated");
+    }
+
+    @Test
+    @DisplayName("Disabled metrics are reported distinctly from 'no data collected'")
+    void testHealthIssuesDistinguishDisabledFromEmpty() {
+      // Enabled but nothing recorded -> "no data" issue, not "disabled".
+      metrics.setEnabled(true);
+      metrics.reset();
+      List<String> enabledIssues =
+          metrics.checkHealth().stream().map(TailwindFXMetrics.HealthIssue::message).toList();
+      assertTrue(
+          enabledIssues.stream().anyMatch(m -> m.contains("No metrics data collected")),
+          "an enabled collector with no activity must report missing data: " + enabledIssues);
+      assertFalse(
+          enabledIssues.stream().anyMatch(m -> m.contains("disabled")),
+          "an enabled collector must not be reported as disabled: " + enabledIssues);
+
+      // Disabled -> its own dedicated issue.
+      metrics.setEnabled(false);
+      List<String> disabledIssues =
+          metrics.checkHealth().stream().map(TailwindFXMetrics.HealthIssue::message).toList();
+      assertTrue(
+          disabledIssues.stream().anyMatch(m -> m.contains("disabled")),
+          "a disabled collector must report that metrics are off: " + disabledIssues);
+      assertFalse(
+          disabledIssues.stream().anyMatch(m -> m.contains("No metrics data collected")),
+          "a disabled collector must not be reported as silently missing data: " + disabledIssues);
+
+      // Restore for the remaining tests in this class.
+      metrics.setEnabled(true);
     }
   }
 

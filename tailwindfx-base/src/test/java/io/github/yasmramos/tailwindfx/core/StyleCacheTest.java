@@ -1,14 +1,17 @@
 package io.github.yasmramos.tailwindfx.core;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.yasmramos.tailwindfx.testing.JavaFxToolkitExtension;
 import java.util.Map;
+import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -68,7 +71,7 @@ class StyleCacheTest {
     @DisplayName("setCleanupListener rejects null node")
     void setCleanupListenerNullNodeThrows() {
       assertThrows(
-          IllegalArgumentException.class, () -> StyleCache.setCleanupListener(null, new Object()));
+          IllegalArgumentException.class, () -> StyleCache.setCleanupListener(null, () -> {}));
     }
 
     @Test
@@ -158,7 +161,7 @@ class StyleCacheTest {
     @DisplayName("setCleanupListener registers and hasCleanupListener reports true")
     void setThenHas() {
       StackPane node = new StackPane();
-      Object listener = new Object();
+      Runnable listener = () -> {};
 
       StyleCache.setCleanupListener(node, listener);
 
@@ -169,7 +172,7 @@ class StyleCacheTest {
     @DisplayName("removeCleanupListener unregisters the listener")
     void removeUnregisters() {
       StackPane node = new StackPane();
-      StyleCache.setCleanupListener(node, new Object());
+      StyleCache.setCleanupListener(node, () -> {});
 
       StyleCache.removeCleanupListener(node);
 
@@ -194,7 +197,7 @@ class StyleCacheTest {
     void invalidateClearsEverything() {
       StackPane node = new StackPane();
       StyleCache.getCategoryCache(node).put("spacing", "p-4");
-      StyleCache.setCleanupListener(node, new Object());
+      StyleCache.setCleanupListener(node, () -> {});
 
       StyleCache.invalidate(node);
 
@@ -208,7 +211,7 @@ class StyleCacheTest {
     void cleanupIsAliasForInvalidate() {
       StackPane node = new StackPane();
       StyleCache.getCategoryCache(node).put("color", "bg-blue-500");
-      StyleCache.setCleanupListener(node, new Object());
+      StyleCache.setCleanupListener(node, () -> {});
 
       StyleCache.cleanup(node);
 
@@ -238,6 +241,128 @@ class StyleCacheTest {
       assertFalse(
           StyleCache.getCategoryCache(b).containsKey("spacing"),
           "node B must never see node A entries");
+    }
+
+    @Test
+    @DisplayName("cleanup listener runs when the node leaves the scene")
+    void cleanupListenerRunsOnDetach() {
+      StackPane root = new StackPane();
+      Scene scene = new Scene(root);
+      StackPane node = new StackPane();
+      int[] runs = {0};
+      StyleCache.setCleanupListener(node, () -> runs[0]++);
+
+      assertNull(node.getScene(), "precondition: the node starts detached");
+
+      root.getChildren().add(node); // attach -> sceneProperty goes null -> scene
+      assertSame(scene, node.getScene(), "precondition: the node is attached");
+      assertEquals(0, runs[0], "attaching must not trigger cleanup");
+
+      root.getChildren().remove(node); // detach -> sceneProperty goes scene -> null
+      assertNull(node.getScene(), "precondition: the node is detached again");
+
+      assertEquals(1, runs[0], "the listener must run exactly once on detach");
+    }
+
+    @Test
+    @DisplayName("cleanup listener does not run while the node stays in a scene")
+    void cleanupListenerIgnoresNonNullScenes() {
+      StackPane root = new StackPane();
+      Scene scene = new Scene(root);
+      StackPane node = new StackPane();
+      int[] runs = {0};
+      StyleCache.setCleanupListener(node, () -> runs[0]++);
+
+      root.getChildren().add(node);
+      // Re-adding the same node inside the same scene does not change sceneProperty, and a plain
+      // scene change must never be mistaken for a detach.
+      root.getChildren().remove(node);
+      root.getChildren().add(node);
+
+      assertSame(scene, node.getScene(), "the node is attached again");
+      assertEquals(1, runs[0], "only the real detach counts, not the re-attach");
+
+      // Moving the node into a second scene must not fire the listener either.
+      StackPane otherRoot = new StackPane();
+      Scene otherScene = new Scene(otherRoot);
+      root.getChildren().remove(node);
+      assertEquals(2, runs[0], "removing from the first scene is a detach");
+      otherRoot.getChildren().add(node);
+      assertSame(otherScene, node.getScene());
+    }
+
+    @Test
+    @DisplayName("removeCleanupListener detaches without running the action")
+    void removeCleanupListenerDoesNotRun() {
+      StackPane root = new StackPane();
+      new Scene(root);
+      StackPane node = new StackPane();
+      int[] runs = {0};
+      StyleCache.setCleanupListener(node, () -> runs[0]++);
+
+      StyleCache.removeCleanupListener(node);
+
+      root.getChildren().add(node);
+      root.getChildren().remove(node);
+
+      assertEquals(0, runs[0], "a removed listener must not run");
+      assertFalse(StyleCache.hasCleanupListener(node));
+    }
+
+    @Test
+    @DisplayName("re-registering replaces the previous listener instead of stacking")
+    void reRegisterReplacesPreviousListener() {
+      StackPane root = new StackPane();
+      new Scene(root);
+      StackPane node = new StackPane();
+      int[] first = {0};
+      int[] second = {0};
+      StyleCache.setCleanupListener(node, () -> first[0]++);
+      StyleCache.setCleanupListener(node, () -> second[0]++);
+
+      root.getChildren().add(node);
+      root.getChildren().remove(node);
+
+      assertEquals(0, first[0], "the superseded listener must be detached");
+      assertEquals(1, second[0], "only the latest listener runs");
+    }
+
+    @Test
+    @DisplayName("passing null to setCleanupListener clears the registration")
+    void setCleanupListenerNullClears() {
+      StackPane root = new StackPane();
+      new Scene(root);
+      StackPane node = new StackPane();
+      int[] runs = {0};
+      StyleCache.setCleanupListener(node, () -> runs[0]++);
+
+      StyleCache.setCleanupListener(node, null);
+
+      root.getChildren().add(node);
+      root.getChildren().remove(node);
+
+      assertEquals(0, runs[0]);
+      assertFalse(StyleCache.hasCleanupListener(node));
+    }
+
+    @Test
+    @DisplayName("a throwing cleanup listener is contained and logged")
+    void throwingCleanupListenerIsContained() {
+      StackPane root = new StackPane();
+      new Scene(root);
+      StackPane node = new StackPane();
+      StyleCache.setCleanupListener(
+          node,
+          () -> {
+            throw new IllegalStateException("boom");
+          });
+
+      // Must not propagate out of the scene graph transition.
+      assertDoesNotThrow(
+          () -> {
+            root.getChildren().add(node);
+            root.getChildren().remove(node);
+          });
     }
   }
 }
