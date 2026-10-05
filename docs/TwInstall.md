@@ -59,10 +59,14 @@ TwInstall.installBase(scene);
 
 ### Dark Mode Installation
 
-Installs dark mode support:
+> **Deprecated:** `installDark(scene)` is a no-op kept for source compatibility. Dark mode needs no
+> extra stylesheet: switch it with `TwTheme.of(scene).dark().apply()`. The dark overrides for the
+> pre-built components ship with `tailwindfx-components.css`.
 
 ```java
-TwInstall.installDark(scene);
+TwInstall.installBase(scene);
+TwInstall.installGenerated(scene, "/tailwindfx-components.css");
+TwTheme.of(scene).dark().apply();   // or ThemeManager.toggle(scene)
 ```
 
 ## Installation Order
@@ -71,7 +75,7 @@ When using multiple installation methods, the cascade order is critical:
 
 1. **Base CSS** (`installBase`) - Installed first, contains variables and reset
 2. **Generated Stylesheet** (`installGenerated`) - Installed second, can override base utilities
-3. **Dark Mode** (`installDark`) - Installed last for proper dark mode overrides
+3. **Dark Mode** (`installDark`) - Deprecated no-op; use `TwTheme.of(scene).dark().apply()`
 
 Example of correct installation order:
 
@@ -79,7 +83,6 @@ Example of correct installation order:
 // Correct order for full installation
 TwInstall.installBase(scene);
 TwInstall.installGenerated(scene, "css/tailwindfx-generated.css");
-TwInstall.installDark(scene);
 ```
 
 Or simply use the convenience method:
@@ -153,9 +156,8 @@ public void start(Stage stage) {
 public void start(Stage stage) {
     Scene scene = new Scene(root, 800, 600);
     
-    // Install base and dark mode support
+    // Install base CSS and the JIT pipeline
     TwInstall.install(scene);
-    TwInstall.installDark(scene);
     
     // Use dark mode variants
     TwStyle.apply(card, "bg-white", "dark:bg-gray-800");

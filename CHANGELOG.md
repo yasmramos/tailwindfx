@@ -9,6 +9,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+#### Theme Tokens
+- **`ThemeTokens`** — Semantic `-tw-*` looked-up colors (`-tw-surface`, `-tw-surface-muted`,
+  `-tw-surface-subtle`, `-tw-border`, `-tw-border-strong`, `-tw-text`, `-tw-text-strong`,
+  `-tw-text-muted`) written by `ThemeManager` and `ThemeScopeManager` next to the Modena variables
+  - Component styles that look these up follow light/dark automatically, including inside scoped panes
+  - `tailwindfx-components.css` declares the light defaults under `.root` and ships `.dark`
+    overrides for the tinted alert, badge and selection colors
+
 #### Animation Utilities
 - **`AnimationApplier`** — Plays Tailwind `animate-*` utilities as JavaFX timelines
   - JavaFX has no CSS animation engine, so these utilities cannot be compiled to inline styles
@@ -21,8 +29,27 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `TokenRegistry.isAnimationToken(String)` — centralizes recognition of `animate-*` utilities
 - `TokenParser` classifies `animate-*` tokens into a dedicated `animationTokens` category
 
+### Changed
+
+- `tailwindfx-components.css` no longer hard-codes neutral colors: cards, inputs, selects, checkboxes,
+  data tables, virtual flow, accordion, titled panes and progress bars use the `-tw-*` tokens
+
+### Deprecated
+
+- `TwInstall.installDark(Scene)` — it does nothing, since dark mode is switched through `TwTheme`. Use `TwTheme.of(scene).dark().apply()`
+
 ### Fixed
 
+- Pre-built components did not switch to dark mode: their stylesheet used literal colors that
+  never reacted to `ThemeManager`. They now follow the active theme (see Theme Tokens)
+- `dark:` / `light:` utilities were evaluated only once, when the node entered a scene, and were
+  never removed. They now follow every theme switch in both directions, also for nodes that are
+  already in a scene, and restore the inline values they overrode
+- `ThemeManager.apply()` / `applyTo()` toggle the `dark` style class before refreshing the style
+  cache instead of after it
+- Themes saved with `saveTheme` before the tokens existed still theme components when restored
+  with `loadTheme`
+- `StyleMerger` now parses `-tw-*` properties; previously a scoped theme dropped them silently
 - Gradient tokens compiled individually now participate in the LRU cache and compilation metrics.
   Previously `JitCompiler.compile()` returned early for gradient tokens, so they were recompiled on
   every call and never appeared in cache statistics.
