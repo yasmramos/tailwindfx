@@ -395,7 +395,10 @@ public class TailwindCssMojo extends AbstractMojo {
     String baseClassName = variantInfo.baseClass;
     String selector = buildSelector(baseClassName, variantInfo);
 
-    classCss.append(selector).append(" {\\n");
+    // NOTE: these must be real line breaks ("\n"). A literal backslash-n here produced a single
+    // physical line per rule, which made the whole block unparseable by the JavaFX CSS parser
+    // ("Expected RBRACE") and silently dropped every utility rule.
+    classCss.append(selector).append(" {\n");
 
     // Parse inline style and convert to class format
     String[] properties = inlineStyle.split(";");
@@ -410,7 +413,7 @@ public class TailwindCssMojo extends AbstractMojo {
                       + trimmed);
           continue;
         }
-        classCss.append("    ").append(trimmed).append(";\\n");
+        classCss.append("    ").append(trimmed).append(";\n");
       }
     }
 
