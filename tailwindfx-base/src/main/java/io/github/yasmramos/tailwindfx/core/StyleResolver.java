@@ -56,6 +56,18 @@ public final class StyleResolver {
       return String.valueOf(value);
     }
 
+    // Special handling for opacity: Tailwind scales are percentages (0-100), JavaFX
+    // -fx-opacity expects a decimal in [0.0, 1.0]. Never emit px here.
+    if ("opacity".equals(token.prefix)) {
+      return formatDecimal(token.scale / 100.0);
+    }
+
+    // Special handling for scale: Tailwind scales are percentages (scale-50 -> 0.5,
+    // scale-100 -> 1.0). JavaFX -fx-scale-x/-fx-scale-y expect unitless factors, not px.
+    if ("scale".equals(token.prefix)) {
+      return formatDecimal(token.scale / 100.0);
+    }
+
     // Special handling for translate-x and translate-y: use signed scale with spacing
     if ("translate".equals(token.prefix)) {
       double[] spacing = themeConfig.spacing();
@@ -78,6 +90,22 @@ public final class StyleResolver {
 
     // Fallback for scales out of range
     return (scale * 4) + "px";
+  }
+
+  /**
+   * Formats a decimal value without an exponent and with the shortest representation that keeps
+   * one decimal place when needed (e.g. 0.0, 0.1, 0.5, 1.0). Used by opacity/scale resolution so
+   * JavaFX receives unitless numbers instead of pixel lengths.
+   */
+  private static String formatDecimal(double value) {
+    if (value == Math.rint(value)) {
+      return String.format(Locale.ROOT, "%.1f", value);
+    }
+    String s = String.format(Locale.ROOT, "%.2f", value);
+    if (s.endsWith("0")) {
+      s = s.substring(0, s.length() - 1);
+    }
+    return s;
   }
 
   private String resolveColor(StyleToken token) {

@@ -2175,84 +2175,111 @@
 }
 .gap-0 {
   -fx-hgap: 0px;
+  -fx-vgap: 0px;
 }
 .gap-1 {
   -fx-hgap: 2px;
+  -fx-vgap: 2px;
 }
 .gap-10 {
   -fx-hgap: 40px;
+  -fx-vgap: 40px;
 }
 .gap-11 {
   -fx-hgap: 44px;
+  -fx-vgap: 44px;
 }
 .gap-12 {
   -fx-hgap: 48px;
+  -fx-vgap: 48px;
 }
 .gap-14 {
   -fx-hgap: 56px;
+  -fx-vgap: 56px;
 }
 .gap-16 {
   -fx-hgap: 64px;
+  -fx-vgap: 64px;
 }
 .gap-2 {
   -fx-hgap: 4px;
+  -fx-vgap: 4px;
 }
 .gap-20 {
   -fx-hgap: 80px;
+  -fx-vgap: 80px;
 }
 .gap-24 {
   -fx-hgap: 96px;
+  -fx-vgap: 96px;
 }
 .gap-28 {
   -fx-hgap: 112px;
+  -fx-vgap: 112px;
 }
 .gap-3 {
   -fx-hgap: 6px;
+  -fx-vgap: 6px;
 }
 .gap-32 {
   -fx-hgap: 128px;
+  -fx-vgap: 128px;
 }
 .gap-36 {
   -fx-hgap: 144px;
+  -fx-vgap: 144px;
 }
 .gap-4 {
   -fx-hgap: 16px;
+  -fx-vgap: 16px;
 }
 .gap-40 {
   -fx-hgap: 160px;
+  -fx-vgap: 160px;
 }
 .gap-44 {
   -fx-hgap: 176px;
+  -fx-vgap: 176px;
 }
 .gap-48 {
   -fx-hgap: 192px;
+  -fx-vgap: 192px;
 }
 .gap-5 {
   -fx-hgap: 20px;
+  -fx-vgap: 20px;
 }
 .gap-52 {
   -fx-hgap: 208px;
+  -fx-vgap: 208px;
 }
 .gap-56 {
   -fx-hgap: 224px;
+  -fx-vgap: 224px;
 }
 .gap-6 {
   -fx-hgap: 24px;
+  -fx-vgap: 24px;
 }
 .gap-60 {
   -fx-hgap: 240px;
+  -fx-vgap: 240px;
 }
 .gap-64 {
   -fx-hgap: 256px;
+  -fx-vgap: 256px;
 }
 .gap-7 {
   -fx-hgap: 28px;
+  -fx-vgap: 28px;
 }
 .gap-8 {
   -fx-hgap: 32px;
+  -fx-vgap: 32px;
 }
 .gap-9 {
   -fx-hgap: 36px;
+  -fx-vgap: 36px;
 }
 .gap-x-0 {
   -fx-hgap: 0px;
@@ -2336,85 +2363,85 @@
   -fx-hgap: 36px;
 }
 .gap-y-0 {
-  -fx-hgap: 0px;
+  -fx-vgap: 0px;
 }
 .gap-y-1 {
-  -fx-hgap: 2px;
+  -fx-vgap: 2px;
 }
 .gap-y-10 {
-  -fx-hgap: 40px;
+  -fx-vgap: 40px;
 }
 .gap-y-11 {
-  -fx-hgap: 44px;
+  -fx-vgap: 44px;
 }
 .gap-y-12 {
-  -fx-hgap: 48px;
+  -fx-vgap: 48px;
 }
 .gap-y-14 {
-  -fx-hgap: 56px;
+  -fx-vgap: 56px;
 }
 .gap-y-16 {
-  -fx-hgap: 64px;
+  -fx-vgap: 64px;
 }
 .gap-y-2 {
-  -fx-hgap: 4px;
+  -fx-vgap: 4px;
 }
 .gap-y-20 {
-  -fx-hgap: 80px;
+  -fx-vgap: 80px;
 }
 .gap-y-24 {
-  -fx-hgap: 96px;
+  -fx-vgap: 96px;
 }
 .gap-y-28 {
-  -fx-hgap: 112px;
+  -fx-vgap: 112px;
 }
 .gap-y-3 {
-  -fx-hgap: 6px;
+  -fx-vgap: 6px;
 }
 .gap-y-32 {
-  -fx-hgap: 128px;
+  -fx-vgap: 128px;
 }
 .gap-y-36 {
-  -fx-hgap: 144px;
+  -fx-vgap: 144px;
 }
 .gap-y-4 {
-  -fx-hgap: 16px;
+  -fx-vgap: 16px;
 }
 .gap-y-40 {
-  -fx-hgap: 160px;
+  -fx-vgap: 160px;
 }
 .gap-y-44 {
-  -fx-hgap: 176px;
+  -fx-vgap: 176px;
 }
 .gap-y-48 {
-  -fx-hgap: 192px;
+  -fx-vgap: 192px;
 }
 .gap-y-5 {
-  -fx-hgap: 20px;
+  -fx-vgap: 20px;
 }
 .gap-y-52 {
-  -fx-hgap: 208px;
+  -fx-vgap: 208px;
 }
 .gap-y-56 {
-  -fx-hgap: 224px;
+  -fx-vgap: 224px;
 }
 .gap-y-6 {
-  -fx-hgap: 24px;
+  -fx-vgap: 24px;
 }
 .gap-y-60 {
-  -fx-hgap: 240px;
+  -fx-vgap: 240px;
 }
 .gap-y-64 {
-  -fx-hgap: 256px;
+  -fx-vgap: 256px;
 }
 .gap-y-7 {
-  -fx-hgap: 28px;
+  -fx-vgap: 28px;
 }
 .gap-y-8 {
-  -fx-hgap: 32px;
+  -fx-vgap: 32px;
 }
 .gap-y-9 {
-  -fx-hgap: 36px;
+  -fx-vgap: 36px;
 }
 .h-0 {
   -fx-pref-height: 0px;
@@ -2501,49 +2528,49 @@
   -fx-pref-height: -1;
 }
 .opacity-0 {
-  -fx-opacity: 0px;
+  -fx-opacity: 0.0;
 }
 .opacity-10 {
-  -fx-opacity: 40px;
+  -fx-opacity: 0.1;
 }
 .opacity-100 {
-  -fx-opacity: 400px;
+  -fx-opacity: 1.0;
 }
 .opacity-20 {
-  -fx-opacity: 80px;
+  -fx-opacity: 0.2;
 }
 .opacity-25 {
-  -fx-opacity: 100px;
+  -fx-opacity: 0.25;
 }
 .opacity-30 {
-  -fx-opacity: 120px;
+  -fx-opacity: 0.3;
 }
 .opacity-40 {
-  -fx-opacity: 160px;
+  -fx-opacity: 0.4;
 }
 .opacity-5 {
-  -fx-opacity: 20px;
+  -fx-opacity: 0.05;
 }
 .opacity-50 {
-  -fx-opacity: 200px;
+  -fx-opacity: 0.5;
 }
 .opacity-60 {
-  -fx-opacity: 240px;
+  -fx-opacity: 0.6;
 }
 .opacity-70 {
-  -fx-opacity: 280px;
+  -fx-opacity: 0.7;
 }
 .opacity-75 {
-  -fx-opacity: 300px;
+  -fx-opacity: 0.75;
 }
 .opacity-80 {
-  -fx-opacity: 320px;
+  -fx-opacity: 0.8;
 }
 .opacity-90 {
-  -fx-opacity: 360px;
+  -fx-opacity: 0.9;
 }
 .opacity-95 {
-  -fx-opacity: 380px;
+  -fx-opacity: 0.95;
 }
 .p-0 {
   -fx-padding: 0px;
@@ -3153,132 +3180,150 @@
 }
 .rounded-2xl {
   -fx-background-radius: 24px;
+  -fx-border-radius: 24px;
 }
 .rounded-3xl {
   -fx-background-radius: 28px;
+  -fx-border-radius: 28px;
 }
 .rounded-full {
   -fx-background-radius: 32px;
+  -fx-border-radius: 32px;
 }
 .rounded-lg {
   -fx-background-radius: 8px;
+  -fx-border-radius: 8px;
 }
 .rounded-md {
   -fx-background-radius: 6px;
+  -fx-border-radius: 6px;
 }
 .rounded-none {
   -fx-background-radius: 0px;
+  -fx-border-radius: 0px;
 }
 .rounded-sm {
   -fx-background-radius: 2px;
+  -fx-border-radius: 2px;
 }
 .rounded-xl {
   -fx-background-radius: 20px;
+  -fx-border-radius: 20px;
 }
 .scale-0 {
-  -fx-scale-x: 0px;
+  -fx-scale-x: 0.0;
+  -fx-scale-y: 0.0;
 }
 .scale-100 {
-  -fx-scale-x: 400px;
+  -fx-scale-x: 1.0;
+  -fx-scale-y: 1.0;
 }
 .scale-105 {
-  -fx-scale-x: 420px;
+  -fx-scale-x: 1.05;
+  -fx-scale-y: 1.05;
 }
 .scale-110 {
-  -fx-scale-x: 440px;
+  -fx-scale-x: 1.1;
+  -fx-scale-y: 1.1;
 }
 .scale-125 {
-  -fx-scale-x: 500px;
+  -fx-scale-x: 1.25;
+  -fx-scale-y: 1.25;
 }
 .scale-150 {
-  -fx-scale-x: 600px;
+  -fx-scale-x: 1.5;
+  -fx-scale-y: 1.5;
 }
 .scale-50 {
-  -fx-scale-x: 200px;
+  -fx-scale-x: 0.5;
+  -fx-scale-y: 0.5;
 }
 .scale-75 {
-  -fx-scale-x: 300px;
+  -fx-scale-x: 0.75;
+  -fx-scale-y: 0.75;
 }
 .scale-90 {
-  -fx-scale-x: 360px;
+  -fx-scale-x: 0.9;
+  -fx-scale-y: 0.9;
 }
 .scale-95 {
-  -fx-scale-x: 380px;
+  -fx-scale-x: 0.95;
+  -fx-scale-y: 0.95;
 }
 .scale-x-0 {
-  -fx-scale-x: 0px;
+  -fx-scale-x: 0.0;
 }
 .scale-x-100 {
-  -fx-scale-x: 400px;
+  -fx-scale-x: 1.0;
 }
 .scale-x-105 {
-  -fx-scale-x: 420px;
+  -fx-scale-x: 1.05;
 }
 .scale-x-110 {
-  -fx-scale-x: 440px;
+  -fx-scale-x: 1.1;
 }
 .scale-x-125 {
-  -fx-scale-x: 500px;
+  -fx-scale-x: 1.25;
 }
 .scale-x-150 {
-  -fx-scale-x: 600px;
+  -fx-scale-x: 1.5;
 }
 .scale-x-50 {
-  -fx-scale-x: 200px;
+  -fx-scale-x: 0.5;
 }
 .scale-x-75 {
-  -fx-scale-x: 300px;
+  -fx-scale-x: 0.75;
 }
 .scale-x-90 {
-  -fx-scale-x: 360px;
+  -fx-scale-x: 0.9;
 }
 .scale-x-95 {
-  -fx-scale-x: 380px;
+  -fx-scale-x: 0.95;
 }
 .scale-y-0 {
-  -fx-scale-x: 0px;
+  -fx-scale-y: 0.0;
 }
 .scale-y-100 {
-  -fx-scale-x: 400px;
+  -fx-scale-y: 1.0;
 }
 .scale-y-105 {
-  -fx-scale-x: 420px;
+  -fx-scale-y: 1.05;
 }
 .scale-y-110 {
-  -fx-scale-x: 440px;
+  -fx-scale-y: 1.1;
 }
 .scale-y-125 {
-  -fx-scale-x: 500px;
+  -fx-scale-y: 1.25;
 }
 .scale-y-150 {
-  -fx-scale-x: 600px;
+  -fx-scale-y: 1.5;
 }
 .scale-y-50 {
-  -fx-scale-x: 200px;
+  -fx-scale-y: 0.5;
 }
 .scale-y-75 {
-  -fx-scale-x: 300px;
+  -fx-scale-y: 0.75;
 }
 .scale-y-90 {
-  -fx-scale-x: 360px;
+  -fx-scale-y: 0.9;
 }
 .scale-y-95 {
-  -fx-scale-x: 380px;
+  -fx-scale-y: 0.95;
 }
 .shadow-2xl {
-  -fx-effect: dropshadow(0, 25, 50, rgba(0, 0, 0, 0.25));
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 50, 0, 0, 25);
 }
 .shadow-lg {
-  -fx-effect: dropshadow(0, 10, 15, rgba(0, 0, 0, 0.1));
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 10);
 }
 .shadow-md {
-  -fx-effect: dropshadow(0, 1, 3, rgba(0, 0, 0, 0.1));
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 3, 0, 0, 1);
 }
 .shadow-sm {
-  -fx-effect: dropshadow(0, 1, 2, rgba(0, 0, 0, 0.05));
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 2, 0, 0, 1);
 }
 .shadow-xl {
-  -fx-effect: dropshadow(0, 20, 25, rgba(0, 0, 0, 0.1));
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 25, 0, 0, 20);
 }
 .text-2xl {
   -fx-font-size: 24px;

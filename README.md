@@ -403,8 +403,10 @@ The following features detect tokens but require manual handling in your applica
 
 - **Responsive Design**: Tokens like `sm:`, `md:`, `lg:` are detected but require manual implementation using `ResponsiveNode` or scene width bindings
 - **Dark Mode**: The `dark:` prefix is recognized but requires manual theme switching via `TwTheme.of(scene).dark().apply()`
-- **Transitions**: CSS transition properties are generated but require JavaFX `Timeline` for actual animation effects
-- **Animations**: `animate-*` classes are detected but should use `TwAnimation` API for proper JavaFX animations
+- **Transitions**: `transition-*`, `duration-*` and `ease-*` classes have no JavaFX CSS equivalent (inert `-fx-transition-*` properties are intentionally NOT emitted into the generated stylesheet). Real behavior comes from `TransitionProcessor` and JavaFX `Timeline`/`TwAnimation` at runtime.
+- **Animations**: `animate-*` classes are detected but should use `TwAnimation` API for proper JavaFX animations; no keyframe CSS is generated.
+- **Aspect Ratio**: `aspect-*` classes are applied at runtime by `AspectRatioProcessor` / `Styles.aspectRatio(Node, ratio)` (width/height bindings); the generated stylesheet only contains a valid `aspect-auto` rule because JavaFX CSS has no native `aspect-ratio` property.
+- **Rings**: `ring-*` classes emit an approximate `-fx-border-*` rule in the stylesheet; the real Tailwind ring look (a soft outer glow that does not affect layout) requires `RingProcessor`/`TwStyle.apply()`, which applies a JavaFX `DropShadow` effect at runtime.
 
 ### Not Supported (JavaFX Limitations) ❌
 The following CSS features are **not supported** due to JavaFX platform limitations:
