@@ -247,11 +247,16 @@ public class TwAvatar extends StackPane {
      */
     public TwAvatarWithStatus(TwAvatar avatar, boolean isOnline) {
       super();
+      if (avatar == null) {
+        throw new IllegalArgumentException("avatar must not be null");
+      }
       this.avatar = avatar;
       getChildren().add(avatar);
 
-      double size = avatar.getMinWidth();
-      if (size <= 0) size = 40; // default
+      // Use the size tracked by the avatar rather than getMinWidth(): the CSS min-width is only
+      // applied once the stylesheet is installed on the scene, so reading it here would silently
+      // fall back to the default for every avatar built before that point.
+      double size = avatar.getAvatarSize();
 
       statusDot = new Label();
       TwStyle.apply(
