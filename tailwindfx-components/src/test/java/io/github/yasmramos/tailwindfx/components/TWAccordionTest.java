@@ -7,13 +7,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.framework.junit5.ApplicationExtension;
 
-/** Unit tests for TWAccordion component. */
+/** Unit tests for TwAccordion component. */
 @ExtendWith(ApplicationExtension.class)
-public class TWAccordionTest {
+public class TwAccordionTest {
 
   @Test
   public void testDefaultConstructor() {
-    TWAccordion accordion = new TWAccordion();
+    TwAccordion accordion = new TwAccordion();
 
     assertNotNull(accordion);
     assertTrue(accordion.getStyleClass().contains("collapse"));
@@ -25,7 +25,7 @@ public class TWAccordionTest {
     TitledPane pane1 = new TitledPane("Pane 1", new javafx.scene.layout.StackPane());
     TitledPane pane2 = new TitledPane("Pane 2", new javafx.scene.layout.StackPane());
 
-    TWAccordion accordion = new TWAccordion(pane1, pane2);
+    TwAccordion accordion = new TwAccordion(pane1, pane2);
 
     assertNotNull(accordion);
     assertTrue(accordion.getStyleClass().contains("collapse"));
@@ -37,9 +37,9 @@ public class TWAccordionTest {
   @Test
   public void testEnsureTailwindStyleWithRegularTitledPane() {
     TitledPane pane = new TitledPane("Test", new javafx.scene.layout.StackPane());
-    assertFalse(pane instanceof TWTitledPane);
+    assertFalse(pane instanceof TwTitledPane);
 
-    TWAccordion accordion = new TWAccordion(pane);
+    TwAccordion accordion = new TwAccordion(pane);
 
     // The ensureTailwindStyle method should add collapse-item class
     assertTrue(pane.getStyleClass().contains("collapse-item"));
@@ -47,9 +47,9 @@ public class TWAccordionTest {
 
   @Test
   public void testEnsureTailwindStyleWithTWTitledPane() {
-    TWTitledPane pane = new TWTitledPane("Test", new javafx.scene.layout.StackPane());
+    TwTitledPane pane = new TwTitledPane("Test", new javafx.scene.layout.StackPane());
 
-    TWAccordion accordion = new TWAccordion(pane);
+    TwAccordion accordion = new TwAccordion(pane);
 
     // TWTitledPane already has collapse-item from its constructor
     assertTrue(pane.getStyleClass().contains("collapse-item"));
@@ -60,7 +60,7 @@ public class TWAccordionTest {
     TitledPane pane1 = new TitledPane("Pane 1", new javafx.scene.layout.StackPane());
     TitledPane pane2 = new TitledPane("Pane 2", new javafx.scene.layout.StackPane());
 
-    TWAccordion accordion = new TWAccordion(pane1, pane2);
+    TwAccordion accordion = new TwAccordion(pane1, pane2);
 
     // Initially no pane is expanded (both should be collapse-close)
     assertFalse(pane1.getStyleClass().contains("collapse-open"));
@@ -83,7 +83,7 @@ public class TWAccordionTest {
     TitledPane pane1 = new TitledPane("Pane 1", new javafx.scene.layout.StackPane());
     TitledPane pane2 = new TitledPane("Pane 2", new javafx.scene.layout.StackPane());
 
-    TWAccordion accordion = new TWAccordion(pane1, pane2);
+    TwAccordion accordion = new TwAccordion(pane1, pane2);
 
     // Expand then collapse
     accordion.setExpandedPane(pane1);
@@ -102,7 +102,7 @@ public class TWAccordionTest {
     TitledPane pane2 = new TitledPane("Pane 2", new javafx.scene.layout.StackPane());
     TitledPane pane3 = new TitledPane("Pane 3", new javafx.scene.layout.StackPane());
 
-    TWAccordion accordion = new TWAccordion(pane1, pane2, pane3);
+    TwAccordion accordion = new TwAccordion(pane1, pane2, pane3);
 
     // Expand pane2
     accordion.setExpandedPane(pane2);
@@ -119,14 +119,42 @@ public class TWAccordionTest {
 
   @Test
   public void testAddPaneAfterConstruction() {
-    TWAccordion accordion = new TWAccordion();
+    TwAccordion accordion = new TwAccordion();
     TitledPane pane = new TitledPane("Dynamic Pane", new javafx.scene.layout.StackPane());
 
     accordion.getPanes().add(pane);
 
     assertEquals(1, accordion.getPanes().size());
-    // Note: ensureTailwindStyle is only called in constructor with varargs
-    // so dynamically added panes won't automatically get collapse-item class
+    // Panes added after construction are styled the same way as the constructor ones.
+    assertTrue(pane.getStyleClass().contains("collapse-item"));
+    assertTrue(pane.getStyleClass().contains("collapse-close"));
+  }
+
+  @Test
+  public void testAddPaneAfterConstructionUpdatesExpandedState() {
+    TwAccordion accordion = new TwAccordion(
+        new TitledPane("First", new javafx.scene.layout.StackPane()));
+    TitledPane added = new TitledPane("Added", new javafx.scene.layout.StackPane());
+
+    accordion.getPanes().add(added);
+    accordion.setExpandedPane(added);
+
+    assertTrue(added.getStyleClass().contains("collapse-open"));
+    assertFalse(added.getStyleClass().contains("collapse-close"));
+  }
+
+  @Test
+  public void testRemovePaneClearsStateClasses() {
+    TitledPane pane1 = new TitledPane("Pane 1", new javafx.scene.layout.StackPane());
+    TitledPane pane2 = new TitledPane("Pane 2", new javafx.scene.layout.StackPane());
+    TwAccordion accordion = new TwAccordion(pane1, pane2);
+
+    accordion.setExpandedPane(pane1);
+    accordion.getPanes().remove(pane1);
+
+    // The removed pane must not keep a stale expanded state class.
+    assertFalse(pane1.getStyleClass().contains("collapse-open"));
+    assertTrue(pane2.getStyleClass().contains("collapse-close"));
   }
 
   @Test
@@ -134,7 +162,7 @@ public class TWAccordionTest {
     TitledPane pane1 = new TitledPane("Pane 1", new javafx.scene.layout.StackPane());
     TitledPane pane2 = new TitledPane("Pane 2", new javafx.scene.layout.StackPane());
 
-    TWAccordion accordion = new TWAccordion(pane1, pane2);
+    TwAccordion accordion = new TwAccordion(pane1, pane2);
     assertEquals(2, accordion.getPanes().size());
 
     accordion.getPanes().remove(pane1);
@@ -145,7 +173,7 @@ public class TWAccordionTest {
   @Test
   public void testInitialStateClasses() {
     TitledPane pane = new TitledPane("Test", new javafx.scene.layout.StackPane());
-    TWAccordion accordion = new TWAccordion(pane);
+    TwAccordion accordion = new TwAccordion(pane);
 
     // Initially, pane is not expanded so it should have collapse-close
     assertTrue(pane.getStyleClass().contains("collapse-close"));

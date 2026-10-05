@@ -24,8 +24,8 @@ import io.github.yasmramos.tailwindfx.TwStyle;
 import io.github.yasmramos.tailwindfx.TwTheme;
 import io.github.yasmramos.tailwindfx.animation.TwAnimation;
 import io.github.yasmramos.tailwindfx.breakpoint.BreakpointManager;
-import io.github.yasmramos.tailwindfx.components.TWAccordion;
-import io.github.yasmramos.tailwindfx.components.TWTitledPane;
+import io.github.yasmramos.tailwindfx.components.TwAccordion;
+import io.github.yasmramos.tailwindfx.components.TwTitledPane;
 import io.github.yasmramos.tailwindfx.components.TwAlert;
 import io.github.yasmramos.tailwindfx.components.TwAvatar;
 import io.github.yasmramos.tailwindfx.components.TwBadge;
@@ -405,11 +405,11 @@ public class DashboardApp extends Application {
     Label c1 = new Label("All widgets follow Tailwind utility semantics.");
     Label c2 = new Label("Colors, spacing and typography map to design tokens.");
     Label c3 = new Label("Use dark:* variants for theme-aware styling.");
-    TWAccordion accordion =
-        new TWAccordion(
-            new TWTitledPane("Design system", new VBox(c1)),
-            new TWTitledPane("Tokens", new VBox(c2)),
-            new TWTitledPane("Theming", new VBox(c3)));
+    TwAccordion accordion =
+        new TwAccordion(
+            new TwTitledPane("Design system", new VBox(c1)),
+            new TwTitledPane("Tokens", new VBox(c2)),
+            new TwTitledPane("Theming", new VBox(c3)));
     return wrapCard("Accordion", accordion);
   }
 

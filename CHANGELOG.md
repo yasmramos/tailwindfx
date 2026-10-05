@@ -121,7 +121,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **`TwSelect`** — Dropdown selection component
 - **`TwSpinner`** — Loading spinner component
 - **`TwVirtualFlow`** — Virtualized list component
-- **`TWAccordion`** — Accordion/collapsible panel component
+- **`TwAccordion`** — Accordion/collapsible panel component
 - **`TWTitledPane`** — Titled pane component
 
 #### Animation System (`animation` package)

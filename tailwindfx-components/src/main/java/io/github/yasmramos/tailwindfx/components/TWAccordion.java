@@ -55,6 +55,16 @@ public class TWAccordion extends Accordion {
             (ListChangeListener<TitledPane>)
                 change -> {
                   change.getAddedSubList().forEach(this::ensureTailwindStyle);
+                  // Drop the state classes from removed panes so they do not stay marked as
+                  // expanded after they leave the accordion.
+                  change
+                      .getRemoved()
+                      .forEach(
+                          pane -> {
+                            if (pane != null) {
+                              pane.getStyleClass().removeAll(STATE_OPEN, STATE_CLOSED);
+                            }
+                          });
                   updateStateClasses();
                 });
 

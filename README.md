@@ -166,7 +166,7 @@ TwAnimation.onHoverScale(btn, 1.05);
 | **Tailwind v4.1** | text-shadow, drop-shadow-[color], SVG fill/stroke, 3D transforms, clip/mask |
 | **Glassmorphism** | `TailwindFX.glass()`, `backdropBlur()`, `.glass` CSS class |
 | **Neumorphism** | `TailwindFX.neumorph()`, `.neumorph` CSS class |
-| **Pre-built Components** | TwButton, TwCard, TwBadge, TwAlert, TwInput, TwCheckbox, TwSelect, TwDataTable, TwProgressBar, TwSpinner, TwAvatar, TwVirtualFlow, TWAccordion |
+| **Pre-built Components** | TwButton, TwCard, TwBadge, TwAlert, TwInput, TwCheckbox, TwSelect, TwDataTable, TwProgressBar, TwSpinner, TwAvatar, TwVirtualFlow, TwAccordion |
 | **Metrics + alerts** | Cache hit ratio, conflict rate, compile time alerts |
 | **Performance** | StyleDiff (skip redundant applies), batch apply, LRU cache |
 
@@ -265,7 +265,7 @@ TailwindFX provides pre-built components in the `io.github.yasmramos.tailwindfx.
 | `TwSpinner` | Loading spinner | `new TwSpinner()` |
 | `TwAvatar` | User avatar | `new TwAvatar(imageUrl)` |
 | `TwVirtualFlow` | Virtualized list | `new TwVirtualFlow<>(items)` |
-| `TWAccordion` | Collapsible sections | `new TWAccordion()` |
+| `TwAccordion` | Collapsible sections | `new TwAccordion()` |
 
 ### Usage Examples
 

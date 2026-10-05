@@ -10,16 +10,16 @@ import javafx.scene.layout.Region;
  * parts are styled through descendant selectors declared in {@code tailwindfx-components.css}
  * rather than by injecting classes into the skin.
  *
- * <p>Use with {@link TWAccordion}, which applies the {@code collapse-open} / {@code
+ * <p>Use with {@link TwAccordion}, which applies the {@code collapse-open} / {@code
  * collapse-close} state classes as the pane is expanded and collapsed.
  */
-public class TWTitledPane extends TitledPane {
+public class TwTitledPane extends TitledPane {
 
   /** Identifies the pane as an item inside an accordion. */
   private static final String ITEM_CLASS = "collapse-item";
 
   /** Creates an empty titled pane. */
-  public TWTitledPane() {
+  public TwTitledPane() {
     super();
     initialize();
   }
@@ -29,7 +29,7 @@ public class TWTitledPane extends TitledPane {
    *
    * @param title the pane title
    */
-  public TWTitledPane(String title) {
+  public TwTitledPane(String title) {
     super(title);
     initialize();
   }
@@ -40,7 +40,7 @@ public class TWTitledPane extends TitledPane {
    * @param title the pane title
    * @param content the pane content
    */
-  public TWTitledPane(String title, Region content) {
+  public TwTitledPane(String title, Region content) {
     super(title, content);
     initialize();
   }
