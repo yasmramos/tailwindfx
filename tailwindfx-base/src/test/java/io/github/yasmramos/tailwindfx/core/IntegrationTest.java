@@ -119,48 +119,24 @@ public class IntegrationTest {
   }
 
   @Test
-  public void testCachePerformance() {
+  public void testCacheReusesCompiledTokens() {
     String[] tokens = {"p-4", "bg-blue-500", "text-white", "rounded-md"};
 
-    // Warmup to ensure JIT compilation
-    for (int i = 0; i < 5; i++) {
-      JitCompiler.compileBatch(tokens);
-    }
-
-    // Clear cache to simulate cache miss
     JitCompiler.clearCache();
+    assertEquals(0, JitCompiler.cacheSize(), "cache should start empty");
 
-    // First compilation after cache clear (cache miss)
-    long start1 = System.nanoTime();
     JitCompiler.compileBatch(tokens);
-    long time1 = System.nanoTime() - start1;
+    int sizeAfterFirst = JitCompiler.cacheSize();
+    assertEquals(tokens.length, sizeAfterFirst, "every distinct token should be cached once");
 
-    // Second compilation (cache hit)
-    long start2 = System.nanoTime();
-    JitCompiler.compileBatch(tokens);
-    long time2 = System.nanoTime() - start2;
+    // Re-compiling the same tokens must be served from the cache: the cache must not grow, and
+    // the compiler must not rebuild the results.
+    JitCompiler.BatchResult first = JitCompiler.compileBatch(tokens);
+    JitCompiler.BatchResult second = JitCompiler.compileBatch(tokens);
 
-    // Use average of multiple runs for more reliable measurement
-    long totalHitTime = 0;
-    int iterations = 10;
-    for (int i = 0; i < iterations; i++) {
-      long start = System.nanoTime();
-      JitCompiler.compileBatch(tokens);
-      totalHitTime += System.nanoTime() - start;
-    }
-    long avgHitTime = totalHitTime / iterations;
-
-    assertTrue(
-        avgHitTime < time1,
-        String.format(
-            "Cache hit (%.3f ms) should be faster than cache miss (%.3f ms)",
-            avgHitTime / 1_000_000.0, time1 / 1_000_000.0));
-    System.out.println(
-        "Cache miss: "
-            + (time1 / 1_000_000.0)
-            + "ms, Avg cache hit: "
-            + (avgHitTime / 1_000_000.0)
-            + "ms");
+    assertEquals(sizeAfterFirst, JitCompiler.cacheSize(), "cache hits must not add entries");
+    assertEquals(first.inlineStyle(), second.inlineStyle(), "cached tokens must yield equal style");
+    assertEquals(first.cssClasses(), second.cssClasses(), "cached tokens must yield equal classes");
   }
 
   @Test
