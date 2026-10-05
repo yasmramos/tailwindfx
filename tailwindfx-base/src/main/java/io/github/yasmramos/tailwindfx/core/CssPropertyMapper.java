@@ -510,14 +510,27 @@ public final class CssPropertyMapper {
     };
   }
 
+  /**
+   * Resolves a Tailwind shadow utility to a JavaFX {@code -fx-effect} value.
+   *
+   * <p>JavaFX has no {@code box-shadow}: {@code -fx-effect} only accepts effect objects, so each
+   * Tailwind layer is translated to a {@code dropshadow(offsetX, offsetY, blurRadius, color)}.
+   * Emitting the web syntax here (e.g. {@code 0 1px 3px 0 rgba(...)}) is not parseable by the
+   * JavaFX CSS parser and made it log a warning for every shadow utility in the stylesheet.
+   *
+   * @param shadow the shadow size keyword ({@code sm}, {@code md}, {@code lg}, {@code xl}, ...)
+   * @return a {@code dropshadow(...)} value, or null for {@code none} / unknown keywords since
+   *     JavaFX CSS cannot express "no effect"
+   */
   private String resolveShadow(String shadow) {
     return switch (shadow) {
-      case "sm" -> "0 1px 2px 0 rgba(0, 0, 0, 0.05)";
-      case "default", "md" -> "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)";
-      case "lg" -> "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)";
-      case "xl" -> "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)";
-      case "2xl" -> "0 25px 50px -12px rgba(0, 0, 0, 0.25)";
-      case "none" -> "none";
+      case "sm" -> "dropshadow(0, 1, 2, rgba(0, 0, 0, 0.05))";
+      case "default", "md" -> "dropshadow(0, 1, 3, rgba(0, 0, 0, 0.1))";
+      case "lg" -> "dropshadow(0, 10, 15, rgba(0, 0, 0, 0.1))";
+      case "xl" -> "dropshadow(0, 20, 25, rgba(0, 0, 0, 0.1))";
+      case "2xl" -> "dropshadow(0, 25, 50, rgba(0, 0, 0, 0.25))";
+        // JavaFX CSS offers no way to clear an inherited effect from a class rule.
+      case "none" -> null;
       default -> null;
     };
   }
