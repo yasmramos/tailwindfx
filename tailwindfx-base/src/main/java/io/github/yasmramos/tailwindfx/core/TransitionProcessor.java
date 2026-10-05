@@ -19,12 +19,12 @@ import java.util.concurrent.ConcurrentHashMap;
  *   <li>{@code transition-transform} — Transition transform property
  *   <li>{@code duration-75}, {@code duration-100}, ..., {@code duration-1000}
  *   <li>{@code ease-linear}, {@code ease-in}, {@code ease-out}, {@code ease-in-out}
- *   <li>{@code animate-spin}, {@code animate-pulse}, {@code animate-bounce}
  * </ul>
  *
- * <p>Note: JavaFX does not support CSS animations directly. This processor generates transition
- * properties that can be used with JavaFX's Timeline animations or CSS-like styling where
- * supported.
+ * <p>Note: JavaFX does not support CSS animations or CSS transitions directly. {@code animate-*}
+ * utilities are recognized here only so they are not reported as unknown tokens; they are actually
+ * played by {@code AnimationApplier} as {@code TwAnimation} timelines. Transition, duration and
+ * easing utilities produce no inline style: they must be applied programmatically.
  *
  * @author yasmramos
  * @since 1.0.0
