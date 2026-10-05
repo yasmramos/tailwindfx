@@ -5,6 +5,34 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Unreleased]
+
+### Added
+
+#### Animation Utilities
+- **`AnimationApplier`** — Plays Tailwind `animate-*` utilities as JavaFX timelines
+  - JavaFX has no CSS animation engine, so these utilities cannot be compiled to inline styles
+  - `TwStyle.apply(node, "animate-spin")` now plays `TwAnimation.spin(node)` instead of silently
+    dropping the token
+  - Supports `animate-spin`, `animate-pulse`, `animate-bounce`, `animate-ping`, `animate-flash`,
+    `animate-shake`, and the `-slow` variants of spin, pulse and bounce
+  - Animations are registered in the `loop` slot, so re-applying a token cancels the previous
+    timeline rather than stacking two on the same node properties
+- `TokenRegistry.isAnimationToken(String)` — centralizes recognition of `animate-*` utilities
+- `TokenParser` classifies `animate-*` tokens into a dedicated `animationTokens` category
+
+### Fixed
+
+- Gradient tokens compiled individually now participate in the LRU cache and compilation metrics.
+  Previously `JitCompiler.compile()` returned early for gradient tokens, so they were recompiled on
+  every call and never appeared in cache statistics.
+- A single gradient token without a color stop (e.g. `bg-gradient-to-r` alone) now falls back to a
+  CSS class instead of an empty inline style.
+- Removed unused singleton `INSTANCE` fields from static utility classes (`TwConfig`, `TwEffect`,
+  `TwLayout`, `TwMetrics`, `TwResponsive`, `TwTheme`). No behavior change.
+
+---
+
 ## [0.1.1] - 2026-09-13
 
 > **Patch Release** — Bug fixes, performance improvements, and enhanced FXML support.

@@ -15,6 +15,7 @@ The `TwAnimation` class is a fluent wrapper around JavaFX `Animation` that provi
 - **Hover Effects**: Built-in hover-based animations (scale, lift, dim)
 - **Chaining Support**: Sequential (`chain`) and parallel (`parallel`) animation composition
 - **Responsive Guards**: Prevents animations during layout changes
+- **Tailwind Token Support**: `animate-*` utilities play through `AnimationApplier`
 
 ## Duration Constants
 
@@ -41,6 +42,33 @@ TwAnimation.slideUp(node).play();
 
 // Scale in with pop effect
 TwAnimation.scaleIn(node).play();
+```
+
+### Tailwind Animation Tokens
+
+JavaFX has no CSS animation engine, so `animate-*` utilities cannot be compiled to inline styles.
+`TwStyle.apply` detects them and plays the matching `TwAnimation` timeline instead:
+
+```java
+// Plays TwAnimation.spin(node) on an infinite loop
+TwStyle.apply(spinner, "animate-spin");
+
+// Plays TwAnimation.pulse(node)
+TwStyle.apply(badge, "animate-pulse");
+
+// Animation tokens compose with regular utilities in the same call
+TwStyle.apply(card, "animate-pulse", "p-4", "rounded-lg");
+```
+
+Supported tokens: `animate-spin`, `animate-pulse`, `animate-bounce`, `animate-ping`,
+`animate-flash`, `animate-shake`, and the `-slow` variants of spin, pulse and bounce. Animations
+are registered in the `loop` slot, so re-applying a token cancels the previous timeline instead of
+stacking two on the same properties. Variant prefixes (`hover:animate-spin`) are not supported.
+
+You can also apply a token directly, outside of `TwStyle`:
+
+```java
+AnimationApplier.applyAnimationToken(node, "animate-spin");
 ```
 
 ### Chained Configuration
