@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.yasmramos</groupId>
+        <artifactId>tailwindfx-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>tailwindfx-examples</artifactId>
+    <packaging>jar</packaging>
+
+    <name>TailwindFX Example - Advanced Dashboard</name>
+    <description>Advanced dashboard example with custom JavaFX charts built on TailwindFX</description>
+
+    <properties>
+        <!-- Example modules are not published: skip the Maven Central artifacts -->
+        <maven.source.skip>true</maven.source.skip>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <jacoco.skip>true</jacoco.skip>
+        <exec.mainClass>tailwindfx.examples.Launcher</exec.mainClass>
+    </properties>
+
+    <dependencies>
+        <!-- TailwindFX core + pre-built components -->
+        <dependency>
+            <groupId>io.github.yasmramos</groupId>
+            <artifactId>tailwindfx-base</artifactId>
+            <version>${tailwindfx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.yasmramos</groupId>
+            <artifactId>tailwindfx-components</artifactId>
+            <version>${tailwindfx.version}</version>
+        </dependency>
+
+        <!-- JavaFX (versions managed by the parent POM) -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-base</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <mainClass>${exec.mainClass}</mainClass>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>tailwindfx.examples.DashboardApp</mainClass>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>tailwindfx.examples.DashboardApp</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

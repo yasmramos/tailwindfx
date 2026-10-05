@@ -1,0 +1,915 @@
+package io.github.yasmramos.tailwindfx.components;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
+import javafx.scene.Node;
+import javafx.scene.control.ScrollBar;
+import javafx.scene.input.*;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
+import javafx.util.Duration;
+
+/**
+ * TwVirtualFlow — High-performance virtualized container with selection, drag & drop, and
+ * configurable animated scrolling.
+ *
+ * @param <T> Data type of the items
+ */
+public class TwVirtualFlow<T> extends Region {
+
+  // Enums & Constants
+  public enum SelectionMode {
+    NONE,
+    SINGLE,
+    MULTIPLE
+  }
+
+  // State & Cache
+  private final ObservableList<T> items = FXCollections.observableArrayList();
+  private Function<T, Node> cellFactory = defaultCellFactory();
+
+  /**
+   * Optional callback that reconfigures a recycled cell node for a new item. When set, cells that
+   * leave the viewport are returned to an internal reuse pool and later handed back (after {@code
+   * cellUpdater.accept(node, item)}) instead of being recreated through {@code cellFactory}. This
+   * is the minimal viable recycling API: it keeps the existing {@code Function<T, Node>} factory
+   * contract fully backward compatible — without an updater every cell is created fresh as before.
+   */
+  private BiConsumer<Node, T> cellUpdater = null;
+
+  /**
+   * Default cell factory that renders each item as a simple padded {@link
+   * javafx.scene.control.Label}.
+   *
+   * @param <T> the item type
+   * @return a fresh default cell factory instance
+   */
+  public static <T> Function<T, Node> defaultCellFactory() {
+    return item -> {
+      var label = new javafx.scene.control.Label(String.valueOf(item));
+      label.setStyle("-fx-padding: 8;");
+      return label;
+    };
+  }
+
+  private Orientation orientation = Orientation.VERTICAL;
+  private final DoubleProperty cellHeight = new SimpleDoubleProperty(48);
+  private final DoubleProperty cellWidth = new SimpleDoubleProperty(200);
+  private Function<T, Double> cellSizeProvider = null;
+
+  private final ObjectProperty<Insets> viewportPadding = new SimpleObjectProperty<>(Insets.EMPTY);
+  private final ObjectProperty<Interpolator> scrollInterpolator =
+      new SimpleObjectProperty<>(Interpolator.EASE_BOTH);
+  private final ObjectProperty<SelectionMode> selectionMode =
+      new SimpleObjectProperty<>(SelectionMode.SINGLE);
+  private final ObservableList<Integer> selectedIndices = FXCollections.observableArrayList();
+
+  /** The caller-supplied list registered via {@link #setItems(ObservableList)}, if any. */
+  private ObservableList<T> sourceItems;
+
+  /** Listener that drops stale selections when the caller mutates its own list directly. */
+  private ListChangeListener<T> sourceItemsListener;
+
+  // Contenedor interno
+  private final Pane cellContainer = new Pane();
+  private final ScrollBar scrollBar = new ScrollBar();
+  private final Map<Integer, Node> visibleCells = new HashMap<>();
+
+  /** Pool of detached cell nodes available for reuse (only used when a cellUpdater is set). */
+  private final Deque<Node> cellPool = new ArrayDeque<>();
+
+  /** Upper bound for the reuse pool; surplus cells are dropped instead of pooled. */
+  private static final int MAX_POOL_SIZE = 200;
+
+  // Listener references kept as fields so dispose() can detach them from their observables.
+  private ChangeListener<Number> scrollValueListener;
+  private ListChangeListener<T> itemsListener;
+  private ChangeListener<Number> widthListener;
+  private ChangeListener<Number> heightListener;
+  private ChangeListener<Insets> paddingListener;
+
+  // Drag & Drop
+  private final Region dropIndicator = new Region();
+  private int dragSourceIndex = -1;
+  private int dragTargetIndex = -1;
+
+  // Size cache
+  private double[] prefixSums = new double[0];
+  private int prefixSumsLength = 0;
+  private boolean sizeCacheDirty = true;
+
+  // Animation & Position
+  private Timeline scrollAnimation;
+  private double scrollPosition = 0;
+  private int firstVisibleIndex = 0;
+  private int lastVisibleIndex = 0;
+
+  // Callbacks
+  private Consumer<Integer> onSelect;
+  private Consumer<Integer> onDoubleClick;
+  private BiConsumer<Integer, Integer> onItemReorder;
+  private Consumer<List<T>> onSelectionChange;
+
+  // Constructor
+  public TwVirtualFlow() {
+    // Setup container
+    dropIndicator.getStyleClass().add("fx-virtualflow-drop-indicator");
+    dropIndicator.setStyle("-fx-background-color: #3b82f6; -fx-pref-height: 2;");
+    dropIndicator.setVisible(false);
+    dropIndicator.setManaged(false);
+    dropIndicator.setPickOnBounds(true);
+
+    getChildren().addAll(cellContainer, dropIndicator, scrollBar);
+    cellContainer.setMouseTransparent(false); // We handle events here
+    cellContainer.setManaged(false);
+
+    // Scroll config
+    scrollBar.setOrientation(orientation);
+    scrollValueListener =
+        (obs, oldVal, newVal) -> {
+          scrollPosition = newVal.doubleValue();
+          updateVisibleCells();
+        };
+    scrollBar.valueProperty().addListener(scrollValueListener);
+
+    // Data changes
+    itemsListener =
+        c -> {
+          sizeCacheDirty = true;
+          updateScrollBar();
+          updateVisibleCells();
+        };
+    items.addListener(itemsListener);
+
+    // Size changes
+    widthListener = (obs, o, n) -> updateVisibleCells();
+    heightListener = (obs, o, n) -> updateVisibleCells();
+    paddingListener =
+        (obs, o, n) -> {
+          requestLayout();
+          updateVisibleCells();
+        };
+    widthProperty().addListener(widthListener);
+    heightProperty().addListener(heightListener);
+    viewportPadding.addListener(paddingListener);
+
+    // EVENT DELEGATION (Container-level)
+    cellContainer.setOnMousePressed(e -> handleSelection(e));
+    cellContainer.setOnMouseClicked(
+        e -> {
+          if (e.getClickCount() == 2) handleDoubleClick(e);
+        });
+
+    // Drag & Drop setup
+    cellContainer.setOnDragDetected(e -> handleDragStart(e));
+    cellContainer.setOnDragOver(e -> handleDragOver(e));
+    cellContainer.setOnDragExited(e -> dropIndicator.setVisible(false));
+    cellContainer.setOnDragDropped(e -> handleDragDrop(e));
+    cellContainer.setOnDragDone(
+        e -> {
+          dropIndicator.setVisible(false);
+          dragSourceIndex = -1;
+        });
+
+    updateScrollBar();
+  }
+
+  // Public API - Core
+  public void setItems(ObservableList<T> items) {
+    Objects.requireNonNull(items, "items cannot be null");
+    // Detach the listener previously attached to the old source list (if any).
+    if (sourceItems != null && sourceItems != this.items && sourceItemsListener != null) {
+      sourceItems.removeListener(sourceItemsListener);
+    }
+    this.items.setAll(items);
+    if (items != this.items) {
+      // Keep the internal copy in sync with the caller's list: later mutations on the
+      // source (clear, remove, add, updates, permutations) must be reflected immediately,
+      // otherwise data and selections become stale. Resync first, then prune selections
+      // that fell out of range.
+      // Recursion check: this.items.setAll(...) fires the internal listener on {@code items}
+      // (sizeCacheDirty / scrollbar / cell refresh), which is desirable. That internal
+      // listener never mutates {@code sourceItems}, so no feedback loop is created.
+      sourceItemsListener =
+          c -> {
+            while (c.next()) {
+              // Consume the change and mirror the source state into the internal list.
+            }
+            this.items.setAll(sourceItems);
+            // Prune selections that are no longer valid after the sync above.
+            selectedIndices.removeIf(idx -> idx < 0 || idx >= this.items.size());
+          };
+      sourceItems = items;
+      sourceItems.addListener(sourceItemsListener);
+    } else {
+      sourceItems = null;
+      sourceItemsListener = null;
+    }
+    // Drop selections that are no longer valid for the new item set.
+    selectedIndices.removeIf(idx -> idx < 0 || idx >= this.items.size());
+  }
+
+  public ObservableList<T> getItems() {
+    return items;
+  }
+
+  public void setCellFactory(Function<T, Node> factory) {
+    if (factory == null) {
+      // Null is treated as "use the default factory" so callers can clear a custom factory safely.
+      this.cellFactory = defaultCellFactory();
+    } else {
+      this.cellFactory = factory;
+    }
+    visibleCells.values().forEach(cellContainer.getChildren()::remove);
+    visibleCells.clear();
+    // Pooled cells were built by the previous factory contract; drop them to avoid
+    // handing stale nodes to the new factory/updater pairing.
+    cellPool.clear();
+    updateVisibleCells();
+  }
+
+  /**
+   * Returns the current cell factory used to create visual nodes for items. Never {@code null};
+   * falls back to {@link #defaultCellFactory()} semantics when cleared via {@code
+   * setCellFactory(null)}.
+   *
+   * @return the cell factory function
+   */
+  public Function<T, Node> getCellFactory() {
+    return cellFactory;
+  }
+
+  /**
+   * Sets the optional cell updater that enables node recycling. When non-null, cells leaving the
+   * viewport are parked in an internal pool and later reused: before a pooled node becomes visible
+   * again, {@code updater.accept(node, newItem)} is invoked so the caller can rebind its content
+   * (text, graphics, style classes...). Passing {@code null} disables recycling and restores the
+   * original create-a-node-per-item behavior, keeping full compatibility with plain {@code
+   * Function<T, Node>} factories.
+   *
+   * <pre>{@code
+   * flow.setCellFactory(item -> new Label());
+   * flow.setCellUpdater((node, item) -> ((Label) node).setText(item));
+   * }</pre>
+   *
+   * @param updater the recycler callback, or null to disable pooling
+   */
+  public void setCellUpdater(BiConsumer<Node, T> updater) {
+    this.cellUpdater = updater;
+    if (updater == null) {
+      // Recycling disabled: discard pooled nodes so they do not linger on the scene graph owner.
+      cellPool.clear();
+    }
+  }
+
+  /**
+   * Returns the currently configured cell updater, or {@code null} when recycling is disabled.
+   *
+   * @return the cell updater callback, or null
+   */
+  public BiConsumer<Node, T> getCellUpdater() {
+    return cellUpdater;
+  }
+
+  public void setCellSizeProvider(Function<T, Double> provider) {
+    this.cellSizeProvider = provider;
+    sizeCacheDirty = true;
+    updateScrollBar();
+    updateVisibleCells();
+  }
+
+  /**
+   * Returns the current cell size provider, or {@code null} if a fixed cell size is used.
+   *
+   * @return the cell size provider function, or null
+   */
+  public Function<T, Double> getCellSizeProvider() {
+    return cellSizeProvider;
+  }
+
+  public void setCellHeight(double height) {
+    if (height <= 0) throw new IllegalArgumentException("cellHeight must be positive");
+    cellHeight.set(height);
+    sizeCacheDirty = true;
+    updateScrollBar();
+    updateVisibleCells();
+  }
+
+  public double getCellHeight() {
+    return cellHeight.get();
+  }
+
+  public DoubleProperty cellHeightProperty() {
+    return cellHeight;
+  }
+
+  public void setCellWidth(double width) {
+    if (width <= 0) throw new IllegalArgumentException("cellWidth must be positive");
+    cellWidth.set(width);
+    sizeCacheDirty = true;
+    updateScrollBar();
+    updateVisibleCells();
+  }
+
+  public double getCellWidth() {
+    return cellWidth.get();
+  }
+
+  public DoubleProperty cellWidthProperty() {
+    return cellWidth;
+  }
+
+  public void setOrientation(Orientation orientation) {
+    Objects.requireNonNull(orientation, "orientation cannot be null");
+    this.orientation = orientation;
+    scrollBar.setOrientation(orientation);
+    sizeCacheDirty = true;
+    updateScrollBar();
+    updateVisibleCells();
+  }
+
+  public Orientation getOrientation() {
+    return orientation;
+  }
+
+  public void setViewportPadding(Insets padding) {
+    Objects.requireNonNull(padding, "viewportPadding cannot be null");
+    this.viewportPadding.set(padding);
+  }
+
+  public Insets getViewportPadding() {
+    return viewportPadding.get();
+  }
+
+  public ObjectProperty<Insets> viewportPaddingProperty() {
+    return viewportPadding;
+  }
+
+  // Public API - Selection
+  public void setSelectionMode(SelectionMode mode) {
+    selectionMode.set(mode);
+    if (mode == SelectionMode.NONE) selectedIndices.clear();
+  }
+
+  public SelectionMode getSelectionMode() {
+    return selectionMode.get();
+  }
+
+  public ObjectProperty<SelectionMode> selectionModeProperty() {
+    return selectionMode;
+  }
+
+  public ObservableList<Integer> getSelectedIndices() {
+    return selectedIndices;
+  }
+
+  public List<T> getSelectedItems() {
+    return selectedIndices.stream()
+        .filter(i -> i >= 0 && i < items.size())
+        .map(items::get)
+        .collect(Collectors.toList());
+  }
+
+  public void clearSelection() {
+    selectedIndices.clear();
+    if (onSelectionChange != null) onSelectionChange.accept(getSelectedItems());
+  }
+
+  /**
+   * Selects the item at the given index. In {@link SelectionMode#MULTIPLE} the index is added to
+   * the current selection (toggle semantics, mirroring mouse shortcut-click behavior); in every
+   * other mode the selection is replaced by this single index.
+   *
+   * @param index the index to select; ignored when out of bounds
+   */
+  public void selectIndex(int index) {
+    if (selectionMode.get() == SelectionMode.NONE) return;
+    if (index < 0 || index >= items.size()) return;
+    selectIndexInternal(index);
+    if (onSelectionChange != null) onSelectionChange.accept(getSelectedItems());
+  }
+
+  /**
+   * Performs the selection mutation without notifying {@link #onSelectionChange}. Callers that need
+   * to fire the callback exactly once (such as {@link #handleSelection}) use this and notify
+   * themselves after the whole interaction is resolved.
+   */
+  private void selectIndexInternal(int index) {
+    if (selectionMode.get() == SelectionMode.MULTIPLE) {
+      if (!selectedIndices.contains(index)) selectedIndices.add(index);
+    } else {
+      selectedIndices.setAll(index);
+    }
+  }
+
+  // Public API - Scrolling & Animation
+  public void scrollToIndex(int index) {
+    scrollToIndex(index, Duration.ZERO);
+  }
+
+  public void scrollToIndex(int index, Duration duration) {
+    if (items.isEmpty() || index < 0 || index >= items.size()) return;
+    ensureSizeCache();
+    animateScrollTo(prefixSums[index], duration);
+  }
+
+  public void scrollBy(double delta, Duration duration) {
+    animateScrollTo(Math.max(0, Math.min(scrollPosition + delta, scrollBar.getMax())), duration);
+  }
+
+  public Interpolator getScrollInterpolator() {
+    return scrollInterpolator.get();
+  }
+
+  public ObjectProperty<Interpolator> scrollInterpolatorProperty() {
+    return scrollInterpolator;
+  }
+
+  public int getFirstVisibleIndex() {
+    return firstVisibleIndex;
+  }
+
+  public int getLastVisibleIndex() {
+    return lastVisibleIndex;
+  }
+
+  public double getScrollPosition() {
+    return scrollPosition;
+  }
+
+  // Public API - Callbacks
+  public void setOnSelect(Consumer<Integer> handler) {
+    this.onSelect = handler;
+  }
+
+  public void setOnDoubleClick(Consumer<Integer> handler) {
+    this.onDoubleClick = handler;
+  }
+
+  public void setOnItemReorder(BiConsumer<Integer, Integer> handler) {
+    this.onItemReorder = handler;
+  }
+
+  public void setOnSelectionChange(Consumer<List<T>> handler) {
+    this.onSelectionChange = handler;
+  }
+
+  // Layout
+  @Override
+  protected void layoutChildren() {
+    double w = getWidth(), h = getHeight();
+    if (orientation == Orientation.VERTICAL) {
+      double sbW = scrollBar.prefWidth(-1);
+      double vw = Math.max(0, w - sbW);
+      cellContainer.resizeRelocate(0, 0, vw, h);
+      scrollBar.resizeRelocate(vw, 0, sbW, h);
+    } else {
+      double sbH = scrollBar.prefHeight(-1);
+      double vh = Math.max(0, h - sbH);
+      cellContainer.resizeRelocate(0, 0, w, vh);
+      scrollBar.resizeRelocate(0, vh, w, sbH);
+    }
+    updateVisibleCells();
+  }
+
+  @Override
+  protected double computePrefWidth(double h) {
+    return orientation == Orientation.VERTICAL ? 400 : 800;
+  }
+
+  @Override
+  protected double computePrefHeight(double w) {
+    return orientation == Orientation.VERTICAL ? 600 : 200;
+  }
+
+  @Override
+  protected double computeMinWidth(double h) {
+    return orientation == Orientation.VERTICAL ? 100 : 200;
+  }
+
+  @Override
+  protected double computeMinHeight(double w) {
+    return orientation == Orientation.VERTICAL ? 100 : 50;
+  }
+
+  // Internal Logic - Size Cache & Binary Search
+  private void ensureSizeCache() {
+    if (!sizeCacheDirty) return;
+    sizeCacheDirty = false;
+    int n = items.size();
+    if (prefixSums.length != n + 1) prefixSums = new double[n + 1];
+    prefixSums[0] = 0;
+    double def = orientation == Orientation.VERTICAL ? cellHeight.get() : cellWidth.get();
+    for (int i = 0; i < n; i++) {
+      double size = (cellSizeProvider != null) ? cellSizeProvider.apply(items.get(i)) : def;
+      prefixSums[i + 1] = prefixSums[i] + Math.max(1, size);
+    }
+    prefixSumsLength = n + 1;
+  }
+
+  private double getTotalContentSize() {
+    ensureSizeCache();
+    return prefixSumsLength > 0 ? prefixSums[prefixSumsLength - 1] : 0;
+  }
+
+  private int findCellIndexForPosition(double absolutePos) {
+    ensureSizeCache();
+    if (prefixSumsLength <= 1) return 0;
+    if (absolutePos <= 0) return 0;
+    if (absolutePos >= prefixSums[prefixSumsLength - 1]) return items.size() - 1;
+
+    int low = 0, high = prefixSumsLength - 2;
+    while (low <= high) {
+      int mid = (low + high) >>> 1;
+      if (absolutePos >= prefixSums[mid] && absolutePos < prefixSums[mid + 1]) return mid;
+      if (absolutePos < prefixSums[mid]) high = mid - 1;
+      else low = mid + 1;
+    }
+    return Math.max(0, Math.min(low, items.size() - 1));
+  }
+
+  // Internal Logic - Scroll & Cells
+  private void updateScrollBar() {
+    if (items.isEmpty()) {
+      scrollBar.setMin(0);
+      scrollBar.setMax(0);
+      scrollBar.setValue(0);
+      scrollBar.setVisibleAmount(1);
+      scrollBar.setDisable(true);
+      return;
+    }
+    double total = getTotalContentSize();
+    double vpSize =
+        orientation == Orientation.VERTICAL
+            ? Math.max(0, cellContainer.getHeight())
+            : Math.max(0, cellContainer.getWidth());
+    double max = Math.max(0, total - vpSize);
+    scrollBar.setMin(0);
+    scrollBar.setMax(max);
+    scrollBar.setVisibleAmount(Math.min(vpSize / total, 1.0));
+    scrollBar.setBlockIncrement(vpSize * 0.9);
+    scrollBar.setUnitIncrement(
+        orientation == Orientation.VERTICAL ? cellHeight.get() : cellWidth.get());
+    scrollBar.setDisable(max <= 0);
+    scrollPosition = Math.min(scrollPosition, max);
+    scrollBar.setValue(scrollPosition);
+  }
+
+  private void animateScrollTo(double target, Duration duration) {
+    if (scrollAnimation != null) scrollAnimation.stop();
+
+    // Fix 1: Use toMillis() instead of isZero() for compatibility
+    if (duration.toMillis() == 0 || duration.toMillis() < 16) {
+      scrollBar.setValue(target);
+      return;
+    }
+
+    // Fix 2 & 3: Correct Timeline construction and Interpolator usage
+    // Timeline takes KeyFrames. Interpolator is applied to KeyValue.
+    scrollAnimation =
+        new Timeline(
+            new KeyFrame(
+                Duration.ZERO,
+                new KeyValue(scrollBar.valueProperty(), scrollPosition, Interpolator.LINEAR)),
+            new KeyFrame(
+                duration,
+                new KeyValue(scrollBar.valueProperty(), target, scrollInterpolator.get())));
+
+    scrollAnimation.play();
+  }
+
+  private void updateVisibleCells() {
+    if (items.isEmpty()) {
+      cellContainer.getChildren().clear();
+      visibleCells.clear();
+      firstVisibleIndex = 0;
+      lastVisibleIndex = -1;
+      return;
+    }
+    ensureSizeCache();
+    Insets pad = viewportPadding.get();
+    double vpSize =
+        orientation == Orientation.VERTICAL
+            ? Math.max(0, cellContainer.getHeight() - pad.getTop() - pad.getBottom())
+            : Math.max(0, cellContainer.getWidth() - pad.getLeft() - pad.getRight());
+    if (vpSize <= 0) return;
+
+    firstVisibleIndex = findCellIndexForPosition(scrollPosition);
+    lastVisibleIndex = firstVisibleIndex;
+    double cur = prefixSums[firstVisibleIndex];
+    int buffer = 3;
+    while (lastVisibleIndex < items.size() - 1 && (cur < scrollPosition + vpSize || buffer > 0)) {
+      lastVisibleIndex++;
+      cur = prefixSums[lastVisibleIndex];
+      buffer--;
+    }
+    while (firstVisibleIndex > 0 && buffer > 0) {
+      firstVisibleIndex--;
+      buffer--;
+    }
+
+    visibleCells
+        .keySet()
+        .removeIf(
+            idx -> {
+              if (idx < firstVisibleIndex || idx > lastVisibleIndex) {
+                Node n = visibleCells.get(idx);
+                if (n != null) {
+                  cellContainer.getChildren().remove(n);
+                  // Recycle: when an updater is configured, detached cells go back to the
+                  // pool instead of being discarded, so they can be rebound to other items.
+                  if (cellUpdater != null && cellPool.size() < MAX_POOL_SIZE) {
+                    cellPool.addLast(n);
+                  }
+                }
+                return true;
+              }
+              return false;
+            });
+
+    for (int i = firstVisibleIndex; i <= lastVisibleIndex; i++) {
+      if (!visibleCells.containsKey(i)) {
+        T item = items.get(i);
+        Node cell = null;
+        if (cellUpdater != null && !cellPool.isEmpty()) {
+          // Reuse a pooled cell and rebind it to the new item via the updater callback.
+          cell = cellPool.removeFirst();
+          cellUpdater.accept(cell, item);
+        }
+        if (cell == null) {
+          cell = cellFactory.apply(item);
+        }
+        if (cell == null) continue;
+        // Attach visual selection state if needed
+        if (!cell.getStyleClass().contains("fx-virtualflow-cell")) {
+          cell.getStyleClass().add("fx-virtualflow-cell");
+        }
+        visibleCells.put(i, cell);
+        cellContainer.getChildren().add(cell);
+      }
+      Node cell = visibleCells.get(i);
+      if (cell == null) continue;
+
+      double start = prefixSums[i] - scrollPosition;
+      double size = prefixSums[i + 1] - prefixSums[i];
+      boolean isSelected = selectedIndices.contains(i);
+      // Update visual state
+      if (isSelected) cell.getStyleClass().add("selected");
+      else cell.getStyleClass().remove("selected");
+
+      if (orientation == Orientation.VERTICAL) {
+        double aw = Math.max(0, cellContainer.getWidth() - pad.getLeft() - pad.getRight());
+        cell.resizeRelocate(pad.getLeft(), start + pad.getTop(), aw, size);
+      } else {
+        double ah = Math.max(0, cellContainer.getHeight() - pad.getTop() - pad.getBottom());
+        cell.resizeRelocate(start + pad.getLeft(), pad.getTop(), size, ah);
+      }
+    }
+  }
+
+  // Internal Logic - Event Delegation
+  private int getIndexAtMouseEvent(MouseEvent e) {
+    ensureSizeCache();
+    Insets pad = viewportPadding.get();
+    double local = orientation == Orientation.VERTICAL ? e.getY() : e.getX();
+    // Subtract the leading viewport padding so hit-testing matches the offset used when
+    // placing cells in updateVisibleCells (resizeRelocate adds pad.getTop()/pad.getLeft()).
+    double offset = orientation == Orientation.VERTICAL ? pad.getTop() : pad.getLeft();
+    return findCellIndexForPosition(local - offset + scrollPosition);
+  }
+
+  // Helper for DragEvents which don't extend MouseEvent
+  private int getIndexAtDragEvent(DragEvent e) {
+    ensureSizeCache();
+    Insets pad = viewportPadding.get();
+    double local = orientation == Orientation.VERTICAL ? e.getY() : e.getX();
+    // Same padding compensation as getIndexAtMouseEvent.
+    double offset = orientation == Orientation.VERTICAL ? pad.getTop() : pad.getLeft();
+    return findCellIndexForPosition(local - offset + scrollPosition);
+  }
+
+  private void handleSelection(MouseEvent e) {
+    if (selectionMode.get() == SelectionMode.NONE) return;
+    int idx = getIndexAtMouseEvent(e);
+    if (idx < 0 || idx >= items.size()) {
+      clearSelection();
+      return;
+    }
+
+    // Every branch below mutates the selection at most once, and the callback is fired once at the
+    // end. Calling the public selectIndex() here used to fire onSelectionChange twice, because it
+    // notifies internally as well.
+    if (selectionMode.get() == SelectionMode.SINGLE) {
+      selectIndexInternal(idx);
+    } else if (selectionMode.get() == SelectionMode.MULTIPLE) {
+      if (e.isShiftDown() && !selectedIndices.isEmpty()) {
+        int last = selectedIndices.get(selectedIndices.size() - 1);
+        int from = Math.min(last, idx), to = Math.max(last, idx);
+        selectedIndices.clear();
+        for (int i = from; i <= to; i++) selectedIndices.add(i);
+      } else if (e.isShortcutDown()) {
+        if (selectedIndices.contains(idx)) selectedIndices.remove(Integer.valueOf(idx));
+        else selectedIndices.add(idx);
+      } else {
+        selectIndexInternal(idx);
+      }
+    }
+    if (onSelect != null) onSelect.accept(idx);
+    if (onSelectionChange != null) onSelectionChange.accept(getSelectedItems());
+  }
+
+  private void handleDoubleClick(MouseEvent e) {
+    int idx = getIndexAtMouseEvent(e);
+    if (idx >= 0 && idx < items.size() && onDoubleClick != null) onDoubleClick.accept(idx);
+  }
+
+  // Corrected Signatures:
+
+  private void handleDragStart(MouseEvent e) {
+    int idx = getIndexAtMouseEvent(e);
+    if (idx < 0 || idx >= items.size()) return;
+    dragSourceIndex = idx;
+
+    Dragboard db = cellContainer.startDragAndDrop(TransferMode.MOVE);
+    ClipboardContent content = new ClipboardContent();
+    content.putString(String.valueOf(idx));
+    db.setContent(content);
+    // Snapshot only the dragged cell, not the whole container (which includes non-visible
+    // children and the scroll bar). Fall back to the container if the cell is unavailable.
+    Node draggedCell = visibleCells.get(idx);
+    db.setDragView((draggedCell != null ? draggedCell : cellContainer).snapshot(null, null));
+  }
+
+  private void handleDragOver(DragEvent e) {
+    if (dragSourceIndex < 0 || !e.getDragboard().hasString()) return;
+    e.acceptTransferModes(TransferMode.MOVE);
+
+    ensureSizeCache();
+    int idx = getIndexAtDragEvent(e);
+    if (idx == dragSourceIndex) {
+      dropIndicator.setVisible(false);
+      return;
+    }
+    dragTargetIndex = idx;
+
+    double absPos = prefixSums[idx] - scrollPosition;
+    if (orientation == Orientation.VERTICAL) {
+      dropIndicator.resizeRelocate(0, absPos, cellContainer.getWidth(), 2);
+    } else {
+      dropIndicator.resizeRelocate(absPos, 0, 2, cellContainer.getHeight());
+    }
+    dropIndicator.setVisible(true);
+  }
+
+  private void handleDragDrop(DragEvent e) {
+    e.setDropCompleted(true);
+    dropIndicator.setVisible(false);
+    if (dragSourceIndex < 0 || dragTargetIndex < 0) return;
+
+    int from = dragSourceIndex;
+    int to = (dragTargetIndex < from) ? dragTargetIndex : dragTargetIndex - 1;
+    if (onItemReorder != null) onItemReorder.accept(from, to);
+    dragSourceIndex = -1;
+  }
+
+  // Fluent API
+  public TwVirtualFlow<T> items(ObservableList<T> i) {
+    setItems(i);
+    return this;
+  }
+
+  public TwVirtualFlow<T> cellFactory(Function<T, Node> f) {
+    setCellFactory(f);
+    return this;
+  }
+
+  public TwVirtualFlow<T> cellHeight(double h) {
+    setCellHeight(h);
+    return this;
+  }
+
+  public TwVirtualFlow<T> cellWidth(double w) {
+    setCellWidth(w);
+    return this;
+  }
+
+  public TwVirtualFlow<T> cellSizeProvider(Function<T, Double> p) {
+    setCellSizeProvider(p);
+    return this;
+  }
+
+  public TwVirtualFlow<T> orientation(Orientation o) {
+    setOrientation(o);
+    return this;
+  }
+
+  public TwVirtualFlow<T> viewportPadding(Insets p) {
+    setViewportPadding(p);
+    return this;
+  }
+
+  public TwVirtualFlow<T> viewportPadding(double px) {
+    return viewportPadding(new Insets(px));
+  }
+
+  public TwVirtualFlow<T> selectionMode(SelectionMode m) {
+    setSelectionMode(m);
+    return this;
+  }
+
+  public TwVirtualFlow<T> scrollInterpolator(Interpolator i) {
+    scrollInterpolator.set(i);
+    return this;
+  }
+
+  public TwVirtualFlow<T> outerPadding(Insets p) {
+    setPadding(p);
+    return this;
+  }
+
+  public TwVirtualFlow<T> outerPadding(double px) {
+    return outerPadding(new Insets(px));
+  }
+
+  public TwVirtualFlow<T> onSelect(Consumer<Integer> h) {
+    setOnSelect(h);
+    return this;
+  }
+
+  public TwVirtualFlow<T> onDoubleClick(Consumer<Integer> h) {
+    setOnDoubleClick(h);
+    return this;
+  }
+
+  public TwVirtualFlow<T> onItemReorder(BiConsumer<Integer, Integer> h) {
+    setOnItemReorder(h);
+    return this;
+  }
+
+  public TwVirtualFlow<T> onSelectionChange(Consumer<List<T>> h) {
+    setOnSelectionChange(h);
+    return this;
+  }
+
+  /** Safe TailwindFX wrapper (fallback to CSS if not in classpath) */
+  public TwVirtualFlow<T> withTailwindStyling(Function<T, Node> base, String... classes) {
+    Objects.requireNonNull(base);
+    return cellFactory(
+        item -> {
+          Node n = base.apply(item);
+          if (n != null && classes.length > 0) {
+            try {
+              Class.forName("tailwindfx.TailwindFX")
+                  .getMethod("apply", Node.class, String[].class)
+                  .invoke(null, n, (Object) classes);
+            } catch (ClassNotFoundException
+                | IllegalAccessException
+                | NoSuchMethodException
+                | InvocationTargetException ex) {
+              n.getStyleClass().addAll(classes);
+            }
+          }
+          return n;
+        });
+  }
+
+  public void dispose() {
+    if (scrollAnimation != null) scrollAnimation.stop();
+
+    // Detach every listener registered in the constructor / setItems so the control can be
+    // garbage-collected even while its observables (or an external source list) stay alive.
+    scrollBar.valueProperty().removeListener(scrollValueListener);
+    items.removeListener(itemsListener);
+    widthProperty().removeListener(widthListener);
+    heightProperty().removeListener(heightListener);
+    viewportPadding.removeListener(paddingListener);
+    if (sourceItems != null && sourceItemsListener != null) {
+      sourceItems.removeListener(sourceItemsListener);
+    }
+    sourceItems = null;
+    sourceItemsListener = null;
+
+    visibleCells.values().forEach(cellContainer.getChildren()::remove);
+    visibleCells.clear();
+    cellPool.clear();
+    items.clear();
+    selectedIndices.clear();
+    prefixSums = new double[0];
+    prefixSumsLength = 0;
+  }
+}

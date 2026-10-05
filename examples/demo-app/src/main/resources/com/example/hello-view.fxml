@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/17" 
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.HelloController"
+      spacing="20" 
+      alignment="CENTER"
+      styleClass="p-10, bg-gray-100">
+
+    <Label text="Welcome to TailwindFX!" 
+           styleClass="text-2xl, font-bold, text-blue-600"/>
+    
+    <Label text="This is an example project using the Maven plugin"
+           styleClass="text-lg, text-gray-700"/>
+
+    <Button text="Click Me" 
+            styleClass="bg-blue-500, hover:bg-blue-700, text-white, font-bold, py-2, px-4, rounded"/>
+    
+    <Label fx:id="welcomeText" 
+           styleClass="text-sm, text-green-600"/>
+
+</VBox>

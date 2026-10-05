@@ -1,0 +1,220 @@
+/*
+ * Copyright 2026 Yasmany Ramos García (yasmramos).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.github.yasmramos.tailwindfx;
+
+import io.github.yasmramos.tailwindfx.breakpoint.BreakpointManager;
+import io.github.yasmramos.tailwindfx.core.ThemeCssGenerator;
+import io.github.yasmramos.tailwindfx.theme.ThemeConfig;
+import java.util.Objects;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+/**
+ * TwInstall — Installation facade for CSS stylesheets.
+ *
+ * <p>This class handles installing minimal TailwindFX CSS files into JavaFX scenes. Most utilities
+ * are now JIT-compiled at runtime via JitCompiler. Base variables are generated dynamically from
+ * ThemeConfig.
+ *
+ * <p>Usage:
+ *
+ * <pre>
+ * TwInstall.install(scene);
+ * TwInstall.installMinimal(scene);
+ * TwInstall.installGenerated(scene, "css/tailwindfx-generated.css");
+ * </pre>
+ */
+public final class TwInstall {
+
+  private static final String GENERATED_BASE_CSS_ID = "tailwindfx-base-generated";
+  private static final String GENERATED_STYLESHEET_CSS_PATH = "/css/tailwindfx-generated.css";
+
+  private TwInstall() {}
+
+  /**
+   * Installs the build-time generated stylesheet (tailwindfx-generated.css) produced by the Maven
+   * plugin. This should be called AFTER installBase() to ensure proper cascade order: 1. Base CSS
+   * (variables, reset) - installed first 2. Generated stylesheet (utility classes) - installed
+   * second, can override base
+   *
+   * <p>The generated stylesheet contains pre-compiled utility classes for better performance and
+   * smaller bundle size. Dynamic/arbitrary values still use JIT fallback.
+   *
+   * <p>This method enables {@code TwConfig.preferStylesheet(true)} upon successful loading, making
+   * the AOT-generated stylesheet the canonical path for applying styles. If the stylesheet is not
+   * found, preferStylesheet remains false and JIT inline compilation is used as fallback.
+   *
+   * @param scene the JavaFX scene to install the stylesheet into
+   * @param cssPath the path to the generated CSS file (default: "/css/tailwindfx-generated.css")
+   */
+  public static void installGenerated(Scene scene, String cssPath) {
+    if (cssPath == null || cssPath.trim().isEmpty()) {
+      cssPath = GENERATED_STYLESHEET_CSS_PATH;
+    }
+
+    // Ensure base CSS is installed first
+    installBase(scene);
+
+    // Load generated stylesheet
+    String normalizedPath = cssPath.startsWith("/") ? cssPath : "/" + cssPath;
+    java.net.URL url = TwInstall.class.getResource(normalizedPath);
+
+    if (url == null) {
+      // Try with TCCL
+      ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+      if (tccl != null) {
+        url = tccl.getResource(normalizedPath.substring(1));
+      }
+    }
+
+    if (url == null) {
+      System.err.println(
+          "[TailwindFX] Warning: Generated stylesheet not found at "
+              + normalizedPath
+              + ". Falling back to JIT inline compilation. Use TwInstall.installMinimal() instead.");
+      return;
+    }
+
+    String urlStr = url.toExternalForm();
+    var sheets = scene.getStylesheets();
+
+    // Remove if already installed
+    if (sheets.contains(urlStr)) {
+      sheets.remove(urlStr);
+    }
+
+    // Add after base CSS (at end of list)
+    sheets.add(urlStr);
+
+    // Enable preferStylesheet mode: AOT stylesheet is now the canonical path
+    TwConfig.preferStylesheet(true);
+  }
+
+  /**
+   * Installs the build-time generated stylesheet using the default path. Equivalent to
+   * installGenerated(scene, null).
+   *
+   * @param scene the JavaFX scene to install the stylesheet into
+   */
+  public static void installGenerated(Scene scene) {
+    installGenerated(scene, null);
+  }
+
+  /** Installs minimal CSS (base variables only). All utilities are JIT-compiled. */
+  public static void install(Scene scene) {
+    installMinimal(scene);
+  }
+
+  public static void install(Scene scene, Stage stage) {
+    installMinimal(scene, stage);
+  }
+
+  /** Installs only the base module (variables and reset). Required for JIT compilation. */
+  public static void installBase(Scene scene) {
+    installGeneratedBaseCss(scene, 0);
+  }
+
+  /**
+   * Does nothing; kept for source compatibility.
+   *
+   * <p>Dark mode needs no stylesheet of its own: {@code TwTheme.of(scene).dark().apply()} sets the
+   * Modena variables and the {@code -tw-*} theme tokens, and the {@code .dark} overrides ship with
+   * {@code tailwindfx-components.css}.
+   *
+   * @param scene ignored
+   * @deprecated dark mode is activated through {@code TwTheme}; this method has no effect
+   */
+  @Deprecated
+  public static void installDark(Scene scene) {
+    // Intentionally empty. See the Javadoc above.
+  }
+
+  /**
+   * Minimal installation: base CSS generated dynamically. All utilities JIT-compiled at runtime.
+   */
+  public static void installMinimal(Scene scene) {
+    installBase(scene);
+    // Optional: uncomment if you need dark mode support
+    // installDark(scene);
+  }
+
+  private static void installMinimal(Scene scene, Stage stage) {
+    installMinimal(scene);
+    BreakpointManager.attach(stage);
+  }
+
+  /**
+   * Installs dynamically generated base CSS from ThemeConfig. Removes any previously installed
+   * static base CSS.
+   */
+  private static void installGeneratedBaseCss(Scene scene, int priority) {
+    // Generate CSS from ThemeConfig
+    ThemeConfig themeConfig = ThemeConfig.defaultConfig();
+    ThemeCssGenerator generator = new ThemeCssGenerator(themeConfig);
+    String generatedCss = generator.generateBaseCss();
+
+    // Properly encode CSS for data URL (RFC 2397)
+    String encodedCss =
+        java.net.URLEncoder.encode(generatedCss, java.nio.charset.StandardCharsets.UTF_8)
+            .replace("+", "%20")
+            .replace("%3A", ":")
+            .replace("%3B", ";")
+            .replace("%7B", "{")
+            .replace("%7D", "}")
+            .replace("%23", "#");
+
+    String dataUrl = "data:text/css;charset=utf-8," + encodedCss;
+
+    var sheets = scene.getStylesheets();
+
+    // Remove any existing generated base CSS
+    sheets.removeIf(url -> url.contains(GENERATED_BASE_CSS_ID));
+
+    // Also remove static base CSS if it exists
+    sheets.removeIf(url -> url.contains("tailwindfx-base.css"));
+
+    // Insert at specified priority
+    sheets.add(Math.min(priority, sheets.size()), dataUrl);
+  }
+
+  private static void installCss(Scene scene, String cssPath, int priority) {
+    // ClassLoader.getResource() doesn't accept leading "/"; Class.getResource() does.
+    String normalizedPath = cssPath.startsWith("/") ? cssPath.substring(1) : cssPath;
+    java.net.URL url = null;
+
+    // 1. Thread Context ClassLoader: resolves resources in OSGi bundles, Java Modules or delegated
+    // classloaders
+    ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+    if (tccl != null) url = tccl.getResource(normalizedPath);
+
+    // 2. TailwindFX ClassLoader: fallback for environments where TCCL is the host/app classloader
+    if (url == null) url = TwInstall.class.getClassLoader().getResource(normalizedPath);
+
+    // 3. Class-relative resolution: captures resources packaged alongside the framework
+    if (url == null) url = TwInstall.class.getResource(cssPath);
+
+    String urlStr =
+        Objects.requireNonNull(
+                url, cssPath + " not found via TCCL, Framework CL, or class-relative path")
+            .toExternalForm();
+
+    var sheets = scene.getStylesheets();
+    if (sheets.contains(urlStr)) sheets.remove(urlStr);
+
+    // Deterministic insertion by priority (maintains stable CSS cascade)
+    sheets.add(Math.min(priority, sheets.size()), urlStr);
+  }
+}

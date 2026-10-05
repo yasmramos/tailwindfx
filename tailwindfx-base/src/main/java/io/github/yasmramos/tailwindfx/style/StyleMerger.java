@@ -1,0 +1,167 @@
+/*
+ * Copyright 2026 Yasmany Ramos García (yasmramos).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.github.yasmramos.tailwindfx.style;
+
+import io.github.yasmramos.tailwindfx.core.JitCompiler;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javafx.scene.Node;
+
+/**
+ * StyleMerger — Applies JIT inline styles to JavaFX nodes without destroying previous styles.
+ *
+ * <p>Problem: node.setStyle() overwrites ALL existing inline style. Solution: parse current style,
+ * merge by property, and rewrite.
+ *
+ * <p>Merge rules: - JIT wins over previous styles of the same property (developer's intent) -
+ * Properties not affected by JIT are preserved intact - Node's CSS classes are NOT touched here
+ * (handled by TwStyle.apply)
+ */
+public final class StyleMerger {
+
+  private StyleMerger() {}
+
+  // Regex para parsear "property: value;" de un inline style
+  private static final Pattern PROP_PATTERN = Pattern.compile("(-(?:fx|tw)-[a-z-]+)\\s*:\\s*([^;]+);?");
+
+  // Public API
+  /**
+   * Aplica tokens JIT a un nodo. Procesa las CSS classes fallback y el inline style merged.
+   *
+   * <p>Ejemplo: StyleMerger.applyJit(button, "p-4", "bg-blue-500/80", "rounded-lg", "font-bold");
+   */
+  public static void applyJit(Node node, String... tokens) {
+    JitCompiler.BatchResult result = JitCompiler.compileBatch(tokens);
+
+    // 1. Inline styles: merge no destructivo
+    if (result.hasInlineStyle()) {
+      String merged = merge(node.getStyle(), result.inlineStyle());
+      node.setStyle(merged);
+    }
+
+    // 2. CSS classes fallback (tokens desconocidos o que mapean a clases).
+    // Tracked in node properties so replaceJit() can remove only framework-added classes.
+    Set<String> tracked = trackedClasses(node);
+    for (String cls : result.cssClasses()) {
+      if (!node.getStyleClass().contains(cls)) {
+        node.getStyleClass().add(cls);
+      }
+      tracked.add(cls);
+    }
+  }
+
+  /** Property key under which StyleMerger tracks the CSS classes it added to a node. */
+  private static final String JIT_CLASSES_KEY = "tailwindfx.jit.classes";
+
+  @SuppressWarnings("unchecked")
+  private static Set<String> trackedClasses(Node node) {
+    return (Set<String>)
+        node.getProperties()
+            .computeIfAbsent(
+                JIT_CLASSES_KEY,
+                k ->
+                    java.util.Collections.newSetFromMap(
+                        new java.util.LinkedHashMap<String, Boolean>()));
+  }
+
+  /**
+   * Removes JIT properties from a node's inline style. Useful for undoing dynamically applied
+   * styles.
+   */
+  public static void removeJit(Node node, String... tokens) {
+    JitCompiler.BatchResult result = JitCompiler.compileBatch(tokens);
+
+    if (result.hasInlineStyle()) {
+      String cleaned = removeProperties(node.getStyle(), result.inlineStyle());
+      node.setStyle(cleaned);
+    }
+
+    Set<String> tracked = trackedClasses(node);
+    for (String cls : result.cssClasses()) {
+      node.getStyleClass().remove(cls);
+      tracked.remove(cls);
+    }
+  }
+
+  /**
+   * Replaces the entire JIT inline style (removes previous and applies new).
+   *
+   * <p>Only removes what this framework owns: the inline style string and the CSS classes that were
+   * previously added by {@link #applyJit} (tracked in node properties). User-managed style classes
+   * are never touched.
+   */
+  public static void replaceJit(Node node, String... tokens) {
+    node.setStyle("");
+    Set<String> tracked = trackedClasses(node);
+    if (!tracked.isEmpty()) {
+      node.getStyleClass().removeAll(tracked);
+      tracked.clear();
+    }
+    applyJit(node, tokens);
+  }
+
+  // Inline styles merge
+  /**
+   * Merges two inline style blocks. Properties in the 'incoming' block overwrite those in
+   * 'existing'. Properties in 'existing' that are not in 'incoming' are preserved.
+   *
+   * <p>merge("-fx-padding: 8px; -fx-opacity: 0.5;", "-fx-padding: 16px; -fx-font-size: 14px;") →
+   * "-fx-font-size: 14px; -fx-opacity: 0.5; -fx-padding: 16px;"
+   */
+  public static String merge(String existing, String incoming) {
+    Map<String, String> props = parseStyle(existing);
+    props.putAll(parseStyle(incoming)); // incoming gana en conflictos
+    return buildStyle(props);
+  }
+
+  /** Elimina del 'existing' todas las propiedades presentes en 'toRemove'. */
+  public static String removeProperties(String existing, String toRemove) {
+    Map<String, String> props = parseStyle(existing);
+    Set<String> keysToRemove = parseStyle(toRemove).keySet();
+    props.keySet().removeAll(keysToRemove);
+    return buildStyle(props);
+  }
+
+  // Parse y build de inline style string
+  /** Parsea "-fx-padding: 16px; -fx-opacity: 0.5;" → {"fx-padding":"16px", ...} */
+  public static Map<String, String> parseStyle(String style) {
+    Map<String, String> map = new LinkedHashMap<>();
+    if (style == null || style.isBlank()) {
+      return map;
+    }
+
+    Matcher m = PROP_PATTERN.matcher(style);
+    while (m.find()) {
+      map.put(m.group(1).trim(), m.group(2).trim());
+    }
+    return map;
+  }
+
+  /** {"fx-padding":"16px", "-fx-opacity":"0.5"} → "-fx-opacity: 0.5; -fx-padding: 16px;" */
+  public static String buildStyle(Map<String, String> props) {
+    if (props.isEmpty()) {
+      return "";
+    }
+    StringBuilder sb = new StringBuilder();
+    // Orden consistente para facilitar debugging
+    new TreeMap<>(props).forEach((k, v) -> sb.append(k).append(": ").append(v).append("; "));
+    return sb.toString().trim();
+  }
+}

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.yasmramos</groupId>
+        <artifactId>tailwindfx-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>demo-app</artifactId>
+    <packaging>jar</packaging>
+
+    <name>TailwindFX Example - FXML Demo</name>
+    <description>TailwindFX with FXML: loads a FXML view and processes the scene graph with TwFXML</description>
+
+    <properties>
+        <!-- Example modules are not published: skip the Maven Central artifacts -->
+        <maven.source.skip>true</maven.source.skip>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <jacoco.skip>true</jacoco.skip>
+        <exec.mainClass>com.example.HelloApplication</exec.mainClass>
+    </properties>
+
+    <dependencies>
+        <!-- JavaFX -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+
+        <!-- TailwindFX -->
+        <dependency>
+            <groupId>io.github.yasmramos</groupId>
+            <artifactId>tailwindfx-base</artifactId>
+            <version>${tailwindfx.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- TailwindFX Maven Plugin -->
+            <plugin>
+                <groupId>io.github.yasmramos</groupId>
+                <artifactId>tailwindfx-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <includeBase>true</includeBase>
+                            <includeColors>true</includeColors>
+                            <minify>false</minify>
+                            <outputDirectory>${project.build.outputDirectory}/css</outputDirectory>
+                            <outputFileName>tailwindfx-generated.css</outputFileName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- JavaFX Maven Plugin -->
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>${exec.mainClass}</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,15 @@
+# Maven / Java Build Artifacts
+target/
+.flattened-pom.xml
+
+# IDE and Editor Files
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+
+# OS Generated Files
+.DS_Store
+Thumbs.db

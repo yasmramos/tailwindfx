@@ -1,0 +1,200 @@
+# TailwindFX JMH Benchmarks
+
+This module contains [JMH (Java Microbenchmark Harness)](http://openjdk.java.net/projects/code-tools/jmh/) benchmarks for measuring the performance of the TailwindFX JIT Compiler.
+
+## Why JMH?
+
+The previous benchmark implementation used `System.nanoTime()` with fragile timing assertions that failed intermittently in CI environments due to:
+- JVM warmup effects
+- CPU throttling
+- Resource contention
+- Dead-code elimination by the JIT compiler
+
+JMH addresses these issues by:
+- Proper JVM warmup iterations
+- Statistical measurement over multiple iterations
+- Forking separate JVM processes
+- Using `Blackhole` to prevent dead-code elimination
+- Accounting for GC effects
+
+## Building
+
+Build the benchmarks module (requires `-P benchmarks` profile):
+
+```bash
+mvn -P benchmarks package
+```
+
+This generates an executable JAR at `tailwindfx-benchmarks/target/benchmarks.jar`.
+
+## Running Benchmarks
+
+### Using BenchmarkRunner (Recommended)
+
+The simplest way to run all benchmarks with reproducible defaults:
+
+```bash
+java -jar tailwindfx-benchmarks/target/benchmarks.jar
+```
+
+This executes all benchmarks in the `io.github.yasmramos.tailwindfx.benchmark` package with:
+- 5 warmup iterations (1 second each)
+- 5 measurement iterations (1 second each)
+- 2 forks (separate JVM processes for reliability)
+- JSON output to `target/jmh-results.json`
+
+Results are written to both console and `target/jmh-results.json` for further analysis.
+
+### Run with custom JMH arguments
+
+Pass arguments to use the full JMH CLI:
+
+```bash
+java -jar tailwindfx-benchmarks/target/benchmarks.jar -f 2 -wi 5 -i 5
+```
+
+Common JMH options:
+- `-f <forks>`: Number of forks (default: 1)
+- `-wi <iterations>`: Warmup iterations
+- `-i <iterations>`: Measurement iterations
+- `-t <threads>`: Number of threads
+- `-r <time>`: Time per iteration (e.g., `1s`, `500ms`)
+- `-v EXTRA`: Verbose output
+
+### Run specific benchmark pattern
+
+```bash
+java -jar tailwindfx-benchmarks/target/benchmarks.jar "JitCompiler.*"
+```
+
+### List available benchmarks
+
+```bash
+java -jar tailwindfx-benchmarks/target/benchmarks.jar -lp
+```
+
+## Benchmark Classes
+
+### JitCompilerBenchmark
+Measures the performance of `JitCompiler.compile()` with different cache scenarios:
+- **benchmarkCacheHit**: Compilation with warm cache (tokens pre-populated) - Average Time mode
+- **benchmarkCacheMiss**: Compilation with cold cache (cache cleared before each invocation) - Average Time mode
+- **benchmarkMixedWorkload**: Alternating hits and misses (50/50) - Average Time mode
+- **benchmarkCacheHitThroughput**: Throughput measurement for cache hits (~22.1M ops/s)
+- **benchmarkCacheMissThroughput**: Throughput measurement for cache misses (~1.97M ops/s)
+- **benchmarkMixedWorkloadThroughput**: Throughput measurement for mixed workload (~602K ops/s)
+
+Key findings: Cache hits are ~11x faster than cache misses in throughput mode. Cache hit latency is so low it falls below timer resolution (≈ 10⁻⁴ ms/op).
+
+### StyleTokenParseBenchmark
+Measures the performance of `StyleToken.parse()` for different token kinds:
+- **benchmarkScaleParse**: SCALE tokens (e.g., p-4, m-2, w-12)
+- **benchmarkColorShadeParse**: COLOR_SHADE tokens without alpha (e.g., bg-blue-500)
+- **benchmarkColorShadeAlphaParse**: COLOR_SHADE tokens with alpha (e.g., bg-blue-500/80)
+- **benchmarkArbitraryParse**: ARBITRARY tokens (e.g., w-[320px], bg-[#ff6600])
+- **benchmarkNamedParse**: NAMED tokens (e.g., text-sm, rounded-lg)
+- **benchmarkUnknownParse**: UNKNOWN/invalid tokens
+
+### VariantParserBenchmark
+Measures the performance of `VariantParser.parse()` for different variant scenarios:
+- **benchmarkNoVariant**: Tokens without variants (e.g., bg-blue-500)
+- **benchmarkSingleVariant**: Tokens with one variant (e.g., hover:bg-blue-500)
+- **benchmarkMultipleVariants**: Tokens with multiple variants (e.g., md:hover:bg-blue-700)
+- **benchmarkComplexVariants**: Tokens with complex variant chains
+- **benchmarkArbitraryVariant**: Tokens with arbitrary variants (e.g., [@media(min-width:768px)]:w-full)
+- **benchmarkExtractVariants**: Performance of extractVariants() method
+- **benchmarkHasVariant**: Performance of hasVariant() method
+
+### StyleResolverBenchmark
+Measures the performance of `StyleResolver.resolve()` for different token kinds:
+- **benchmarkScaleResolve**: Resolving SCALE tokens to pixel values
+- **benchmarkColorShadeResolve**: Resolving COLOR_SHADE tokens to RGB values
+- **benchmarkColorShadeAlphaResolve**: Resolving COLOR_SHADE tokens with alpha to RGBA values
+- **benchmarkArbitraryResolve**: Resolving ARBITRARY tokens
+- **benchmarkNamedResolve**: Resolving NAMED tokens
+
+Note: Tokens are pre-parsed in setup to isolate resolution cost from parsing cost.
+
+### ThemeCssGeneratorBenchmark
+Measures the performance of `ThemeCssGenerator.generateBaseCss()`:
+- **benchmarkGenerateBaseCss**: Time to generate full CSS with all variables
+- **benchmarkGenerateBaseCssThroughput**: CSS generations per second
+
+This is a heavier operation that generates all color, spacing, font-size, border-radius, opacity, and shadow variables. Useful for characterizing startup cost.
+
+## Interpreting Results
+
+Results are reported in two modes:
+- **Average Time** (`avgt`): Lower is better (time per operation in milliseconds)
+- **Throughput** (`thrpt`): Higher is better (operations per second)
+
+Example output (actual results from hardened configuration with `@Fork(3)`, JDK 17):
+```
+Benchmark                                          Mode  Cnt         Score        Error   Units
+JitCompilerBenchmark.benchmarkCacheHitThroughput  thrpt   15  22084163.924 ± 222820.028   ops/s
+JitCompilerBenchmark.benchmarkThroughput          thrpt   15   1889995.571 ± 152869.049   ops/s
+JitCompilerBenchmark.benchmarkCacheHit             avgt   15        ≈ 10⁻⁴                 ms/op
+JitCompilerBenchmark.benchmarkCacheMiss            avgt   15         0.001 ±      0.001   ms/op
+JitCompilerBenchmark.benchmarkMixedWorkload        avgt   15         0.002 ±      0.001   ms/op
+```
+
+Key findings:
+- Cache hit throughput: ~22M operations per second
+- Cache miss throughput: ~1.9M operations per second
+- Cache hits are approximately 10x faster than cache misses
+
+## CI Integration
+
+Benchmarks are executed in CI via the `.github/workflows/benchmarks.yml` workflow. The workflow is configured with different modes depending on the trigger:
+
+### When benchmarks run
+
+| Trigger | Mode | Configuration | Purpose |
+|---------|------|---------------|---------|
+| **Release tags** (`v*`) | Robust | `-i 5 -wi 5 -f 3` | Characterize performance of published versions |
+| **Scheduled** (daily at 02:00 UTC) | Robust | `-i 5 -wi 5 -f 3` | Detect performance regressions over time |
+| **Manual dispatch** (default) | Smoke | `-i 3 -wi 2 -f 1` | Quick validation |
+| **Manual dispatch** (`include_warmup=true`) | Robust | `-i 5 -wi 5 -f 3` | Full performance analysis |
+| **PR** (only if benchmark-related files changed) | Smoke | `-i 3 -wi 2 -f 1` | Validate benchmarks compile and run |
+
+### Downloading results
+
+After a workflow run completes:
+1. Go to the workflow run page on GitHub Actions
+2. Scroll to the "Artifacts" section
+3. Download `jmh-results` artifact
+4. Extract `benchmark-results.json` for analysis
+
+### Performance regression detection
+
+The workflow uses [`benchmark-action/github-action-benchmark`](https://github.com/benchmark-action/github-action-benchmark) to:
+- Store historical baseline data in the `gh-pages` branch
+- Compare current results against historical data
+- Alert when performance degrades by more than **150%** (configurable threshold)
+- Post comments on commits when regressions are detected
+
+**Important:** The workflow will NOT fail on regression alerts for PRs or manual runs by default. The `fail-on-alert` option is only enabled for scheduled runs when explicitly requested via the `fail_on_regression` input, preventing false positives from blocking merges due to CI runner variability.
+
+### Running benchmarks manually
+
+To run benchmarks with robust configuration on demand:
+1. Go to Actions → "JMH Benchmarks" workflow
+2. Click "Run workflow"
+3. Check "Include warmup iterations" for reliable data
+4. Optionally check "Fail on regression" to enable strict mode
+5. Click "Run workflow"
+
+## Adding New Benchmarks
+
+1. Create a new class in `src/main/java/io/github/yasmramos/tailwindfx/benchmark/`
+2. Annotate with JMH annotations (`@Benchmark`, `@State`, `@Setup`, etc.)
+3. Use `Blackhole` to consume results
+4. Rebuild with `mvn -P benchmarks package`
+
+See `JitCompilerBenchmark.java` for examples.
+
+## References
+
+- [JMH Official Documentation](http://openjdk.java.net/projects/code-tools/jmh/)
+- [JMH Samples](https://hg.openjdk.java.net/code-tools/jmh/file/tip/jmh-samples/src/main/java/org/openjdk/jmh/samples/)
+- [How to Write a Good Java Benchmark](https://shipilev.net/blog/2014/nanotrusting-nanotime/)

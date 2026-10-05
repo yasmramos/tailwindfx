@@ -1,0 +1,535 @@
+package io.github.yasmramos.tailwindfx.core;
+
+import io.github.yasmramos.tailwindfx.breakpoint.BreakpointManager;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+
+/**
+ * Variant Manager for TailwindFX — Handles variant application to JavaFX nodes.
+ *
+ * <p>This manager applies dynamic styles based on: - State variants (hover, focus, active,
+ * disabled) - Theme variants (dark, light) - Group variants (group-hover, group-focus) - Arbitrary
+ * variants ([&:hover], [@media...])
+ *
+ * <p>IMPORTANT: Responsive breakpoints (sm:, md:, lg:) are NOT handled here. They are managed
+ * centrally by BreakpointManager to avoid O(N) listeners. This class subscribes ONCE per Scene to
+ * breakpoint changes, not per node.
+ *
+ * <p>Architecture: Publisher-Subscriber pattern - BreakpointManager: Single publisher (one listener
+ * per Stage with throttling) - VariantManager: Subscriber (one subscription per Scene, iterates
+ * affected nodes)
+ *
+ * @see BreakpointManager
+ */
+public class VariantManager {
+
+  /** Tracks nodes that need responsive variant updates per Scene */
+  private static final Map<Scene, List<ResponsiveBinding>> responsiveNodes = new WeakHashMap<>();
+
+  /** Cache of compiled styles for responsive utilities */
+  private static final Map<String, JitCompiler.CompileResult> styleCache =
+      new ConcurrentHashMap<>();
+
+  /**
+   * Applies a state variant (hover, focus, active, disabled) to a JavaFX node.
+   *
+   * @param node The target node
+   * @param variant The variant name (e.g., "hover", "focus")
+   * @param utility The base utility to apply when variant is active
+   * @param jitCompiler JIT compiler for generating styles
+   */
+  public static void applyStateVariant(
+      Node node, String variant, String utility, JitCompiler jitCompiler) {
+    if (node == null || variant == null || utility == null) {
+      return;
+    }
+
+    // Compile the base utility
+    JitCompiler.CompileResult result = jitCompiler.compile(utility);
+    if (result == null || !result.hasInlineStyle()) {
+      // Fallback: try to apply as CSS class for static utilities (e.g., hover:btn-primary)
+      if (!utility.contains("[") && !utility.startsWith("bg-") && !utility.startsWith("text-")) {
+        // It's likely a CSS class - we'll handle it via styleClass manipulation
+        // This is a limitation: static CSS classes with variants need special handling
+        // For now, log in debug mode and skip
+        if (io.github.yasmramos.tailwindfx.TwConfig.isDebug()) {
+          System.out.println(
+              "[TailwindFX Warning] Variant on non-JIT utility not fully supported: "
+                  + variant
+                  + ":"
+                  + utility);
+        }
+      }
+      return;
+    }
+    String baseStyle = result.inlineStyle();
+
+    switch (variant) {
+      case "hover":
+        node.addEventHandler(
+            javafx.scene.input.MouseEvent.MOUSE_ENTERED, e -> applyStyle(node, baseStyle));
+        node.addEventHandler(
+            javafx.scene.input.MouseEvent.MOUSE_EXITED, e -> removeStyle(node, baseStyle));
+        break;
+
+      case "focus":
+        if (node instanceof javafx.scene.control.Control) {
+          javafx.scene.control.Control control = (javafx.scene.control.Control) node;
+          control
+              .focusedProperty()
+              .addListener(
+                  (obs, oldVal, newVal) -> {
+                    if (newVal) {
+                      applyStyle(node, baseStyle);
+                    } else {
+                      removeStyle(node, baseStyle);
+                    }
+                  });
+        }
+        break;
+
+      case "active":
+        node.addEventHandler(
+            javafx.scene.input.MouseEvent.MOUSE_PRESSED, e -> applyStyle(node, baseStyle));
+        node.addEventHandler(
+            javafx.scene.input.MouseEvent.MOUSE_RELEASED, e -> removeStyle(node, baseStyle));
+        break;
+
+      case "disabled":
+        if (node instanceof javafx.scene.control.Control) {
+          javafx.scene.control.Control control = (javafx.scene.control.Control) node;
+          control
+              .disableProperty()
+              .addListener(
+                  (obs, oldVal, newVal) -> {
+                    if (newVal) {
+                      applyStyle(node, baseStyle);
+                    } else {
+                      removeStyle(node, baseStyle);
+                    }
+                  });
+        }
+        break;
+
+      case "checked":
+        if (node instanceof javafx.scene.control.CheckBox) {
+          javafx.scene.control.CheckBox checkBox = (javafx.scene.control.CheckBox) node;
+          checkBox
+              .selectedProperty()
+              .addListener(
+                  (obs, oldVal, newVal) -> {
+                    if (newVal) {
+                      applyStyle(node, baseStyle);
+                    } else {
+                      removeStyle(node, baseStyle);
+                    }
+                  });
+        }
+        break;
+    }
+  }
+
+  /**
+   * Registers a node for responsive variant updates.
+   *
+   * <p>This method subscribes ONCE per Scene to breakpoint changes, not per node. When the
+   * breakpoint changes, all registered nodes in that Scene are updated.
+   *
+   * @param node The target node
+   * @param breakpoint The breakpoint name (e.g., "md", "lg")
+   * @param utility The base utility to apply when breakpoint is active
+   * @param jitCompiler JIT compiler for generating styles
+   */
+  public static void bindResponsiveVariant(
+      Node node, String breakpoint, String utility, JitCompiler jitCompiler) {
+    if (node == null || breakpoint == null || utility == null) {
+      return;
+    }
+
+    // Cache the compiled style
+    String cacheKey = breakpoint + ":" + utility;
+    JitCompiler.CompileResult result =
+        styleCache.computeIfAbsent(cacheKey, k -> jitCompiler.compile(utility));
+    if (result == null || !result.hasInlineStyle()) {
+      return;
+    }
+
+    // Store the binding
+    ResponsiveBinding binding = new ResponsiveBinding(node, breakpoint, result.inlineStyle());
+
+    node.sceneProperty()
+        .addListener(
+            (obs, oldScene, newScene) -> {
+              if (oldScene != null) {
+                unregisterFromScene(oldScene, binding);
+              }
+              if (newScene != null) {
+                registerToScene(newScene, binding);
+              }
+            });
+
+    // Register immediately if already in a scene
+    Scene currentScene = node.getScene();
+    if (currentScene != null) {
+      registerToScene(currentScene, binding);
+    }
+  }
+
+  /**
+   * Registers a responsive binding to a Scene. Subscribes to BreakpointManager only once per Scene.
+   */
+  private static void registerToScene(Scene scene, ResponsiveBinding binding) {
+    List<ResponsiveBinding> bindings =
+        responsiveNodes.computeIfAbsent(
+            scene,
+            k -> {
+              // First binding for this Scene — subscribe to breakpoint changes
+              subscribeToBreakpointChanges(scene);
+              return new ArrayList<>();
+            });
+
+    // Avoid duplicate bindings
+    if (!bindings.contains(binding)) {
+      bindings.add(binding);
+    }
+
+    // Apply initial state
+    applyResponsiveStyle(binding);
+  }
+
+  /** Unregisters a responsive binding from a Scene. */
+  private static void unregisterFromScene(Scene scene, ResponsiveBinding binding) {
+    List<ResponsiveBinding> bindings = responsiveNodes.get(scene);
+    if (bindings != null) {
+      bindings.remove(binding);
+      if (bindings.isEmpty()) {
+        responsiveNodes.remove(scene);
+      }
+    }
+  }
+
+  /**
+   * Subscribes to breakpoint changes for a Scene. Called only once per Scene to avoid O(N)
+   * listeners.
+   */
+  private static void subscribeToBreakpointChanges(Scene scene) {
+    var window = scene.getWindow();
+    if (window instanceof javafx.stage.Stage) {
+      BreakpointManager bpm = BreakpointManager.from((javafx.stage.Stage) window);
+
+      // Listen to breakpoint changes and update all nodes in this Scene
+      bpm.activeBreakpointProperty()
+          .addListener(
+              (obs, oldBp, newBp) -> {
+                List<ResponsiveBinding> bindings = responsiveNodes.get(scene);
+                if (bindings != null) {
+                  for (ResponsiveBinding binding : bindings) {
+                    applyResponsiveStyle(binding);
+                  }
+                }
+              });
+    }
+  }
+
+  /** Applies or removes responsive style based on current breakpoint. */
+  private static void applyResponsiveStyle(ResponsiveBinding binding) {
+    var scene = binding.node().getScene();
+    if (scene == null) return;
+
+    var window = scene.getWindow();
+    if (!(window instanceof javafx.stage.Stage)) return;
+
+    BreakpointManager.Breakpoint currentBp =
+        BreakpointManager.from((javafx.stage.Stage) window).current();
+    int currentMinWidth = (int) currentBp.minWidth;
+    int targetMinWidth = getBreakpointMinWidth(binding.breakpoint());
+
+    boolean isActive = currentMinWidth >= targetMinWidth;
+
+    if (isActive) {
+      applyStyle(binding.node(), binding.style());
+    } else {
+      removeStyle(binding.node(), binding.style());
+    }
+  }
+
+  /** Gets the minimum width for a breakpoint name. */
+  private static int getBreakpointMinWidth(String breakpoint) {
+    return switch (breakpoint) {
+      case "sm" -> 640;
+      case "md" -> 768;
+      case "lg" -> 1024;
+      case "xl" -> 1280;
+      case "2xl" -> 1536;
+      default -> 0;
+    };
+  }
+
+  /**
+   * Applies a theme variant ({@code dark:}, {@code light:}) to a node.
+   *
+   * <p>The utility is applied while the scene root carries (for {@code dark:}) or lacks (for {@code
+   * light:}) the {@code dark} style class, and it is removed again when the theme switches, so
+   * {@code ThemeManager.toggle(scene)} works in both directions. Properties that the utility
+   * overrides are restored to the value the node had before, instead of being dropped.
+   */
+  public static void applyThemeVariant(
+      Node node, String variant, String utility, JitCompiler jitCompiler) {
+    new ThemeVariantBinding(node, "dark".equals(variant), utility, jitCompiler).attach();
+  }
+
+  /**
+   * Keeps one {@code dark:}/{@code light:} utility in sync with the theme of the scene a node lives
+   * in. It follows the node moving between scenes, the scene replacing its root, and the root's
+   * {@code dark} style class changing.
+   */
+  private static final class ThemeVariantBinding {
+    private final Node node;
+    private final boolean wantsDark;
+    private final String utility;
+    private final JitCompiler jitCompiler;
+
+    private final javafx.collections.ListChangeListener<String> classListener = c -> sync();
+    private final javafx.beans.value.ChangeListener<javafx.scene.Parent> rootListener =
+        (obs, oldRoot, newRoot) -> rebindRoot(newRoot);
+
+    private Scene scene;
+    private javafx.scene.Parent root;
+    private boolean applied;
+    private String appliedStyle;
+    private Map<String, String> previousValues = Map.of();
+
+    ThemeVariantBinding(Node node, boolean wantsDark, String utility, JitCompiler jitCompiler) {
+      this.node = node;
+      this.wantsDark = wantsDark;
+      this.utility = utility;
+      this.jitCompiler = jitCompiler;
+    }
+
+    void attach() {
+      node.sceneProperty().addListener((obs, oldScene, newScene) -> rebindScene(newScene));
+      rebindScene(node.getScene());
+    }
+
+    private void rebindScene(Scene newScene) {
+      if (scene != null) {
+        scene.rootProperty().removeListener(rootListener);
+      }
+      scene = newScene;
+      if (scene != null) {
+        scene.rootProperty().addListener(rootListener);
+      }
+      rebindRoot(scene == null ? null : scene.getRoot());
+    }
+
+    private void rebindRoot(javafx.scene.Parent newRoot) {
+      if (root != null) {
+        root.getStyleClass().removeListener(classListener);
+      }
+      root = newRoot;
+      if (root != null) {
+        root.getStyleClass().addListener(classListener);
+      }
+      sync();
+    }
+
+    private void sync() {
+      boolean shouldApply = root != null && root.getStyleClass().contains("dark") == wantsDark;
+      if (shouldApply == applied) {
+        return;
+      }
+      if (shouldApply) {
+        JitCompiler.CompileResult result = jitCompiler.compile(utility);
+        if (result == null || !result.hasInlineStyle()) {
+          return;
+        }
+        appliedStyle = result.inlineStyle();
+        previousValues = captureOverriddenValues(appliedStyle);
+        applyStyle(node, appliedStyle);
+        applied = true;
+      } else {
+        removeStyle(node, appliedStyle);
+        if (!previousValues.isEmpty()) {
+          applyStyle(
+              node, io.github.yasmramos.tailwindfx.style.StyleMerger.buildStyle(previousValues));
+        }
+        previousValues = Map.of();
+        applied = false;
+      }
+    }
+
+    /** Remembers what the node currently has for the properties the utility is about to set. */
+    private Map<String, String> captureOverriddenValues(String style) {
+      Map<String, String> current =
+          io.github.yasmramos.tailwindfx.style.StyleMerger.parseStyle(node.getStyle());
+      Map<String, String> incoming =
+          io.github.yasmramos.tailwindfx.style.StyleMerger.parseStyle(style);
+      Map<String, String> previous = new LinkedHashMap<>();
+      incoming.keySet().forEach(k -> {
+        if (current.containsKey(k)) {
+          previous.put(k, current.get(k));
+        }
+      });
+      return previous;
+    }
+  }
+
+  /**
+   * Applies a group variant (group-hover, group-focus) to a node. Dynamically tracks parent changes
+   * to handle runtime graph modifications.
+   */
+  public static void applyGroupVariant(
+      Node node, String variant, String utility, JitCompiler jitCompiler) {
+    String groupVariant = variant.substring(6); // Remove "group-" prefix
+
+    // Create a listener that searches for .group parent and attaches handlers
+    var parentListener =
+        (javafx.beans.value.ChangeListener<javafx.scene.Parent>)
+            (obs, oldParent, newParent) -> {
+              // Remove listeners from old parent
+              if (oldParent != null) {
+                oldParent.setOnMouseEntered(null);
+                oldParent.setOnMouseExited(null);
+              }
+
+              // Search for .group parent in new hierarchy
+              javafx.scene.Parent parent = newParent;
+              while (parent != null) {
+                if (parent.getStyleClass().contains("group")) {
+                  switch (groupVariant) {
+                    case "hover":
+                      parent.setOnMouseEntered(
+                          e -> {
+                            JitCompiler.CompileResult result = jitCompiler.compile(utility);
+                            if (result != null && result.hasInlineStyle()) {
+                              applyStyle(node, result.inlineStyle());
+                            }
+                          });
+                      parent.setOnMouseExited(
+                          e -> {
+                            JitCompiler.CompileResult result = jitCompiler.compile(utility);
+                            if (result != null && result.hasInlineStyle()) {
+                              removeStyle(node, result.inlineStyle());
+                            }
+                          });
+                      break;
+                  }
+                  break;
+                }
+                parent = parent.getParent();
+              }
+            };
+
+    // Attach listener to parent property
+    node.parentProperty().addListener(parentListener);
+
+    // Trigger initial search
+    parentListener.changed(null, null, node.getParent());
+  }
+
+  /** Applies an arbitrary variant ([@media...], [&:hover]) to a node. */
+  public static void applyArbitraryVariant(
+      Node node, String variant, String utility, JitCompiler jitCompiler) {
+    String content = variant.substring(1, variant.length() - 1);
+
+    if (content.startsWith("@media")) {
+      // Handle as responsive variant (simplified)
+      JitCompiler.CompileResult result = jitCompiler.compile(utility);
+      if (result != null && result.hasInlineStyle()) {
+        applyStyle(node, result.inlineStyle());
+      }
+    } else {
+      // Other arbitrary variants
+      JitCompiler.CompileResult result = jitCompiler.compile(utility);
+      if (result != null && result.hasInlineStyle()) {
+        applyStyle(node, result.inlineStyle());
+      }
+    }
+  }
+
+  /**
+   * Applies a style to a node, merging by property (no destructive string concat). Delegates to
+   * {@link io.github.yasmramos.tailwindfx.style.StyleMerger#merge} so existing inline properties
+   * are preserved and duplicates are overwritten cleanly with proper separators.
+   */
+  private static void applyStyle(Node node, String style) {
+    if (style == null || style.isEmpty()) {
+      return;
+    }
+    node.setStyle(io.github.yasmramos.tailwindfx.style.StyleMerger.merge(node.getStyle(), style));
+  }
+
+  /**
+   * Removes the properties contained in {@code style} from the node's inline style. Uses
+   * property-level removal ({@link
+   * io.github.yasmramos.tailwindfx.style.StyleMerger#removeProperties}) instead of substring
+   * replacement, which previously corrupted longer values sharing a prefix (e.g. removing
+   * "-fx-padding:4px" would break "-fx-padding:40px").
+   */
+  private static void removeStyle(Node node, String style) {
+    if (style == null || style.isEmpty()) {
+      return;
+    }
+    node.setStyle(
+        io.github.yasmramos.tailwindfx.style.StyleMerger.removeProperties(node.getStyle(), style));
+  }
+
+  /**
+   * Processes a token with variants and applies it to a node. Supports chained variants like
+   * hover:md:bg-blue-500.
+   *
+   * @param node The target node
+   * @param token The full token (e.g., "hover:bg-blue-500", "md:w-full", "hover:md:bg-red-500")
+   * @param jitCompiler JIT compiler
+   */
+  public static void processToken(Node node, String token, JitCompiler jitCompiler) {
+    VariantParser.VariantResult result = VariantParser.parse(token);
+
+    if (!result.hasVariant()) {
+      // No variants, apply directly
+      JitCompiler.CompileResult compileResult = jitCompiler.compile(token);
+      if (compileResult != null && compileResult.hasInlineStyle()) {
+        applyStyle(node, compileResult.inlineStyle());
+      }
+      return;
+    }
+
+    List<String> variants = result.getVariants();
+    String utility = result.getUtility();
+
+    // Process ALL variants in chain, not just the last one
+    // This enables combinations like group-hover:md:hover:bg-blue-500
+    for (String variant : variants) {
+      String variantType = VariantParser.getVariantType(variant);
+
+      switch (variantType) {
+        case "state":
+          applyStateVariant(node, variant, utility, jitCompiler);
+          break;
+        case "screen":
+          bindResponsiveVariant(node, variant, utility, jitCompiler);
+          break;
+        case "theme":
+          applyThemeVariant(node, variant, utility, jitCompiler);
+          break;
+        case "group":
+          applyGroupVariant(node, variant, utility, jitCompiler);
+          break;
+        case "arbitrary":
+          applyArbitraryVariant(node, variant, utility, jitCompiler);
+          break;
+        default:
+          // Unknown variant, apply directly
+          JitCompiler.CompileResult compileResult = jitCompiler.compile(utility);
+          if (compileResult != null && compileResult.hasInlineStyle()) {
+            applyStyle(node, compileResult.inlineStyle());
+          }
+      }
+    }
+  }
+
+  /** Record representing a responsive binding between a node and a breakpoint. */
+  private record ResponsiveBinding(Node node, String breakpoint, String style) {}
+}

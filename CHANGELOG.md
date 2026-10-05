@@ -1,0 +1,249 @@
+# TailwindFX Changelog
+
+All notable changes to this project are documented here.
+Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+---
+
+## [Unreleased]
+
+### Added
+
+#### Theme Tokens
+- **`ThemeTokens`** — Semantic `-tw-*` looked-up colors (`-tw-surface`, `-tw-surface-muted`,
+  `-tw-surface-subtle`, `-tw-border`, `-tw-border-strong`, `-tw-text`, `-tw-text-strong`,
+  `-tw-text-muted`) written by `ThemeManager` and `ThemeScopeManager` next to the Modena variables
+  - Component styles that look these up follow light/dark automatically, including inside scoped panes
+  - `tailwindfx-components.css` declares the light defaults under `.root` and ships `.dark`
+    overrides for the tinted alert, badge and selection colors
+
+#### Animation Utilities
+- **`AnimationApplier`** — Plays Tailwind `animate-*` utilities as JavaFX timelines
+  - JavaFX has no CSS animation engine, so these utilities cannot be compiled to inline styles
+  - `TwStyle.apply(node, "animate-spin")` now plays `TwAnimation.spin(node)` instead of silently
+    dropping the token
+  - Supports `animate-spin`, `animate-pulse`, `animate-bounce`, `animate-ping`, `animate-flash`,
+    `animate-shake`, and the `-slow` variants of spin, pulse and bounce
+  - Animations are registered in the `loop` slot, so re-applying a token cancels the previous
+    timeline rather than stacking two on the same node properties
+- `TokenRegistry.isAnimationToken(String)` — centralizes recognition of `animate-*` utilities
+- `TokenParser` classifies `animate-*` tokens into a dedicated `animationTokens` category
+
+### Changed
+
+- `tailwindfx-components.css` no longer hard-codes neutral colors: cards, inputs, selects, checkboxes,
+  data tables, virtual flow, accordion, titled panes and progress bars use the `-tw-*` tokens
+
+### Deprecated
+
+- `TwInstall.installDark(Scene)` — it does nothing, since dark mode is switched through `TwTheme`. Use `TwTheme.of(scene).dark().apply()`
+
+### Fixed
+
+- Pre-built components did not switch to dark mode: their stylesheet used literal colors that
+  never reacted to `ThemeManager`. They now follow the active theme (see Theme Tokens)
+- `dark:` / `light:` utilities were evaluated only once, when the node entered a scene, and were
+  never removed. They now follow every theme switch in both directions, also for nodes that are
+  already in a scene, and restore the inline values they overrode
+- `ThemeManager.apply()` / `applyTo()` toggle the `dark` style class before refreshing the style
+  cache instead of after it
+- Themes saved with `saveTheme` before the tokens existed still theme components when restored
+  with `loadTheme`
+- `StyleMerger` now parses `-tw-*` properties; previously a scoped theme dropped them silently
+- Gradient tokens compiled individually now participate in the LRU cache and compilation metrics.
+  Previously `JitCompiler.compile()` returned early for gradient tokens, so they were recompiled on
+  every call and never appeared in cache statistics.
+- A single gradient token without a color stop (e.g. `bg-gradient-to-r` alone) now falls back to a
+  CSS class instead of an empty inline style.
+- Removed unused singleton `INSTANCE` fields from static utility classes (`TwConfig`, `TwEffect`,
+  `TwLayout`, `TwMetrics`, `TwResponsive`, `TwTheme`). No behavior change.
+
+---
+
+## [0.1.1] - 2026-09-13
+
+> **Patch Release** — Bug fixes, performance improvements, and enhanced FXML support.
+
+### Added
+
+#### FXML Integration
+- **`TwFXML`** — New utility class for processing JavaFX node trees loaded from FXML
+  - `process(Parent root)` — Recursively applies JIT compilation to nodes with arbitrary values
+  - `enableAutoJit(Parent root)` — Opt-in dynamic JIT compilation via ListChangeListener
+  - Supports both static classes (via generated CSS) and JIT/arbitrary values (via inline styles)
+- Automatic detection of JIT tokens in `styleClass` attributes
+- Protection against infinite recursion using node properties flag
+
+#### Opacity Modifier Support
+- Support for arbitrary color values with opacity modifier: `bg-[#ff0000]/80`
+- Converts hex colors to `rgba(r,g,b,opacity)` format automatically
+- Safe fallback for non-color arbitrary values with opacity suffix
+
+### Changed
+
+#### Testing Infrastructure
+- Migrated all pseudo-tests to real JUnit 5 tests with proper `@Test` annotations
+- Replaced custom `runFx()` helper with TestFX's standard `interact()` method
+- All tests now extend `ApplicationTest` for proper JavaFX toolkit initialization
+- Improved test reliability and build failure on assertion errors
+
+#### Documentation
+- Updated examples to promote `TwStyle.apply()` over `getStyleClass().addAll()` for JIT support
+- Clarified distinction between static classes (stylesheet-based) and arbitrary values (JIT-compiled)
+- Added FXML integration guide with `TwFXML.process()` usage pattern
+
+### Fixed
+
+- JIT/arbitrary values now work correctly when added via `getStyleClass().addAll()`
+- No more "unknown token" warnings for valid JIT utility classes
+- Opacity modifier parsing in `StyleToken` regex pattern
+- Test execution under Maven Surefire (tests were previously not running)
+
+### Removed
+
+- **Breaking:** Removed `TailwindFX` static facade in favor of specialized facades (`TwStyle`, `TwTheme`, etc.)
+- Removed `Benchmark` and `BenchmarkTest` classes (migrated to JMH benchmarks in `tailwindfx-benchmarks`)
+- Removed duplicate `runFx()` helper methods (replaced by TestFX `interact()`)
+- Removed manual test counters (`passed`/`failed`) and `runAll()` patterns
+
+---
+
+## [0.1.0] - 2026-09-04
+
+> **Early Preview Release** — This is an initial preview version intended for testing and feedback. Some features may be incomplete or subject to change.
+
+### Added
+
+#### Core API — Static Facade Entry Point
+- **`TailwindFX`** — Main static facade delegating to specialized facades: `TwStyle`, `TwInstall`, `TwTheme`, `TwLayout`, `TwResponsive`, `TwEffect`, `TwMetrics`, `TwBatch`, `TwConfig`, `TwAnimation`
+- Key methods: `apply()`, `jit()`, `remove()`, `toggle()`, `install()`, `installBase()`, `installDark()`, `theme()`, `layout()`
+
+#### Style System (`style` package)
+- **`Styles`** — Comprehensive utility class for applying Tailwind-like styles programmatically
+- **`StyleMerger`** — Merges multiple style maps with conflict resolution
+- **`StylePerf`** — Performance optimization with style diff caching and batch apply
+- **`StyleToken`** — Represents parsed style tokens
+- **`TypeHint`** — Type hints for style resolution
+
+#### Theme System (`theme` package)
+- **`ThemeManager`** — Manages light/dark/custom themes with persistence via `java.util.prefs.Preferences`
+- **`ThemeScopeManager`** — Scoped themes for any Pane subtree with `findClosestScope()`, `inheritScope()`, `refreshScope()`
+- **`ThemeConfig`** — Theme configuration options
+- **`ThemeCustomizationPanel`** — UI panel for runtime theme customization
+
+#### Layout Components (`layout` package)
+- **`TwFlexPane`** — Full Flexbox model: direction, wrap, justify-content (6 variants), align-items (4 variants), gap, flex-grow, flex-shrink, order, align-self, flex-basis
+- **`TwGridPane`** — Grid layout with grid-template-areas, auto-flow, and masonry support
+
+#### UI Components (`components` package)
+- **`TwAlert`** — Alert/notification component
+- **`TwAvatar`** — Avatar image component
+- **`TwBadge`** — Badge/label component with variants
+- **`TwButton`** — Styled button component
+- **`TwCard`** — Card container component
+- **`TwCheckbox`** — Checkbox component
+- **`TwDataTable<T>`** — Declarative, sortable, filterable, paginated TableView wrapper
+- **`TwInput`** — Text input component
+- **`TwProgressBar`** — Progress indicator component
+- **`TwSelect`** — Dropdown selection component
+- **`TwSpinner`** — Loading spinner component
+- **`TwVirtualFlow`** — Virtualized list component
+- **`TwAccordion`** — Accordion/collapsible panel component
+- **`TwTitledPane`** — Titled pane component
+
+#### Animation System (`animation` package)
+- **`TwAnimation`** — Fluent animation API with 14+ built-in animations, animation registry, and responsive animation guard
+
+#### Core Engine (`core` package)
+- **`JitCompiler`** — Just-in-time CSS compiler with LRU cache (2000 entries), thread-safe operations, supports arbitrary values like `drop-shadow-[#hex]`, `text-shadow-[rgba]`, `stroke-[n]`, `fill-[#hex]`, `aspect-ratio-[w/h]`
+- **`StyleResolver`** — Resolves style tokens to CSS properties
+- **`UtilityConflictResolver`** — Handles v4.1 categories including text-shadow, drop-shadow, fill, stroke, clip, break, skew-x/y, aspect, rotate-x/y, translate-z, and component categories; includes `cleanupNode()`, `autoCleanup()`, `invalidateCategoryCache()`
+- **`VariantManager`** — Manages state variants (hover, focus, active, etc.)
+- **`VariantParser`** — Parses variant prefixes from utility classes
+- **`GradientProcessor`** — Processes gradient utilities
+- **`RingProcessor`** — Processes ring/border utilities
+- **`ScrollSnapProcessor`** — Processes scroll-snap utilities
+- **`AspectRatioProcessor`** — Processes aspect-ratio utilities
+- **`ContainerQueryProcessor`** — Processes container query utilities
+- **`TransitionProcessor`** — Processes CSS transition utilities
+- **`TypeHintProcessor`** — Processes type hints for style resolution
+- **`CssPropertyMapper`** — Maps utility classes to CSS properties
+- **`ThemeCssGenerator`** — Generates theme-specific CSS
+- **`ComponentStyles`** — Predefined component style presets
+- **`ColorUtilityValidator`** — Validates color utility classes
+- **`ManualLruCache`** — Thread-safe LRU cache implementation
+- **`Preconditions`** — Utility for argument validation
+
+#### Responsive & Breakpoint System
+- **`BreakpointManager`** (`breakpoint` package) — Responsive-aware category detection with SM/MD/LG/XL/XXL breakpoints
+- **`ResponsiveNode`** (`responsive` package) — Per-node responsive utility rules driven by `Scene.widthProperty()`
+- **`ContainerQuery`** (`responsive` package) — Container query support
+
+#### Color System (`color` package)
+- **`ColorPalette`** — 209 Tailwind colors with programmatic access
+
+#### Internationalization (`i18n` package)
+- **`TwI18n`** — Internationalization support for components
+
+#### Metrics & Monitoring (`metrics` package)
+- **`TailwindFXMetrics`** — AtomicLong counters for cache hits/misses, compilations, conflicts, themes, animations, layout passes; alert system with `onAlert()`, `alertOnLowCacheHitRatio()`, `alertOnHighConflictRate()`, `alertOnSlowCompile()`
+
+#### Benchmarks Module (`tailwindfx-benchmarks`)
+- **JMH-based benchmarks** — Java Microbenchmark Harness benchmarks for reliable performance measurement
+- **`JitCompilerBenchmark`** — Measures cache hit/miss/throughput with hardened configuration (`@Fork(3)`, 5 warmup/measurement iterations)
+- Key results: ~22M ops/s cache hit throughput, ~1.9M ops/s cache miss throughput, cache hits ~10x faster than misses
+
+#### Configuration & Batch Operations
+- **`TwConfig`** — Configuration options including unit, breakpoints, debug mode, warn-on-parent, auto-batch threshold
+- **`TwBatch`** — Batch style application with `batch()` and `batchAsync()` methods
+
+#### Maven Plugin
+- **`tailwindfx-maven-plugin`** — Maven plugin for TailwindFX integration
+- **`TailwindCssMojo`** — Mojo for processing Tailwind CSS during build
+
+#### Module Support
+- **`module-info.java`** — Java module descriptor for modular projects
+- **`package-info.java`** — Package-level Javadoc documentation
+
+### Tests
+
+Comprehensive test suite with 59+ test classes covering:
+
+#### Component Tests
+- `TwAlertTest`, `TwAvatarTest`, `TwBadgeTest`, `TwButtonTest`, `TwCardTest`, `TwCheckboxTest`, `TwDataTableTest`, `TwInputTest`, `TwFlexPaneTest`
+
+#### Layout Tests
+- `TwFlexPaneTest`, `TwGridPaneTest`, `TwLayoutTest`
+
+#### Core Engine Tests
+- `JitCompilerTest`, `JitCompilerExtendedTest`, `VariantManagerTest`, `VariantParserTest`, `GradientProcessorTest`, `RingProcessorTest`, `AspectRatioProcessorTest`, `ContainerQueryProcessorTest`, `TransitionProcessorTest`, `TypeHintProcessorTest`, `UtilityConflictResolverTest`, `StyleResolverTest`, `CssPropertyMapperTest`, `ThemeCssGeneratorTest`, `LruCacheTest`, `PreconditionsTest`
+
+#### Style System Tests
+- `StylesTest`, `StyleTokenTest`, `StyleTokenExtendedTest`, `StyleMergerTest`, `StylePerfTest`, `StylePerfAdditionalTest`, `TypeHintTest`
+
+#### Theme System Tests
+- `ThemeManagerTest`, `ThemeScopeManagerTest`
+
+#### Integration Tests
+- `TailwindFXTest`, `TailwindFXIntegrationTest`, `AdvancedTestFXIntegrationTest`, `IntegrationTest`, `MetricsIntegrationTest`
+
+#### Responsive & Breakpoint Tests
+- `BreakpointManagerTest`, `ResponsiveNodeTest`, `ContainerQueryTest`
+
+#### Color & i18n Tests
+- `ColorPaletteTest`, `TwI18nTest`
+
+#### Configuration & Batch Tests
+- `TwConfigTest`, `TwBatchTest`, `TwMetricsTest`, `TwResponsiveTest`, `TwStyleTest`, `TwStyleLayoutTest`, `TwThemeTest`, `TwEffectTest`
+
+#### CSS Utilities Tests
+- `CssUtilitiesTest`
+
+### Documentation
+
+- Complete Javadoc for all public APIs including `TwAnimation` with examples, parameter descriptions, and usage guidelines
+- Package-level documentation via `package-info.java` files
+- README.md with setup and usage instructions
+- CONTRIBUTING.md with contribution guidelines
+- CODE_OF_CONDUCT.md with community standards
+- Apache License 2.0 with 2026 copyright
