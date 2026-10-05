@@ -116,7 +116,7 @@ public final class TwSelect {
     if (options.length > 0) {
       combo.setValue(options[0]);
     }
-    combo.getStyleClass().addAll("select", "select-disabled");
+    style(combo, DISABLED_CLASS);
     return combo;
   }
 
@@ -132,7 +132,7 @@ public final class TwSelect {
     ComboBox<T> combo = new ComboBox<>();
     combo.setPromptText(promptText);
     combo.setItems(FXCollections.observableArrayList(options));
-    combo.getStyleClass().addAll("select", "select-error");
+    style(combo, ERROR_CLASS);
     return combo;
   }
 }
