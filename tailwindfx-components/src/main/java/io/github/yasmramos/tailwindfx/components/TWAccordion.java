@@ -1,68 +1,97 @@
 package io.github.yasmramos.tailwindfx.components;
 
+import javafx.collections.ListChangeListener;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.TitledPane;
 
 /**
- * Componente Accordion estilizado con clases utilitarias tipo Tailwind.
+ * TWAccordion — Accordion styled with the {@code collapse} component classes.
  *
- * @author CONTADOR
+ * <p>Every pane receives the {@code collapse-item} class plus a {@code collapse-open} or {@code
+ * collapse-close} state class that follows the currently expanded pane. Panes added after
+ * construction are styled the same way as the ones passed to the constructor.
+ *
+ * <pre>
+ * TWAccordion accordion = new TWAccordion(
+ *     new TWTitledPane("Design system", content),
+ *     new TWTitledPane("Theming", theming));
+ * </pre>
  */
 public class TWAccordion extends Accordion {
 
+  /** Base stylesheet class applied to the accordion container. */
+  private static final String BASE_CLASS = "collapse";
+
+  /** State class applied to the currently expanded pane. */
+  private static final String STATE_OPEN = "collapse-open";
+
+  /** State class applied to every collapsed pane. */
+  private static final String STATE_CLOSED = "collapse-close";
+
+  /** Creates an empty accordion. */
   public TWAccordion() {
     super();
-    // La clase 'collapse' define el contenedor principal
-    getStyleClass().add("collapse");
-
-    // Escuchar cambios en el pane expandido para actualizar estados (open/close)
-    expandedPaneProperty()
-        .addListener(
-            (obs, oldPane, newPane) -> {
-              updateStateClasses();
-            });
+    initialize();
   }
 
+  /**
+   * Creates an accordion with the given panes.
+   *
+   * @param titledPanes the panes to add
+   */
   public TWAccordion(TitledPane... titledPanes) {
     super(titledPanes);
-    getStyleClass().add("collapse");
-    // Ensure that all panes have the correct style
-    for (TitledPane pane : titledPanes) {
-      ensureTailwindStyle(pane);
-    }
-    // Update state classes after panes are added
-    updateStateClasses();
-
-    // Listen for changes in expanded pane to update states (open/close)
-    expandedPaneProperty()
-        .addListener(
-            (obs, oldPane, newPane) -> {
-              updateStateClasses();
-            });
+    initialize();
   }
 
+  private void initialize() {
+    getStyleClass().add(BASE_CLASS);
+
+    // Style the constructor panes, then keep styling later additions so dynamically added panes
+    // behave the same as the initial ones.
+    getPanes().forEach(this::ensureTailwindStyle);
+    getPanes()
+        .addListener(
+            (ListChangeListener<TitledPane>)
+                change -> {
+                  change.getAddedSubList().forEach(this::ensureTailwindStyle);
+                  updateStateClasses();
+                });
+
+    updateStateClasses();
+
+    // Reflect the expanded pane as collapse-open / collapse-close on each pane.
+    expandedPaneProperty().addListener((obs, oldPane, newPane) -> updateStateClasses());
+  }
+
+  /**
+   * Ensures a pane carries the classes required by the component stylesheet.
+   *
+   * <p>{@link TWTitledPane} adds them itself, so plain panes are the only ones that need the
+   * class injected here.
+   *
+   * @param pane the pane to style, ignored when null
+   */
   private void ensureTailwindStyle(TitledPane pane) {
-    // Si no es un TWTitledPane, forzamos las clases necesarias
-    if (!(pane instanceof TWTitledPane)) {
+    if (pane != null && !(pane instanceof TWTitledPane)) {
       pane.getStyleClass().add("collapse-item");
-      // Nota: Para un control total, se recomienda usar TWTitledPane
     }
   }
 
   private void updateStateClasses() {
-    // Clear previous state classes on all panes
-    for (TitledPane pane : getPanes()) {
-      pane.getStyleClass().remove("collapse-open");
-      pane.getStyleClass().remove("collapse-close");
-    }
-
-    // Apply correct state class based on expanded state
     TitledPane expanded = getExpandedPane();
     for (TitledPane pane : getPanes()) {
+      if (pane == null) {
+        continue;
+      }
+      // Replace the state class in a single pass so a pane never keeps both, and so panes that
+      // were expanded keep no stale class after collapsing.
       if (pane.equals(expanded)) {
-        pane.getStyleClass().add("collapse-open");
+        pane.getStyleClass().remove(STATE_CLOSED);
+        pane.getStyleClass().add(STATE_OPEN);
       } else {
-        pane.getStyleClass().add("collapse-close");
+        pane.getStyleClass().remove(STATE_OPEN);
+        pane.getStyleClass().add(STATE_CLOSED);
       }
     }
   }
