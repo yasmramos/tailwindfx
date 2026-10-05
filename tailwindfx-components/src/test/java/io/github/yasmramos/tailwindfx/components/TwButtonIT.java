@@ -214,4 +214,49 @@ public class TwButtonIT {
 
     assertTrue(btn.getStyleClass().contains("btn-md"));
   }
+
+  @Test
+  public void testLoadingDisablesButtonAndAddsClasses() {
+    TwButton btn = TwButton.primary("Save");
+
+    btn.setLoading(true);
+
+    assertTrue(btn.isLoading());
+    assertTrue(btn.isDisabled());
+    assertTrue(btn.getStyleClass().contains("btn-loading"));
+    assertTrue(btn.getStyleClass().contains("btn-disabled"));
+
+    btn.setLoading(false);
+
+    assertFalse(btn.isLoading());
+    assertFalse(btn.isDisabled());
+    assertFalse(btn.getStyleClass().contains("btn-loading"));
+    assertFalse(btn.getStyleClass().contains("btn-disabled"));
+  }
+
+  @Test
+  public void testClearingLoadingRestoresCallerDisabledIntent() {
+    // Node.setDisabled is protected, so a caller-disabled button is built through the factory.
+    TwButton btn = (TwButton) TwButton.disabled("Save");
+    assertTrue(btn.isDisabled());
+
+    btn.setLoading(true);
+    assertTrue(btn.isDisabled());
+
+    // Clearing the loading flag must restore the caller's intent, not simply re-enable.
+    btn.setLoading(false);
+    assertTrue(btn.isDisabled());
+    assertTrue(btn.getStyleClass().contains("btn-disabled"));
+  }
+
+  @Test
+  public void testLoadingOnEnabledButtonReEnablesAfterwards() {
+    TwButton btn = TwButton.primary("Save");
+
+    btn.setLoading(true);
+    btn.setLoading(false);
+
+    assertFalse(btn.isDisabled());
+    assertFalse(btn.getStyleClass().contains("btn-disabled"));
+  }
 }
