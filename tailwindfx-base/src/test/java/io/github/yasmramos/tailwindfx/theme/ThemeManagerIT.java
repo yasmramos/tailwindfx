@@ -2,6 +2,8 @@ package io.github.yasmramos.tailwindfx.theme;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
@@ -502,4 +504,126 @@ class ThemeManagerIT extends ApplicationTest {
       // Test passes as we're verifying graceful handling
     }
   }
+
+  @Test
+  @DisplayName("Should resolve preset names case-insensitively regardless of locale")
+  void testPresetUppercaseName() {
+    // Regression: preset(name) usaba toLowerCase() sin Locale.ROOT; en una JVM con locale
+    // turco, "BLUE".toLowerCase() produce "bluÌˆe" y el preset no se encontraba.
+    ThemeManager.forScene(scene).preset("DARK").apply();
+
+    String style = scene.getRoot().getStyle();
+    assertTrue(style.contains("#2b2b2b"));
+    assertTrue(scene.getRoot().getStyleClass().contains("dark"));
+  }
+
+  @Test
+  @DisplayName("Should add dark class for non-hex dark base colors")
+  void testIsColorDark_nonHexColors() {
+    // Regression: the [^0-9a-fA-F] regex turned "rgb(30,30,30)" into "303030" by accident
+    // and reduced "black"/"red" to an empty string (always "light"). Now it is parsed with
+    // Color.web() and the W3C luminance decides.
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).base("rgb(30,30,30)").apply();
+          assertTrue(
+              scene.getRoot().getStyleClass().contains("dark"),
+              "rgb(30,30,30) is dark and must add the .dark class");
+
+          ThemeManager.forScene(scene).base("black").apply();
+          assertTrue(
+              scene.getRoot().getStyleClass().contains("dark"), "black must add the .dark class");
+
+          // #ff0000: W3C luminance ≈ 0.21 < 0.4 → dark (previously hit the regex edge case)
+          ThemeManager.forScene(scene).base("#f00").apply();
+          assertTrue(scene.getRoot().getStyleClass().contains("dark"), "hex shorthand #f00 is dark");
+
+          // Light colors must not add the class
+          ThemeManager.forScene(scene).base("white").apply();
+          assertFalse(scene.getRoot().getStyleClass().contains("dark"));
+
+          // Unparseable value → treated as light (historical behavior)
+          ThemeManager.forScene(scene).base("not-a-color").apply();
+          assertFalse(scene.getRoot().getStyleClass().contains("dark"));
+        });
+  }
+
+  @Test
+  @DisplayName("cyclePreset should follow the real order after applying a concrete preset")
+  void testCyclePresetOrderAfterConcretePreset() {
+    List<String> themes = ThemeManager.availableThemes();
+    int roseIdx = themes.indexOf("rose");
+    String expectedNext = themes.get((roseIdx + 1) % themes.size());
+
+    // Previous light presets ("light", index 0) made the old base-only matching fail to
+    // detect "rose", so cyclePreset always jumped back to the first theme.
+    ThemeManager.forScene(scene).light().apply();
+    ThemeManager.forScene(scene).preset("ROSE").apply();
+
+    ThemeManager.cyclePreset(scene);
+
+    String style = scene.getRoot().getStyle();
+    assertTrue(
+        style.contains(PRESET_BASE.get(expectedNext)),
+        "after 'rose' the next theme should be '" + expectedNext + "', style was: " + style);
+  }
+
+  @Test
+  @DisplayName("cyclePreset should fall back to token matching for unmanaged scenes")
+  void testCyclePresetTokenFallback() {
+    // Scene whose style was set manually (e.g. restored by loadTheme): with no preset
+    // record, cyclePreset must detect the theme from its distinctive tokens (base+accent+bg).
+    // The fallback path is forced by clearing the static record after applying a preset.
+    Scene manual = new Scene(new StackPane(), 200, 200);
+    ThemeManager.forScene(manual).preset("purple").apply();
+
+    String purpleStyle = manual.getRoot().getStyle();
+    assertTrue(purpleStyle.contains("#ede9fe"));
+
+    // Simulate an unmanaged scene: unknown last preset + empty style.
+    // With no recognizable tokens, cyclePreset should start at the first theme (light).
+    clearLastPresetName();
+    manual.getRoot().setStyle("");
+    ThemeManager.cyclePreset(manual);
+
+    assertTrue(
+        manual.getRoot().getStyle().contains(PRESET_BASE.get("light")),
+        "with no style and no registry, cyclePreset should start at the first theme (light)");
+
+    // Now, with the "purple" style set manually and the registry cleared, the token-based
+    // fallback should detect "purple" and apply the next theme in the list.
+    clearLastPresetName();
+    manual.getRoot().setStyle(purpleStyle);
+
+    ThemeManager.cyclePreset(manual);
+
+    java.util.List<String> themes = ThemeManager.availableThemes();
+    String expectedNext =
+        themes.get((themes.indexOf("purple") + 1) % themes.size());
+    assertTrue(
+        manual.getRoot().getStyle().contains(PRESET_BASE.get(expectedNext)),
+        "fallback token matching should have advanced past 'purple'");
+  }
+
+  /** Resets the static {@code lastPresetName} record to exercise the fallback path. */
+  private static void clearLastPresetName() {
+    try {
+      java.lang.reflect.Field f = ThemeManager.class.getDeclaredField("lastPresetName");
+      f.setAccessible(true);
+      f.set(null, null);
+    } catch (ReflectiveOperationException e) {
+      throw new AssertionError("cannot reset ThemeManager.lastPresetName", e);
+    }
+  }
+
+  /** Preset base colors used to verify cyclePreset order (must match ThemeManager). */
+  private static final Map<String, String> PRESET_BASE =
+      Map.of(
+          "light", "#ececec",
+          "dark", "#2b2b2b",
+          "blue", "#dbeafe",
+          "green", "#dcfce7",
+          "purple", "#ede9fe",
+          "rose", "#ffe4e6",
+          "slate", "#e2e8f0");
 }

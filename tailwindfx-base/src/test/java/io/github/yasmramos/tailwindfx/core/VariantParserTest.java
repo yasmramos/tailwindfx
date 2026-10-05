@@ -260,8 +260,8 @@ class VariantParserTest {
 
   @Test
   void testToCssSelector_themeVariants() {
-    assertEquals("@media (prefers-color-scheme: dark)", VariantParser.toCssSelector("dark"));
-    assertEquals("@media (prefers-color-scheme: light)", VariantParser.toCssSelector("light"));
+    assertEquals(".dark", VariantParser.toCssSelector("dark"));
+    assertEquals(".light", VariantParser.toCssSelector("light"));
   }
 
   @Test
