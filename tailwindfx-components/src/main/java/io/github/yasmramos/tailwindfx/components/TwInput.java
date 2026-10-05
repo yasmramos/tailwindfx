@@ -33,6 +33,9 @@ public class TwInput extends TextField {
 
   private void initialize() {
     getStyleClass().add("tw-input");
+
+    // Clear the error state as soon as the user starts correcting the value, so a stale
+    // validation message does not stay visible next to valid input.
     setupValidation();
   }
 
@@ -69,7 +72,11 @@ public class TwInput extends TextField {
     return error;
   }
 
-  /** Sets a numeric formatter for this input. */
+  /**
+   * Restricts input to digits only, rejecting any other character.
+   *
+   * <p>The formatter allows intermediate empty values so the field can be cleared while typing.
+   */
   public void setNumericOnly() {
     TextFormatter<?> formatter =
         new TextFormatter<>(
@@ -132,26 +139,11 @@ public class TwInput extends TextField {
   /**
    * Creates a password input.
    *
-   * @return TwInput configured as password field
+   * @deprecated a {@link javafx.scene.control.TextField} cannot mask its content, so the returned
+   *     field would display the password in plain text. Use {@link TwPasswordField} instead.
    */
+  @Deprecated
   public static TwInput password() {
-    TwInput input = new TwInput("Password");
-    // U+25CF BLACK CIRCLE, written as a Unicode escape on purpose. A literal non-ASCII char in a
-    // character literal makes javadoc fail with "unmappable character" whenever the source
-    // encoding is not honoured (javadoc ignores -encoding for sources read through --patch-module),
-    // which breaks the release build. The escape keeps the source pure ASCII.
-    input.setEchoChar('\u25CF');
-    return input;
-  }
-
-  /**
-   * Sets the echo character for password input.
-   *
-   * @param char the echo character
-   */
-  public void setEchoChar(char echoChar) {
-    // JavaFX TextField doesn't support echo char directly
-    // This would need a custom skin or PasswordField
-    setPromptText(String.valueOf(echoChar));
+    return new TwInput("Password");
   }
 }
