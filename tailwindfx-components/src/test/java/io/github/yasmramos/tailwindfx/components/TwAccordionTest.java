@@ -7,13 +7,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.framework.junit5.ApplicationExtension;
 
-/** Unit tests for TWAccordion component. */
+/** Unit tests for TwAccordion component. */
 @ExtendWith(ApplicationExtension.class)
 public class TwAccordionTest {
 
   @Test
   public void testDefaultConstructor() {
-    TWAccordion accordion = new TWAccordion();
+    TwAccordion accordion = new TwAccordion();
 
     assertNotNull(accordion);
     assertTrue(accordion.getStyleClass().contains("collapse"));
@@ -25,7 +25,7 @@ public class TwAccordionTest {
     TitledPane pane1 = new TitledPane("Pane 1", new javafx.scene.layout.StackPane());
     TitledPane pane2 = new TitledPane("Pane 2", new javafx.scene.layout.StackPane());
 
-    TWAccordion accordion = new TWAccordion(pane1, pane2);
+    TwAccordion accordion = new TwAccordion(pane1, pane2);
 
     assertNotNull(accordion);
     assertTrue(accordion.getStyleClass().contains("collapse"));
@@ -39,19 +39,19 @@ public class TwAccordionTest {
     TitledPane pane = new TitledPane("Test", new javafx.scene.layout.StackPane());
     assertFalse(pane instanceof TwTitledPane);
 
-    TWAccordion accordion = new TWAccordion(pane);
+    TwAccordion accordion = new TwAccordion(pane);
 
     // The ensureTailwindStyle method should add collapse-item class
     assertTrue(pane.getStyleClass().contains("collapse-item"));
   }
 
   @Test
-  public void testEnsureTailwindStyleWithTWTitledPane() {
+  public void testEnsureTailwindStyleWithTwTitledPane() {
     TwTitledPane pane = new TwTitledPane("Test", new javafx.scene.layout.StackPane());
 
-    TWAccordion accordion = new TWAccordion(pane);
+    TwAccordion accordion = new TwAccordion(pane);
 
-    // TWTitledPane already has collapse-item from its constructor
+    // TwTitledPane already has collapse-item from its constructor
     assertTrue(pane.getStyleClass().contains("collapse-item"));
   }
 
@@ -60,7 +60,7 @@ public class TwAccordionTest {
     TitledPane pane1 = new TitledPane("Pane 1", new javafx.scene.layout.StackPane());
     TitledPane pane2 = new TitledPane("Pane 2", new javafx.scene.layout.StackPane());
 
-    TWAccordion accordion = new TWAccordion(pane1, pane2);
+    TwAccordion accordion = new TwAccordion(pane1, pane2);
 
     // Initially no pane is expanded (both should be collapse-close)
     assertFalse(pane1.getStyleClass().contains("collapse-open"));
@@ -83,7 +83,7 @@ public class TwAccordionTest {
     TitledPane pane1 = new TitledPane("Pane 1", new javafx.scene.layout.StackPane());
     TitledPane pane2 = new TitledPane("Pane 2", new javafx.scene.layout.StackPane());
 
-    TWAccordion accordion = new TWAccordion(pane1, pane2);
+    TwAccordion accordion = new TwAccordion(pane1, pane2);
 
     // Expand then collapse
     accordion.setExpandedPane(pane1);
@@ -102,7 +102,7 @@ public class TwAccordionTest {
     TitledPane pane2 = new TitledPane("Pane 2", new javafx.scene.layout.StackPane());
     TitledPane pane3 = new TitledPane("Pane 3", new javafx.scene.layout.StackPane());
 
-    TWAccordion accordion = new TWAccordion(pane1, pane2, pane3);
+    TwAccordion accordion = new TwAccordion(pane1, pane2, pane3);
 
     // Expand pane2
     accordion.setExpandedPane(pane2);
@@ -119,7 +119,7 @@ public class TwAccordionTest {
 
   @Test
   public void testAddPaneAfterConstruction() {
-    TWAccordion accordion = new TWAccordion();
+    TwAccordion accordion = new TwAccordion();
     TitledPane pane = new TitledPane("Dynamic Pane", new javafx.scene.layout.StackPane());
 
     accordion.getPanes().add(pane);
@@ -132,7 +132,7 @@ public class TwAccordionTest {
 
   @Test
   public void testAddPaneAfterConstructionUpdatesExpandedState() {
-    TWAccordion accordion = new TWAccordion(
+    TwAccordion accordion = new TwAccordion(
         new TitledPane("First", new javafx.scene.layout.StackPane()));
     TitledPane added = new TitledPane("Added", new javafx.scene.layout.StackPane());
 
@@ -147,7 +147,7 @@ public class TwAccordionTest {
   public void testRemovePaneClearsStateClasses() {
     TitledPane pane1 = new TitledPane("Pane 1", new javafx.scene.layout.StackPane());
     TitledPane pane2 = new TitledPane("Pane 2", new javafx.scene.layout.StackPane());
-    TWAccordion accordion = new TWAccordion(pane1, pane2);
+    TwAccordion accordion = new TwAccordion(pane1, pane2);
 
     accordion.setExpandedPane(pane1);
     accordion.getPanes().remove(pane1);
@@ -162,7 +162,7 @@ public class TwAccordionTest {
     TitledPane pane1 = new TitledPane("Pane 1", new javafx.scene.layout.StackPane());
     TitledPane pane2 = new TitledPane("Pane 2", new javafx.scene.layout.StackPane());
 
-    TWAccordion accordion = new TWAccordion(pane1, pane2);
+    TwAccordion accordion = new TwAccordion(pane1, pane2);
     assertEquals(2, accordion.getPanes().size());
 
     accordion.getPanes().remove(pane1);
@@ -173,7 +173,7 @@ public class TwAccordionTest {
   @Test
   public void testInitialStateClasses() {
     TitledPane pane = new TitledPane("Test", new javafx.scene.layout.StackPane());
-    TWAccordion accordion = new TWAccordion(pane);
+    TwAccordion accordion = new TwAccordion(pane);
 
     // Initially, pane is not expanded so it should have collapse-close
     assertTrue(pane.getStyleClass().contains("collapse-close"));

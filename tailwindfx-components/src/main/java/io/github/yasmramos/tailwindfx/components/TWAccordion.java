@@ -5,19 +5,19 @@ import javafx.scene.control.Accordion;
 import javafx.scene.control.TitledPane;
 
 /**
- * TWAccordion — Accordion styled with the {@code collapse} component classes.
+ * TwAccordion — Accordion styled with the {@code collapse} component classes.
  *
  * <p>Every pane receives the {@code collapse-item} class plus a {@code collapse-open} or {@code
  * collapse-close} state class that follows the currently expanded pane. Panes added after
  * construction are styled the same way as the ones passed to the constructor.
  *
  * <pre>
- * TWAccordion accordion = new TWAccordion(
- *     new TWTitledPane("Design system", content),
- *     new TWTitledPane("Theming", theming));
+ * TwAccordion accordion = new TwAccordion(
+ *     new TwTitledPane("Design system", content),
+ *     new TwTitledPane("Theming", theming));
  * </pre>
  */
-public class TWAccordion extends Accordion {
+public class TwAccordion extends Accordion {
 
   /** Base stylesheet class applied to the accordion container. */
   private static final String BASE_CLASS = "collapse";
@@ -29,7 +29,7 @@ public class TWAccordion extends Accordion {
   private static final String STATE_CLOSED = "collapse-close";
 
   /** Creates an empty accordion. */
-  public TWAccordion() {
+  public TwAccordion() {
     super();
     initialize();
   }
@@ -39,7 +39,7 @@ public class TWAccordion extends Accordion {
    *
    * @param titledPanes the panes to add
    */
-  public TWAccordion(TitledPane... titledPanes) {
+  public TwAccordion(TitledPane... titledPanes) {
     super(titledPanes);
     initialize();
   }
@@ -77,13 +77,13 @@ public class TWAccordion extends Accordion {
   /**
    * Ensures a pane carries the classes required by the component stylesheet.
    *
-   * <p>{@link TWTitledPane} adds them itself, so plain panes are the only ones that need the
+   * <p>{@link TwTitledPane} adds them itself, so plain panes are the only ones that need the
    * class injected here.
    *
    * @param pane the pane to style, ignored when null
    */
   private void ensureTailwindStyle(TitledPane pane) {
-    if (pane != null && !(pane instanceof TWTitledPane)) {
+    if (pane != null && !(pane instanceof TwTitledPane)) {
       pane.getStyleClass().add("collapse-item");
     }
   }

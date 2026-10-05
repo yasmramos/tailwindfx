@@ -4,7 +4,7 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.layout.Region;
 
 /**
- * TWTitledPane — TitledPane carrying the {@code collapse-item} component class.
+ * TwTitledPane — TitledPane carrying the {@code collapse-item} component class.
  *
  * <p>JavaFX does not expose the header and content nodes of a {@link TitledPane}, so the internal
  * parts are styled through descendant selectors declared in {@code tailwindfx-components.css}
@@ -30,7 +30,8 @@ public class TwTitledPane extends TitledPane {
    * @param title the pane title
    */
   public TwTitledPane(String title) {
-    super(title);
+    super();
+    setText(title);
     initialize();
   }
 

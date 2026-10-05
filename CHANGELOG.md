@@ -122,7 +122,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **`TwSpinner`** — Loading spinner component
 - **`TwVirtualFlow`** — Virtualized list component
 - **`TwAccordion`** — Accordion/collapsible panel component
-- **`TWTitledPane`** — Titled pane component
+- **`TwTitledPane`** — Titled pane component
 
 #### Animation System (`animation` package)
 - **`TwAnimation`** — Fluent animation API with 14+ built-in animations, animation registry, and responsive animation guard
