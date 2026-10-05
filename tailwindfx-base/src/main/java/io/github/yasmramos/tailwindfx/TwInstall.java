@@ -127,10 +127,19 @@ public final class TwInstall {
     installGeneratedBaseCss(scene, 0);
   }
 
-  /** Installs dark mode overrides. Optional. */
+  /**
+   * Does nothing; kept for source compatibility.
+   *
+   * <p>Dark mode needs no stylesheet of its own: {@code TwTheme.of(scene).dark().apply()} sets the
+   * Modena variables and the {@code -tw-*} theme tokens, and the {@code .dark} overrides ship with
+   * {@code tailwindfx-components.css}.
+   *
+   * @param scene ignored
+   * @deprecated dark mode is activated through {@code TwTheme}; this method has no effect
+   */
+  @Deprecated
   public static void installDark(Scene scene) {
-    // Dark mode is now handled by ThemeManager.theme(scene).dark().apply()
-    // No static CSS file needed
+    // Intentionally empty. See the Javadoc above.
   }
 
   /**

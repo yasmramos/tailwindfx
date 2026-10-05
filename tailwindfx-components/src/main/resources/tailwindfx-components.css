@@ -10,6 +10,26 @@
    ========================================================================== */
 
 /* =============================================================================
+   THEME TOKENS
+   ----------------------------------------------------------------------------
+   Looked-up colors that make component styles follow the active theme.
+   ThemeManager / ThemeScopeManager override them in the inline style of the
+   themed root (or scoped pane); the values below are the light defaults used
+   when no theme has been applied. Keep in sync with ThemeTokens.java.
+   ========================================================================== */
+
+.root {
+    -tw-surface: #ffffff;
+    -tw-surface-muted: #f9fafb;
+    -tw-surface-subtle: #f3f4f6;
+    -tw-border: #e5e7eb;
+    -tw-border-strong: #d1d5db;
+    -tw-text: #374151;
+    -tw-text-strong: #111827;
+    -tw-text-muted: #6b7280;
+}
+
+/* =============================================================================
    BUTTON STYLES (TwButton)
    ========================================================================== */
 
@@ -25,7 +45,7 @@
 }
 
 .btn-secondary {
-    -fx-text-fill: #374151;
+    -fx-text-fill: -tw-text;
 }
 
 .btn-outline {
@@ -37,7 +57,7 @@
 
 .btn-ghost {
     -fx-background-color: transparent;
-    -fx-text-fill: #374151;
+    -fx-text-fill: -tw-text;
 }
 
 .btn-danger {
@@ -140,9 +160,9 @@
    ========================================================================== */
 
 .tw-card {
-    -fx-background-color: white;
+    -fx-background-color: -tw-surface;
     -fx-background-radius: 8px;
-    -fx-border-color: #e5e7eb;
+    -fx-border-color: -tw-border;
     -fx-border-width: 1;
     -fx-border-radius: 8px;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 4, 0, 0, 2);
@@ -151,14 +171,14 @@
 
 .tw-card-header {
     -fx-padding: 0 0 16px 0;
-    -fx-border-color: #e5e7eb;
+    -fx-border-color: -tw-border;
     -fx-border-width: 0 0 1 0;
 }
 
 .tw-card-title {
     -fx-font-size: 18px;
     -fx-font-weight: 600;
-    -fx-text-fill: #111827;
+    -fx-text-fill: -tw-text-strong;
 }
 
 .tw-card-content {
@@ -167,7 +187,7 @@
 
 .tw-card-footer {
     -fx-padding: 16px 0 0 0;
-    -fx-border-color: #e5e7eb;
+    -fx-border-color: -tw-border;
     -fx-border-width: 1 0 0 0;
 }
 
@@ -228,7 +248,7 @@
 
 .alert-message {
     -fx-font-size: 14px;
-    -fx-text-fill: #374151;
+    -fx-text-fill: -tw-text;
 }
 
 /* =============================================================================
@@ -316,8 +336,8 @@
 }
 
 .badge-gray {
-    -fx-background-color: #f3f4f6;
-    -fx-text-fill: #374151;
+    -fx-background-color: -tw-surface-subtle;
+    -fx-text-fill: -tw-text;
 }
 
 /* Dot badge variant */
@@ -493,7 +513,7 @@
     -fx-min-height: 12px;
     -fx-max-width: 12px;
     -fx-max-height: 12px;
-    -fx-border-color: white;
+    -fx-border-color: -tw-surface;
     -fx-border-width: 2;
     -fx-pref-width: 12px;
     -fx-pref-height: 12px;
@@ -516,8 +536,8 @@
 }
 
 .checkbox .box {
-    -fx-background-color: white;
-    -fx-border-color: #d1d5db;
+    -fx-background-color: -tw-surface;
+    -fx-border-color: -tw-border-strong;
     -fx-border-width: 1;
     -fx-background-radius: 4px;
     -fx-border-radius: 4px;
@@ -600,13 +620,14 @@
    ========================================================================== */
 
 .tw-input {
-    -fx-background-color: white;
+    -fx-background-color: -tw-surface;
     -fx-background-radius: 6px;
-    -fx-border-color: #d1d5db;
+    -fx-border-color: -tw-border-strong;
     -fx-border-width: 1;
     -fx-border-radius: 6px;
     -fx-padding: 8px 12px;
     -fx-font-size: 14px;
+    -fx-text-fill: -tw-text;
 }
 
 .tw-input:focused {
@@ -621,7 +642,7 @@
 
 .input-helper {
     -fx-font-size: 12px;
-    -fx-text-fill: #6b7280;
+    -fx-text-fill: -tw-text-muted;
 }
 
 .input-error-text {
@@ -634,9 +655,9 @@
    ========================================================================== */
 
 .select {
-    -fx-background-color: white;
+    -fx-background-color: -tw-surface;
     -fx-background-radius: 6px;
-    -fx-border-color: #d1d5db;
+    -fx-border-color: -tw-border-strong;
     -fx-border-width: 1;
     -fx-border-radius: 6px;
     -fx-padding: 8px 12px;
@@ -662,8 +683,8 @@
  * .select:focused border-width when the field is focused and disabled at the same time.
  */
 .select.select-base {
-    -fx-background-color: white;
-    -fx-border-color: #d1d5db;
+    -fx-background-color: -tw-surface;
+    -fx-border-color: -tw-border-strong;
     -fx-border-width: 1;
     -fx-border-radius: 6px;
     -fx-background-radius: 6px;
@@ -674,7 +695,7 @@
 /* Disabled state applied by TwSelect.disabledChoiceBox(...) / disabledComboBox(...) */
 .select.select-disabled {
     -fx-opacity: 0.6;
-    -fx-background-color: #f3f4f6;
+    -fx-background-color: -tw-surface-subtle;
 }
 
 /* Error state applied by TwSelect.error(...) */
@@ -686,8 +707,8 @@
 
 /* Dropdown popup list, so the opened list matches the field styling */
 .select-popup .list-view {
-    -fx-background-color: white;
-    -fx-border-color: #e5e7eb;
+    -fx-background-color: -tw-surface;
+    -fx-border-color: -tw-border;
     -fx-border-width: 1;
     -fx-background-radius: 6px;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 8, 0, 0, 2);
@@ -707,7 +728,7 @@
    ========================================================================== */
 
 .progress-bar {
-    -fx-background-color: #e5e7eb;
+    -fx-background-color: -tw-border;
     -fx-background-radius: 9999px;
     -fx-min-height: 8px;
     -fx-max-height: 8px;
@@ -764,7 +785,7 @@
 
 /* Indeterminate progress bar (progress = -1) */
 .progress-bar .track {
-    -fx-background-color: #e5e7eb;
+    -fx-background-color: -tw-border;
     -fx-background-radius: 9999px;
 }
 
@@ -826,28 +847,28 @@
    ========================================================================== */
 
 .data-table {
-    -fx-background-color: white;
-    -fx-border-color: #e5e7eb;
+    -fx-background-color: -tw-surface;
+    -fx-border-color: -tw-border;
     -fx-border-width: 1;
     -fx-background-radius: 8px;
 }
 
 .data-table .column-header {
-    -fx-background-color: #f9fafb;
-    -fx-border-color: #e5e7eb;
+    -fx-background-color: -tw-surface-muted;
+    -fx-border-color: -tw-border;
     -fx-border-width: 0 0 1 0;
     -fx-padding: 12px;
     -fx-font-weight: 600;
 }
 
 .data-table .table-row-cell {
-    -fx-border-color: #e5e7eb;
+    -fx-border-color: -tw-border;
     -fx-border-width: 0 0 1 0;
     -fx-padding: 12px;
 }
 
 .data-table .table-row-cell:odd {
-    -fx-background-color: #f9fafb;
+    -fx-background-color: -tw-surface-muted;
 }
 
 .data-table .table-row-cell:selected {
@@ -859,17 +880,17 @@
    ========================================================================== */
 
 .virtual-flow {
-    -fx-background-color: white;
-    -fx-border-color: #e5e7eb;
+    -fx-background-color: -tw-surface;
+    -fx-border-color: -tw-border;
     -fx-border-width: 1;
 }
 
 .virtual-flow .scroll-bar {
-    -fx-background-color: #f3f4f6;
+    -fx-background-color: -tw-surface-subtle;
 }
 
 .virtual-flow .scroll-bar .thumb {
-    -fx-background-color: #d1d5db;
+    -fx-background-color: -tw-border-strong;
     -fx-background-radius: 4px;
 }
 
@@ -887,7 +908,7 @@
 }
 
 .virtual-flow .fx-virtualflow-cell:hover {
-    -fx-background-color: #f3f4f6;
+    -fx-background-color: -tw-surface-subtle;
 }
 
 .virtual-flow .fx-virtualflow-cell.selected {
@@ -904,8 +925,8 @@
    ========================================================================== */
 
 .collapse-item {
-    -fx-background-color: white;
-    -fx-border-color: #e5e7eb;
+    -fx-background-color: -tw-surface;
+    -fx-border-color: -tw-border;
     -fx-border-width: 1;
     -fx-background-radius: 8px;
     -fx-border-radius: 8px;
@@ -922,7 +943,7 @@
 }
 
 .collapse-header {
-    -fx-background-color: #f9fafb;
+    -fx-background-color: -tw-surface-muted;
     -fx-padding: 16px;
     -fx-font-weight: 600;
     -fx-cursor: hand;
@@ -938,11 +959,11 @@
  * contract with the component is explicit and so the collapsed pane can opt out of the shadow.
  */
 .collapse-item.collapse-open {
-    -fx-background-color: white;
+    -fx-background-color: -tw-surface;
 }
 
 .collapse-item.collapse-close {
-    -fx-background-color: #f9fafb;
+    -fx-background-color: -tw-surface-muted;
 }
 
 /* Accordion container */
@@ -953,20 +974,51 @@
 
 /* Titled Pane variant */
 .titled-pane {
-    -fx-background-color: white;
-    -fx-border-color: #e5e7eb;
+    -fx-background-color: -tw-surface;
+    -fx-border-color: -tw-border;
     -fx-border-width: 1;
     -fx-background-radius: 8px;
     -fx-border-radius: 8px;
 }
 
 .titled-pane > .title {
-    -fx-background-color: #f9fafb;
+    -fx-background-color: -tw-surface-muted;
     -fx-padding: 16px;
     -fx-font-weight: 600;
 }
 
 .titled-pane > .content {
     -fx-padding: 16px;
-    -fx-background-color: white;
+    -fx-background-color: -tw-surface;
+}
+
+/* =============================================================================
+   DARK MODE OVERRIDES
+   ----------------------------------------------------------------------------
+   Neutral surfaces, borders and text follow the -tw-* tokens above. The rules
+   below cover the tinted status colors, which cannot be derived from a single
+   token. They match when the themed root (or a scoped pane) has the .dark class
+   that ThemeManager / ThemeScopeManager add.
+   ========================================================================== */
+
+.dark .alert-info    { -fx-background-color: #1e3a8a66; -fx-border-color: #1e40af; }
+.dark .alert-success { -fx-background-color: #14532d66; -fx-border-color: #166534; }
+.dark .alert-warning { -fx-background-color: #713f1266; -fx-border-color: #854d0e; }
+.dark .alert-error   { -fx-background-color: #7f1d1d66; -fx-border-color: #991b1b; }
+
+.dark .badge-blue   { -fx-background-color: #1e3a8a99; -fx-text-fill: #bfdbfe; }
+.dark .badge-green  { -fx-background-color: #14532d99; -fx-text-fill: #bbf7d0; }
+.dark .badge-red    { -fx-background-color: #7f1d1d99; -fx-text-fill: #fecaca; }
+.dark .badge-yellow { -fx-background-color: #713f1299; -fx-text-fill: #fef08a; }
+.dark .badge-purple { -fx-background-color: #581c8799; -fx-text-fill: #e9d5ff; }
+
+/* Selected / hovered rows that use a light blue tint in the default theme */
+.dark .data-table .table-row-cell:selected,
+.dark .virtual-flow .fx-virtualflow-cell.selected {
+    -fx-background-color: #1e3a8a99;
+}
+
+.dark .select-popup .list-cell:filled:selected,
+.dark .select-popup .list-cell:filled:hover {
+    -fx-background-color: #1e3a8a66;
 }

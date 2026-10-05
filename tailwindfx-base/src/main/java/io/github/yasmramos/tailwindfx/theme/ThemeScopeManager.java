@@ -234,14 +234,7 @@ public final class ThemeScopeManager {
     public void apply() {
       if (vars.isEmpty()) return;
 
-      // Merge con estilos existentes del Pane
-      StringBuilder sb = new StringBuilder();
-      vars.forEach((k, v) -> sb.append(k).append(": ").append(v).append("; "));
-      String themeStyle = sb.toString().trim();
-      String merged = StyleMerger.merge(pane.getStyle(), themeStyle);
-      pane.setStyle(merged);
-
-      // Gestionar clase .dark
+      // Resolve the mode first: the semantic tokens depend on it.
       boolean dark;
       if (forceDark != null) {
         dark = forceDark;
@@ -250,6 +243,19 @@ public final class ThemeScopeManager {
         String base = vars.getOrDefault("-fx-base", "#ececec");
         dark = isColorDark(base);
       }
+
+      // Merge con estilos existentes del Pane
+      StringBuilder sb = new StringBuilder();
+      vars.forEach((k, v) -> sb.append(k).append(": ").append(v).append("; "));
+      // Only emit the tokens when this scope decides the mode (explicit dark()/light() or a
+      // base color). A scope that merely tweaks the accent must keep inheriting the parent's
+      // tokens instead of resetting them to the light palette.
+      if (forceDark != null || vars.containsKey("-fx-base")) {
+        sb.append(ThemeTokens.toStyle(dark));
+      }
+      String themeStyle = sb.toString().trim();
+      String merged = StyleMerger.merge(pane.getStyle(), themeStyle);
+      pane.setStyle(merged);
 
       if (dark) {
         if (!pane.getStyleClass().contains("dark")) pane.getStyleClass().add("dark");
@@ -371,7 +377,7 @@ public final class ThemeScopeManager {
           "-fx-text-background-color");
 
   private static boolean isThemeVar(String prop) {
-    return THEME_VARS.contains(prop);
+    return THEME_VARS.contains(prop) || ThemeTokens.isToken(prop);
   }
 
   private static boolean isColorDark(String hexColor) {
