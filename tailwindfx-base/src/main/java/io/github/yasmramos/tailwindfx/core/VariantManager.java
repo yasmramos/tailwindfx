@@ -267,25 +267,113 @@ public class VariantManager {
     };
   }
 
-  /** Applies a theme variant (dark, light) to a node. */
+  /**
+   * Applies a theme variant ({@code dark:}, {@code light:}) to a node.
+   *
+   * <p>The utility is applied while the scene root carries (for {@code dark:}) or lacks (for {@code
+   * light:}) the {@code dark} style class, and it is removed again when the theme switches, so
+   * {@code ThemeManager.toggle(scene)} works in both directions. Properties that the utility
+   * overrides are restored to the value the node had before, instead of being dropped.
+   */
   public static void applyThemeVariant(
       Node node, String variant, String utility, JitCompiler jitCompiler) {
-    boolean isDark = "dark".equals(variant);
+    new ThemeVariantBinding(node, "dark".equals(variant), utility, jitCompiler).attach();
+  }
 
-    node.sceneProperty()
-        .addListener(
-            (obs, oldScene, newScene) -> {
-              if (newScene != null && newScene.getRoot() != null) {
-                boolean sceneIsDark = newScene.getRoot().getStyleClass().contains("dark");
+  /**
+   * Keeps one {@code dark:}/{@code light:} utility in sync with the theme of the scene a node lives
+   * in. It follows the node moving between scenes, the scene replacing its root, and the root's
+   * {@code dark} style class changing.
+   */
+  private static final class ThemeVariantBinding {
+    private final Node node;
+    private final boolean wantsDark;
+    private final String utility;
+    private final JitCompiler jitCompiler;
 
-                if (sceneIsDark == isDark) {
-                  JitCompiler.CompileResult result = jitCompiler.compile(utility);
-                  if (result != null && result.hasInlineStyle()) {
-                    applyStyle(node, result.inlineStyle());
-                  }
-                }
-              }
-            });
+    private final javafx.collections.ListChangeListener<String> classListener = c -> sync();
+    private final javafx.beans.value.ChangeListener<javafx.scene.Parent> rootListener =
+        (obs, oldRoot, newRoot) -> rebindRoot(newRoot);
+
+    private Scene scene;
+    private javafx.scene.Parent root;
+    private boolean applied;
+    private String appliedStyle;
+    private Map<String, String> previousValues = Map.of();
+
+    ThemeVariantBinding(Node node, boolean wantsDark, String utility, JitCompiler jitCompiler) {
+      this.node = node;
+      this.wantsDark = wantsDark;
+      this.utility = utility;
+      this.jitCompiler = jitCompiler;
+    }
+
+    void attach() {
+      node.sceneProperty().addListener((obs, oldScene, newScene) -> rebindScene(newScene));
+      rebindScene(node.getScene());
+    }
+
+    private void rebindScene(Scene newScene) {
+      if (scene != null) {
+        scene.rootProperty().removeListener(rootListener);
+      }
+      scene = newScene;
+      if (scene != null) {
+        scene.rootProperty().addListener(rootListener);
+      }
+      rebindRoot(scene == null ? null : scene.getRoot());
+    }
+
+    private void rebindRoot(javafx.scene.Parent newRoot) {
+      if (root != null) {
+        root.getStyleClass().removeListener(classListener);
+      }
+      root = newRoot;
+      if (root != null) {
+        root.getStyleClass().addListener(classListener);
+      }
+      sync();
+    }
+
+    private void sync() {
+      boolean shouldApply = root != null && root.getStyleClass().contains("dark") == wantsDark;
+      if (shouldApply == applied) {
+        return;
+      }
+      if (shouldApply) {
+        JitCompiler.CompileResult result = jitCompiler.compile(utility);
+        if (result == null || !result.hasInlineStyle()) {
+          return;
+        }
+        appliedStyle = result.inlineStyle();
+        previousValues = captureOverriddenValues(appliedStyle);
+        applyStyle(node, appliedStyle);
+        applied = true;
+      } else {
+        removeStyle(node, appliedStyle);
+        if (!previousValues.isEmpty()) {
+          applyStyle(
+              node, io.github.yasmramos.tailwindfx.style.StyleMerger.buildStyle(previousValues));
+        }
+        previousValues = Map.of();
+        applied = false;
+      }
+    }
+
+    /** Remembers what the node currently has for the properties the utility is about to set. */
+    private Map<String, String> captureOverriddenValues(String style) {
+      Map<String, String> current =
+          io.github.yasmramos.tailwindfx.style.StyleMerger.parseStyle(node.getStyle());
+      Map<String, String> incoming =
+          io.github.yasmramos.tailwindfx.style.StyleMerger.parseStyle(style);
+      Map<String, String> previous = new LinkedHashMap<>();
+      incoming.keySet().forEach(k -> {
+        if (current.containsKey(k)) {
+          previous.put(k, current.get(k));
+        }
+      });
+      return previous;
+    }
   }
 
   /**

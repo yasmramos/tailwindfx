@@ -275,7 +275,8 @@ public final class ThemeManager {
       return;
     }
 
-    String newStyle = buildStyleString();
+    boolean isDark = isColorDark(vars.getOrDefault("-fx-base", "#ececec"));
+    String newStyle = buildStyleString(isDark);
 
     // Manage the .dark class
     String baseColor = vars.getOrDefault("-fx-base", "#ececec");
@@ -298,6 +299,13 @@ public final class ThemeManager {
       if (darkBase) {
         target.getStyleClass().add("dark");
       }
+    }
+
+    // Toggle the .dark class before refreshing so that `.dark ...` selectors are already
+    // matched when the style cache is invalidated.
+    target.getStyleClass().remove("dark");
+    if (isDark) {
+      target.getStyleClass().add("dark");
     }
 
     // CRITICAL FIX 1: Force style refresh on all descendant nodes
@@ -330,8 +338,8 @@ public final class ThemeManager {
       return;
     }
 
-    String newStyle = buildStyleString();
     boolean darkBase = isColorDark(vars.getOrDefault("-fx-base", "#ececec"));
+    String newStyle = buildStyleString(darkBase);
 
     for (javafx.stage.Window window : javafx.stage.Window.getWindows()) {
       if (window instanceof javafx.stage.Stage stage) {
@@ -360,17 +368,16 @@ public final class ThemeManager {
     if (vars.isEmpty()) {
       return;
     }
-    String style = buildStyleString();
-    node.setStyle(style);
-
-    // CRITICAL FIX: Force style refresh on scoped subtree
-    forceStyleRefresh(node);
-
     boolean darkBase = isColorDark(vars.getOrDefault("-fx-base", "#ececec"));
+    node.setStyle(buildStyleString(darkBase));
+
     node.getStyleClass().remove("dark");
     if (darkBase) {
       node.getStyleClass().add("dark");
     }
+
+    // CRITICAL FIX: Force style refresh on scoped subtree
+    forceStyleRefresh(node);
   }
 
   /** Removes the theme and restores the Modena defaults. */
@@ -443,11 +450,17 @@ public final class ThemeManager {
     return null;
   }
 
-  private String buildStyleString() {
+  /**
+   * Builds the inline style for the root (or scoped node): the Modena variables collected by the
+   * builder plus the {@link ThemeTokens} of the resolved mode, so component stylesheets that use
+   * {@code -tw-*} lookups follow the theme.
+   */
+  private String buildStyleString(boolean dark) {
     StringBuilder sb = new StringBuilder();
     for (var e : vars.entrySet()) {
       sb.append(e.getKey()).append(": ").append(e.getValue()).append("; ");
     }
+    sb.append(ThemeTokens.toStyle(dark));
     return sb.toString().trim();
   }
 
@@ -571,10 +584,14 @@ public final class ThemeManager {
         return false;
       }
       boolean dark = prefs.getBoolean(key + ".dark", false);
+      // Themes saved before the semantic tokens existed do not contain them: add them so
+      // component stylesheets follow the restored theme.
+      final String restoredStyle =
+          style.contains(ThemeTokens.SURFACE + ":") ? style : style + " " + ThemeTokens.toStyle(dark);
       Platform.runLater(
           () -> {
             if (scene.getRoot() != null) {
-              scene.getRoot().setStyle(style);
+              scene.getRoot().setStyle(restoredStyle.trim());
 
               // CRITICAL FIX: Force style refresh
               forceStyleRefresh(scene.getRoot());

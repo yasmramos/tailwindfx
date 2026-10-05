@@ -39,7 +39,7 @@ public final class StyleMerger {
   private StyleMerger() {}
 
   // Regex para parsear "property: value;" de un inline style
-  private static final Pattern PROP_PATTERN = Pattern.compile("(-fx-[a-z-]+)\\s*:\\s*([^;]+);?");
+  private static final Pattern PROP_PATTERN = Pattern.compile("(-(?:fx|tw)-[a-z-]+)\\s*:\\s*([^;]+);?");
 
   // Public API
   /**

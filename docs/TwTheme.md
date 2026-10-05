@@ -241,3 +241,38 @@ try {
 - `ThemeManager` - Core theme management
 - `ThemeScopeManager` - Scoped theme management
 - `ThemeCssGenerator` - Generate theme CSS variables
+
+## Theme tokens for component styles
+
+`TwTheme` changes the Modena variables (`-fx-base`, `-fx-accent`, ...). A stylesheet that hard-codes
+a color, such as `-fx-background-color: white`, never reacts to that change. To make your own
+component styles follow light/dark, look up the semantic tokens that `ThemeManager` and
+`ThemeScopeManager` write next to the Modena variables:
+
+| Token | Light | Dark | Use for |
+|-------|-------|------|---------|
+| `-tw-surface` | `#ffffff` | `#1e1e1e` | cards, inputs, tables, popups |
+| `-tw-surface-muted` | `#f9fafb` | `#262626` | table headers, zebra rows |
+| `-tw-surface-subtle` | `#f3f4f6` | `#303030` | hover, disabled, scroll tracks |
+| `-tw-border` | `#e5e7eb` | `#3a3a3a` | dividers, card borders |
+| `-tw-border-strong` | `#d1d5db` | `#4a4a4a` | input and select borders |
+| `-tw-text` | `#374151` | `#e5e5e5` | body text |
+| `-tw-text-strong` | `#111827` | `#fafafa` | titles |
+| `-tw-text-muted` | `#6b7280` | `#a3a3a3` | helper text |
+
+```css
+.my-panel {
+    -fx-background-color: -tw-surface;
+    -fx-border-color: -tw-border;
+}
+
+/* Tinted colors that cannot be derived from a token can use the .dark class */
+.dark .my-badge { -fx-background-color: #1e3a8a99; }
+```
+
+The light values are declared as defaults under `.root` in `tailwindfx-components.css`, so
+components render correctly before any theme is applied. Tokens are also written on scoped panes,
+so `TwTheme.scope(pane).dark().apply()` themes only that subtree.
+
+> `dark:` and `light:` utilities (for example `TwStyle.apply(node, "bg-white", "dark:bg-gray-800")`)
+> are re-evaluated whenever the scene's theme changes, in both directions.
