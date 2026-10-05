@@ -66,12 +66,19 @@ public class TwCard extends VBox {
   }
 
   /**
-   * Appends content to the card body.
+   * Appends content to the card body, before the footer.
+   *
+   * <p>The body is inserted ahead of the footer so header/body/footer keep their documented order
+   * no matter the order in which they are set.
    *
    * @param body the body node
    */
   public void setBody(Node body) {
-    getChildren().add(body);
+    if (this.footer != null) {
+      getChildren().add(getChildren().indexOf(this.footer), body);
+    } else {
+      getChildren().add(body);
+    }
   }
 
   /**
