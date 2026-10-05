@@ -85,6 +85,7 @@ public class DashboardApp extends Application {
     // Install base runtime styles plus the AOT generated stylesheet (build-time CSS).
     TwInstall.install(scene);
     TwInstall.installGenerated(scene, "css/tailwindfx-generated.css");
+    TwInstall.installGenerated(scene, "css/tailwindfx-components.css");
 
     root.setLeft(buildSidebar());
     root.setTop(buildHeader(scene));
