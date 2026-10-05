@@ -1,5 +1,6 @@
 package io.github.yasmramos.tailwindfx.components;
 
+import java.util.Set;
 import javafx.scene.control.ProgressBar;
 
 /**
@@ -17,6 +18,20 @@ import javafx.scene.control.ProgressBar;
  */
 public class TwProgressBar extends ProgressBar {
 
+  /** Base stylesheet class applied to every TwProgressBar. */
+  private static final String BASE_CLASS = "progress-bar";
+
+  /** Prefix shared by every modifier class applied by this component. */
+  private static final String MODIFIER_PREFIX = "progress-";
+
+  /**
+   * Modifier classes that are owned by other concerns and must survive {@link #applyColor()}. The
+   * table adds {@code progress-bar-success} style classes itself, and {@code ProgressBar} exposes
+   * {@code progress-bar} as a base class, so neither may be treated as a color modifier.
+   */
+  private static final Set<String> MODIFIERS =
+      Set.of(BASE_CLASS, "progress-bar-success", "progress-bar-warning", "progress-bar-danger");
+
   private String color = "blue";
   private boolean striped = false;
 
@@ -26,17 +41,26 @@ public class TwProgressBar extends ProgressBar {
   }
 
   private void initialize() {
-    getStyleClass().add("progress-bar");
+    getStyleClass().add(BASE_CLASS);
     applyColor();
   }
 
   private void applyColor() {
-    getStyleClass().removeIf(cls -> cls.startsWith("progress-") && !cls.equals("progress-bar"));
+    // Drop previously applied modifier classes (progress-blue, progress-striped, ...) while
+    // keeping the base "progress-bar" class. Matches on the prefix so every modifier, including
+    // ones added by later features, is cleaned up in one place.
+    getStyleClass()
+        .removeIf(
+            cls ->
+                cls.startsWith(MODIFIER_PREFIX)
+                    && !cls.equals(BASE_CLASS)
+                    && !MODIFIERS.contains(cls));
+
     if (color != null && !color.isEmpty()) {
-      getStyleClass().add("progress-" + color);
+      getStyleClass().add(MODIFIER_PREFIX + color);
     }
     if (striped) {
-      getStyleClass().add("progress-striped");
+      getStyleClass().add(MODIFIER_PREFIX + "striped");
     }
   }
 
