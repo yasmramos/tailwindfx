@@ -294,6 +294,11 @@ public final class JitCompiler {
       baseToken = baseToken.substring(DARK_PREFIX.length());
     }
 
+    // Gradient tokens are processed by GradientProcessor in batch compilation.
+    if (GradientProcessor.isGradientToken(baseToken)) {
+      return new CompileResult("", null, true, isDarkMode);
+    }
+
     // Create cache key including modifiers
     String cacheKey = token.trim();
 
