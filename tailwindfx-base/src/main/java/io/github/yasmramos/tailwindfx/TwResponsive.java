@@ -31,8 +31,6 @@ import javafx.stage.Stage;
  */
 public final class TwResponsive {
 
-  private static final TwResponsive INSTANCE = new TwResponsive();
-
   private TwResponsive() {}
 
   /** Installs responsive support on a Stage. */

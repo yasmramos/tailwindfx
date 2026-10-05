@@ -86,8 +86,6 @@ import javafx.scene.layout.VBox;
  */
 public final class TwLayout {
 
-  private static final TwLayout INSTANCE = new TwLayout();
-
   private TwLayout() {}
 
   /**

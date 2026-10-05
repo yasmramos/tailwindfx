@@ -33,8 +33,6 @@ import javafx.scene.Scene;
  */
 public final class TwTheme {
 
-  private static final TwTheme INSTANCE = new TwTheme();
-
   private TwTheme() {}
 
   /**
