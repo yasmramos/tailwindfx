@@ -17,6 +17,7 @@ package io.github.yasmramos.tailwindfx.theme;
 
 import io.github.yasmramos.tailwindfx.style.StyleMerger;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -148,7 +149,8 @@ public final class ThemeScopeManager {
     }
 
     public ScopeBuilder preset(String name) {
-      return switch (name.toLowerCase()) {
+      // Locale.ROOT evita fallos con locales como el turco (p. ej. preset("BLUE")).
+      return switch (name.toLowerCase(Locale.ROOT)) {
         case "dark" -> dark();
         case "light" -> light();
         case "blue" -> base("#dbeafe")

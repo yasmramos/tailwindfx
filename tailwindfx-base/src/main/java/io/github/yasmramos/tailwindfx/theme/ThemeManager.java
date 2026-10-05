@@ -20,6 +20,7 @@ import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.prefs.Preferences;
 import javafx.animation.Interpolator;
@@ -137,6 +138,13 @@ public final class ThemeManager {
     return new ArrayList<>(PRESETS.keySet());
   }
 
+  /**
+   * Last preset applied through {@link #preset(String)} (lowercased). Used as the primary source
+   * to disambiguate the active theme in {@link #cyclePreset(Scene)}; matching style tokens acts
+   * as a fallback for scenes not managed by this ThemeManager.
+   */
+  private static volatile String lastPresetName;
+
   // Builder state
   private final Scene scene;
   private final Node scopeNode; // null = applies to scene root
@@ -164,7 +172,9 @@ public final class ThemeManager {
   /** Applies a predefined theme */
   public ThemeManager preset(String name) {
     Preconditions.requireNonBlank(name, "ThemeManager.preset", "name");
-    ThemeVars t = PRESETS.get(name.toLowerCase());
+    // Locale.ROOT avoids surprises with locales such as Turkish (e.g. preset("BLUE")).
+    String key = name.toLowerCase(Locale.ROOT);
+    ThemeVars t = PRESETS.get(key);
     if (t == null) {
       throw new IllegalArgumentException(
           "ThemeManager.preset: theme '"
@@ -172,6 +182,7 @@ public final class ThemeManager {
               + "' does not exist. Available: "
               + PRESETS.keySet());
     }
+    lastPresetName = key;
     return base(t.base())
         .innerBackground(t.innerBg())
         .background(t.bg())
@@ -267,10 +278,27 @@ public final class ThemeManager {
     boolean isDark = isColorDark(vars.getOrDefault("-fx-base", "#ececec"));
     String newStyle = buildStyleString(isDark);
 
+    // Manage the .dark class
+    String baseColor = vars.getOrDefault("-fx-base", "#ececec");
+    boolean darkBase = isColorDark(baseColor);
+    if (isPresetName(baseColor)) {
+      lastPresetName = baseColor.toLowerCase(Locale.ROOT);
+    } else if (lastPresetName != null && !baseMatchesPreset(baseColor)) {
+      // The theme is no longer a pure preset (e.g. base()/accent() was overridden manually):
+      // drop the record so cyclePreset falls back to token matching.
+      lastPresetName = null;
+    }
+
     if (animDurationMs > 0) {
-      applyAnimated(target, newStyle);
+      // When animating, the .dark class is applied together with the tokens inside the
+      // corresponding KeyFrame, so both change at the same instant.
+      applyAnimated(target, newStyle, darkBase);
     } else {
       target.setStyle(newStyle);
+      target.getStyleClass().remove("dark");
+      if (darkBase) {
+        target.getStyleClass().add("dark");
+      }
     }
 
     // Toggle the .dark class before refreshing so that `.dark ...` selectors are already
@@ -288,12 +316,51 @@ public final class ThemeManager {
 
     // CRITICAL FIX 2: Apply theme to Stage window chrome (title bar, borders)
     if (scene != null && scene.getWindow() instanceof javafx.stage.Stage stage) {
-      applyToStage(stage, isDark);
+      applyToStage(stage, darkBase);
     }
   }
 
   /**
-   * Aplica el tema a un nodo específico (scope externo)
+   * Applies the same variable style and the {@code dark} class to the root of every open
+   * {@link Scene} across all application windows ({@link javafx.stage.Window#getWindows()}).
+   *
+   * <p>This lets Dialogs, Popups and other windows with their own scene inherit the active theme
+   * tokens, since {@link #apply()} only affects the scene associated with this ThemeManager.
+   *
+   * <p><b>Note:</b> scenes created after invoking this method do not benefit from it; they must
+   * be registered manually by applying the theme via {@code ThemeManager.forScene(newScene)...
+   * .apply()} (or by calling {@code applyToAllWindows()} again).
+   */
+  public void applyToAllWindows() {
+    if (vars.isEmpty()) {
+      Preconditions.LOG.warning(
+          "ThemeManager.applyToAllWindows: no variables defined — use preset() or base()/accent() before applyToAllWindows()");
+      return;
+    }
+
+    boolean darkBase = isColorDark(vars.getOrDefault("-fx-base", "#ececec"));
+    String newStyle = buildStyleString(darkBase);
+
+    for (javafx.stage.Window window : javafx.stage.Window.getWindows()) {
+      if (window instanceof javafx.stage.Stage stage) {
+        Scene sc = stage.getScene();
+        if (sc == null || sc.getRoot() == null) {
+          continue;
+        }
+        Node root = sc.getRoot();
+        root.setStyle(newStyle);
+        root.getStyleClass().remove("dark");
+        if (darkBase) {
+          root.getStyleClass().add("dark");
+        }
+        forceStyleRefresh(root);
+        applyToStage(stage, darkBase);
+      }
+    }
+  }
+
+  /**
+   * Applies the theme to a specific node (external scope)
    *
    * <p>Forces style refresh on the scoped node tree.
    */
@@ -301,11 +368,11 @@ public final class ThemeManager {
     if (vars.isEmpty()) {
       return;
     }
-    boolean isDark = isColorDark(vars.getOrDefault("-fx-base", "#ececec"));
-    node.setStyle(buildStyleString(isDark));
+    boolean darkBase = isColorDark(vars.getOrDefault("-fx-base", "#ececec"));
+    node.setStyle(buildStyleString(darkBase));
 
     node.getStyleClass().remove("dark");
-    if (isDark) {
+    if (darkBase) {
       node.getStyleClass().add("dark");
     }
 
@@ -313,7 +380,7 @@ public final class ThemeManager {
     forceStyleRefresh(node);
   }
 
-  /** Elimina el tema y vuelve a Modena por defecto. */
+  /** Removes the theme and restores the Modena defaults. */
   public void reset() {
     Node target = resolveTarget();
     if (target != null) {
@@ -341,15 +408,34 @@ public final class ThemeManager {
   public static void cyclePreset(Scene scene) {
     List<String> themes = availableThemes();
     String style = scene.getRoot().getStyle();
-    // Find which theme is active by comparing base color
-    int next = 0;
-    for (int i = 0; i < themes.size(); i++) {
-      ThemeVars t = PRESETS.get(themes.get(i));
-      if (style.contains(t.base())) {
-        next = (i + 1) % themes.size();
-        break;
+
+    // Primary source: the last preset applied by this ThemeManager. It is exact even if two
+    // presets shared the same base color (token matching would be ambiguous in that case).
+    int active = -1;
+    if (lastPresetName != null) {
+      active = themes.indexOf(lastPresetName);
+    }
+
+    // Fallback: scenes not managed by this ThemeManager (e.g. styled manually or restored with
+    // loadTheme). Pick the preset with the most distinctive tokens present in the style
+    // (base + accent + background); ties keep the first entry in the list.
+    if (active < 0 && style != null && !style.isEmpty()) {
+      int bestMatches = 0;
+      for (int i = 0; i < themes.size(); i++) {
+        ThemeVars t = PRESETS.get(themes.get(i));
+        int matches = 0;
+        if (style.contains(t.base())) matches++;
+        if (style.contains(t.accent())) matches++;
+        if (style.contains(t.bg())) matches++;
+        if (matches > bestMatches) {
+          bestMatches = matches;
+          active = i;
+        }
       }
     }
+
+    int next = (active >= 0) ? (active + 1) % themes.size() : 0;
+    lastPresetName = themes.get(next);
     forScene(scene).preset(themes.get(next)).apply();
   }
 
@@ -378,7 +464,7 @@ public final class ThemeManager {
     return sb.toString().trim();
   }
 
-  private void applyAnimated(Node target, String newStyle) {
+  private void applyAnimated(Node target, String newStyle, boolean isDark) {
     // Opacity animation for smooth transition
     Timeline tl =
         new Timeline(
@@ -387,24 +473,59 @@ public final class ThemeManager {
             new KeyFrame(
                 Duration.millis(animDurationMs / 2.0),
                 new KeyValue(target.opacityProperty(), 0.85, Interpolator.EASE_BOTH)),
-            new KeyFrame(Duration.millis(animDurationMs / 2.0 + 1), e -> target.setStyle(newStyle)),
+            new KeyFrame(
+                Duration.millis(animDurationMs / 2.0 + 1),
+                e -> {
+                  // Tokens and the .dark class change together in the same KeyFrame
+                  target.setStyle(newStyle);
+                  target.getStyleClass().remove("dark");
+                  if (isDark) {
+                    target.getStyleClass().add("dark");
+                  }
+                }),
             new KeyFrame(
                 Duration.millis(animDurationMs),
                 new KeyValue(target.opacityProperty(), 1.0, Interpolator.EASE_BOTH)));
     tl.play();
   }
 
-  private boolean isColorDark(String hex) {
-    try {
-      String h = hex.trim().replaceAll("[^0-9a-fA-F]", "");
-      if (h.length() < 6) {
-        return false;
+  /**
+   * Returns whether the given value is exactly the base color of one of the registered presets.
+   * Lets {@link #apply()} recognize when the builder corresponds to a pure preset.
+   */
+  private static boolean isPresetName(String value) {
+    return value != null && PRESETS.containsKey(value.toLowerCase(Locale.ROOT));
+  }
+
+  /** Checks whether a base color matches the one of any registered preset. */
+  private static boolean baseMatchesPreset(String baseColor) {
+    if (baseColor == null) {
+      return false;
+    }
+    for (ThemeVars t : PRESETS.values()) {
+      if (t.base().equalsIgnoreCase(baseColor.trim())) {
+        return true;
       }
-      int r = Integer.parseInt(h.substring(0, 2), 16);
-      int g = Integer.parseInt(h.substring(2, 4), 16);
-      int b = Integer.parseInt(h.substring(4, 6), 16);
-      // Luminancia relativa W3C
-      return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255.0 < 0.4;
+    }
+    return false;
+  }
+
+  /**
+   * Determines whether a color is considered dark by applying the W3C relative luminance
+   * (threshold 0.4) over its normalized RGB components.
+   *
+   * <p>Uses {@link javafx.scene.paint.Color#web(String)}, which supports CSS color names
+   * ({@code "red"}), 3/4/6/8-digit hex values and {@code rgb()/rgba()} functions. The previous
+   * regex ({@code [^0-9a-fA-F]}) turned {@code "rgb(30,30,30)"} into {@code "303030"} by accident
+   * and reduced {@code "red"} to an empty string, misclassifying it as light.
+   * Any unparseable value returns {@code false} (light), same as before.
+   */
+  private boolean isColorDark(String value) {
+    try {
+      javafx.scene.paint.Color color = javafx.scene.paint.Color.web(value.trim());
+      double luminance =
+          0.2126 * color.getRed() + 0.7152 * color.getGreen() + 0.0722 * color.getBlue();
+      return luminance < 0.4;
     } catch (Exception e) {
       return false;
     }

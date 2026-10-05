@@ -281,12 +281,12 @@
     -fx-padding: 1px 8px;
 }
 
-.badge-blue.badge-outline { -fx-border-color: #3b82f6; }
-.badge-green.badge-outline { -fx-border-color: #22c55e; }
-.badge-red.badge-outline { -fx-border-color: #ef4444; }
-.badge-yellow.badge-outline { -fx-border-color: #eab308; }
-.badge-purple.badge-outline { -fx-border-color: #a855f7; }
-.badge-gray.badge-outline { -fx-border-color: #6b7280; }
+.badge-blue.badge-outline { -fx-border-color: #3b82f6; -fx-text-fill: #3b82f6; }
+.badge-green.badge-outline { -fx-border-color: #22c55e; -fx-text-fill: #22c55e; }
+.badge-red.badge-outline { -fx-border-color: #ef4444; -fx-text-fill: #ef4444; }
+.badge-yellow.badge-outline { -fx-border-color: #eab308; -fx-text-fill: #eab308; }
+.badge-purple.badge-outline { -fx-border-color: #a855f7; -fx-text-fill: #a855f7; }
+.badge-gray.badge-outline { -fx-border-color: #6b7280; -fx-text-fill: #6b7280; }
 
 /* TwBadge.dot() renders the text without its own pill padding, next to a status dot. */
 .badge-compact {
@@ -565,6 +565,14 @@
 .checkbox-yellow .box:selected { -fx-background-color: #eab308; -fx-border-color: #eab308; }
 .checkbox-purple .box:selected { -fx-background-color: #a855f7; -fx-border-color: #a855f7; }
 .checkbox-gray .box:selected { -fx-background-color: #6b7280; -fx-border-color: #6b7280; }
+
+/* Alternative selector order: .checkbox:selected .box (same specificity, later wins) */
+.checkbox-blue:selected .box { -fx-background-color: #3b82f6; -fx-border-color: #3b82f6; }
+.checkbox-green:selected .box { -fx-background-color: #22c55e; -fx-border-color: #22c55e; }
+.checkbox-red:selected .box { -fx-background-color: #ef4444; -fx-border-color: #ef4444; }
+.checkbox-yellow:selected .box { -fx-background-color: #eab308; -fx-border-color: #eab308; }
+.checkbox-purple:selected .box { -fx-background-color: #a855f7; -fx-border-color: #a855f7; }
+.checkbox-gray:selected .box { -fx-background-color: #6b7280; -fx-border-color: #6b7280; }
 
 /* Checkbox sizes */
 .checkbox-xs .box {

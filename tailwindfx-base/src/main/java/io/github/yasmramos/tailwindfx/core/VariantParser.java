@@ -345,9 +345,11 @@ public class VariantParser {
         return ".group:focus-within &";
 
       case "dark":
-        return "@media (prefers-color-scheme: dark)";
+        // JavaFX does not support @media queries; use the .dark CSS class that
+        // ThemeManager applies to the scene root instead.
+        return ".dark";
       case "light":
-        return "@media (prefers-color-scheme: light)";
+        return ".light";
 
       default:
         // Breakpoints
