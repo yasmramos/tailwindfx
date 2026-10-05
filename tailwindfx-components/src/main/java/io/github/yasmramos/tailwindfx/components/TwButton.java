@@ -34,6 +34,16 @@ public class TwButton extends Button {
    */
   private boolean disabledByUser = false;
 
+  /**
+   * True while {@link #setLoading(boolean)} writes the disabled state itself.
+   *
+   * <p>{@code Node.setDisabled} is final in JavaFX, so it cannot be overridden to intercept the
+   * caller's intent. Instead, the {@link #disabledProperty()} listener records every external
+   * change into {@link #disabledByUser}; this flag tells that listener to ignore the writes this
+   * class performs, which are derived from {@link #loading} rather than requested by the caller.
+   */
+  private boolean applyingLoadingState = false;
+
   public TwButton(String text) {
     super(text);
     initialize();
@@ -61,7 +71,26 @@ public class TwButton extends Button {
 
     // A button that becomes disabled while hovered would otherwise stay scaled up, because the
     // hover listener only fires on hover transitions.
-    disabledProperty().addListener((obs, oldVal, disabled) -> resetScale());
+    disabledProperty()
+        .addListener(
+            (obs, oldVal, disabled) -> {
+              resetScale();
+
+              // Node.setDisabled is final, so the caller's intent is captured here instead of in
+              // an override. Changes this class makes on behalf of setLoading() are ignored.
+              if (!applyingLoadingState) {
+                disabledByUser = disabled;
+                syncDisabledClass(disabled);
+              }
+            });
+  }
+
+  /** Adds or removes the disabled modifier class to match the current disabled state. */
+  private void syncDisabledClass(boolean disabled) {
+    getStyleClass().remove(DISABLED_CLASS);
+    if (disabled) {
+      getStyleClass().add(DISABLED_CLASS);
+    }
   }
 
   private void resetScale() {
@@ -132,17 +161,25 @@ public class TwButton extends Button {
   /**
    * Sets the loading state, disabling the button while work is in progress.
    *
-   * <p>The disabled state is derived from the loading flag and the state previously set through
-   * {@link #setDisabled(boolean)}, so clearing the loading flag restores the caller's intent
-   * instead of always re-enabling the button.
+   * <p>The disabled state is derived from the loading flag and the state previously requested
+   * through {@link javafx.scene.Node#setDisabled(boolean)}, so clearing the loading flag restores
+   * the caller's intent instead of always re-enabling the button. That intent is captured by a
+   * listener, because {@code Node.setDisabled} is final and cannot be overridden.
    *
    * @param loading true while the associated action is running
    */
   public void setLoading(boolean loading) {
     this.loading = loading;
     getStyleClass().remove(LOADING_CLASS);
-    getStyleClass().remove(DISABLED_CLASS);
-    setDisabled(loading || disabledByUser);
+
+    applyingLoadingState = true;
+    try {
+      super.setDisabled(loading || disabledByUser);
+    } finally {
+      applyingLoadingState = false;
+    }
+
+    syncDisabledClass(isDisabled());
     if (loading) {
       getStyleClass().add(LOADING_CLASS);
     }
@@ -155,21 +192,6 @@ public class TwButton extends Button {
    */
   public boolean isLoading() {
     return loading;
-  }
-
-  /**
-   * Sets the disabled state, keeping it independent from the loading flag.
-   *
-   * @param disabled true to disable the button
-   */
-  @Override
-  public void setDisabled(boolean disabled) {
-    this.disabledByUser = disabled;
-    super.setDisabled(disabled || loading);
-    getStyleClass().remove(DISABLED_CLASS);
-    if (disabled) {
-      getStyleClass().add(DISABLED_CLASS);
-    }
   }
 
   public static TwButton primary(String text) {
