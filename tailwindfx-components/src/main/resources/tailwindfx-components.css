@@ -242,6 +242,38 @@
     -fx-padding: 2px 8px;
 }
 
+/*
+ * TwBadge.pill() renders a fully rounded chip. The base .badge rule already rounds the
+ * background, so this variant only needs to guarantee the pill shape for larger sizes where a
+ * per-size padding could otherwise make the corners visible.
+ */
+.badge-pill {
+    -fx-background-radius: 9999px;
+    -fx-border-radius: 9999px;
+    -fx-padding: 3px 12px;
+}
+
+/* TwBadge.outline() renders a border-only badge: reset the filled background first. */
+.badge-outline {
+    -fx-background-color: transparent;
+    -fx-border-width: 1;
+    -fx-border-radius: 9999px;
+    -fx-padding: 1px 8px;
+}
+
+.badge-blue.badge-outline { -fx-border-color: #3b82f6; }
+.badge-green.badge-outline { -fx-border-color: #22c55e; }
+.badge-red.badge-outline { -fx-border-color: #ef4444; }
+.badge-yellow.badge-outline { -fx-border-color: #eab308; }
+.badge-purple.badge-outline { -fx-border-color: #a855f7; }
+.badge-gray.badge-outline { -fx-border-color: #6b7280; }
+
+/* TwBadge.dot() renders the text without its own pill padding, next to a status dot. */
+.badge-compact {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
 .badge-sm {
     -fx-font-size: 10px;
     -fx-padding: 1px 6px;
@@ -433,6 +465,48 @@
     -fx-text-fill: white;
 }
 
+/* Avatar containing an image: the image fills the whole avatar box. */
+.avatar-image {
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+}
+
+.avatar-image > .image-view {
+    -fx-background-color: transparent;
+}
+
+/*
+ * Overlapping avatar group. TwAvatar adds .avatar-group-item to each member and offsets them
+ * with translateX, so the group itself must not clip and must not re-layout the children.
+ */
+.avatar-group-item {
+    -fx-border-color: white;
+    -fx-border-width: 2;
+    -fx-border-radius: 9999px;
+}
+
+/* Online / offline status dot anchored to the bottom-right of an avatar. */
+.avatar-status-dot {
+    -fx-background-radius: 50%;
+    -fx-min-width: 12px;
+    -fx-min-height: 12px;
+    -fx-max-width: 12px;
+    -fx-max-height: 12px;
+    -fx-border-color: white;
+    -fx-border-width: 2;
+    -fx-pref-width: 12px;
+    -fx-pref-height: 12px;
+}
+
+.avatar-status-online {
+    -fx-background-color: #22c55e;
+}
+
+.avatar-status-offline {
+    -fx-background-color: #9ca3af;
+}
+
 /* =============================================================================
    CHECKBOX STYLES (TwCheckbox)
    ========================================================================== */
@@ -459,6 +533,66 @@
 .checkbox .box .mark {
     -fx-background-color: white;
     -fx-shape: "M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z";
+}
+
+/*
+ * TwCheckbox applies checkbox-<color> and checkbox-<size> modifiers. Both are scoped to the box
+ * so the label text keeps inheriting the theme color instead of being recolored.
+ */
+.checkbox-blue .box:selected { -fx-background-color: #3b82f6; -fx-border-color: #3b82f6; }
+.checkbox-green .box:selected { -fx-background-color: #22c55e; -fx-border-color: #22c55e; }
+.checkbox-red .box:selected { -fx-background-color: #ef4444; -fx-border-color: #ef4444; }
+.checkbox-yellow .box:selected { -fx-background-color: #eab308; -fx-border-color: #eab308; }
+.checkbox-purple .box:selected { -fx-background-color: #a855f7; -fx-border-color: #a855f7; }
+.checkbox-gray .box:selected { -fx-background-color: #6b7280; -fx-border-color: #6b7280; }
+
+/* Checkbox sizes */
+.checkbox-xs .box {
+    -fx-min-width: 12px;
+    -fx-min-height: 12px;
+    -fx-background-radius: 3px;
+    -fx-border-radius: 3px;
+}
+
+.checkbox-sm .box {
+    -fx-min-width: 14px;
+    -fx-min-height: 14px;
+    -fx-background-radius: 3px;
+    -fx-border-radius: 3px;
+}
+
+.checkbox-md .box {
+    -fx-min-width: 16px;
+    -fx-min-height: 16px;
+}
+
+.checkbox-lg .box {
+    -fx-min-width: 20px;
+    -fx-min-height: 20px;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+}
+
+.checkbox-xl .box {
+    -fx-min-width: 24px;
+    -fx-min-height: 24px;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+}
+
+.checkbox-lg, .checkbox-xl {
+    -fx-font-size: 15px;
+}
+
+/* Error state applied by TwCheckbox.setError(true) */
+.checkbox-error .box {
+    -fx-border-color: #ef4444;
+    -fx-border-width: 2;
+}
+
+/* Disabled state applied by TwCheckbox.disabled(...) */
+.checkbox-disabled {
+    -fx-opacity: 0.5;
 }
 
 /* =============================================================================
@@ -522,6 +656,52 @@
     -fx-background-color: #6b7280;
 }
 
+/*
+ * TwSelect applies select-base alongside .select on ChoiceBox and ComboBox. The modifier is kept
+ * as an explicit hook so callers can extend it, and it re-states the base rules to win over the
+ * .select:focused border-width when the field is focused and disabled at the same time.
+ */
+.select.select-base {
+    -fx-background-color: white;
+    -fx-border-color: #d1d5db;
+    -fx-border-width: 1;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 8px 12px;
+    -fx-font-size: 14px;
+}
+
+/* Disabled state applied by TwSelect.disabledChoiceBox(...) / disabledComboBox(...) */
+.select.select-disabled {
+    -fx-opacity: 0.6;
+    -fx-background-color: #f3f4f6;
+}
+
+/* Error state applied by TwSelect.error(...) */
+.select.select-error,
+.select-error {
+    -fx-border-color: #ef4444;
+    -fx-border-width: 2;
+}
+
+/* Dropdown popup list, so the opened list matches the field styling */
+.select-popup .list-view {
+    -fx-background-color: white;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+    -fx-background-radius: 6px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 8, 0, 0, 2);
+}
+
+.select-popup .list-cell {
+    -fx-padding: 8px 12px;
+}
+
+.select-popup .list-cell:filled:selected,
+.select-popup .list-cell:filled:hover {
+    -fx-background-color: #eff6ff;
+}
+
 /* =============================================================================
    PROGRESS BAR STYLES (TwProgressBar)
    ========================================================================== */
@@ -538,16 +718,54 @@
     -fx-background-radius: 9999px;
 }
 
-.progress-bar-success .bar {
+.progress-bar-success .bar,
+.progress-bar.progress-green .bar {
     -fx-background-color: #22c55e;
 }
 
-.progress-bar-warning .bar {
+.progress-bar-warning .bar,
+.progress-bar.progress-yellow .bar {
     -fx-background-color: #eab308;
 }
 
-.progress-bar-danger .bar {
+.progress-bar-danger .bar,
+.progress-bar.progress-red .bar {
     -fx-background-color: #ef4444;
+}
+
+.progress-bar.progress-purple .bar {
+    -fx-background-color: #a855f7;
+}
+
+/*
+ * TwProgressBar.setColor(<name>) emits progress-<name>, where <name> is the Tailwind color.
+ * The base .progress-bar .bar rule supplies blue; the rules above add the remaining colors.
+ */
+.progress-bar.progress-blue .bar {
+    -fx-background-color: #3b82f6;
+}
+
+/*
+ * Striped progress bars use a repeating gradient on the filled bar. JavaFX CSS has no
+ * animation support, so the stripe is static; use TwAnimation to animate it when needed.
+ */
+.progress-bar.progress-striped .bar {
+    -fx-background-color: linear-gradient(
+        to bottom,
+        #ffffff26 0%,
+        #ffffff26 25%,
+        #00000026 25%,
+        #00000026 50%,
+        #ffffff26 50%,
+        #ffffff26 75%,
+        #00000026 75%,
+        #00000026 100%);
+}
+
+/* Indeterminate progress bar (progress = -1) */
+.progress-bar .track {
+    -fx-background-color: #e5e7eb;
+    -fx-background-radius: 9999px;
 }
 
 /* =============================================================================
@@ -559,31 +777,49 @@
     -fx-min-height: 24px;
     -fx-max-width: 24px;
     -fx-max-height: 24px;
+    -fx-pref-width: 24px;
+    -fx-pref-height: 24px;
 }
 
-.spinner-blue {
-    -fx-stroke: #3b82f6;
+/* Spinner sizes */
+.spinner-sm {
+    -fx-min-width: 16px;
+    -fx-min-height: 16px;
+    -fx-max-width: 16px;
+    -fx-max-height: 16px;
+    -fx-pref-width: 16px;
+    -fx-pref-height: 16px;
 }
 
-.spinner-green {
-    -fx-stroke: #22c55e;
+.spinner-md {
+    -fx-min-width: 24px;
+    -fx-min-height: 24px;
+    -fx-max-width: 24px;
+    -fx-max-height: 24px;
+    -fx-pref-width: 24px;
+    -fx-pref-height: 24px;
 }
 
-.spinner-red {
-    -fx-stroke: #ef4444;
+.spinner-lg {
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+    -fx-pref-width: 40px;
+    -fx-pref-height: 40px;
 }
 
-.spinner-yellow {
-    -fx-stroke: #eab308;
-}
-
-.spinner-purple {
-    -fx-stroke: #a855f7;
-}
-
-.spinner-gray {
-    -fx-stroke: #6b7280;
-}
+/*
+ * TwSpinner colors the ProgressIndicator via its .indicator descendant. The -fx-stroke on the
+ * root only affects the indeterminate arc in some JavaFX versions, so the descendant selector
+ * is the reliable hook.
+ */
+.spinner-blue .indicator { -fx-stroke: #3b82f6; }
+.spinner-green .indicator { -fx-stroke: #22c55e; }
+.spinner-red .indicator { -fx-stroke: #ef4444; }
+.spinner-yellow .indicator { -fx-stroke: #eab308; }
+.spinner-purple .indicator { -fx-stroke: #a855f7; }
+.spinner-gray .indicator { -fx-stroke: #6b7280; }
 
 /* =============================================================================
    DATA TABLE STYLES (TwDataTable)
@@ -641,6 +877,28 @@
     -fx-background-color: #9ca3af;
 }
 
+/*
+ * TwVirtualFlow applies fx-virtualflow-cell to every cell and toggles a bare "selected" class.
+ * The selected rule is scoped to .virtual-flow so it cannot leak onto unrelated nodes that happen
+ * to use the generic class name.
+ */
+.virtual-flow .fx-virtualflow-cell {
+    -fx-background-color: transparent;
+}
+
+.virtual-flow .fx-virtualflow-cell:hover {
+    -fx-background-color: #f3f4f6;
+}
+
+.virtual-flow .fx-virtualflow-cell.selected {
+    -fx-background-color: #dbeafe;
+}
+
+.virtual-flow .fx-virtualflow-drop-indicator {
+    -fx-background-color: #3b82f6;
+    -fx-pref-height: 2;
+}
+
 /* =============================================================================
    ACCORDION STYLES (TWAccordion)
    ========================================================================== */
@@ -672,6 +930,25 @@
 
 .collapse-content {
     -fx-padding: 16px;
+}
+
+/*
+ * State classes applied by TWAccordion. The expanded pane needs no extra rules of its own (the
+ * default .collapse-item styling already covers it), but both states are declared so the
+ * contract with the component is explicit and so the collapsed pane can opt out of the shadow.
+ */
+.collapse-item.collapse-open {
+    -fx-background-color: white;
+}
+
+.collapse-item.collapse-close {
+    -fx-background-color: #f9fafb;
+}
+
+/* Accordion container */
+.collapse {
+    -fx-background-color: transparent;
+    -fx-spacing: 0;
 }
 
 /* Titled Pane variant */
