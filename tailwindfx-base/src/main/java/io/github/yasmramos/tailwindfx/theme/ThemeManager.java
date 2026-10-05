@@ -172,7 +172,7 @@ public final class ThemeManager {
   /** Applies a predefined theme */
   public ThemeManager preset(String name) {
     Preconditions.requireNonBlank(name, "ThemeManager.preset", "name");
-    // Locale.ROOT evita sorpresas con locales como el turco (p. ej. preset("BLUE")).
+    // Locale.ROOT avoids surprises with locales such as Turkish (e.g. preset("BLUE")).
     String key = name.toLowerCase(Locale.ROOT);
     ThemeVars t = PRESETS.get(key);
     if (t == null) {
@@ -277,9 +277,9 @@ public final class ThemeManager {
 
     String newStyle = buildStyleString();
 
-    // Gestionar clase .dark
+    // Manage the .dark class
     String baseColor = vars.getOrDefault("-fx-base", "#ececec");
-    boolean isDark = isColorDark(baseColor);
+    boolean darkBase = isColorDark(baseColor);
     if (isPresetName(baseColor)) {
       lastPresetName = baseColor.toLowerCase(Locale.ROOT);
     } else if (lastPresetName != null && !baseMatchesPreset(baseColor)) {
@@ -291,11 +291,11 @@ public final class ThemeManager {
     if (animDurationMs > 0) {
       // When animating, the .dark class is applied together with the tokens inside the
       // corresponding KeyFrame, so both change at the same instant.
-      applyAnimated(target, newStyle, isDark);
+      applyAnimated(target, newStyle, darkBase);
     } else {
       target.setStyle(newStyle);
       target.getStyleClass().remove("dark");
-      if (isDark) {
+      if (darkBase) {
         target.getStyleClass().add("dark");
       }
     }
@@ -308,7 +308,7 @@ public final class ThemeManager {
 
     // CRITICAL FIX 2: Apply theme to Stage window chrome (title bar, borders)
     if (scene != null && scene.getWindow() instanceof javafx.stage.Stage stage) {
-      applyToStage(stage, isDark);
+      applyToStage(stage, darkBase);
     }
   }
 
@@ -331,7 +331,7 @@ public final class ThemeManager {
     }
 
     String newStyle = buildStyleString();
-    boolean isDark = isColorDark(vars.getOrDefault("-fx-base", "#ececec"));
+    boolean darkBase = isColorDark(vars.getOrDefault("-fx-base", "#ececec"));
 
     for (javafx.stage.Window window : javafx.stage.Window.getWindows()) {
       if (window instanceof javafx.stage.Stage stage) {
@@ -342,11 +342,11 @@ public final class ThemeManager {
         Node root = sc.getRoot();
         root.setStyle(newStyle);
         root.getStyleClass().remove("dark");
-        if (isDark) {
+        if (darkBase) {
           root.getStyleClass().add("dark");
         }
         forceStyleRefresh(root);
-        applyToStage(stage, isDark);
+        applyToStage(stage, darkBase);
       }
     }
   }
@@ -366,14 +366,14 @@ public final class ThemeManager {
     // CRITICAL FIX: Force style refresh on scoped subtree
     forceStyleRefresh(node);
 
-    boolean isDark = isColorDark(vars.getOrDefault("-fx-base", "#ececec"));
+    boolean darkBase = isColorDark(vars.getOrDefault("-fx-base", "#ececec"));
     node.getStyleClass().remove("dark");
-    if (isDark) {
+    if (darkBase) {
       node.getStyleClass().add("dark");
     }
   }
 
-  /** Elimina el tema y vuelve a Modena por defecto. */
+  /** Removes the theme and restores the Modena defaults. */
   public void reset() {
     Node target = resolveTarget();
     if (target != null) {
@@ -463,7 +463,7 @@ public final class ThemeManager {
             new KeyFrame(
                 Duration.millis(animDurationMs / 2.0 + 1),
                 e -> {
-                  // Tokens y clase .dark cambian juntos en el mismo KeyFrame
+                  // Tokens and the .dark class change together in the same KeyFrame
                   target.setStyle(newStyle);
                   target.getStyleClass().remove("dark");
                   if (isDark) {
@@ -477,8 +477,8 @@ public final class ThemeManager {
   }
 
   /**
-   * Devuelve si el valor dado es exactamente el color base de alguno de los presets registrados.
-   * Permite a {@link #apply()} reconocer cuando el builder corresponde a un preset puro.
+   * Returns whether the given value is exactly the base color of one of the registered presets.
+   * Lets {@link #apply()} recognize when the builder corresponds to a pure preset.
    */
   private static boolean isPresetName(String value) {
     return value != null && PRESETS.containsKey(value.toLowerCase(Locale.ROOT));
