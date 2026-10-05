@@ -204,8 +204,8 @@ class TokenParserTest {
 
     // btn-primary: css class (1)
     // bg-blue-500: css class (named value, not arbitrary/numeric) (1)
-    // gap-4: css class (named value) + layout-dependent + unknown (not in known utilities registry)
-    // (3)
+    // gap-4: css class (named value) + layout-dependent (2). gap-4 is a real Tailwind utility
+    // handled by LayoutApplier, so it is no longer reported as unknown.
     // flex: css class + layout-migration + layout-dependent (bare "flex" also carries child-side
     // grow/shrink semantics for LayoutApplier) (3)
     // hover:text-white: variant (1)
@@ -218,8 +218,7 @@ class TokenParserTest {
     assertEquals(1, result.layoutMigrationTokens().size()); // flex
     assertEquals(1, result.variantTokens().size()); // hover:text-white
     assertEquals(1, result.effectTokens().size()); // blur-sm
-    assertEquals(1, result.unknownTokens().size()); // gap-4 (not in known utilities registry)
-    assertTrue(result.unknownTokens().contains("gap-4"));
+    assertTrue(result.unknownTokens().isEmpty()); // every token here is a recognized utility
   }
 
   @Test
@@ -336,8 +335,7 @@ class TokenParserTest {
             "bg-blue-500", "gap-4", "flex", "hover:text-white", "blur-sm", "unknown-token");
 
     // bg-blue-500: css class (named value) (1 token)
-    // gap-4: css class + layout-dependent + unknown (not in known utilities registry) (3
-    // classifications)
+    // gap-4: css class + layout-dependent (1 token, classified in multiple categories) (2)
     // flex: css class + layout-migration + layout-dependent (1 token, classified in multiple
     // categories) (3)
     // hover:text-white: variant (1 token)
@@ -345,7 +343,7 @@ class TokenParserTest {
     // unknown-token: css class + unknown (1 token, classified in multiple categories) (2)
     // Total: 6 unique tokens
     // Count by classification: 0(jit) + 2(layout-dep: gap-4, flex) + 1(layout-mig) + 1(variant) +
-    // 1(effect) + 4(css) + 2(unknown) = 11
-    assertEquals(11, result.totalTokenCount());
+    // 1(effect) + 4(css) + 1(unknown: unknown-token) = 10
+    assertEquals(10, result.totalTokenCount());
   }
 }

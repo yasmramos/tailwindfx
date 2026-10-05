@@ -195,7 +195,11 @@ public final class TokenRegistry {
     Pattern.compile("^(justify|items|content|self|place-items|place-content)(-[a-zA-Z0-9-]+)?$"),
     Pattern.compile("^(flex|grid)(-[a-zA-Z0-9-]+)?$"),
     Pattern.compile("^(order|col|row)(-[a-zA-Z0-9-]+)?$"),
-    Pattern.compile("^(grow|shrink)(-[a-zA-Z0-9-]+)?$"),
+    // grow/shrink take no arbitrary value in Tailwind: only "grow", "grow-0", "shrink" and
+    // "shrink-0" exist. Matching any suffix here would silently accept typos like "grow-x",
+    // defeating the typo detection these patterns exist for.
+    Pattern.compile("^grow(-0)?$"),
+    Pattern.compile("^shrink(-0)?$"),
     Pattern.compile("^(w|h|min|max)(-[a-zA-Z0-9]+)?$"),
     Pattern.compile("^opacity(-[0-9]+)?$"),
     Pattern.compile("^rotate(-[0-9]+)?$"),

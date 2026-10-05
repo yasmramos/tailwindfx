@@ -354,6 +354,28 @@ public final class CssPropertyMapper {
       // Otherwise it's a border color (COLOR_SHADE type), continue with default mapping
     }
 
+    // Tailwind's text-* utilities are dual-purpose: named sizes (text-sm, text-2xl) set the FONT
+    // SIZE, while colors (text-white, text-gray-500) set the text fill. JavaFX needs a different
+    // property for each, and a pixel length in -fx-text-fill is not a valid Paint, so the JavaFX
+    // CSS parser rejects it. resolveFontSize() returns null for color names, which keeps the
+    // -fx-text-fill mapping for them.
+    if ("text".equals(token.prefix) && token.namedValue != null) {
+      String fontSize = resolveFontSize(token.namedValue);
+      if (fontSize != null) {
+        return prop("-fx-font-size", fontSize);
+      }
+    }
+
+    // font-* utilities carry either a weight (font-bold, font-medium) or an arbitrary font family
+    // (font-['Inter']). -fx-font-family only accepts a font family name, so weights must go to
+    // -fx-font-weight instead of emitting an invalid numeric font family.
+    if ("font".equals(token.prefix) && token.namedValue != null) {
+      String fontWeight = resolveFontWeight(token.namedValue);
+      if (fontWeight != null) {
+        return prop("-fx-font-weight", fontWeight);
+      }
+    }
+
     // Special handling for rotate: already resolved as degrees without 'px' suffix
     if ("rotate".equals(token.prefix)) {
       String property = mapToCssProperty(token.prefix);
@@ -394,13 +416,16 @@ public final class CssPropertyMapper {
 
     // Special handling for composite properties
     if ("p".equals(token.prefix) && token.subPrefix != null) {
+      // Composite padding utilities need the full JavaFX property name: "padding" is not a JavaFX
+      // CSS property, so the axis forms are emitted as -fx-padding with the four insets
+      // (top right bottom left).
       return switch (token.subPrefix) {
-        case "x" -> px("padding", "0px %s 0px %s".formatted(resolvedValue, resolvedValue));
-        case "y" -> px("padding", "%s 0px %s 0px".formatted(resolvedValue, resolvedValue));
-        case "t" -> px("padding", "%s 0px 0px 0px".formatted(resolvedValue));
-        case "r" -> px("padding", "0px %s 0px 0px".formatted(resolvedValue));
-        case "b" -> px("padding", "0px 0px %s 0px".formatted(resolvedValue));
-        case "l" -> px("padding", "0px 0px 0px %s".formatted(resolvedValue));
+        case "x" -> px("-fx-padding", "0px %s 0px %s".formatted(resolvedValue, resolvedValue));
+        case "y" -> px("-fx-padding", "%s 0px %s 0px".formatted(resolvedValue, resolvedValue));
+        case "t" -> px("-fx-padding", "%s 0px 0px 0px".formatted(resolvedValue));
+        case "r" -> px("-fx-padding", "0px %s 0px 0px".formatted(resolvedValue));
+        case "b" -> px("-fx-padding", "0px 0px %s 0px".formatted(resolvedValue));
+        case "l" -> px("-fx-padding", "0px 0px 0px %s".formatted(resolvedValue));
         default -> prop(property, resolvedValue);
       };
     }
