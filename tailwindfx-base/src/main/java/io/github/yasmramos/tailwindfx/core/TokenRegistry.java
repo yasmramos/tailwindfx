@@ -160,7 +160,20 @@ public final class TokenRegistry {
       new HashSet<>(
           Arrays.asList(
               "btn", "input", "card", "badge", "avatar", "alert", "spinner", "tooltip", "modal",
-              "group"));
+              "group",
+              // Component classes declared in tailwindfx-components.css. They are applied by the
+              // components module (e.g. TwBadge applies dot / dot-sm / dot-<color> to the status
+              // dot) and must not be reported as unknown tokens.
+              "checkbox",
+              "collapse",
+              "data",
+              "dot",
+              "progress",
+              "select",
+              "table",
+              "titled",
+              "tw",
+              "virtual"));
 
   /** Theme variant tokens. */
   private static final Set<String> THEME_VARIANTS = new HashSet<>(Arrays.asList("dark", "light"));
@@ -175,6 +188,14 @@ public final class TokenRegistry {
     Pattern.compile("^bg(-[a-zA-Z0-9-/\\[\\]#]+)?$"),
     Pattern.compile("^border(-[a-zA-Z0-9-/\\[\\]#]+)?$"),
     Pattern.compile("^[pm](t|r|b|l|x|y)?(-[a-zA-Z0-9\\[\\]]+)?$"),
+    // Flexbox / grid families. These are layout-dependent tokens handled programmatically by
+    // LayoutApplier, so they are valid utilities even though they produce no CSS declaration.
+    Pattern.compile("^gap(-(x|y))?(-[a-zA-Z0-9-]+)?$"),
+    Pattern.compile("^space(-(x|y))?(-[a-zA-Z0-9-]+)?$"),
+    Pattern.compile("^(justify|items|content|self|place-items|place-content)(-[a-zA-Z0-9-]+)?$"),
+    Pattern.compile("^(flex|grid)(-[a-zA-Z0-9-]+)?$"),
+    Pattern.compile("^(order|col|row)(-[a-zA-Z0-9-]+)?$"),
+    Pattern.compile("^(grow|shrink)(-[a-zA-Z0-9-]+)?$"),
     Pattern.compile("^(w|h|min|max)(-[a-zA-Z0-9]+)?$"),
     Pattern.compile("^opacity(-[0-9]+)?$"),
     Pattern.compile("^rotate(-[0-9]+)?$"),
