@@ -17,7 +17,29 @@ import javafx.scene.control.ComboBox;
  */
 public final class TwSelect {
 
+  /** Base stylesheet class applied to every select control. */
+  private static final String BASE_CLASS = "select";
+
+  /** Modifier applied to enabled controls, kept as an extension hook. */
+  private static final String ENABLED_CLASS = "select-base";
+
+  /** Modifier applied by the disabled factories. */
+  private static final String DISABLED_CLASS = "select-disabled";
+
+  /** Modifier applied by {@link #error(String, Object[])}. */
+  private static final String ERROR_CLASS = "select-error";
+
   private TwSelect() {}
+
+  /**
+   * Applies the base and modifier classes shared by every select factory.
+   *
+   * @param control the control to style
+   * @param modifier the modifier class to apply
+   */
+  private static void style(javafx.scene.control.Control control, String modifier) {
+    control.getStyleClass().addAll(BASE_CLASS, modifier);
+  }
 
   /**
    * Creates a styled ChoiceBox with the given options.
@@ -28,7 +50,7 @@ public final class TwSelect {
   @SafeVarargs
   public static <T> ChoiceBox<T> choiceBox(T... options) {
     ChoiceBox<T> cb = new ChoiceBox<>(FXCollections.observableArrayList(options));
-    cb.getStyleClass().addAll("select", "select-base");
+    style(cb, ENABLED_CLASS);
     if (options.length > 0) {
       cb.setValue(options[0]);
     }
@@ -44,7 +66,7 @@ public final class TwSelect {
   @SafeVarargs
   public static <T> ComboBox<T> comboBox(T... options) {
     ComboBox<T> combo = new ComboBox<>(FXCollections.observableArrayList(options));
-    combo.getStyleClass().addAll("select", "select-base");
+    style(combo, ENABLED_CLASS);
     return combo;
   }
 
@@ -58,7 +80,7 @@ public final class TwSelect {
     ComboBox<String> combo = new ComboBox<>();
     combo.setEditable(true);
     combo.setPromptText(placeholder);
-    combo.getStyleClass().addAll("select", "select-base");
+    style(combo, ENABLED_CLASS);
     return combo;
   }
 
@@ -76,7 +98,7 @@ public final class TwSelect {
     if (options.length > 0) {
       cb.setValue(options[0]);
     }
-    cb.getStyleClass().addAll("select", "select-disabled");
+    style(cb, DISABLED_CLASS);
     return cb;
   }
 
