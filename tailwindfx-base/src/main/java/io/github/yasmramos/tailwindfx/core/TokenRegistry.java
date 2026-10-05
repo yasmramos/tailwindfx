@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
  *   <li>JIT (Just-In-Time) prefixes for dynamic style compilation
  *   <li>Layout-dependent prefixes requiring parent container context
  *   <li>Effect/filter tokens handled via TwEffect
+ *   <li>Animation tokens handled via TwAnimation
  *   <li>Static utility classes known to the system
  *   <li>Tokens requiring layout migration (flex, grid containers)
  * </ul>
@@ -24,6 +25,7 @@ import java.util.regex.Pattern;
  * TokenRegistry.isJitPrefix("bg-blue-500");      // true
  * TokenRegistry.isLayoutDependent("gap-4");       // true
  * TokenRegistry.isEffectToken("blur-sm");         // true
+ * TokenRegistry.isAnimationToken("animate-spin"); // true
  * TokenRegistry.requiresMigration("flex");        // true
  * TokenRegistry.isKnownUtility("rounded-lg");     // true
  * </pre>
@@ -118,6 +120,9 @@ public final class TokenRegistry {
               "col-span-",
               "row-span-"));
 
+  /** Prefix for animation tokens handled via TwAnimation instead of CSS. */
+  private static final String ANIMATION_PREFIX = "animate-";
+
   /** Effect/filter prefixes handled via TwEffect instead of CSS. */
   private static final Set<String> EFFECT_PREFIXES =
       new HashSet<>(
@@ -133,6 +138,22 @@ public final class TokenRegistry {
               "drop-shadow",
               "backdrop-blur",
               "opacity"));
+
+  /** Animation tokens handled via TwAnimation instead of CSS. */
+  private static final Set<String> ANIMATION_NAMES =
+      new HashSet<>(
+          Arrays.asList(
+              "spin",
+              "pulse",
+              "bounce",
+              "ping",
+              "flash",
+              "shake",
+              "shake-x",
+              "shake-y",
+              "spin-slow",
+              "pulse-slow",
+              "bounce-slow"));
 
   /** Component class prefixes for static utility validation. */
   private static final Set<String> COMPONENT_PREFIXES =
@@ -263,6 +284,27 @@ public final class TokenRegistry {
               }
               return false;
             });
+  }
+
+  /**
+   * Checks if a token is an animation token that should be played via TwAnimation.
+   *
+   * <p>JavaFX has no CSS animation engine, so {@code animate-*} utilities cannot be expressed as
+   * inline styles. They are recognized here and routed to {@code AnimationApplier}, which plays the
+   * equivalent {@code TwAnimation} timeline on the node.
+   *
+   * @param token the base token (without variant prefix)
+   * @return true if this token should be applied via TwAnimation
+   */
+  public static boolean isAnimationToken(String token) {
+    if (token == null || token.isEmpty()) {
+      return false;
+    }
+    String baseToken = stripVariantPrefix(token);
+    if (!baseToken.startsWith(ANIMATION_PREFIX)) {
+      return false;
+    }
+    return ANIMATION_NAMES.contains(baseToken.substring(ANIMATION_PREFIX.length()));
   }
 
   /**
@@ -466,6 +508,15 @@ public final class TokenRegistry {
    */
   public static Set<String> getEffectPrefixes() {
     return new HashSet<>(EFFECT_PREFIXES);
+  }
+
+  /**
+   * Gets all supported animation names (without the {@code animate-} prefix).
+   *
+   * @return unmodifiable set of animation names
+   */
+  public static Set<String> getAnimationNames() {
+    return new HashSet<>(ANIMATION_NAMES);
   }
 
   /**

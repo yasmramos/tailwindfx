@@ -15,6 +15,7 @@
  */
 package io.github.yasmramos.tailwindfx;
 
+import io.github.yasmramos.tailwindfx.animation.AnimationApplier;
 import io.github.yasmramos.tailwindfx.core.JitCompiler;
 import io.github.yasmramos.tailwindfx.core.Preconditions;
 import io.github.yasmramos.tailwindfx.core.StyleCache;
@@ -103,6 +104,12 @@ public final class TwStyle {
       for (String effectToken : result.effectTokens()) {
         EffectApplier.applyEffectToken(node, effectToken);
       }
+    }
+
+    // Apply animate-* tokens via AnimationApplier (JavaFX has no CSS animation engine, so these
+    // are played as TwAnimation timelines rather than compiled to inline styles)
+    for (String animationToken : result.animationTokens()) {
+      AnimationApplier.applyAnimationToken(node, animationToken);
     }
 
     // Migration tokens detected (e.g. legacy "flex"/"grid" usage on a plain node): we log a

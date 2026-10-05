@@ -1,6 +1,7 @@
 package io.github.yasmramos.tailwindfx.core;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -293,7 +294,39 @@ class TokenParserTest {
     assertTrue(empty.layoutMigrationTokens().isEmpty());
     assertTrue(empty.variantTokens().isEmpty());
     assertTrue(empty.effectTokens().isEmpty());
+    assertTrue(empty.animationTokens().isEmpty());
     assertTrue(empty.unknownTokens().isEmpty());
+  }
+
+  @Test
+  void testAnimationTokensAreClassifiedSeparately() {
+    TokenParser.ParseResult result = TokenParser.parse("animate-spin", "animate-pulse");
+
+    assertEquals(2, result.animationTokens().size());
+    assertTrue(result.animationTokens().contains("animate-spin"));
+    assertTrue(result.animationTokens().contains("animate-pulse"));
+    // Animations must not leak into the CSS class path: JavaFX has no CSS animation engine,
+    // so adding them as style classes would silently do nothing.
+    assertTrue(result.cssClasses().isEmpty());
+    assertTrue(result.jitTokens().isEmpty());
+    assertFalse(result.unknownTokens().contains("animate-spin"));
+  }
+
+  @Test
+  void testUnknownAnimationNameIsNotClassifiedAsAnimation() {
+    TokenParser.ParseResult result = TokenParser.parse("animate-nonexistent");
+
+    assertTrue(result.animationTokens().isEmpty());
+  }
+
+  @Test
+  void testVariantPrefixedAnimationIsNotClassifiedAsAnimation() {
+    // JavaFX cannot express "play an animation on hover" through this token path; variant
+    // animations fall through to the variant handler instead of being silently played.
+    TokenParser.ParseResult result = TokenParser.parse("hover:animate-spin");
+
+    assertTrue(result.animationTokens().isEmpty());
+    assertEquals(1, result.variantTokens().size());
   }
 
   @Test
