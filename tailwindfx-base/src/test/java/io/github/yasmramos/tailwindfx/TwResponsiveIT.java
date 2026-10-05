@@ -60,13 +60,23 @@ class TwResponsiveTest extends ApplicationTest {
   }
 
   @Test
-  void testSingletonInstance() throws Exception {
-    // Verify that the class has a singleton pattern
-    var instanceField = TwResponsive.class.getDeclaredField("INSTANCE");
-    instanceField.setAccessible(true);
-    Object instance = instanceField.get(null);
-    assertNotNull(instance);
-    assertTrue(instance instanceof TwResponsive);
+  void testIsStaticUtilityClass() {
+    // TwResponsive exposes only static methods, so there is no instance to hold: the class must
+    // not declare a singleton field, and must not expose any public constructor.
+    for (var field : TwResponsive.class.getDeclaredFields()) {
+      assertFalse(
+          field.isSynthetic(),
+          () -> "TwResponsive should not hold state, found field: " + field.getName());
+    }
+    for (var constructor : TwResponsive.class.getDeclaredConstructors()) {
+      assertTrue(
+          java.lang.reflect.Modifier.isPrivate(constructor.getModifiers()),
+          "TwResponsive must not expose a public constructor");
+    }
+    assertEquals(
+        0,
+        TwResponsive.class.getConstructors().length,
+        "TwResponsive must not expose a public constructor");
   }
 
   @Test

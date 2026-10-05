@@ -294,11 +294,6 @@ public final class JitCompiler {
       baseToken = baseToken.substring(DARK_PREFIX.length());
     }
 
-    // Gradient tokens are processed by GradientProcessor in batch compilation.
-    if (GradientProcessor.isGradientToken(baseToken)) {
-      return new CompileResult("", null, true, isDarkMode);
-    }
-
     // Create cache key including modifiers
     String cacheKey = token.trim();
 
@@ -610,6 +605,21 @@ public final class JitCompiler {
 
   // Main compilation - delega a StyleResolver y CssPropertyMapper
   private CompileResult doCompile(String raw) {
+    // Gradient utilities are resolved by GradientProcessor, which builds the complete
+    // -fx-background-color: linear-gradient(...) declaration. Handled here (rather than in
+    // compile()) so gradient tokens share the LRU cache and the compilation metrics with
+    // every other token instead of bypassing both.
+    if (GradientProcessor.isGradientToken(raw)) {
+      GradientProcessor.GradientResult gradient =
+          GradientProcessor.processGradientTokens(new String[] {raw});
+      if (gradient.hasInlineStyle()) {
+        return CompileResult.inline(gradient.inlineStyle());
+      }
+      // A gradient token without a usable color (e.g. "bg-gradient-to-r" alone) has no inline
+      // representation; fall back to the CSS class so the stylesheet can resolve it.
+      return CompileResult.cssClass(raw);
+    }
+
     StyleToken t = StyleToken.parse(raw);
 
     // Delegate resolution to StyleResolver

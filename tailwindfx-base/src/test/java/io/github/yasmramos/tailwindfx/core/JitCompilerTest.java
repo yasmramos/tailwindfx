@@ -122,6 +122,41 @@ class JitCompilerTest {
       assertTrue(result.hasInlineStyle());
       assertTrue(result.inlineStyle().contains("#9333ea")); // purple-600 hex
     }
+
+    @Test
+    @DisplayName("Should compile a single gradient stop token to an inline gradient")
+    void testSingleGradientTokenCompilesInline() {
+      JitCompiler.CompileResult result = JitCompiler.compile("from-blue-500");
+
+      assertTrue(result.isKnown());
+      assertTrue(result.hasInlineStyle());
+      assertTrue(result.inlineStyle().contains("-fx-background-color"));
+      assertTrue(result.inlineStyle().contains("#3b82f6"));
+    }
+
+    @Test
+    @DisplayName("Should fall back to a CSS class when a gradient token has no color")
+    void testGradientTokenWithoutColorFallsBackToCssClass() {
+      // Direction-only tokens carry no color stops, so there is nothing to render inline.
+      JitCompiler.CompileResult result = JitCompiler.compile("bg-gradient-to-r");
+
+      assertTrue(result.isKnown());
+      assertFalse(result.hasInlineStyle());
+      assertTrue(result.hasCssClass());
+    }
+
+    @Test
+    @DisplayName("Should cache single gradient tokens like any other token")
+    void testSingleGradientTokenIsCached() {
+      JitCompiler.clearCache();
+
+      JitCompiler.compile("from-blue-500");
+      assertEquals(1, JitCompiler.cacheSize());
+
+      // A second compilation of the same token must not grow the cache.
+      JitCompiler.compile("from-blue-500");
+      assertEquals(1, JitCompiler.cacheSize());
+    }
   }
 
   @Nested
