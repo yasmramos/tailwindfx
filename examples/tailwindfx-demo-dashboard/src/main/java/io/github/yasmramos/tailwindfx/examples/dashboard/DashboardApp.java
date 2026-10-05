@@ -497,7 +497,7 @@ public class DashboardApp extends Application {
     TwButton reportBtn = TwButton.ghost("Print metrics report");
     reportBtn.setOnAction(
         e -> {
-          System.out.println(TailwindFXMetrics.instance().report());
+          TailwindFXMetrics.instance().report();
           refreshMetricsCard();
         });
 
