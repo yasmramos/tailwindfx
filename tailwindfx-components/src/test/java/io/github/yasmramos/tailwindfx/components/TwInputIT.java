@@ -93,15 +93,33 @@ public class TwInputIT {
     TwInput input = TwInput.password();
 
     assertNotNull(input);
-    assertEquals("●", input.getPromptText());
+    assertEquals("Password", input.getPromptText());
   }
 
   @Test
-  public void testSetEchoChar() {
-    TwInput input = new TwInput();
-    input.setEchoChar('*');
+  public void testPasswordFieldIsMasked() {
+    TwPasswordField password = TwPasswordField.create();
 
-    assertEquals("*", input.getPromptText());
+    password.setText("secret");
+
+    // The value round-trips, but the control masks what it renders.
+    assertEquals("secret", password.getText());
+    assertTrue(password.getStyleClass().contains("tw-input"));
+  }
+
+  @Test
+  public void testPasswordFieldErrorState() {
+    TwPasswordField password = TwPasswordField.withPlaceholder("Password");
+
+    assertFalse(password.isError());
+    password.setError(true);
+    assertTrue(password.isError());
+    assertTrue(password.getStyleClass().contains("input-error"));
+
+    // Typing clears the stale error state.
+    password.setText("x");
+    assertFalse(password.isError());
+    assertFalse(password.getStyleClass().contains("input-error"));
   }
 
   @Test
