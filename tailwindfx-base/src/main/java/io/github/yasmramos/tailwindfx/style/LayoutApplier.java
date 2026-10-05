@@ -20,6 +20,7 @@ import io.github.yasmramos.tailwindfx.layout.TwFlexPane;
 import io.github.yasmramos.tailwindfx.layout.TwGridPane;
 import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
@@ -58,6 +59,27 @@ import javafx.scene.layout.VBox;
 public final class LayoutApplier {
 
   private static final Logger LOGGER = Logger.getLogger(LayoutApplier.class.getName());
+
+  /**
+   * Named Tailwind scale keywords that legitimately carry no numeric measurement.
+   *
+   * <p>They are valid tokens (recognized by {@code TokenRegistry}), so parsing them into {@link
+   * Double#NaN} is expected behavior instead of a malformed-token warning.
+   */
+  private static final Set<String> NAMED_SCALE_KEYWORDS =
+      Set.of(
+          "auto",
+          "full",
+          "min",
+          "max",
+          "fit",
+          "screen",
+          "px",
+          "none",
+          "normal",
+          "inherit",
+          "initial",
+          "unset");
 
   private LayoutApplier() {
     // Utility class - prevent instantiation
@@ -663,14 +685,29 @@ public final class LayoutApplier {
         int value = Integer.parseInt(numPart);
         return negative ? -value : value;
       } catch (NumberFormatException e) {
-        // Handle non-numeric values like "auto", "full"
-        if (TwConfig.isDebug()) {
+        // Named scale keywords ("mt-auto", "w-full", "h-screen", "p-px", ...) are valid Tailwind
+        // utilities that simply carry no numeric measurement. They are expected here, so they must
+        // not be reported as warnings; only genuinely malformed tails are worth flagging.
+        if (!isNamedScaleKeyword(numPart) && TwConfig.isDebug()) {
           System.out.println("[TailwindFX Warning] Non-numeric value in token: " + token);
         }
         return Double.NaN;
       }
     }
     return Double.NaN;
+  }
+
+  /**
+   * Checks whether a value tail is a named Tailwind keyword instead of a malformed token.
+   *
+   * <p>These tokens are recognized by {@code TokenRegistry} and handled (or intentionally ignored)
+   * elsewhere, so returning {@code NaN} for them is the expected outcome rather than an error.
+   *
+   * @param valuePart the token tail after the last hyphen (e.g. {@code auto} in {@code mt-auto})
+   * @return true if the tail is a recognized non-numeric Tailwind keyword
+   */
+  private static boolean isNamedScaleKeyword(String valuePart) {
+    return NAMED_SCALE_KEYWORDS.contains(valuePart);
   }
 
   /**
