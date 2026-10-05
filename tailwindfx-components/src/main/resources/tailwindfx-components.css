@@ -900,7 +900,7 @@
 }
 
 /* =============================================================================
-   ACCORDION STYLES (TWAccordion)
+   ACCORDION STYLES (TwAccordion)
    ========================================================================== */
 
 .collapse-item {
@@ -933,7 +933,7 @@
 }
 
 /*
- * State classes applied by TWAccordion. The expanded pane needs no extra rules of its own (the
+ * State classes applied by TwAccordion. The expanded pane needs no extra rules of its own (the
  * default .collapse-item styling already covers it), but both states are declared so the
  * contract with the component is explicit and so the collapsed pane can opt out of the shadow.
  */
