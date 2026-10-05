@@ -145,6 +145,58 @@ public class TwCardIT extends ApplicationTest {
   }
 
   @Test
+  public void testSetHeaderTwiceReplacesPrevious() {
+    TwCard card = new TwCard();
+    Label first = new Label("First");
+    Label second = new Label("Second");
+
+    card.setHeader(first);
+    card.setHeader(second);
+
+    assertEquals(1, card.getChildren().size());
+    assertSame(second, card.getHeader());
+    assertFalse(card.getChildren().contains(first));
+  }
+
+  @Test
+  public void testSetFooterTwiceReplacesPrevious() {
+    TwCard card = new TwCard();
+    Label first = new Label("First");
+    Label second = new Label("Second");
+
+    card.setFooter(first);
+    card.setFooter(second);
+
+    assertEquals(1, card.getChildren().size());
+    assertSame(second, card.getFooter());
+    assertFalse(card.getChildren().contains(first));
+  }
+
+  @Test
+  public void testHeaderStaysFirstWhenSetLast() {
+    TwCard card = new TwCard();
+    Label footer = new Label("Footer");
+    Label header = new Label("Header");
+
+    // Footer assigned before the header must not push the header out of first position.
+    card.setFooter(footer);
+    card.setBody(new Label("Body"));
+    card.setHeader(header);
+
+    assertEquals(3, card.getChildren().size());
+    assertSame(header, card.getChildren().get(0));
+    assertSame(footer, card.getChildren().get(2));
+  }
+
+  @Test
+  public void testGetHeaderAndFooterDefaultToNull() {
+    TwCard card = new TwCard();
+
+    assertNull(card.getHeader());
+    assertNull(card.getFooter());
+  }
+
+  @Test
   public void testCardSpacingAndPadding() {
     TwCard card = new TwCard();
 

@@ -9,6 +9,18 @@ import javafx.scene.control.CheckBox;
  */
 public class TwCheckbox extends CheckBox {
 
+  /** Base stylesheet class applied to every checkbox. */
+  private static final String BASE_CLASS = "checkbox";
+
+  /** Prefix shared by every modifier class applied by this component. */
+  private static final String MODIFIER_PREFIX = "checkbox-";
+
+  /** State class applied by {@link #setError(boolean)}. */
+  private static final String ERROR_CLASS = "checkbox-error";
+
+  /** State class applied by {@link #disabled(String)}. */
+  private static final String DISABLED_CLASS = "checkbox-disabled";
+
   private String color = "blue";
   private String size = "md";
 
@@ -29,18 +41,20 @@ public class TwCheckbox extends CheckBox {
   }
 
   private void initialize() {
-    getStyleClass().add("checkbox");
+    getStyleClass().add(BASE_CLASS);
     applyStyling();
   }
 
   private void applyStyling() {
-    // Remove old color and size classes
+    // Remove previously applied color/size classes. The error and disabled state classes are
+    // owned by setError/disabled(...) and are preserved so changing the color or size does not
+    // silently clear a validation or disabled state.
     getStyleClass()
         .removeIf(
             cls ->
-                (cls.startsWith("checkbox-") && !cls.equals("checkbox"))
-                    || cls.equals("checkbox-error")
-                    || cls.equals("checkbox-disabled"));
+                cls.startsWith(MODIFIER_PREFIX)
+                    && !cls.equals(ERROR_CLASS)
+                    && !cls.equals(DISABLED_CLASS));
 
     // Add color class
     if (color != null && !color.isEmpty()) {
@@ -77,6 +91,11 @@ public class TwCheckbox extends CheckBox {
    *
    * @param size size modifier (xs, sm, md, lg, xl)
    */
+  /**
+   * Sets the checkbox size.
+   *
+   * @param size size modifier (xs, sm, md, lg, xl)
+   */
   public void setSize(String size) {
     this.size = size;
     applyStyling();
@@ -98,9 +117,9 @@ public class TwCheckbox extends CheckBox {
    */
   public void setError(boolean error) {
     if (error) {
-      getStyleClass().add("checkbox-error");
+      getStyleClass().add(ERROR_CLASS);
     } else {
-      getStyleClass().remove("checkbox-error");
+      getStyleClass().remove(ERROR_CLASS);
     }
   }
 
@@ -110,7 +129,7 @@ public class TwCheckbox extends CheckBox {
    * @return true if error
    */
   public boolean isError() {
-    return getStyleClass().contains("checkbox-error");
+    return getStyleClass().contains(ERROR_CLASS);
   }
 
   /**
@@ -145,7 +164,7 @@ public class TwCheckbox extends CheckBox {
   public static TwCheckbox disabled(String text) {
     TwCheckbox chk = new TwCheckbox(text);
     chk.setDisable(true);
-    chk.getStyleClass().add("checkbox-disabled");
+    chk.getStyleClass().add(DISABLED_CLASS);
     return chk;
   }
 

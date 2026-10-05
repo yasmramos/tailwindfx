@@ -340,7 +340,9 @@ node.getStyleClass().add("high-priority-style");
 
 ### Medium Priority
 - [ ] **Plugin system** for custom utilities
-- [ ] **Animation utilities** (`animate-spin`, `animate-pulse`)
+- [x] **Animation utilities** (`animate-spin`, `animate-pulse`, ...) — played as `TwAnimation`
+      timelines via `AnimationApplier`; JavaFX has no CSS animation engine, so these are not
+      compiled to inline styles. Variant-prefixed forms (`hover:animate-spin`) are not supported.
 - [ ] **Transform utilities** (`rotate-45`, `scale-95`)
 
 ### Low Priority

@@ -87,7 +87,7 @@
 - [x] Scroll snap utilities
 - [x] Container query utilities (@min-*, @max-*, @[breakpoint])
 - [x] Transition utilities (transition-*, duration-*, ease-*)
-- [x] Animation markers (animate-*)
+- [x] Animation utilities (animate-*, played as TwAnimation timelines)
 - [x] Dark mode detection (`dark:` prefix)
 - [x] Important modifier detection (`!` suffix)
 - [x] Responsive prefixes (`sm:`, `md:`, `lg:`, `xl:`, `2xl:`)
@@ -96,7 +96,6 @@
 - [x] Metrics and statistics
 
 ### Partial Implementation ⚠️
-- [ ] Animations (requires TwAnimation integration)
 - [ ] Transitions (CSS properties generated, JavaFX Timeline needed)
 - [ ] Container queries (CSS generated, manual handling required)
 - [ ] Responsive design (tokens detected, manual handling required)
@@ -157,14 +156,13 @@ String style = JitCompiler.compile("p-4!", "dark:bg-gray-800").inlineStyle();
 ## 🚀 Next Steps
 
 1. **Benchmarking Suite**: Create comprehensive performance tests
-2. **Animation Integration**: Connect animate-* tokens to TwAnimation
-3. **Type Hints Enhancement**: Improve arbitrary value type detection
-4. **Additional Utilities**: 
+2. **Type Hints Enhancement**: Improve arbitrary value type detection
+3. **Additional Utilities**: 
    - Columns utilities
    - Object fit utilities
    - Isolation utilities
    - Mix blend modes
-5. **Documentation**: Complete API reference and migration guide
+4. **Documentation**: Complete API reference and migration guide
 
 ## 📝 Commit History
 

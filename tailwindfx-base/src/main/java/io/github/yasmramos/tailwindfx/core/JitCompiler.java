@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  * rgba(59,130,246,0.80);" Input: "w-[320px]" → "-fx-pref-width: 320px;" Input: "-translate-x-4" →
  * "-fx-translate-x: -16px;"
  *
- * <p>Cache: compiled tokens are stored in a thread-safe ManualLruCache with automatic eviction.
+ * <p>Cache: compiled tokens are stored in a thread-safe LruCache with automatic eviction.
  * Compiling "p-4" 1000 times costs the same as compiling it once.
  *
  * <p>Unknown tokens — smart heuristic: If the token looks like a JIT utility (has numbers, /, [) →
@@ -68,8 +68,8 @@ public final class JitCompiler {
    * <p>Why 2000? A typical large app uses ~300-500 unique utility tokens. 2000 gives 4× headroom
    * for JIT-compiled arbitrary values while keeping the cache under ~400KB in the worst case.
    */
-  private static final ManualLruCache<String, CompileResult> CACHE =
-      new ManualLruCache<>(MAX_CACHE_SIZE);
+  private static final LruCache<String, CompileResult> CACHE =
+      new LruCache<>(MAX_CACHE_SIZE);
 
   // Modo debug: loguea todos los tokens procesados
   private static volatile boolean DEBUG = false;
@@ -599,12 +599,27 @@ public final class JitCompiler {
    *
    * @return a CacheStats record with current metrics
    */
-  public static ManualLruCache.CacheStats getCacheStats() {
+  public static LruCache.CacheStats getCacheStats() {
     return CACHE.getStats();
   }
 
   // Main compilation - delega a StyleResolver y CssPropertyMapper
   private CompileResult doCompile(String raw) {
+    // Gradient utilities are resolved by GradientProcessor, which builds the complete
+    // -fx-background-color: linear-gradient(...) declaration. Handled here (rather than in
+    // compile()) so gradient tokens share the LRU cache and the compilation metrics with
+    // every other token instead of bypassing both.
+    if (GradientProcessor.isGradientToken(raw)) {
+      GradientProcessor.GradientResult gradient =
+          GradientProcessor.processGradientTokens(new String[] {raw});
+      if (gradient.hasInlineStyle()) {
+        return CompileResult.inline(gradient.inlineStyle());
+      }
+      // A gradient token without a usable color (e.g. "bg-gradient-to-r" alone) has no inline
+      // representation; fall back to the CSS class so the stylesheet can resolve it.
+      return CompileResult.cssClass(raw);
+    }
+
     StyleToken t = StyleToken.parse(raw);
 
     // Delegate resolution to StyleResolver

@@ -19,6 +19,21 @@ import javafx.scene.layout.HBox;
  */
 public class TwBadge extends Label {
 
+  /** Base stylesheet class applied to every badge. */
+  private static final String BASE_CLASS = "badge";
+
+  /** Modifier applied by {@link #pill(String, String)}. */
+  private static final String PILL_CLASS = "badge-pill";
+
+  /** Modifier applied by {@link #outline(String, String)}. */
+  private static final String OUTLINE_CLASS = "badge-outline";
+
+  /** Modifier applied by the dot variant, which renders bare text next to a dot. */
+  private static final String COMPACT_CLASS = "badge-compact";
+
+  /** Modifier applied to the status dot of the dot variant. */
+  private static final String DOT_CLASS = "dot";
+
   /**
    * Creates a small badge label (e.g. NEW, BETA, PRO).
    *
@@ -38,8 +53,8 @@ public class TwBadge extends Label {
    */
   public static TwBadge create(String text, String color) {
     TwBadge lbl = new TwBadge();
-    lbl.setText(text.toUpperCase());
-    TwStyle.apply(lbl, "badge", "badge-" + color, "badge-md");
+    lbl.setText(text == null ? "" : text.toUpperCase());
+    TwStyle.apply(lbl, BASE_CLASS, "badge-" + color, "badge-md");
     return lbl;
   }
 
@@ -62,7 +77,7 @@ public class TwBadge extends Label {
    */
   public static TwBadge pill(String text, String color) {
     TwBadge lbl = create(text, color);
-    TwStyle.apply(lbl, "badge-pill");
+    TwStyle.apply(lbl, PILL_CLASS);
     return lbl;
   }
 
@@ -108,8 +123,8 @@ public class TwBadge extends Label {
    */
   public static TwBadge outline(String text, String color) {
     TwBadge lbl = new TwBadge();
-    lbl.setText(text.toUpperCase());
-    TwStyle.apply(lbl, "badge", "badge-outline", "badge-" + color, "badge-md");
+    lbl.setText(text == null ? "" : text.toUpperCase());
+    TwStyle.apply(lbl, BASE_CLASS, OUTLINE_CLASS, "badge-" + color, "badge-md");
     return lbl;
   }
 
@@ -135,12 +150,12 @@ public class TwBadge extends Label {
       super();
 
       dot = new Label();
-      TwStyle.apply(dot, "dot", "dot-" + dotColor, "dot-sm");
+      TwStyle.apply(dot, DOT_CLASS, "dot-" + dotColor, "dot-sm");
 
       label = new TwBadge();
-      label.setText(text);
-      TwStyle.apply(label, "badge", "badge-" + textColor, "badge-compact");
-      label.setPadding(new Insets(0));
+      label.setText(text == null ? "" : text);
+      TwStyle.apply(label, BASE_CLASS, "badge-" + textColor, COMPACT_CLASS);
+      label.setPadding(Insets.EMPTY);
 
       getChildren().addAll(dot, label);
       setSpacing(4);

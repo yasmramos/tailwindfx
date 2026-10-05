@@ -548,8 +548,8 @@ public final class ThemeManager {
    * AssertionError}. {@link AssertionError} is an {@link Error}, not an {@link Exception}, so a
    * {@code catch (NullPointerException)} block does not contain it: the error escaped {@code
    * safeApplyCss}, aborted the deferred refresh scheduled by {@link #forceStyleRefresh} and
-   * surfaced on the JavaFX Application Thread. Catching {@link Throwable} keeps the refresh best
-   * effort as documented.
+   * surfaced on the JavaFX Application Thread. Containing both {@link RuntimeException} and {@link
+   * Error} keeps the refresh best effort as documented.
    *
    * @param node the node whose CSS should be refreshed; ignored when {@code null}
    */

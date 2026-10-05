@@ -16,6 +16,12 @@ import javafx.scene.control.ProgressIndicator;
  */
 public final class TwSpinner {
 
+  /** Base stylesheet class applied to every spinner. */
+  private static final String BASE_CLASS = "spinner";
+
+  /** Prefix shared by the size and color modifier classes. */
+  private static final String MODIFIER_PREFIX = "spinner-";
+
   private TwSpinner() {}
 
   /**
@@ -53,7 +59,8 @@ public final class TwSpinner {
    */
   public static ProgressIndicator size(String size) {
     ProgressIndicator spinner = new ProgressIndicator();
-    spinner.getStyleClass().addAll("spinner", "spinner-" + size);
+    spinner.getStyleClass().add(BASE_CLASS);
+    spinner.getStyleClass().add(MODIFIER_PREFIX + size);
     return spinner;
   }
 
@@ -64,9 +71,7 @@ public final class TwSpinner {
    * @return styled ProgressIndicator
    */
   public static ProgressIndicator colored(String color) {
-    ProgressIndicator spinner = new ProgressIndicator();
-    spinner.getStyleClass().addAll("spinner", "spinner-md", "spinner-" + color);
-    return spinner;
+    return sizeAndColor("md", color);
   }
 
   /**
@@ -76,9 +81,7 @@ public final class TwSpinner {
    * @return styled ProgressIndicator
    */
   public static ProgressIndicator smallColored(String color) {
-    ProgressIndicator spinner = new ProgressIndicator();
-    spinner.getStyleClass().addAll("spinner", "spinner-sm", "spinner-" + color);
-    return spinner;
+    return sizeAndColor("sm", color);
   }
 
   /**
@@ -88,8 +91,21 @@ public final class TwSpinner {
    * @return styled ProgressIndicator
    */
   public static ProgressIndicator largeColored(String color) {
+    return sizeAndColor("lg", color);
+  }
+
+  /**
+   * Creates a spinner with both a size and a color modifier.
+   *
+   * @param size size variant (sm, md, lg)
+   * @param color Tailwind color name
+   * @return styled ProgressIndicator
+   */
+  public static ProgressIndicator sizeAndColor(String size, String color) {
     ProgressIndicator spinner = new ProgressIndicator();
-    spinner.getStyleClass().addAll("spinner", "spinner-lg", "spinner-" + color);
+    spinner.getStyleClass().add(BASE_CLASS);
+    spinner.getStyleClass().add(MODIFIER_PREFIX + size);
+    spinner.getStyleClass().add(MODIFIER_PREFIX + color);
     return spinner;
   }
 }

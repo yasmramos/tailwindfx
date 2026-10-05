@@ -41,7 +41,7 @@ area.
 | Avatars | Initials avatars, `TwAvatarGroup`, `TwAvatarWithStatus` |
 | Form | `TwInput`, `TwSelect`, `TwCheckbox` inside `TwCard.withTitle(...)` |
 | Data | `TwProgressBar`, `TwSpinner`, `TwDataTable` |
-| Accordion | `TWAccordion` with `TWTitledPane` |
+| Accordion | `TwAccordion` with `TwTitledPane` |
 | Style utilities | `TwStyle.apply` tokens (`p-*`, `m-*`, `bg-*-500`, `text-*`, `rounded-*`, `shadow-*`), `hover:`/`focus:`/`dark:` variants, JIT arbitrary values |
 | Effects & responsive | `TwEffect`, `TwAnimation` (fade-in), `TwResponsive` / `BreakpointManager` |
 | Batching & metrics | `TwBatch`, `TwMetrics` / `TailwindFXMetrics` |

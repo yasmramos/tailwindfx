@@ -3,6 +3,7 @@ package io.github.yasmramos.tailwindfx.components;
 import static org.junit.jupiter.api.Assertions.*;
 
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.junit.jupiter.api.Test;
@@ -152,5 +153,55 @@ public class TwAvatarIT extends ApplicationTest {
     assertNotNull(withStatus.getStatusDot());
     assertNotEquals(0, withStatus.getStatusDot().getTranslateX(), 0.01);
     assertNotEquals(0, withStatus.getStatusDot().getTranslateY(), 0.01);
+  }
+
+  @Test
+  public void testSizeModifierIsTracked() {
+    TwAvatar avatar = TwAvatar.create("JD", "blue", "lg");
+
+    assertEquals("lg", avatar.getSizeModifier());
+    assertEquals("blue", avatar.getColorModifier());
+    // Must match the .avatar-lg rule in tailwindfx-components.css, otherwise the circular clip
+    // and the styled box would disagree.
+    assertEquals(48d, avatar.getAvatarSize(), 0.01);
+  }
+
+  @Test
+  public void testGetAvatarSizeMatchesStylesheet() {
+    // Values asserted here are the ones declared in tailwindfx-components.css.
+    assertEquals(24d, TwAvatar.create("A", "blue", "xs").getAvatarSize(), 0.01);
+    assertEquals(32d, TwAvatar.create("A", "blue", "sm").getAvatarSize(), 0.01);
+    assertEquals(40d, TwAvatar.create("A", "blue", "md").getAvatarSize(), 0.01);
+    assertEquals(48d, TwAvatar.create("A", "blue", "lg").getAvatarSize(), 0.01);
+    assertEquals(64d, TwAvatar.create("A", "blue", "xl").getAvatarSize(), 0.01);
+  }
+
+  @Test
+  public void testImageClipMatchesSizeModifier() {
+    Image image =
+        new Image(
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==");
+    ImageView imageView = new ImageView(image);
+
+    TwAvatar avatar = TwAvatar.fromImage(imageView, "xl");
+
+    assertEquals("xl", avatar.getSizeModifier());
+    javafx.scene.shape.Circle clip = (javafx.scene.shape.Circle) avatar.getClip();
+    assertEquals(64d, clip.getRadius() * 2, 0.01);
+    assertEquals(64d, imageView.getFitWidth(), 0.01);
+    assertEquals(64d, imageView.getFitHeight(), 0.01);
+  }
+
+  @Test
+  public void testCreate_NullInitialsIsSafe() {
+    TwAvatar avatar = TwAvatar.create(null);
+
+    assertNotNull(avatar);
+    assertEquals("", ((Label) avatar.getChildren().get(0)).getText());
+  }
+
+  @Test
+  public void testFromImage_NullThrows() {
+    assertThrows(IllegalArgumentException.class, () -> TwAvatar.fromImage(null));
   }
 }

@@ -349,12 +349,24 @@ public final class TwDataTable<T> extends TableView<T> {
     }
     sorted.comparatorProperty().bind(comparatorProperty());
 
-    // With pagination the TableView holds a materialized copy of the current page, so a change of
-    // comparator reorders the sorted view but never reaches the visible items. Re-slice the page
-    // whenever the sort order changes, otherwise clicking a column header does nothing.
-    comparatorProperty().addListener((obs, oldComp, newComp) -> {
-          if (paginated) applyPage();
-        });
+    // With pagination the TableView holds a materialized copy of the current page, so a sort change
+    // reorders the sorted view but never reaches the visible items. Re-slice the page whenever the
+    // sort order changes, otherwise clicking a column header does nothing.
+    //
+    // Both signals are observed on purpose: TableView recomputes its comparator from the sort
+    // order (and the per-column SortType), and the comparator is what the sorted view is bound to.
+    // A header click re-sets the sort order, so either listener alone would catch a user-driven
+    // sort; listening to both also covers programmatic reordering through the comparator.
+    getSortOrder()
+        .addListener(
+            (javafx.collections.ListChangeListener<TableColumn<T, ?>>)
+                change -> applyPageIfPaginated());
+    comparatorProperty().addListener((obs, oldComp, newComp) -> applyPageIfPaginated());
+  }
+
+  /** Re-slices the current page when the table is paginated; a no-op otherwise. */
+  private void applyPageIfPaginated() {
+    if (paginated) applyPage();
   }
 
   private void configureTable(Builder<T> b) {

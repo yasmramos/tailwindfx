@@ -19,6 +19,7 @@ import java.util.Set;
  *   <li>Layout migration tokens (need container conversion)
  *   <li>Variant tokens (hover:, focus:, responsive, etc.)
  *   <li>Effect tokens (blur, brightness, etc. via TwEffect)
+ *   <li>Animation tokens (animate-* via TwAnimation)
  *   <li>Unknown tokens (not recognized by the system)
  * </ul>
  *
@@ -42,6 +43,7 @@ import java.util.Set;
  * result.layoutMigrationTokens(); // ["flex"]
  * result.variantTokens();   // ["hover:p-2"]
  * result.effectTokens();    // []
+ * result.animationTokens(); // ["animate-spin"]
  * result.unknownTokens();   // []
  * </pre>
  *
@@ -80,6 +82,7 @@ public final class TokenParser {
     List<String> layoutMigrationTokens = new ArrayList<>();
     List<String> variantTokens = new ArrayList<>();
     List<String> effectTokens = new ArrayList<>();
+    List<String> animationTokens = new ArrayList<>();
     Set<String> unknownTokens = new HashSet<>();
 
     for (String token : tokens) {
@@ -97,6 +100,7 @@ public final class TokenParser {
             layoutMigrationTokens,
             variantTokens,
             effectTokens,
+            animationTokens,
             unknownTokens);
       }
     }
@@ -108,6 +112,7 @@ public final class TokenParser {
         layoutMigrationTokens,
         variantTokens,
         effectTokens,
+        animationTokens,
         unknownTokens);
   }
 
@@ -134,6 +139,7 @@ public final class TokenParser {
    * @param layoutMigrationTokens list to add migration-required tokens to
    * @param variantTokens list to add variant tokens to
    * @param effectTokens list to add effect tokens to
+   * @param animationTokens list to add animation tokens to
    * @param unknownTokens set to add unknown tokens to
    */
   private static void classifyToken(
@@ -144,6 +150,7 @@ public final class TokenParser {
       List<String> layoutMigrationTokens,
       List<String> variantTokens,
       List<String> effectTokens,
+      List<String> animationTokens,
       Set<String> unknownTokens) {
 
     // Check if token has variants (hover:, focus:, dark:, sm:, etc.)
@@ -167,6 +174,14 @@ public final class TokenParser {
     // Handle filter/effect tokens via TwEffect (blur, brightness, contrast, etc.)
     if (TokenRegistry.isEffectToken(baseUtility)) {
       effectTokens.add(hasVariant ? token : baseUtility);
+      return;
+    }
+
+    // Handle animate-* tokens via TwAnimation. JavaFX has no CSS animation engine, so these
+    // cannot be expressed as inline styles; they are played programmatically instead. Variant
+    // prefixes are not supported here (e.g. "hover:animate-spin"), so only bare tokens match.
+    if (!hasVariant && TokenRegistry.isAnimationToken(token)) {
+      animationTokens.add(token);
       return;
     }
 
@@ -289,6 +304,7 @@ public final class TokenParser {
    * @param layoutMigrationTokens tokens requiring container migration (flex, grid)
    * @param variantTokens tokens with state/responsive variants
    * @param effectTokens filter/effect tokens for TwEffect
+   * @param animationTokens animate-* tokens for TwAnimation
    * @param unknownTokens unrecognized tokens for warning/debugging
    */
   public record ParseResult(
@@ -298,6 +314,7 @@ public final class TokenParser {
       List<String> layoutMigrationTokens,
       List<String> variantTokens,
       List<String> effectTokens,
+      List<String> animationTokens,
       Set<String> unknownTokens) {
 
     /**
@@ -307,6 +324,7 @@ public final class TokenParser {
      */
     public static ParseResult empty() {
       return new ParseResult(
+          new ArrayList<>(),
           new ArrayList<>(),
           new ArrayList<>(),
           new ArrayList<>(),
@@ -328,6 +346,7 @@ public final class TokenParser {
           && layoutMigrationTokens.isEmpty()
           && variantTokens.isEmpty()
           && effectTokens.isEmpty()
+          && animationTokens.isEmpty()
           && unknownTokens.isEmpty();
     }
 
@@ -343,6 +362,7 @@ public final class TokenParser {
           + layoutMigrationTokens.size()
           + variantTokens.size()
           + effectTokens.size()
+          + animationTokens.size()
           + unknownTokens.size();
     }
   }

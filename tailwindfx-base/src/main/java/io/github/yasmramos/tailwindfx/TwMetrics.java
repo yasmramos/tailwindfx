@@ -31,8 +31,6 @@ import javafx.scene.Node;
  */
 public final class TwMetrics {
 
-  private static final TwMetrics INSTANCE = new TwMetrics();
-
   private TwMetrics() {}
 
   /** Generates a debug report for a node. */

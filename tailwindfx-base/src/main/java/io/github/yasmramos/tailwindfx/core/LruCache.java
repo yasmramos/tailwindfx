@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * ManualLruCache — A thread-safe, lock-free LRU cache implementation with bounded size.
+ * LruCache — A thread-safe, lock-free LRU cache implementation with bounded size.
  *
  * <p>This cache uses a combination of ConcurrentHashMap for storage and a secondary access-order
  * tracking map to implement LRU eviction without external dependencies.
@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>Usage example:
  *
  * <pre>{@code
- * ManualLruCache<String, CompileResult> cache = new ManualLruCache<>(2000);
+ * LruCache<String, CompileResult> cache = new LruCache<>(2000);
  * cache.put("p-4", result);
  * CompileResult cached = cache.get("p-4");
  * }</pre>
@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author yasmramos
  * @since 1.0.0
  */
-public class ManualLruCache<K, V> {
+public class LruCache<K, V> {
 
   /** Maximum number of entries to keep in the cache. */
   private final int maxSize;
@@ -56,7 +56,7 @@ public class ManualLruCache<K, V> {
    * @param maxSize the maximum number of entries to keep in the cache
    * @throws IllegalArgumentException if maxSize is less than or equal to zero
    */
-  public ManualLruCache(int maxSize) {
+  public LruCache(int maxSize) {
     if (maxSize <= 0) {
       throw new IllegalArgumentException("Max size must be positive: " + maxSize);
     }

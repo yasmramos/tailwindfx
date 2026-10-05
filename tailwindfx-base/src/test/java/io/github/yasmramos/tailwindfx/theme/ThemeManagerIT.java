@@ -2,6 +2,7 @@ package io.github.yasmramos.tailwindfx.theme;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.concurrent.atomic.AtomicReference;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -306,6 +307,74 @@ class ThemeManagerIT extends ApplicationTest {
     ThemeManager manager = ThemeManager.scope(null);
     // Should not throw exception
     assertDoesNotThrow(() -> manager.preset("dark").apply());
+  }
+
+  @Test
+  @DisplayName("Style refresh must never leak an Error from applyCss")
+  void testStyleRefreshDoesNotPropagateErrors() {
+    // Regression test for the AssertionError raised by StyleMap.getCascadingStyles when
+    // forceStyleRefresh() ran applyCss() while the node tree was still in a transient state.
+    // safeApplyCss() used to catch only NullPointerException, so the Error escaped, aborted the
+    // Platform.runLater() deferred pass and failed the whole test. Both passes must now complete.
+    AtomicReference<Throwable> escaped = new AtomicReference<>();
+
+    Thread.UncaughtExceptionHandler handler = (thread, error) -> escaped.set(error);
+    Thread.setDefaultUncaughtExceptionHandler(handler);
+    try {
+      Pane child = new Pane();
+      interact(() -> root.getChildren().add(child));
+
+      assertDoesNotThrow(
+          () ->
+              interact(
+                  () -> {
+                    ThemeManager.forScene(scene).preset("light").apply();
+                    ThemeManager.cyclePreset(scene);
+                  }));
+
+      // Drain the deferred Platform.runLater pass scheduled by forceStyleRefresh.
+      interact(() -> {});
+      Thread.sleep(150);
+      interact(() -> {});
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      fail("interrupted while waiting for the deferred style refresh");
+    } finally {
+      Thread.setDefaultUncaughtExceptionHandler(null);
+    }
+
+    assertNull(
+        escaped.get(),
+        "an Error from applyCss escaped onto the JavaFX Application Thread: " + escaped.get());
+  }
+
+  @Test
+  @DisplayName("Theme cycling repeatedly does not destabilize the scene graph")
+  void testRepeatedThemeCyclingIsStable() {
+    // The CI failure surfaced in testCyclePreset after several themes had been applied in the
+    // same JVM. Cycling through every preset must stay free of leaked Errors.
+    AtomicReference<Throwable> escaped = new AtomicReference<>();
+    Thread.setDefaultUncaughtExceptionHandler((thread, error) -> escaped.set(error));
+    try {
+      for (String preset : ThemeManager.availableThemes()) {
+        interact(() -> ThemeManager.forScene(scene).preset(preset).apply());
+      }
+      for (String preset : ThemeManager.availableThemes()) {
+        interact(() -> ThemeManager.cyclePreset(scene));
+      }
+      interact(() -> {});
+      Thread.sleep(150);
+      interact(() -> {});
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      fail("interrupted while waiting for the deferred style refresh");
+    } finally {
+      Thread.setDefaultUncaughtExceptionHandler(null);
+    }
+
+    assertNull(
+        escaped.get(),
+        "cycling themes leaked an Error onto the JavaFX Application Thread: " + escaped.get());
   }
 
   @Test

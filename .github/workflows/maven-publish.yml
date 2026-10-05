@@ -92,8 +92,10 @@ jobs:
           tag_name: ${{ env.RELEASE_TAG }}
           files: |
             tailwindfx-base/target/*.jar
+            tailwindfx-components/target/*.jar
             tailwindfx-maven-plugin/target/*.jar
             tailwindfx-base/target/*.pom
+            tailwindfx-components/target/*.pom
             tailwindfx-maven-plugin/target/*.pom
           fail_on_unmatched_files: true
           draft: false
@@ -102,9 +104,12 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v5
         with:
-          name: maven-snapshot-artifacts
+          name: maven-release-artifacts
           path: |
-            target/*.jar
+            tailwindfx-base/target/*.jar
+            tailwindfx-components/target/*.jar
+            tailwindfx-maven-plugin/target/*.jar
+          if-no-files-found: error
 
       - name: Bump revision to next development version
         if: success() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')

@@ -1,6 +1,7 @@
 package io.github.yasmramos.tailwindfx.core;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -203,8 +204,8 @@ class TokenParserTest {
 
     // btn-primary: css class (1)
     // bg-blue-500: css class (named value, not arbitrary/numeric) (1)
-    // gap-4: css class (named value) + layout-dependent + unknown (not in known utilities registry)
-    // (3)
+    // gap-4: css class (named value) + layout-dependent (2). gap-4 is a real Tailwind utility
+    // handled by LayoutApplier, so it is no longer reported as unknown.
     // flex: css class + layout-migration + layout-dependent (bare "flex" also carries child-side
     // grow/shrink semantics for LayoutApplier) (3)
     // hover:text-white: variant (1)
@@ -217,8 +218,7 @@ class TokenParserTest {
     assertEquals(1, result.layoutMigrationTokens().size()); // flex
     assertEquals(1, result.variantTokens().size()); // hover:text-white
     assertEquals(1, result.effectTokens().size()); // blur-sm
-    assertEquals(1, result.unknownTokens().size()); // gap-4 (not in known utilities registry)
-    assertTrue(result.unknownTokens().contains("gap-4"));
+    assertTrue(result.unknownTokens().isEmpty()); // every token here is a recognized utility
   }
 
   @Test
@@ -293,7 +293,39 @@ class TokenParserTest {
     assertTrue(empty.layoutMigrationTokens().isEmpty());
     assertTrue(empty.variantTokens().isEmpty());
     assertTrue(empty.effectTokens().isEmpty());
+    assertTrue(empty.animationTokens().isEmpty());
     assertTrue(empty.unknownTokens().isEmpty());
+  }
+
+  @Test
+  void testAnimationTokensAreClassifiedSeparately() {
+    TokenParser.ParseResult result = TokenParser.parse("animate-spin", "animate-pulse");
+
+    assertEquals(2, result.animationTokens().size());
+    assertTrue(result.animationTokens().contains("animate-spin"));
+    assertTrue(result.animationTokens().contains("animate-pulse"));
+    // Animations must not leak into the CSS class path: JavaFX has no CSS animation engine,
+    // so adding them as style classes would silently do nothing.
+    assertTrue(result.cssClasses().isEmpty());
+    assertTrue(result.jitTokens().isEmpty());
+    assertFalse(result.unknownTokens().contains("animate-spin"));
+  }
+
+  @Test
+  void testUnknownAnimationNameIsNotClassifiedAsAnimation() {
+    TokenParser.ParseResult result = TokenParser.parse("animate-nonexistent");
+
+    assertTrue(result.animationTokens().isEmpty());
+  }
+
+  @Test
+  void testVariantPrefixedAnimationIsNotClassifiedAsAnimation() {
+    // JavaFX cannot express "play an animation on hover" through this token path; variant
+    // animations fall through to the variant handler instead of being silently played.
+    TokenParser.ParseResult result = TokenParser.parse("hover:animate-spin");
+
+    assertTrue(result.animationTokens().isEmpty());
+    assertEquals(1, result.variantTokens().size());
   }
 
   @Test
@@ -303,8 +335,7 @@ class TokenParserTest {
             "bg-blue-500", "gap-4", "flex", "hover:text-white", "blur-sm", "unknown-token");
 
     // bg-blue-500: css class (named value) (1 token)
-    // gap-4: css class + layout-dependent + unknown (not in known utilities registry) (3
-    // classifications)
+    // gap-4: css class + layout-dependent (1 token, classified in multiple categories) (2)
     // flex: css class + layout-migration + layout-dependent (1 token, classified in multiple
     // categories) (3)
     // hover:text-white: variant (1 token)
@@ -312,7 +343,7 @@ class TokenParserTest {
     // unknown-token: css class + unknown (1 token, classified in multiple categories) (2)
     // Total: 6 unique tokens
     // Count by classification: 0(jit) + 2(layout-dep: gap-4, flex) + 1(layout-mig) + 1(variant) +
-    // 1(effect) + 4(css) + 2(unknown) = 11
-    assertEquals(11, result.totalTokenCount());
+    // 1(effect) + 4(css) + 1(unknown: unknown-token) = 10
+    assertEquals(10, result.totalTokenCount());
   }
 }

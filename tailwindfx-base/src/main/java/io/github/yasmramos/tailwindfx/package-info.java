@@ -34,6 +34,9 @@
  * // 8. Animations:
  * TwAnimation.fadeIn(node).play();
  * TwAnimation.onHoverScale(button, 1.05);
+ *
+ * // 9. Tailwind animation tokens (played as TwAnimation timelines):
+ * TwStyle.apply(spinner, "animate-spin");
  * </pre>
  *
  * <h2>Class overview</h2>

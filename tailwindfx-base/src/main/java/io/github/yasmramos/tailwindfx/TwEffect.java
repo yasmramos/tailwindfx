@@ -56,8 +56,6 @@ import javafx.scene.effect.GaussianBlur;
  */
 public final class TwEffect {
 
-  private static final TwEffect INSTANCE = new TwEffect();
-
   // Tailwind CSS v4 blur scale mappings (in pixels)
   // Source: https://tailwindcss.com/docs/blur
   private static final double BLUR_NONE = 0;

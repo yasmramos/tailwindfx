@@ -36,7 +36,13 @@ public final class GradientProcessor {
    *     linear-gradient(...);")
    * @param isGradient true if gradient tokens were found and processed
    */
-  public record GradientResult(String inlineStyle, boolean isGradient) {}
+  public record GradientResult(String inlineStyle, boolean isGradient) {
+
+    /** Returns true when a complete inline style declaration was produced. */
+    public boolean hasInlineStyle() {
+      return inlineStyle != null && !inlineStyle.isBlank();
+    }
+  }
 
   /**
    * Processes an array of tokens and extracts gradient-related ones.
