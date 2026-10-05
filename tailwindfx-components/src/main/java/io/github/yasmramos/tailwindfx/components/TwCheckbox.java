@@ -34,13 +34,15 @@ public class TwCheckbox extends CheckBox {
   }
 
   private void applyStyling() {
-    // Remove old color and size classes
+    // Remove previously applied color/size classes. The error and disabled state classes are
+    // owned by setError/disabled(...) and are preserved so changing the color or size does not
+    // silently clear a validation or disabled state.
     getStyleClass()
         .removeIf(
             cls ->
-                (cls.startsWith("checkbox-") && !cls.equals("checkbox"))
-                    || cls.equals("checkbox-error")
-                    || cls.equals("checkbox-disabled"));
+                cls.startsWith(MODIFIER_PREFIX)
+                    && !cls.equals(ERROR_CLASS)
+                    && !cls.equals(DISABLED_CLASS));
 
     // Add color class
     if (color != null && !color.isEmpty()) {
@@ -72,6 +74,11 @@ public class TwCheckbox extends CheckBox {
     return color;
   }
 
+  /**
+   * Sets the checkbox size.
+   *
+   * @param size size modifier (xs, sm, md, lg, xl)
+   */
   /**
    * Sets the checkbox size.
    *
