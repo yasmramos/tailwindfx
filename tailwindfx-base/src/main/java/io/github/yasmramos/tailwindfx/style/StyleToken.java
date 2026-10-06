@@ -157,6 +157,13 @@ public final class StyleToken {
           Kind.NAMED);
     }
 
+    // 5. Base prefix without suffix: rounded, border, shadow
+    // In Tailwind, "rounded" without a suffix applies the default border radius.
+    // Treat it as NAMED with namedValue="default" so resolveBorderRadius("default") works.
+    if (token.equals("rounded")) {
+      return new StyleToken(raw, false, "rounded", null, null, null, null, null, "default", null, Kind.NAMED);
+    }
+
     return unknown(raw);
   }
 

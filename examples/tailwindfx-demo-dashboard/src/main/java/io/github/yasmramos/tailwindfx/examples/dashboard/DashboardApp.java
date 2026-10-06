@@ -43,7 +43,6 @@ import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
 import io.github.yasmramos.tailwindfx.responsive.ResponsiveNode;
 import io.github.yasmramos.tailwindfx.theme.ThemeManager;
 import javafx.application.Application;
-import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -51,6 +50,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -105,34 +105,71 @@ public class DashboardApp extends Application {
 
   /** Builds the left sidebar using an arbitrary JIT value ({@code w-[240px]}) for the width. */
   private VBox buildSidebar() {
+    // Brand row with a version pill badge.
     Label brand = new Label("⚡ TailwindFX");
-    TwStyle.apply(brand, "text-xl", "font-bold", "text-white", "mb-4");
+    TwStyle.apply(brand, "text-xl", "font-bold", "text-white");
+    HBox brandRow = new HBox(8, brand, TwBadge.pill("v0.1.2", "indigo"));
+    TwStyle.apply(brandRow, "items-center", "mb-4");
 
-    String[] items = {"Dashboard", "Analytics", "Customers", "Orders", "Settings"};
+    // Section caption above the navigation.
+    Label menuLabel = new Label("MENU");
+    TwStyle.apply(menuLabel, "text-xs", "text-gray-500", "px-3", "mb-1");
+
+    String[][] items = {
+      {"📊", "Dashboard"},
+      {"📈", "Analytics"},
+      {"👥", "Customers"},
+      {"🛒", "Orders"},
+      {"⚙️", "Settings"}
+    };
     VBox nav = new VBox(4);
     for (int i = 0; i < items.length; i++) {
-      Label item = new Label(items[i]);
-      // First item is highlighted as "active"; hover variant demonstrates state prefixes.
-      TwStyle.apply(
-          item,
-          "p-2",
-          "px-3",
-          "rounded-md",
-          "text-sm",
-          "text-gray-300",
-          "hover:bg-gray-800",
-          "hover:text-white",
-          i == 0 ? "bg-gray-800" : "bg-transparent");
+      Label item = new Label(items[i][0] + "   " + items[i][1]);
+      if (i == 0) {
+        // Active item: indigo accent; hover lightens the accent instead of replacing it.
+        TwStyle.apply(
+            item,
+            "p-2",
+            "px-3",
+            "rounded-md",
+            "text-sm",
+            "bg-indigo-600",
+            "text-white",
+            "hover:bg-indigo-500");
+      } else {
+        // Hover variants demonstrate state prefixes.
+        TwStyle.apply(
+            item,
+            "p-2",
+            "px-3",
+            "rounded-md",
+            "text-sm",
+            "text-gray-300",
+            "hover:bg-gray-800",
+            "hover:text-white");
+      }
       nav.getChildren().add(item);
     }
 
-    Label footer = new Label("v0.1.2 · JIT + AOT");
-    TwStyle.apply(footer, "text-xs", "text-gray-500", "mt-auto");
+    // Hairline divider (arbitrary JIT height) above the user profile.
+    Region divider = new Region();
+    TwStyle.apply(divider, "h-[1px]", "bg-gray-800");
 
-    VBox sidebar = new VBox(8, brand, nav, footer);
+    // User profile pinned to the bottom of the sidebar.
+    TwAvatar profileAvatar = TwAvatar.create("yr", "indigo", "sm");
+    Label name = new Label("Yasmany Ramos");
+    TwStyle.apply(name, "text-sm", "font-semibold", "text-white");
+    Label role = new Label("Administrator");
+    TwStyle.apply(role, "text-xs", "text-gray-500");
+    HBox profile = new HBox(8, profileAvatar, new VBox(0, name, role));
+    TwStyle.apply(profile, "items-center");
+
+    VBox bottom = new VBox(8, divider, profile);
+    TwStyle.apply(bottom, "mt-auto");
+
+    VBox sidebar = new VBox(8, brandRow, menuLabel, nav, bottom);
     // Arbitrary value w-[240px] demonstrates JIT bracket syntax alongside standard tokens.
     TwStyle.apply(sidebar, "w-[240px]", "bg-gray-900", "text-white", "p-4");
-    sidebar.setPadding(new Insets(16));
     return sidebar;
   }
 
@@ -140,13 +177,20 @@ public class DashboardApp extends Application {
   // Header with dark mode toggle
   // ---------------------------------------------------------------------------------------------
 
-  /** Builds the top header bar including the dark mode toggle button. */
+  /** Builds the top header bar including search, the dark mode toggle and the user avatar. */
   private HBox buildHeader(Scene scene) {
+    // Stacked headings give the title a clear hierarchy over the subtitle.
     Label title = new Label("Admin Dashboard");
     TwStyle.apply(title, "text-2xl", "font-bold", "text-gray-900", "dark:text-white");
 
     Label subtitle = new Label("JIT utilities · AOT stylesheet · responsive · theming");
     TwStyle.apply(subtitle, "text-sm", "text-gray-500", "dark:text-gray-400");
+    VBox headings = new VBox(2, title, subtitle);
+
+    // Search box styled with an arbitrary JIT width value.
+    TwInput search = TwInput.withPlaceholder("🔍 Search anything…");
+    TwStyle.apply(search, "w-[260px]", "text-sm");
+    search.setMaxWidth(Region.USE_PREF_SIZE);
 
     TwButton darkToggle = TwButton.outline("🌙 Toggle Dark Mode");
     darkToggle.setOnAction(
@@ -158,11 +202,16 @@ public class DashboardApp extends Application {
     TwButton refresh = TwButton.primary("Refresh");
     refresh.setOnAction(e -> refreshMetricsCard());
 
+    TwAvatar.TwAvatarWithStatus me =
+        TwAvatar.withStatus(TwAvatar.create("yr", "indigo", "sm"), true);
+
+    HBox actions = new HBox(8, search, darkToggle, refresh, me);
+    TwStyle.apply(actions, "items-center");
+
     Region spacer = new Region();
     HBox.setHgrow(spacer, Priority.ALWAYS);
 
-    HBox header = new HBox(12, title, subtitle, spacer, darkToggle, refresh);
-    header.setPadding(new Insets(12, 16, 12, 16));
+    HBox header = new HBox(12, headings, spacer, actions);
     TwStyle.apply(
         header,
         "bg-white",
@@ -170,7 +219,9 @@ public class DashboardApp extends Application {
         "border-b",
         "border-gray-200",
         "shadow-sm",
-        "items-center");
+        "items-center",
+        "p-3",
+        "px-4");
     return header;
   }
 
@@ -179,12 +230,23 @@ public class DashboardApp extends Application {
   // ---------------------------------------------------------------------------------------------
 
   private ScrollPane mainScroll;
+  private TwGridPane kpiGrid;
   private TwGridPane cardsGrid;
   private TwCard metricsCard;
   private Label metricsLabel;
 
-  /** Builds the scrollable main area with a responsive grid of demo cards. */
+  /** Builds the scrollable main area with a KPI stat row and a responsive grid of demo cards. */
   private VBox buildMainArea(Stage stage, Scene scene) {
+    // KPI stat cards row above the component gallery.
+    kpiGrid = TwGridPane.create().cols(4).gap(16).build();
+    kpiGrid
+        .getChildren()
+        .addAll(
+            statCard("💰", "Revenue", "$48,210", "+12.4%", true),
+            statCard("🛒", "Orders", "1,284", "+8.1%", true),
+            statCard("👥", "Users", "9,342", "+3.1%", true),
+            statCard("📈", "Conversion", "3.42%", "-0.4%", false));
+
     cardsGrid = TwGridPane.create().cols(3).gap(16).build();
 
     cardsGrid.getChildren().addAll(buildButtonsCard(), buildBadgesCard(), buildAlertsCard());
@@ -195,16 +257,16 @@ public class DashboardApp extends Application {
     // Give the metrics card a double column span to show per-child grid spans.
     TwGridPane.setColSpan(metricsCard, 2);
 
-    // Animate cards in with a staggered fade effect.
-    int delay = 0;
+    // Animate KPI cards and demo cards in with a fade effect.
+    for (javafx.scene.Node child : kpiGrid.getChildren()) {
+      TwAnimation.fadeIn(child, TwAnimation.NORMAL).play();
+    }
     for (javafx.scene.Node child : cardsGrid.getChildren()) {
-      TwAnimation anim = TwAnimation.fadeIn(child, TwAnimation.NORMAL);
-      anim.play();
-      delay += 40;
+      TwAnimation.fadeIn(child, TwAnimation.NORMAL).play();
     }
 
-    VBox content = new VBox(16, cardsGrid);
-    content.setPadding(new Insets(16));
+    VBox content = new VBox(16, kpiGrid, cardsGrid);
+    TwStyle.apply(content, "p-4");
 
     mainScroll = new ScrollPane(content);
     mainScroll.setFitToWidth(true);
@@ -243,11 +305,76 @@ public class DashboardApp extends Application {
   /** Adjusts the number of grid columns based on the active breakpoint. */
   private void applyResponsiveColumns(BreakpointManager.Breakpoint bp) {
     switch (bp) {
-      case XS, SM -> cardsGrid.cols(1);
-      case MD -> cardsGrid.cols(2);
-      case LG -> cardsGrid.cols(3);
-      default -> cardsGrid.cols(4);
+      case XS -> {
+        kpiGrid.cols(1);
+        cardsGrid.cols(1);
+      }
+      case SM -> {
+        kpiGrid.cols(2);
+        cardsGrid.cols(1);
+      }
+      case MD -> {
+        kpiGrid.cols(2);
+        cardsGrid.cols(2);
+      }
+      case LG -> {
+        kpiGrid.cols(4);
+        cardsGrid.cols(3);
+      }
+      default -> {
+        kpiGrid.cols(4);
+        cardsGrid.cols(4);
+      }
     }
+  }
+
+  // ---------------------------------------------------------------------------------------------
+  // Section: KPI stat cards
+  // ---------------------------------------------------------------------------------------------
+
+  /** Builds one KPI stat card: icon tile, label, headline value and trend line. */
+  private TwCard statCard(String glyph, String label, String value, String delta, boolean up) {
+    StackPane tile = statTile(glyph);
+
+    Label lbl = new Label(label);
+    TwStyle.apply(lbl, "text-sm", "text-gray-500", "dark:text-gray-400");
+    Label val = new Label(value);
+    TwStyle.apply(val, "text-2xl", "font-bold", "text-gray-900", "dark:text-white");
+    VBox texts = new VBox(2, lbl, val);
+
+    HBox top = new HBox(12, tile, texts);
+    TwStyle.apply(top, "items-center");
+
+    Label trend = new Label((up ? "▲ " : "▼ ") + delta + " vs last month");
+    TwStyle.apply(
+        trend,
+        "text-xs",
+        "font-semibold",
+        up ? "text-green-600" : "text-red-600",
+        up ? "dark:text-green-400" : "dark:text-red-400");
+
+    VBox body = new VBox(10, top, trend);
+    TwCard card = new TwCard();
+    card.setBody(body);
+    TwStyle.apply(
+        card,
+        "bg-white",
+        "dark:bg-gray-800",
+        "rounded-xl",
+        "shadow-md",
+        "p-4",
+        "gap-2",
+        "hover:shadow-lg");
+    return card;
+  }
+
+  /** Creates the rounded 40x40 icon tile shared by the KPI stat cards. */
+  private StackPane statTile(String glyph) {
+    Label g = new Label(glyph);
+    TwStyle.apply(g, "text-xl", "text-indigo-600", "dark:text-indigo-400");
+    StackPane tile = new StackPane(g);
+    TwStyle.apply(tile, "w-10", "h-10", "rounded-lg", "bg-indigo-100", "dark:bg-indigo-900");
+    return tile;
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -530,8 +657,16 @@ public class DashboardApp extends Application {
   private TwCard wrapCard(String title, javafx.scene.Node body) {
     TwCard card = TwCard.withTitle(title);
     card.setBody(body);
+    // hover:shadow-lg (a variant token) is JIT compiled inline and needs no stylesheet entry.
     TwStyle.apply(
-        card, "bg-white", "dark:bg-gray-800", "rounded-xl", "shadow-md", "p-4", "gap-2");
+        card,
+        "bg-white",
+        "dark:bg-gray-800",
+        "rounded-xl",
+        "shadow-md",
+        "p-4",
+        "gap-2",
+        "hover:shadow-lg");
     return card;
   }
 

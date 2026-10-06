@@ -66,7 +66,7 @@
         <dependency>
             <groupId>org.testfx</groupId>
             <artifactId>openjfx-monocle</artifactId>
-            <version>17.0.10</version>
+            <version>${openjfx-monocle.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -105,13 +105,19 @@
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>
-                    <argLine>@{argLine} --add-opens javafx.controls/javafx.scene.control=ALL-UNNAMED --add-opens javafx.graphics/javafx.scene=ALL-UNNAMED</argLine>
+                    <argLine>@{argLine} --patch-module javafx.graphics="${openjfx-monocle.jar}" --add-opens javafx.graphics/com.sun.glass.ui.monocle=ALL-UNNAMED --add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED --add-opens javafx.graphics/com.sun.javafx.application=ALL-UNNAMED --add-opens javafx.controls/javafx.scene.control=ALL-UNNAMED --add-opens javafx.graphics/javafx.scene=ALL-UNNAMED</argLine>
                     <!--
                         Monocle headless configuration (verified locally with openjfx-monocle 17.0.10):
                         glass.platform must be the short name "Monocle" (JavaFX resolves the factory as
                         "com.sun.glass.ui." + value + "PlatformFactory"; the full class name caused a
                         ClassNotFoundException) and monocle.platform must be "Headless" because the
                         TestFX openjfx-monocle artifact does not ship a GTK platform factory.
+                        The patch-module JVM argument above patches Monocle into javafx.graphics,
+                        which is required on JDKs bundling JavaFX (e.g. Liberica Full): there
+                        javafx.graphics is loaded by the platform class loader, whose Class.forName
+                        cannot see openjfx-monocle on the test classpath, so PlatformFactory fails
+                        with ClassNotFoundException for MonoclePlatformFactory. On plain JDKs the
+                        JVM only logs "Unknown module: javafx.graphics" and ignores the patch.
                     -->
                     <systemPropertyVariables>
                         <testfx.robot>glass</testfx.robot>
@@ -147,6 +153,9 @@
                     <includes>
                         <include>**/*IT.java</include>
                     </includes>
+                    <!-- See the surefire configuration above for the rationale of the
+                         Monocle headless properties and of the patch-module argument. -->
+                    <argLine>--patch-module javafx.graphics="${openjfx-monocle.jar}" --add-opens javafx.graphics/com.sun.glass.ui.monocle=ALL-UNNAMED --add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED --add-opens javafx.graphics/com.sun.javafx.application=ALL-UNNAMED</argLine>
                     <!--
                         Monocle headless configuration (verified locally with openjfx-monocle 17.0.10):
                         glass.platform must be the short name "Monocle" (JavaFX resolves the factory as

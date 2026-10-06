@@ -49,6 +49,11 @@
         <javafx.version>17</javafx.version>
         <junit.version>5.10.2</junit.version>
         <testfx.version>4.0.17</testfx.version>
+        <!-- openjfx-monocle is pinned separately: it tracks the JavaFX major version, not TestFX. -->
+        <openjfx-monocle.version>17.0.10</openjfx-monocle.version>
+        <!-- Resolved path of the Monocle jar, reused by the surefire/failsafe patch-module
+             argument that makes headless tests work on JDKs bundling JavaFX (e.g. Liberica Full). -->
+        <openjfx-monocle.jar>${settings.localRepository}/org/testfx/openjfx-monocle/${openjfx-monocle.version}/openjfx-monocle-${openjfx-monocle.version}.jar</openjfx-monocle.jar>
         <mockito.version>5.11.0</mockito.version>
         <jacoco.version>0.8.14</jacoco.version>
         <surefire.version>3.2.5</surefire.version>

@@ -111,4 +111,4 @@ mvn clean install
 - Java: `getStyleClass().addAll("class1", "class2")` or string literals
 - FXML: `styleClass="class1, class2"`
 
-**CSS not applied:** Check that `TailwindFX.install()` is called in your Application class.
+**CSS not applied:** Check that `TwInstall.install(scene)` is called in your Application class.

@@ -265,17 +265,20 @@ public final class TokenRegistry {
       return false;
     }
 
+    // Strip Tailwind's negative marker so "-mt-2" / "-m-4" match like "mt-2" / "m-4".
+    String bare = stripNegativeMarker(token);
+
     // Check for exact matches first (grow, shrink). Bare "flex" is also layout-dependent:
     // when it lands on a node that is already inside a flex-capable container (TwFlexPane,
     // HBox, VBox), LayoutApplier treats it as the Tailwind `flex: 1 1 0%` shorthand
     // (grow=1, shrink=1) instead of a display-migration request. Tokens that genuinely need
     // container migration are still routed through requiresMigration() first in TokenParser.
-    if (token.equals("grow") || token.equals("shrink") || token.equals("flex")) {
+    if (bare.equals("grow") || bare.equals("shrink") || bare.equals("flex")) {
       return true;
     }
 
     // Check for prefix matches (gap-, flex-, justify-, etc.)
-    return LAYOUT_DEPENDENT_PREFIXES.stream().anyMatch(token::startsWith);
+    return LAYOUT_DEPENDENT_PREFIXES.stream().anyMatch(bare::startsWith);
   }
 
   /**
@@ -378,9 +381,12 @@ public final class TokenRegistry {
       return true;
     }
 
-    // Tailwind utility classes with regex validation to catch typos
+    // Tailwind utility classes with regex validation to catch typos. The negative marker is
+    // stripped first so that "-mt-2" / "-rotate-45" match the same patterns as their positive
+    // counterparts instead of being reported as unknown tokens.
+    String bare = stripNegativeMarker(token);
     for (Pattern pattern : UTILITY_PATTERNS) {
-      if (pattern.matcher(token).matches()) {
+      if (pattern.matcher(bare).matches()) {
         return true;
       }
     }
@@ -597,10 +603,26 @@ public final class TokenRegistry {
     if (token == null || token.isEmpty()) {
       return token;
     }
-    int firstHyphen = token.indexOf('-');
-    if (firstHyphen > 0) {
-      return token.substring(0, firstHyphen);
+    // Skip Tailwind's negative marker so "-mt-2" extracts "mt" (same as "mt-2"). Without this,
+    // indexOf('-') returns 0 for the leading marker and the whole token is treated as the prefix.
+    int start = (token.length() > 1 && token.charAt(0) == '-') ? 1 : 0;
+    int firstHyphen = token.indexOf('-', start);
+    if (firstHyphen > start) {
+      return token.substring(start, firstHyphen);
     }
-    return token;
+    return token.substring(start);
+  }
+
+  /**
+   * Removes Tailwind's leading negative marker from a token.
+   *
+   * <p>Examples: {@code "-mt-2"} → {@code "mt-2"}, {@code "-m-4"} → {@code "m-4"}. Tokens without
+   * a marker are returned unchanged.
+   *
+   * @param token the token to normalize
+   * @return the token without its leading minus sign
+   */
+  private static String stripNegativeMarker(String token) {
+    return (token.length() > 1 && token.charAt(0) == '-') ? token.substring(1) : token;
   }
 }

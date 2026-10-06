@@ -17,6 +17,7 @@ package io.github.yasmramos.tailwindfx.style;
 
 import io.github.yasmramos.tailwindfx.animation.TwAnimation;
 import io.github.yasmramos.tailwindfx.core.Preconditions;
+import javafx.beans.binding.Bindings;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
@@ -625,6 +626,62 @@ public final class Styles {
   public static <T extends Node> T filterNone(T node) {
     if (node.getEffect() instanceof ColorAdjust) node.setEffect(null);
     return node;
+  }
+
+  // ASPECT RATIO — aspect-square, aspect-video, aspect-[w/h]
+  // JavaFX CSS has no native aspect-ratio property; the real mechanism is this width/height
+  // binding (the generated stylesheet intentionally omits aspect-* rules except aspect-auto).
+
+  /**
+   * Binds a {@link Region}'s preferred height to its computed width so the node keeps the given
+   * aspect ratio (width / height), mirroring the CSS {@code aspect-ratio} property.
+   *
+   * <p>The binding uses the region's actual width when available and falls back to the current
+   * preferred width otherwise, so it behaves correctly inside flex/grid containers.
+   *
+   * @param node the region to constrain
+   * @param ratio width divided by height (e.g. 16.0 / 9.0 for {@code aspect-video})
+   * @param <T> the region type
+   * @return the same node, for chaining
+   */
+  public static <T extends Region> T aspectRatio(T node, double ratio) {
+    Preconditions.requireNode(node, "Styles.aspectRatio");
+    if (ratio <= 0 || Double.isNaN(ratio) || Double.isInfinite(ratio)) {
+      throw new IllegalArgumentException("aspectRatio requires a positive, finite ratio");
+    }
+    node.prefHeightProperty()
+        .bind(
+            Bindings.createDoubleBinding(
+                () -> {
+                  double width = node.getWidth();
+                  if (width <= 0) {
+                    width = node.getPrefWidth();
+                  }
+                  return width > 0 ? width / ratio : Region.USE_COMPUTED_SIZE;
+                },
+                node.widthProperty(),
+                node.prefWidthProperty()));
+    return node;
+  }
+
+  /** Shortcut for {@code aspect-square} (1:1). */
+  public static <T extends Region> T aspectSquare(T node) {
+    return aspectRatio(node, 1.0);
+  }
+
+  /** Shortcut for {@code aspect-video} (16:9). */
+  public static <T extends Region> T aspectVideo(T node) {
+    return aspectRatio(node, 16.0 / 9.0);
+  }
+
+  /** Shortcut for {@code aspect-portrait} (3:4). */
+  public static <T extends Region> T aspectPortrait(T node) {
+    return aspectRatio(node, 3.0 / 4.0);
+  }
+
+  /** Shortcut for {@code aspect-landscape} (4:3). */
+  public static <T extends Region> T aspectLandscape(T node) {
+    return aspectRatio(node, 4.0 / 3.0);
   }
 
   // SKEW — skew-x-*, skew-y-*

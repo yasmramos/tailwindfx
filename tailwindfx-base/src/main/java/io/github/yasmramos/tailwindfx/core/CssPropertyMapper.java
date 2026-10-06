@@ -382,6 +382,64 @@ public final class CssPropertyMapper {
       return prop(property, resolvedValue);
     }
 
+    // Scale utilities carry an optional axis sub-prefix (scale-x-*, scale-y-*). The generic
+    // mapping below only sees token.prefix ("scale"), which previously always emitted
+    // -fx-scale-x and made scale-y-* wrong. Bare scale-* applies to both axes.
+    if ("scale".equals(token.prefix)) {
+      if (token.subPrefix != null) {
+        String axisProperty =
+            switch (token.subPrefix) {
+              case "x" -> "-fx-scale-x";
+              case "y" -> "-fx-scale-y";
+              default -> null;
+            };
+        if (axisProperty == null) {
+          return null;
+        }
+        return prop(axisProperty, resolvedValue);
+      }
+      return prop("-fx-scale-x", resolvedValue) + " " + prop("-fx-scale-y", resolvedValue);
+    }
+
+    // Gap utilities are dual-axis in JavaFX FlowPane (-fx-hgap / -fx-vgap). The generic mapping
+    // only consulted token.prefix, so gap-y-* wrongly emitted -fx-hgap. Bare gap-N sets both.
+    if ("gap".equals(token.prefix)) {
+      if (token.subPrefix != null) {
+        String axisProperty =
+            switch (token.subPrefix) {
+              case "x" -> "-fx-hgap";
+              case "y" -> "-fx-vgap";
+              default -> null;
+            };
+        if (axisProperty == null) {
+          return null;
+        }
+        return prop(axisProperty, resolvedValue);
+      }
+      return prop("-fx-hgap", resolvedValue) + " " + prop("-fx-vgap", resolvedValue);
+    }
+
+    // rounded-* must also round the border: JavaFX draws -fx-border-* independently of the
+    // background shape, so without -fx-border-radius a border-* + rounded-* combination keeps
+    // sharp corners on the stroke.
+    if ("rounded".equals(token.prefix)) {
+      return prop("-fx-background-radius", resolvedValue)
+          + " "
+          + prop("-fx-border-radius", resolvedValue);
+    }
+
+    // Aspect-ratio, ring width/color, transitions and animations have no real JavaFX CSS
+    // equivalent; they are applied at runtime by AspectRatioProcessor, RingProcessor and
+    // TransitionProcessor via JitCompiler.compileBatch. Emitting inert -fx-transition-* or
+    // approximate properties here would only confuse consumers of the stylesheet.
+    if ("aspect".equals(token.prefix)
+        || "transition".equals(token.prefix)
+        || "duration".equals(token.prefix)
+        || "ease".equals(token.prefix)
+        || "animate".equals(token.prefix)) {
+      return null;
+    }
+
     // Special handling for translate-x and translate-y: use signed values
     if ("translate".equals(token.prefix) && token.subPrefix != null) {
       String property =
@@ -523,12 +581,16 @@ public final class CssPropertyMapper {
    *     JavaFX CSS cannot express "no effect"
    */
   private String resolveShadow(String shadow) {
+    // Full JavaFX dropshadow signature:
+    //   dropshadow(gaussian, color, radius, spread, offsetX, offsetY)
+    // The previous 4-argument form was not valid JavaFX CSS and made the parser reject every
+    // shadow utility in the generated stylesheet.
     return switch (shadow) {
-      case "sm" -> "dropshadow(0, 1, 2, rgba(0, 0, 0, 0.05))";
-      case "default", "md" -> "dropshadow(0, 1, 3, rgba(0, 0, 0, 0.1))";
-      case "lg" -> "dropshadow(0, 10, 15, rgba(0, 0, 0, 0.1))";
-      case "xl" -> "dropshadow(0, 20, 25, rgba(0, 0, 0, 0.1))";
-      case "2xl" -> "dropshadow(0, 25, 50, rgba(0, 0, 0, 0.25))";
+      case "sm" -> "dropshadow(gaussian, rgba(0,0,0,0.05), 2, 0, 0, 1)";
+      case "default", "md" -> "dropshadow(gaussian, rgba(0,0,0,0.1), 3, 0, 0, 1)";
+      case "lg" -> "dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 10)";
+      case "xl" -> "dropshadow(gaussian, rgba(0,0,0,0.1), 25, 0, 0, 20)";
+      case "2xl" -> "dropshadow(gaussian, rgba(0,0,0,0.25), 50, 0, 0, 25)";
         // JavaFX CSS offers no way to clear an inherited effect from a class rule.
       case "none" -> null;
       default -> null;

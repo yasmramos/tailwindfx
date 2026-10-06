@@ -27,14 +27,16 @@ mvn -Dexamples install
 mvn -pl examples/tailwindfx-demo-dashboard javafx:run
 ```
 
-A window opens with an admin-style layout: left sidebar, top header with a
-dark-mode toggle, and a scrollable grid of cards demonstrating each feature
-area.
+A window opens with an admin-style layout: a left sidebar (brand, navigation
+with icons, user profile pinned to the bottom), a top header with a search
+box, dark-mode toggle and user avatar, a KPI stat row with four trend cards,
+and a scrollable grid of cards demonstrating each feature area.
 
 ## What it demonstrates
 
 | Section | API covered |
 | --- | --- |
+| KPI stats | `TwGridPane` with breakpoint-driven columns, `TwCard` stat tiles, `TwAvatar` |
 | Buttons | `TwButton.primary/secondary/outline/ghost/danger/icon` |
 | Badges | `TwBadge.create/pill/outline`, `TwBadgeDot` |
 | Alerts | `TwAlert` with `AlertType.INFO/SUCCESS/WARNING/ERROR` |
