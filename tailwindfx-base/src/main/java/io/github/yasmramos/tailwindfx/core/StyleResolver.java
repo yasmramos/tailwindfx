@@ -137,8 +137,10 @@ public final class StyleResolver {
       return applyOpacity(colorValue, token.alpha);
     }
 
-    // Sin opacidad: devolver referencia a variable CSS lookupeada
-    return "-color-" + token.colorName + "-" + token.shade;
+    // Without opacity: return the direct color value (hex or rgb). JavaFX cannot resolve
+    // looked-up color references in inline styles, so the concrete value is required for it
+    // to be usable as a Paint (otherwise -fx-background-color throws ClassCastException).
+    return colorValue;
   }
 
   private String resolveArbitrary(StyleToken token) {

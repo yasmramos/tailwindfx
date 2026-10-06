@@ -43,8 +43,10 @@ class StyleResolverTest {
     String result = resolver.resolve(token);
 
     assertNotNull(result);
-    // Debe devolver referencia a variable CSS lookupeada
-    assertEquals("-color-blue-500", result);
+    // Debe devolver el valor directo del color (hex) para que JavaFX pueda
+    // convertirlo a Paint en inline styles. Las referencias a variables CSS
+    // (-color-blue-500) no funcionan en inline styles.
+    assertEquals("#3b82f6", result);
   }
 
   @Test
