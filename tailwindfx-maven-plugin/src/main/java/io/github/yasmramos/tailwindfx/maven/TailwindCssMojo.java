@@ -16,11 +16,13 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 
 /**
  * Generates optimized TailwindCSS for JavaFX at build time. Scans source files for Tailwind classes
@@ -32,6 +34,14 @@ public class TailwindCssMojo extends AbstractMojo {
   /** Directory containing JavaFX source files to scan for Tailwind classes. */
   @Parameter(defaultValue = "${project.build.sourceDirectory}", required = true)
   private File sourceDirectory;
+
+  /**
+   * Current project, used to discover the resource directories that hold FXML views. FXML files
+   * live under {@code src/main/resources}, outside the Java source directory, so they must be
+   * scanned separately for {@code styleClass} attributes.
+   */
+  @Parameter(defaultValue = "${project}", readonly = true, required = true)
+  private MavenProject project;
 
   /** Output directory for generated CSS files. */
   @Parameter(defaultValue = "${project.build.outputDirectory}/css", required = true)
@@ -109,8 +119,18 @@ public class TailwindCssMojo extends AbstractMojo {
     }
 
     try {
-      // Scan source files for Tailwind classes
-      Set<String> usedClasses = scanForTailwindClasses(sourceDirectory);
+      // Scan Java sources plus the project's resource directories, where FXML views live
+      Set<String> usedClasses = new HashSet<>();
+      usedClasses.addAll(scanForTailwindClasses(sourceDirectory));
+      if (project != null && project.getResources() != null) {
+        for (Resource resource : project.getResources()) {
+          String dirPath = resource.getDirectory();
+          File resourceDir = dirPath != null ? new File(dirPath) : null;
+          if (resourceDir != null && resourceDir.exists()) {
+            usedClasses.addAll(scanForTailwindClasses(resourceDir));
+          }
+        }
+      }
       getLog()
           .info(
               "TailwindFX: Found "
@@ -183,11 +203,14 @@ public class TailwindCssMojo extends AbstractMojo {
         String content = Files.readString(file, StandardCharsets.UTF_8);
 
         if (file.toString().endsWith(".fxml")) {
-          // Extract classes from FXML styleClass attributes
+          // Extract classes from FXML styleClass attributes. The attribute is a comma- and
+          // whitespace-separated list (e.g. "p-10, bg-gray-100"), so both separators must be
+          // honored: splitting on whitespace alone left trailing commas on tokens (e.g. "p-10,"),
+          // which never compile to a utility and silently dropped the rule from the output.
           Matcher fxmlMatcher = FXML_CLASS_PATTERN.matcher(content);
           while (fxmlMatcher.find()) {
             String classes = fxmlMatcher.group(1);
-            for (String cls : classes.split("\\s+")) {
+            for (String cls : classes.split("[\\s,]+")) {
               if (!cls.isEmpty() && isValidTailwindClass(cls)) {
                 tailwindClasses.add(cls);
               }

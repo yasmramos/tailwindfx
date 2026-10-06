@@ -512,4 +512,35 @@ public class TailwindCssMojoTest {
     assertFalse(classes.contains("github"), "Should not extract github");
     assertFalse(classes.contains("count"), "Should not extract count");
   }
+
+  @Test
+  public void testScanForTailwindClassesSplitsFxmlStyleClassTokens() throws Exception {
+    TailwindCssMojo mojo = new TailwindCssMojo();
+
+    // FXML styleClass attributes are comma- and whitespace-separated lists
+    File fxmlDir = tempDir.resolve("fxml").toFile();
+    fxmlDir.mkdirs();
+    File fxmlFile = tempDir.resolve("fxml/view.fxml").toFile();
+    String fxmlContent =
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            + "<VBox xmlns=\"http://javafx.com/javafx/17\" styleClass=\"p-10, bg-gray-100\">\n"
+            + "    <Button text=\"Click Me\" "
+            + "styleClass=\"bg-blue-500, hover:bg-blue-700, rounded\"/>\n"
+            + "</VBox>\n";
+    java.nio.file.Files.writeString(fxmlFile.toPath(), fxmlContent);
+
+    java.lang.reflect.Method scanMethod =
+        TailwindCssMojo.class.getDeclaredMethod("scanForTailwindClasses", File.class);
+    scanMethod.setAccessible(true);
+
+    @SuppressWarnings("unchecked")
+    java.util.Set<String> classes = (java.util.Set<String>) scanMethod.invoke(mojo, fxmlDir);
+
+    assertTrue(classes.contains("p-10"), "Should extract p-10 without trailing comma");
+    assertTrue(classes.contains("bg-gray-100"), "Should extract bg-gray-100");
+    assertTrue(classes.contains("bg-blue-500"), "Should extract bg-blue-500");
+    assertTrue(classes.contains("hover:bg-blue-700"), "Should extract hover:bg-blue-700");
+    assertFalse(classes.contains("p-10,"), "Should not keep trailing comma on tokens");
+    assertFalse(classes.contains("hover:bg-blue-700,"), "Should not keep comma after variants");
+  }
 }
