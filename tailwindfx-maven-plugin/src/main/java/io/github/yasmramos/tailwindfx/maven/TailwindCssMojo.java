@@ -327,9 +327,18 @@ public class TailwindCssMojo extends AbstractMojo {
   private String generateCss(Set<String> usedClasses) {
     StringBuilder css = new StringBuilder();
 
-    // Add base styles if requested
+    // Add base styles and/or the color palette if requested. generateBaseCss() embeds the
+    // color palette inside the same .root block, so it is appended exactly once when any of
+    // the two flags is enabled. Appending it once per flag (the previous behaviour) emitted
+    // the whole base block twice and produced a duplicated .root selector whenever both
+    // includeBase and includeColors were true.
     if (includeBase) {
       getLog().info("TailwindFX: Including base styles");
+    }
+    if (includeColors) {
+      getLog().info("TailwindFX: Including color palette");
+    }
+    if (includeBase || includeColors) {
       ThemeConfig config =
           themeConfigClass != null
               ? loadCustomThemeConfig(themeConfigClass)
@@ -338,19 +347,6 @@ public class TailwindCssMojo extends AbstractMojo {
       ThemeCssGenerator generator = new ThemeCssGenerator(config);
       String baseCss = generator.generateBaseCss();
       css.append(baseCss).append("\n\n");
-    }
-
-    // Add color palette if requested
-    if (includeColors) {
-      getLog().info("TailwindFX: Including color palette");
-      ThemeConfig config =
-          themeConfigClass != null
-              ? loadCustomThemeConfig(themeConfigClass)
-              : ThemeConfig.defaultConfig();
-
-      ThemeCssGenerator generator = new ThemeCssGenerator(config);
-      String colorCss = generator.generateBaseCss(); // Reuse base CSS which includes colors
-      css.append(colorCss).append("\n\n");
     }
 
     // Generate utilities for used classes
