@@ -122,6 +122,34 @@ class TokenRegistryTest {
     assertFalse(TokenRegistry.isLayoutDependent(""));
   }
 
+  @Test
+  @DisplayName("isLayoutDependent recognizes negative margin tokens")
+  void testIsLayoutDependentNegativeMargins() {
+    assertTrue(TokenRegistry.isLayoutDependent("-m-4"), "-m-4 must be layout-dependent");
+    assertTrue(TokenRegistry.isLayoutDependent("-mt-2"), "-mt-2 must be layout-dependent");
+    assertTrue(TokenRegistry.isLayoutDependent("-mx-8"), "-mx-8 must be layout-dependent");
+    assertTrue(TokenRegistry.isLayoutDependent("-ml-4"), "-ml-4 must be layout-dependent");
+  }
+
+  @Test
+  @DisplayName("isKnownUtility recognizes negative utility tokens")
+  void testIsKnownUtilityNegativeTokens() {
+    assertTrue(TokenRegistry.isKnownUtility("-mt-2"), "-mt-2 must not be reported as unknown");
+    assertTrue(TokenRegistry.isKnownUtility("-m-4"), "-m-4 must not be reported as unknown");
+    assertTrue(TokenRegistry.isKnownUtility("-p-4"), "-p-4 must not be reported as unknown");
+    assertTrue(TokenRegistry.isKnownUtility("-rotate-45"), "-rotate-45 must be known");
+  }
+
+  @Test
+  @DisplayName("isJitPrefix extracts the prefix after the negative marker")
+  void testIsJitPrefixNegativeTokens() {
+    assertTrue(TokenRegistry.isJitPrefix("-mt-2"), "negative margin prefix must resolve to 'mt'");
+    assertTrue(TokenRegistry.isJitPrefix("-p-4"), "negative padding prefix must resolve to 'p'");
+    assertTrue(
+        TokenRegistry.isJitPrefix("-translate-x-2"),
+        "negative translate prefix must resolve to 'translate'");
+  }
+
   // ==========================================================================
   // Effect Token Tests
   // ==========================================================================
