@@ -305,24 +305,10 @@ public class TailwindCssMojo extends AbstractMojo {
       return false;
     }
 
-    // Skip method names (typically camelCase starting with lowercase verb)
-    if (className.matches("[a-z][a-zA-Z0-9]*")
-        && !className.contains("-")
-        && className.length() > 2) {
-      // Check if it looks like a method name (common patterns)
-      if (className.startsWith("get")
-          || className.startsWith("set")
-          || className.startsWith("is")
-          || className.startsWith("has")
-          || className.startsWith("add")
-          || className.startsWith("remove")
-          || className.endsWith("ing") // e.g., "printing", "running"
-          || className.endsWith("ed")) { // e.g., "created", "loaded"
-        return false;
-      }
-    }
-
-    // Try to compile the class - if it produces no output, it's not a valid Tailwind class
+    // Try to compile the class - if it produces no output, it's not a valid Tailwind class.
+    // The compiler is the authoritative filter for Java identifiers (method names, keywords,
+    // etc.); shape-based heuristics are deliberately avoided here because real utilities such
+    // as "rounded" and "fixed" end in "ed" and were wrongly rejected by them.
     try {
       JitCompiler compiler = new JitCompiler();
       JitCompiler.BatchResult result = compiler.compileBatch(className);

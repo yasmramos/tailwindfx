@@ -446,7 +446,9 @@ public class TailwindCssMojoTest {
       "hover:bg-red-500",
       "focus:ring-2",
       "md:p-4",
-      "dark:text-white"
+      "dark:text-white",
+      "rounded",
+      "fixed"
     };
 
     for (String className : validClasses) {
@@ -540,6 +542,7 @@ public class TailwindCssMojoTest {
     assertTrue(classes.contains("bg-gray-100"), "Should extract bg-gray-100");
     assertTrue(classes.contains("bg-blue-500"), "Should extract bg-blue-500");
     assertTrue(classes.contains("hover:bg-blue-700"), "Should extract hover:bg-blue-700");
+    assertTrue(classes.contains("rounded"), "Should extract bare rounded token");
     assertFalse(classes.contains("p-10,"), "Should not keep trailing comma on tokens");
     assertFalse(classes.contains("hover:bg-blue-700,"), "Should not keep comma after variants");
   }
