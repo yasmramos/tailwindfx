@@ -59,73 +59,94 @@ class ThemeManagerIT extends ApplicationTest {
   @Test
   @DisplayName("Should apply light theme preset")
   void testLightPreset() {
-    ThemeManager.forScene(scene).light().apply();
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).light().apply();
 
-    String style = scene.getRoot().getStyle();
-    assertTrue(style.contains("-fx-base"));
-    assertTrue(style.contains("#ececec"));
-    assertFalse(scene.getRoot().getStyleClass().contains("dark"));
+          String style = scene.getRoot().getStyle();
+          assertTrue(style.contains("-fx-base"));
+          assertTrue(style.contains("#ececec"));
+          assertFalse(scene.getRoot().getStyleClass().contains("dark"));
+        });
   }
 
   @Test
   @DisplayName("Should apply dark theme preset")
   void testDarkPreset() {
-    ThemeManager.forScene(scene).dark().apply();
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).dark().apply();
 
-    String style = scene.getRoot().getStyle();
-    assertTrue(style.contains("-fx-base"));
-    assertTrue(style.contains("#2b2b2b"));
-    assertTrue(scene.getRoot().getStyleClass().contains("dark"));
+          String style = scene.getRoot().getStyle();
+          assertTrue(style.contains("-fx-base"));
+          assertTrue(style.contains("#2b2b2b"));
+          assertTrue(scene.getRoot().getStyleClass().contains("dark"));
+        });
   }
 
   @Test
   @DisplayName("Should apply blue theme preset")
   void testBluePreset() {
-    ThemeManager.forScene(scene).preset("blue").apply();
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).preset("blue").apply();
 
-    String style = scene.getRoot().getStyle();
-    assertTrue(style.contains("#dbeafe"));
-    assertTrue(style.contains("-fx-accent"));
+          String style = scene.getRoot().getStyle();
+          assertTrue(style.contains("#dbeafe"));
+          assertTrue(style.contains("-fx-accent"));
+        });
   }
 
   @Test
   @DisplayName("Should apply green theme preset")
   void testGreenPreset() {
-    ThemeManager.forScene(scene).preset("green").apply();
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).preset("green").apply();
 
-    String style = scene.getRoot().getStyle();
-    assertTrue(style.contains("#dcfce7"));
-    assertTrue(style.contains("#16a34a"));
+          String style = scene.getRoot().getStyle();
+          assertTrue(style.contains("#dcfce7"));
+          assertTrue(style.contains("#16a34a"));
+        });
   }
 
   @Test
   @DisplayName("Should apply purple theme preset")
   void testPurplePreset() {
-    ThemeManager.forScene(scene).preset("purple").apply();
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).preset("purple").apply();
 
-    String style = scene.getRoot().getStyle();
-    assertTrue(style.contains("#ede9fe"));
-    assertTrue(style.contains("#7c3aed"));
+          String style = scene.getRoot().getStyle();
+          assertTrue(style.contains("#ede9fe"));
+          assertTrue(style.contains("#7c3aed"));
+        });
   }
 
   @Test
   @DisplayName("Should apply rose theme preset")
   void testRosePreset() {
-    ThemeManager.forScene(scene).preset("rose").apply();
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).preset("rose").apply();
 
-    String style = scene.getRoot().getStyle();
-    assertTrue(style.contains("#ffe4e6"));
-    assertTrue(style.contains("#e11d48"));
+          String style = scene.getRoot().getStyle();
+          assertTrue(style.contains("#ffe4e6"));
+          assertTrue(style.contains("#e11d48"));
+        });
   }
 
   @Test
   @DisplayName("Should apply slate theme preset")
   void testSlatePreset() {
-    ThemeManager.forScene(scene).preset("slate").apply();
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).preset("slate").apply();
 
-    String style = scene.getRoot().getStyle();
-    assertTrue(style.contains("#e2e8f0"));
-    assertTrue(style.contains("#475569"));
+          String style = scene.getRoot().getStyle();
+          assertTrue(style.contains("#e2e8f0"));
+          assertTrue(style.contains("#475569"));
+        });
   }
 
   @Test
@@ -263,12 +284,15 @@ class ThemeManagerIT extends ApplicationTest {
   @Test
   @DisplayName("Should cycle through available themes")
   void testCyclePreset() {
-    ThemeManager.forScene(scene).preset("light").apply();
-    ThemeManager.cyclePreset(scene);
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).preset("light").apply();
+          ThemeManager.cyclePreset(scene);
 
-    // Should cycle to next theme (dark)
-    String style = scene.getRoot().getStyle();
-    assertTrue(style.contains("-fx-base"));
+          // Should cycle to next theme (dark)
+          String style = scene.getRoot().getStyle();
+          assertTrue(style.contains("-fx-base"));
+        });
   }
 
   @Test
@@ -390,7 +414,7 @@ class ThemeManagerIT extends ApplicationTest {
   @Test
   @DisplayName("Should save theme to preferences")
   void testSaveTheme() {
-    ThemeManager.forScene(scene).dark().apply();
+    interact(() -> ThemeManager.forScene(scene).dark().apply());
 
     assertDoesNotThrow(() -> ThemeManager.saveTheme(scene, "test.app.theme"));
   }
@@ -399,7 +423,7 @@ class ThemeManagerIT extends ApplicationTest {
   @DisplayName("Should load theme from preferences")
   void testLoadTheme() {
     // First save a theme
-    ThemeManager.forScene(scene).dark().apply();
+    interact(() -> ThemeManager.forScene(scene).dark().apply());
     ThemeManager.saveTheme(scene, "test.load.theme");
 
     // Reset
@@ -420,7 +444,7 @@ class ThemeManagerIT extends ApplicationTest {
   @Test
   @DisplayName("Should delete saved theme")
   void testDeleteTheme() {
-    ThemeManager.forScene(scene).dark().apply();
+    interact(() -> ThemeManager.forScene(scene).dark().apply());
     ThemeManager.saveTheme(scene, "test.delete.theme");
 
     assertDoesNotThrow(() -> ThemeManager.deleteTheme("test.delete.theme"));
@@ -437,11 +461,14 @@ class ThemeManagerIT extends ApplicationTest {
   @Test
   @DisplayName("Should apply theme override on top of preset")
   void testPresetWithOverride() {
-    ThemeManager.forScene(scene).preset("dark").accent("#ff0000").apply();
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).preset("dark").accent("#ff0000").apply();
 
-    String style = scene.getRoot().getStyle();
-    assertTrue(style.contains("#2b2b2b")); // dark base
-    assertTrue(style.contains("-fx-accent: #ff0000")); // custom accent
+          String style = scene.getRoot().getStyle();
+          assertTrue(style.contains("#2b2b2b")); // dark base
+          assertTrue(style.contains("-fx-accent: #ff0000")); // custom accent
+        });
   }
 
   @Test
@@ -510,11 +537,14 @@ class ThemeManagerIT extends ApplicationTest {
   void testPresetUppercaseName() {
     // Regression: preset(name) usaba toLowerCase() sin Locale.ROOT; en una JVM con locale
     // turco, "BLUE".toLowerCase() produce "bluÌˆe" y el preset no se encontraba.
-    ThemeManager.forScene(scene).preset("DARK").apply();
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).preset("DARK").apply();
 
-    String style = scene.getRoot().getStyle();
-    assertTrue(style.contains("#2b2b2b"));
-    assertTrue(scene.getRoot().getStyleClass().contains("dark"));
+          String style = scene.getRoot().getStyle();
+          assertTrue(style.contains("#2b2b2b"));
+          assertTrue(scene.getRoot().getStyleClass().contains("dark"));
+        });
   }
 
   @Test
@@ -557,15 +587,18 @@ class ThemeManagerIT extends ApplicationTest {
 
     // Previous light presets ("light", index 0) made the old base-only matching fail to
     // detect "rose", so cyclePreset always jumped back to the first theme.
-    ThemeManager.forScene(scene).light().apply();
-    ThemeManager.forScene(scene).preset("ROSE").apply();
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).light().apply();
+          ThemeManager.forScene(scene).preset("ROSE").apply();
 
-    ThemeManager.cyclePreset(scene);
+          ThemeManager.cyclePreset(scene);
 
-    String style = scene.getRoot().getStyle();
-    assertTrue(
-        style.contains(PRESET_BASE.get(expectedNext)),
-        "after 'rose' the next theme should be '" + expectedNext + "', style was: " + style);
+          String style = scene.getRoot().getStyle();
+          assertTrue(
+              style.contains(PRESET_BASE.get(expectedNext)),
+              "after 'rose' the next theme should be '" + expectedNext + "', style was: " + style);
+        });
   }
 
   @Test
