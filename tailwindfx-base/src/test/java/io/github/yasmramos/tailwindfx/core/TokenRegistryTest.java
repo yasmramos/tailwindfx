@@ -252,6 +252,11 @@ class TokenRegistryTest {
     assertTrue(TokenRegistry.isKnownUtility("card-2"));
     assertTrue(TokenRegistry.isKnownUtility("badge"));
     assertTrue(TokenRegistry.isKnownUtility("avatar"));
+    // Applied by TwBadge to the status dot; must not be reported as unknown tokens.
+    assertTrue(TokenRegistry.isKnownUtility("dot"));
+    assertTrue(TokenRegistry.isKnownUtility("dot-sm"));
+    assertTrue(TokenRegistry.isKnownUtility("dot-green"));
+    assertTrue(TokenRegistry.isKnownUtility("dot-red"));
   }
 
   @Test
@@ -279,6 +284,12 @@ class TokenRegistryTest {
     assertTrue(TokenRegistry.isKnownUtility("w-64"));
     assertTrue(TokenRegistry.isKnownUtility("opacity-75"));
     assertTrue(TokenRegistry.isKnownUtility("z-10"));
+    // Flexbox alignment and gap utilities are handled by LayoutApplier, not by CSS, but they are
+    // still valid tokens and must not be flagged as unknown.
+    assertTrue(TokenRegistry.isKnownUtility("items-center"));
+    assertTrue(TokenRegistry.isKnownUtility("justify-between"));
+    assertTrue(TokenRegistry.isKnownUtility("self-center"));
+    assertTrue(TokenRegistry.isKnownUtility("gap-2"));
   }
 
   @Test
