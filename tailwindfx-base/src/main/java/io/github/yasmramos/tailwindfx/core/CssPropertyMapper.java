@@ -572,7 +572,8 @@ public final class CssPropertyMapper {
    * Resolves a Tailwind shadow utility to a JavaFX {@code -fx-effect} value.
    *
    * <p>JavaFX has no {@code box-shadow}: {@code -fx-effect} only accepts effect objects, so each
-   * Tailwind layer is translated to a {@code dropshadow(offsetX, offsetY, blurRadius, color)}.
+   * Tailwind layer is translated to a {@code dropshadow(gaussian, color, radius, spread, offsetX,
+   * offsetY)}.
    * Emitting the web syntax here (e.g. {@code 0 1px 3px 0 rgba(...)}) is not parseable by the
    * JavaFX CSS parser and made it log a warning for every shadow utility in the stylesheet.
    *
