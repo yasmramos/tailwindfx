@@ -320,6 +320,40 @@ public class LayoutApplierTest extends ApplicationTest {
     assertEquals(before, twGridPane.getCols(), "invalid grid-cols value must leave cols unchanged");
   }
 
+  @Test
+  public void testNamedScaleKeywordsDoNotEmitNonNumericWarning() {
+    // "mt-auto" is a valid Tailwind utility (recognized by TokenRegistry) that carries no numeric
+    // measurement: it must resolve to NaN without logging the "Non-numeric value" warning. A
+    // genuinely malformed tail must still be reported, so the quiet path is not a blanket mute.
+    boolean previousDebug = TwConfig.isDebug();
+    java.io.PrintStream previousOut = System.out;
+    try {
+      TwConfig.debug(true);
+
+      java.io.ByteArrayOutputStream namedOut = new java.io.ByteArrayOutputStream();
+      System.setOut(new java.io.PrintStream(namedOut, true, java.nio.charset.StandardCharsets.UTF_8));
+      assertTrue(
+          Double.isNaN(invokeParseTailwindValue("mt-auto")), "mt-auto should resolve to NaN");
+      String namedMessages = namedOut.toString(java.nio.charset.StandardCharsets.UTF_8);
+      assertTrue(
+          !namedMessages.contains("Non-numeric value"),
+          "named scale keyword mt-auto must not emit a warning, got: " + namedMessages);
+
+      java.io.ByteArrayOutputStream malformedOut = new java.io.ByteArrayOutputStream();
+      System.setOut(
+          new java.io.PrintStream(malformedOut, true, java.nio.charset.StandardCharsets.UTF_8));
+      assertTrue(
+          Double.isNaN(invokeParseTailwindValue("m-abc")), "malformed tail should resolve to NaN");
+      String malformedMessages = malformedOut.toString(java.nio.charset.StandardCharsets.UTF_8);
+      assertTrue(
+          malformedMessages.contains("Non-numeric value in token: m-abc"),
+          "malformed tail must still emit a warning, got: " + malformedMessages);
+    } finally {
+      System.setOut(previousOut);
+      TwConfig.debug(previousDebug);
+    }
+  }
+
   /** Helper to invoke private parseTailwindValue via reflection for testing. */
   private double invokeParseTailwindValue(String token) {
     try {
