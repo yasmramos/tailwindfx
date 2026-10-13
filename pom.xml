@@ -31,7 +31,7 @@
     
     <scm>
         <connection>scm:git:git://github.com/yasmramos/tailwindfx.git</connection>
-        <developerConnection>scm:git:ssh://github.com:yasmramos/tailwindfx.git</developerConnection>
+        <developerConnection>scm:git:ssh://git@github.com/yasmramos/tailwindfx.git</developerConnection>
         <url>https://github.com/yasmramos/tailwindfx/tree/main</url>
         <tag>HEAD</tag>
     </scm>
