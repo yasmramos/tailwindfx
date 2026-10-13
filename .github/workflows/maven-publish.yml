@@ -95,12 +95,19 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           GPG_KEY_NAME: ${{ secrets.GPG_KEY_NAME }}
         run: |
-          # Deploy to Maven Central via Central Publisher Portal
+          # Deploy to Maven Central via Central Publisher Portal.
+          # IMPORTANT: do NOT run the `clean` phase here. The central-publishing
+          # plugin stages all module artifacts into the parent's target/central-staging
+          # directory; running `clean` wipes it mid-reactor, so earlier modules' POMs
+          # disappear from the uploaded bundle and Central rejects the deployment with
+          # "Bundle has content that does NOT have a .pom file". The previous `verify`
+          # step already produced a clean, fully tested build, so deploying without
+          # cleaning reuses those verified outputs safely.
           GPG_ARGS=""
           if [ -n "$GPG_KEY_NAME" ]; then
             GPG_ARGS="-Dgpg.keyname=$GPG_KEY_NAME"
           fi
-          mvn --batch-mode clean deploy \
+          mvn --batch-mode deploy \
             -DskipTests \
             -P release \
             -DperformRelease=true \
