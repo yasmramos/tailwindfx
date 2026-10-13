@@ -126,6 +126,56 @@ public class TailwindCssMojoTest {
   }
 
   @Test
+  public void testGeneratedUtilitiesUseRealLineBreaks() throws Exception {
+    TailwindCssMojo mojo = new TailwindCssMojo();
+
+    File sourceDir = tempDir.resolve("src").toFile();
+    sourceDir.mkdirs();
+    Files.writeString(
+        sourceDir.toPath().resolve("Test.java"),
+        "package test;\n"
+            + "import io.github.yasmramos.tailwindfx.TwStyle;\n"
+            + "import javafx.scene.Node;\n"
+            + "public class Test {\n"
+            + "  void init(Node node) {\n"
+            + "    TwStyle.apply(node, \"p-4\", \"px-3\", \"bg-blue-500\", \"rounded-lg\","
+            + " \"text-sm\", \"shadow-md\");\n"
+            + "  }\n"
+            + "}");
+
+    File outputDir = tempDir.resolve("output").toFile();
+
+    java.lang.reflect.Field sourceField = TailwindCssMojo.class.getDeclaredField("sourceDirectory");
+    sourceField.setAccessible(true);
+    sourceField.set(mojo, sourceDir);
+
+    java.lang.reflect.Field outputField = TailwindCssMojo.class.getDeclaredField("outputDirectory");
+    outputField.setAccessible(true);
+    outputField.set(mojo, outputDir);
+
+    java.lang.reflect.Field includeBaseField =
+        TailwindCssMojo.class.getDeclaredField("includeBase");
+    includeBaseField.setAccessible(true);
+    includeBaseField.set(mojo, true);
+
+    mojo.execute();
+
+    String content = Files.readString(new File(outputDir, "tailwindfx-generated.css").toPath());
+
+    // Regression: utility rules used to be appended with a literal backslash-n, so every rule was
+    // a single physical line and the JavaFX parser failed with "Expected RBRACE", silently
+    // dropping the entire utility block.
+    assertFalse(content.contains("\\n"), "generated CSS must not contain literal \\n escapes");
+    assertTrue(
+        content.contains("\n    -fx-"),
+        "utility declarations must be emitted on their own indented line");
+    assertEquals(
+        content.chars().filter(c -> c == '{').count(),
+        content.chars().filter(c -> c == '}').count(),
+        "generated CSS must have balanced braces");
+  }
+
+  @Test
   public void testMojoWithIncludeColors() throws Exception {
     TailwindCssMojo mojo = new TailwindCssMojo();
 

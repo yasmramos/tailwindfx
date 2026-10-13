@@ -59,6 +59,25 @@ jobs:
           echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
           echo "RELEASE_TAG=v${{ github.event.inputs.version }}" >> $GITHUB_ENV
 
+      # Fallback for the `release` event and manual dispatches with an empty
+      # version input: read the project version directly from the POM so the
+      # build never runs with an empty -Drevision, which previously crashed
+      # Maven with "version can neither be null, empty nor blank".
+      - name: Resolve release version from POM
+        if: env.VERSION == '' || github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.version == '')
+        run: |
+          VERSION=$(mvn -q -DforceStdout help:evaluate -Dexpression=project.version -Drevision='')
+          if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
+            echo "::error::Could not resolve the project version from pom.xml"
+            exit 1
+          fi
+          echo "Resolved version from POM: $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          case "${{ github.event_name }}" in
+            push) : ;;  # RELEASE_TAG already set from the git tag
+            *) echo "RELEASE_TAG=v$VERSION" >> $GITHUB_ENV ;;
+          esac
+
       # Run the full verify lifecycle (unit tests + integration tests) once, under
       # xvfb, relying exclusively on the surefire systemPropertyVariables defined in
       # the module poms (Monocle/Headless). Do NOT override them on the CLI: passing
@@ -76,13 +95,24 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           GPG_KEY_NAME: ${{ secrets.GPG_KEY_NAME }}
         run: |
-          # Deploy to Maven Central via Central Publisher Portal
-          mvn --batch-mode clean deploy \
+          # Deploy to Maven Central via Central Publisher Portal.
+          # IMPORTANT: do NOT run the `clean` phase here. The central-publishing
+          # plugin stages all module artifacts into the parent's target/central-staging
+          # directory; running `clean` wipes it mid-reactor, so earlier modules' POMs
+          # disappear from the uploaded bundle and Central rejects the deployment with
+          # "Bundle has content that does NOT have a .pom file". The previous `verify`
+          # step already produced a clean, fully tested build, so deploying without
+          # cleaning reuses those verified outputs safely.
+          GPG_ARGS=""
+          if [ -n "$GPG_KEY_NAME" ]; then
+            GPG_ARGS="-Dgpg.keyname=$GPG_KEY_NAME"
+          fi
+          mvn --batch-mode deploy \
             -DskipTests \
             -P release \
             -DperformRelease=true \
             -Drevision=${{ env.VERSION }} \
-            -Dgpg.keyname=$GPG_KEY_NAME \
+            $GPG_ARGS \
             -Dgpg.passphrase=$MAVEN_GPG_PASSPHRASE
 
       - name: Attach artifacts to GitHub Release
@@ -115,7 +145,7 @@ jobs:
         if: success() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         run: |
           RELEASED=${{ env.VERSION }}
-          # Quitar sufijo -SNAPSHOT si lo hubiera
+          # Strip the -SNAPSHOT suffix if present
           RELEASED=${RELEASED%-SNAPSHOT}
           IFS='.' read -r MAJOR MINOR PATCH <<< "$RELEASED"
           NEXT="$MAJOR.$MINOR.$((PATCH + 1))"
