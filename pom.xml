@@ -362,6 +362,13 @@
                         <configuration>
                             <publishingServerId>central</publishingServerId>
                             <autoPublish>true</autoPublish>
+                            <!-- Single aggregated deployment: the plugin collects all
+                                 module artifacts across the reactor and uploads ONE
+                                 bundle after the last module finishes. Without this,
+                                 each module triggers its own upload of the shared
+                                 staging directory and Maven Central rejects the
+                                 bundles with "content that does NOT have a .pom file". -->
+                            <uniqueVersion>false</uniqueVersion>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -387,6 +394,10 @@
                         <configuration>
                             <publishingServerId>central</publishingServerId>
                             <autoPublish>true</autoPublish>
+                            <!-- Single aggregated deployment (see release profile):
+                                 upload one bundle at the end of the reactor instead
+                                 of per-module partial bundles. -->
+                            <uniqueVersion>false</uniqueVersion>
                         </configuration>
                     </plugin>
                 </plugins>
