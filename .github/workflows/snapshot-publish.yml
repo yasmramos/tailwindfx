@@ -62,10 +62,17 @@ jobs:
           # "clean" is intentionally omitted: the previous step already ran
           # "clean verify", so cleaning again would delete the verified build
           # output and force a full recompilation before every deployment.
+          # NOTE: -Dmaven.repository.credentialScope=id restores legacy id-only
+          # credential matching. Since Maven 3.9.7+ credentials configured for
+          # server id 'central' (via setup-java) are origin-checked against
+          # https://repo.maven.apache.org only, so they were NOT sent to
+          # https://central.sonatype.com/repository/maven-snapshots/, causing
+          # HTTP 401 failures on snapshot deployments.
           mvn --batch-mode deploy \
             -P snapshot \
             -Drevision=${SNAPSHOT_VERSION} \
-            -DskipTests
+            -DskipTests \
+            -Dmaven.repository.credentialScope=id
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v5
