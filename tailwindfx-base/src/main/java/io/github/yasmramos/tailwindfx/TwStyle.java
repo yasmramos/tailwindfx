@@ -25,6 +25,7 @@ import io.github.yasmramos.tailwindfx.core.VariantManager;
 import io.github.yasmramos.tailwindfx.effect.EffectApplier;
 import io.github.yasmramos.tailwindfx.metrics.TailwindFXMetrics;
 import io.github.yasmramos.tailwindfx.style.LayoutApplier;
+import io.github.yasmramos.tailwindfx.style.ProgrammaticStyleApplier;
 import io.github.yasmramos.tailwindfx.style.StyleMerger;
 import io.github.yasmramos.tailwindfx.style.StylePerf;
 import io.github.yasmramos.tailwindfx.style.StylesheetApplier;
@@ -127,6 +128,9 @@ public final class TwStyle {
 
     if (!result.cssClasses().isEmpty()) {
       UtilityConflictResolver.applyAll(node, result.cssClasses().toArray(new String[0]));
+      // Some utilities (visibility, overflow, z-order, fill sizing) have no JavaFX CSS
+      // equivalent; apply them through the JavaFX API so the class is not a silent no-op.
+      ProgrammaticStyleApplier.apply(node, result.cssClasses());
       TailwindFXMetrics.instance().recordApply(result.cssClasses().size());
     }
 
