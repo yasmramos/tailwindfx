@@ -33,30 +33,30 @@ import javafx.scene.layout.VBox;
 import javafx.scene.transform.Shear;
 
 /**
- * Styles — API Java para todo lo que CSS no puede hacer en JavaFX.
+ * Styles — Java API for everything CSS cannot do in JavaFX.
  *
- * <p>Cada método corresponde a una clase Tailwind comentada en tailwindfx.css con "use X in Java".
- * La nomenclatura es idéntica a Tailwind para que el mapping sea inmediato:
+ * <p>Each method maps to a Tailwind class documented in tailwindfx.css with "use X in Java".
+ * The naming is identical to Tailwind so the mapping is immediate:
  *
- * <p>CSS class comentada → método Java .col-span-3 → Styles.colSpan(node, 3) .row-span-full →
+ * <p>Commented CSS class → Java method .col-span-3 → Styles.colSpan(node, 3) .row-span-full →
  * Styles.rowSpanFull(node) .mx-4 → Styles.mx(node, 4) .z-50 → Styles.z(node, 50) .self-center →
  * Styles.selfCenter(node) .justify-self-end → Styles.justifySelfEnd(node) .flex-1 →
  * Styles.flex1(node) .grayscale → Styles.grayscale(node) .brightness-75 → Styles.brightness(node,
  * 0.75) .skew-x-6 → Styles.skewX(node, 6) .object-cover → Styles.objectCover(imageView)
  * .order-first → Styles.orderFirst(node)
  *
- * <p>Todos los métodos devuelven el nodo recibido para permitir encadenamiento:
+ * <p>All methods return the node they receive to allow chaining:
  * Styles.colSpan(Styles.mx(card, 4), 3);
  */
 public final class Styles {
 
-  // Escala Tailwind: 1 unidad = 4px
+  // Tailwind scale: 1 unit = 4px
   private static final double UNIT = 4.0;
 
   private Styles() {}
 
   // GRIDPANE — col-span-*, row-span-*
-  // Corresponde a: grid-column: span N / grid-row: span N en CSS web
+  // Maps to: grid-column: span N / grid-row: span N in web CSS
 
   /**
    * Sets the column span of a node in a {@link GridPane} (equivalent to {@code .col-span-N}).
@@ -179,9 +179,9 @@ public final class Styles {
   }
 
   // GROW/SHRINK — flex-1, flex-grow, flex-shrink, flex-none
-  // Corresponde a: flex-grow, flex-shrink en CSS web
+  // Maps to: flex-grow, flex-shrink in web CSS
 
-  /** .flex-1 / .grow — crece para llenar espacio horizontal (HBox) */
+  /** .flex-1 / .grow — grows to fill the horizontal space (HBox) */
   public static <T extends Node> T flex1(T node) {
     Preconditions.requireNode(node, "Styles.flex1");
     Preconditions.warnNoParent(node, "Styles.flex1");
@@ -189,7 +189,7 @@ public final class Styles {
     return node;
   }
 
-  /** .grow — crece para llenar espacio horizontal */
+  /** .grow — grows to fill the horizontal space */
   public static <T extends Node> T grow(T node) {
     Preconditions.requireNode(node, "Styles.grow");
     Preconditions.warnNoParent(node, "Styles.grow");
@@ -197,33 +197,33 @@ public final class Styles {
     return node;
   }
 
-  /** .grow-0 / .flex-none — no crece */
+  /** .grow-0 / .flex-none — does not grow */
   public static <T extends Node> T growNone(T node) {
     HBox.setHgrow(node, Priority.NEVER);
     VBox.setVgrow(node, Priority.NEVER);
     return node;
   }
 
-  /** .flex-auto — crece y encoge según sea necesario */
+  /** .flex-auto — grows and shrinks as needed */
   public static <T extends Node> T flexAuto(T node) {
     HBox.setHgrow(node, Priority.SOMETIMES);
     return node;
   }
 
-  /** Crece verticalmente en VBox */
+  /** Grows vertically inside a VBox */
   public static <T extends Node> T vgrow(T node) {
     VBox.setVgrow(node, Priority.ALWAYS);
     return node;
   }
 
-  /** .hbox-fill-width — el nodo llena el ancho disponible en HBox */
+  /** .hbox-fill-width — the node fills the available width in an HBox */
   public static <T extends Node> T hboxFillWidth(T node) {
     HBox.setHgrow(node, Priority.ALWAYS);
     if (node instanceof Region r) r.setMaxWidth(Double.MAX_VALUE);
     return node;
   }
 
-  /** .vbox-fill-height — el nodo llena el alto disponible en VBox */
+  /** .vbox-fill-height — the node fills the available height in a VBox */
   public static <T extends Node> T vboxFillHeight(T node) {
     VBox.setVgrow(node, Priority.ALWAYS);
     if (node instanceof Region r) r.setMaxHeight(Double.MAX_VALUE);
@@ -231,27 +231,27 @@ public final class Styles {
   }
 
   // MARGIN — mx-*, my-*, mt-*, mr-*, mb-*, ml-*
-  // Corresponde a: margin en CSS web
-  // NOTA: JavaFX no tiene margin CSS. Se usa setMargin() en el contenedor.
+  // Maps to: margin in web CSS
+  // NOTE: JavaFX has no CSS margin. setMargin() on the container is used instead.
 
   /**
-   * IMPORTANTE — orden de llamada con métodos de margen.
+   * IMPORTANT — call order with the margin methods.
    *
-   * <p>JavaFX aplica los constraints ({@code HBox.setMargin}, etc.) en el momento de la llamada. El
-   * nodo debe estar ya añadido al padre para que el margen tenga efecto inmediato.
+   * <p>JavaFX applies the constraints ({@code HBox.setMargin}, etc.) at call time. The node must
+   * already be added to the parent for the margin to take effect immediately.
    *
    * <pre>
    * // Correct - add first, margin after
    * parent.getChildren().add(node);
    * Styles.mx(node, 4);
    *
-   * // Incorrecto — el constraint se aplica sin padre, sin efecto visible
+   * // Wrong — the constraint is applied without a parent, with no visible effect
    * Styles.mx(node, 4);
    * parent.getChildren().add(node);
    * </pre>
    *
-   * <p>Para evitar el problema usa los métodos {@code WithParent} que añaden el nodo y aplican el
-   * margen en un único paso:
+   * <p>To avoid the problem, use the {@code WithParent} methods that add the node and apply the
+   * margin in a single step:
    *
    * <pre>
    * Styles.mxWithParent(node, hbox, 4);
@@ -317,33 +317,33 @@ public final class Styles {
     return node;
   }
 
-  /** .mt-{n} — margen superior */
+  /** .mt-{n} — top margin */
   public static <T extends Node> T mt(T node, int n) {
     return margin(node, n * UNIT, 0, 0, 0);
   }
 
-  /** .mr-{n} — margen derecho */
+  /** .mr-{n} — right margin */
   public static <T extends Node> T mr(T node, int n) {
     return margin(node, 0, n * UNIT, 0, 0);
   }
 
-  /** .mb-{n} — margen inferior */
+  /** .mb-{n} — bottom margin */
   public static <T extends Node> T mb(T node, int n) {
     return margin(node, 0, 0, n * UNIT, 0);
   }
 
-  /** .ml-{n} — margen izquierdo */
+  /** .ml-{n} — left margin */
   public static <T extends Node> T ml(T node, int n) {
     return margin(node, 0, 0, 0, n * UNIT);
   }
 
-  /** .mx-auto — centra horizontalmente en HBox usando espaciadores */
+  /** .mx-auto — centers horizontally in an HBox using spacers */
   public static <T extends Node> T mxAuto(T node) {
     HBox.setHgrow(node, Priority.ALWAYS);
     return node;
   }
 
-  /** Margen con valores exactos en px */
+  /** Margin with exact pixel values */
   public static <T extends Node> T margin(
       T node, double top, double right, double bottom, double left) {
     Preconditions.requireNode(node, "Styles.margin");
@@ -376,10 +376,10 @@ public final class Styles {
   }
 
   // MARGIN WithParent - add node AND apply margin in a single step
-  // Eliminan el problema del orden de llamada descrito en el javadoc de margin.
+  // They remove the call-order problem described in the margin Javadoc.
 
   /**
-   * Añade {@code node} a {@code parent} y aplica margen en todos los lados.
+   * Adds {@code node} to {@code parent} and applies a margin on all sides.
    *
    * <p>Equivale a:
    *
@@ -396,7 +396,7 @@ public final class Styles {
   }
 
   /**
-   * Añade {@code node} a {@code parent} y aplica margen horizontal (n × 4px).
+   * Adds {@code node} to {@code parent} and applies a horizontal margin (n × 4px).
    *
    * <p>Equivale a:
    *
@@ -412,7 +412,7 @@ public final class Styles {
     return mx(node, n);
   }
 
-  /** Añade {@code node} a {@code parent} y aplica margen vertical (n × 4px). */
+  /** Adds {@code node} to {@code parent} and applies a vertical margin (n × 4px). */
   public static <T extends Node> T myWithParent(T node, Pane parent, int n) {
     Preconditions.requireNode(node, "Styles.myWithParent");
     Preconditions.requireNonNull(parent, "Styles.myWithParent", "parent");
@@ -421,12 +421,12 @@ public final class Styles {
   }
 
   /**
-   * Añade {@code node} a {@code parent} y aplica márgenes individuales en px.
+   * Adds {@code node} to {@code parent} and applies individual margins in px.
    *
-   * @param top margen superior en px
-   * @param right margen derecho en px
-   * @param bottom margen inferior en px
-   * @param left margen izquierdo en px
+   * @param top top margin in px
+   * @param right right margin in px
+   * @param bottom bottom margin in px
+   * @param left left margin in px
    */
   public static <T extends Node> T marginWithParent(
       T node, Pane parent, double top, double right, double bottom, double left) {
@@ -437,16 +437,16 @@ public final class Styles {
   }
 
   /**
-   * Añade varios nodos a un padre con el mismo margen (n × 4px) aplicado a cada uno.
+   * Adds several nodes to a parent with the same margin (n × 4px) applied to each one.
    *
    * <pre>
    * // Adds three cards to an HBox with 8px margin each
    * Styles.addWithMargin(hbox, 2, card1, card2, card3);
    * </pre>
    *
-   * @param parent contenedor destino
-   * @param n unidades Tailwind (n × 4px)
-   * @param nodes nodos a añadir
+   * @param parent destination container
+   * @param n Tailwind units (n × 4px)
+   * @param nodes nodes to add
    */
   @SafeVarargs
   public static <T extends Node> void addWithMargin(Pane parent, int n, T... nodes) {
@@ -459,12 +459,12 @@ public final class Styles {
   }
 
   // Z-ORDER — z-0, z-10, z-20, z-30, z-40, z-50, z-auto
-  // Corresponde a: z-index en CSS web
+  // Maps to: z-index in web CSS
   // NOTE: In JavaFX, lower viewOrder = more forward (opposite of z-index)
 
   /**
-   * .z-{value} — controla el orden de pintado del nodo. JavaFX viewOrder: 0 = frente, valores
-   * positivos = más atrás. Se invierte respecto a z-index web (donde mayor = más adelante).
+   * .z-{value} — controls the node's paint order. JavaFX viewOrder: 0 = front, positive values
+   * = further back. It is inverted with respect to web z-index (where higher = more forward).
    */
   public static <T extends Node> T z(T node, int zIndex) {
     Preconditions.requireNode(node, "Styles.z");
@@ -497,20 +497,20 @@ public final class Styles {
     return z(node, 50);
   }
 
-  /** .order-first — lleva el nodo al frente */
+  /** .order-first — brings the node to the front */
   public static <T extends Node> T orderFirst(T node) {
     node.toFront();
     return node;
   }
 
-  /** .order-last — lleva el nodo al fondo */
+  /** .order-last — sends the node to the back */
   public static <T extends Node> T orderLast(T node) {
     node.toBack();
     return node;
   }
 
   // SELF ALIGNMENT — self-start, self-center, self-end, self-stretch
-  // Corresponde a: align-self en CSS web (GridPane)
+  // Maps to: align-self in web CSS (GridPane)
 
   public static <T extends Node> T selfStart(T node) {
     GridPane.setValignment(node, VPos.TOP);
@@ -533,7 +533,7 @@ public final class Styles {
   }
 
   // JUSTIFY SELF — justify-self-start, justify-self-center, justify-self-end
-  // Corresponde a: justify-self en CSS web (GridPane)
+  // Maps to: justify-self in web CSS (GridPane)
 
   public static <T extends Node> T justifySelfStart(T node) {
     GridPane.setHalignment(node, HPos.LEFT);
@@ -552,24 +552,24 @@ public final class Styles {
 
   // COLORADJUST FILTERS — grayscale, brightness, contrast, saturate,
   //                        hueRotate, invert, sepia
-  // Corresponde a: filter: grayscale(), brightness(), etc. en CSS web
+  // Maps to: filter: grayscale(), brightness(), etc. in web CSS
 
-  /** .grayscale — elimina el color del nodo */
+  /** .grayscale — removes color from the node */
   public static <T extends Node> T grayscale(T node) {
     Preconditions.requireNode(node, "Styles.grayscale");
     node.setEffect(new ColorAdjust(0, -1, 0, 0));
     return node;
   }
 
-  /** .grayscale-0 — elimina el filtro de escala de grises */
+  /** .grayscale-0 — removes the grayscale filter */
   public static <T extends Node> T grayscale0(T node) {
     if (node.getEffect() instanceof ColorAdjust) node.setEffect(null);
     return node;
   }
 
   /**
-   * .brightness-{n} — ajusta el brillo (0=negro, 1=normal, 2=doble) Tailwind usa 0-200, aquí recibe
-   * la fracción directamente. brightness(0.5) = oscurecer a la mitad, brightness(1.5) = aclarar 50%
+   * .brightness-{n} — adjusts brightness (0=black, 1=normal, 2=double). Tailwind uses 0-200; here
+   * it takes the fraction directly. brightness(0.5) = darken by half, brightness(1.5) = brighten 50%
    */
   public static <T extends Node> T brightness(T node, double value) {
     Preconditions.requireNode(node, "Styles.brightness");
@@ -580,7 +580,7 @@ public final class Styles {
     return node;
   }
 
-  /** .contrast-{n} — ajusta el contraste (1 = normal) */
+  /** .contrast-{n} — adjusts contrast (1 = normal) */
   public static <T extends Node> T contrast(T node, double value) {
     Preconditions.requireNode(node, "Styles.contrast");
     double adjusted = value - 1.0;
@@ -588,7 +588,7 @@ public final class Styles {
     return node;
   }
 
-  /** .saturate-{n} — ajusta la saturación (0 = gris, 1 = normal, >1 = más vivo) */
+  /** .saturate-{n} — adjusts saturation (0 = gray, 1 = normal, >1 = more vivid) */
   public static <T extends Node> T saturate(T node, double value) {
     Preconditions.requireNode(node, "Styles.saturate");
     double adjusted = value - 1.0;
@@ -596,7 +596,7 @@ public final class Styles {
     return node;
   }
 
-  /** .hue-rotate-{deg} — rota el matiz en grados (0-360) */
+  /** .hue-rotate-{deg} — rotates the hue in degrees (0-360) */
   public static <T extends Node> T hueRotate(T node, double degrees) {
     Preconditions.requireNode(node, "Styles.hueRotate");
     // ColorAdjust hue: -1 a 1 (representa -180° a +180°)
@@ -605,16 +605,16 @@ public final class Styles {
     return node;
   }
 
-  /** .invert — invierte los colores del nodo */
+  /** .invert — inverts the node's colors */
   public static <T extends Node> T invert(T node) {
     Preconditions.requireNode(node, "Styles.invert");
-    // No hay propiedad directa en ColorAdjust para invert total
-    // Se aproxima con hue=1 + brightness=-1
+    // ColorAdjust has no direct property for a full invert
+    // It is approximated with hue=1 + brightness=-1
     node.setEffect(new ColorAdjust(1.0, 0, -0.5, 0));
     return node;
   }
 
-  /** .sepia — aplica tono sepia al nodo */
+  /** .sepia — applies a sepia tone to the node */
   public static <T extends Node> T sepia(T node) {
     Preconditions.requireNode(node, "Styles.sepia");
     // Sepia: desaturate + warm tone shift
@@ -622,7 +622,7 @@ public final class Styles {
     return node;
   }
 
-  /** Elimina todos los filtros ColorAdjust del nodo */
+  /** Removes every ColorAdjust filter from the node */
   public static <T extends Node> T filterNone(T node) {
     if (node.getEffect() instanceof ColorAdjust) node.setEffect(null);
     return node;
@@ -685,9 +685,9 @@ public final class Styles {
   }
 
   // SKEW — skew-x-*, skew-y-*
-  // Corresponde a: transform: skewX(), skewY() en CSS web
+  // Maps to: transform: skewX(), skewY() in web CSS
 
-  /** .skew-x-{degrees} — inclina el nodo en el eje X */
+  /** .skew-x-{degrees} — skews the node along the X axis */
   public static <T extends Node> T skewX(T node, double degrees) {
     Preconditions.requireNode(node, "Styles.skewX");
     double kx = Math.tan(Math.toRadians(degrees));
@@ -695,7 +695,7 @@ public final class Styles {
     return node;
   }
 
-  /** .skew-y-{degrees} — inclina el nodo en el eje Y */
+  /** .skew-y-{degrees} — skews the node along the Y axis */
   public static <T extends Node> T skewY(T node, double degrees) {
     Preconditions.requireNode(node, "Styles.skewY");
     double ky = Math.tan(Math.toRadians(degrees));
@@ -703,7 +703,7 @@ public final class Styles {
     return node;
   }
 
-  /** Atajos para valores Tailwind estándar */
+  /** Shorthands for standard Tailwind values */
   public static <T extends Node> T skewX1(T node) {
     return skewX(node, 1);
   }
@@ -745,7 +745,7 @@ public final class Styles {
   }
 
   // IMAGEVIEW — object-fit, object-position, object-cover, object-contain
-  // Corresponde a: object-fit, object-position en CSS web
+  // Maps to: object-fit, object-position in web CSS
 
   /** .object-cover — fills the area by cropping if necessary */
   public static ImageView objectCover(ImageView iv) {
@@ -754,14 +754,14 @@ public final class Styles {
     return iv;
   }
 
-  /** .object-contain — encaja la imagen completa preservando proporción */
+  /** .object-contain — fits the whole image while preserving its ratio */
   public static ImageView objectContain(ImageView iv) {
     Preconditions.requireNonNull(iv, "Styles.objectContain", "imageView");
     iv.setPreserveRatio(true);
     return iv;
   }
 
-  /** .object-fill — estira para llenar exactamente (distorsiona) */
+  /** .object-fill — stretches to fill exactly (distorts) */
   public static ImageView objectFill(ImageView iv) {
     iv.setPreserveRatio(false);
     iv.setSmooth(true);
@@ -769,8 +769,7 @@ public final class Styles {
   }
 
   /**
-   * .object-top — muestra la parte superior de la imagen Requiere que fitWidth y fitHeight estén
-   * definidos.
+   * .object-top — shows the top part of the image. Requires fitWidth and fitHeight to be set.
    */
   public static ImageView objectTop(ImageView iv) {
     if (iv.getImage() != null) {
@@ -781,7 +780,7 @@ public final class Styles {
     return iv;
   }
 
-  /** .object-center — muestra el centro de la imagen */
+  /** .object-center — shows the center of the image */
   public static ImageView objectCenter(ImageView iv) {
     Preconditions.requireNonNull(iv, "Styles.objectCenter", "imageView");
     Preconditions.warnNoImage(iv, "Styles.objectCenter");
@@ -797,7 +796,7 @@ public final class Styles {
     return iv;
   }
 
-  /** Establece tamaño del ImageView y modo de ajuste en una sola llamada */
+  /** Sets the ImageView size and fit mode in a single call */
   public static ImageView imgSize(
       ImageView iv, double width, double height, boolean preserveRatio) {
     iv.setFitWidth(width);
@@ -808,14 +807,14 @@ public final class Styles {
 
   // NODE VISIBILITY — hidden, visible, managed
 
-  /** .hidden — oculta el nodo pero mantiene su espacio en el layout */
+  /** .hidden — hides the node but keeps its space in the layout */
   public static <T extends Node> T invisible(T node) {
     Preconditions.requireNode(node, "Styles.invisible");
     node.setOpacity(0);
     return node;
   }
 
-  /** .hidden-node — oculta el nodo Y elimina su espacio del layout */
+  /** .hidden-node — hides the node AND removes its space from the layout */
   public static <T extends Node> T hiddenNode(T node) {
     Preconditions.requireNode(node, "Styles.hiddenNode");
     node.setVisible(false);
@@ -823,7 +822,7 @@ public final class Styles {
     return node;
   }
 
-  /** Restaura visibilidad y espacio en layout */
+  /** Restores visibility and layout space */
   public static <T extends Node> T show(T node) {
     Preconditions.requireNode(node, "Styles.show");
     node.setVisible(true);
@@ -1371,7 +1370,7 @@ public final class Styles {
   }
 
   // USER-SELECT - Text selection control
-  // Corresponde a: user-select: none/text/all/auto en CSS web
+  // Maps to: user-select: none/text/all/auto in web CSS
 
   /** .select-none — Disables text selection */
   public static <T extends Node> T selectNone(T node) {
@@ -1403,7 +1402,7 @@ public final class Styles {
   }
 
   // TOUCH-ACTION - Touch gesture control
-  // Corresponde a: touch-action: auto/none/pan-x/pan-y/pinch-zoom/manipulation en CSS web
+  // Maps to: touch-action: auto/none/pan-x/pan-y/pinch-zoom/manipulation in web CSS
 
   /** .touch-auto — Default touch gesture handling */
   public static <T extends Node> T touchAuto(T node) {
@@ -1474,7 +1473,7 @@ public final class Styles {
   }
 
   // SCROLL-SNAP — Snap scrolling behavior
-  // Corresponde a: scroll-snap-align/type en CSS web
+  // Maps to: scroll-snap-align/type in web CSS
 
   /** .snap-start — Snap to start of container */
   public static <T extends Region> T snapStart(T node) {
@@ -1531,7 +1530,7 @@ public final class Styles {
   }
 
   // COLUMNS — Multi-column layout
-  // Corresponde a: columns-N/auto en CSS web
+  // Maps to: columns-N/auto in web CSS
 
   /** .columns-1 — Single column layout */
   public static <T extends Pane> T columns1(T node) {

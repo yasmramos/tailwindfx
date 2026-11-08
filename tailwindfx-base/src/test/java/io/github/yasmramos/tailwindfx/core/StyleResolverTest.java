@@ -7,7 +7,7 @@ import io.github.yasmramos.tailwindfx.theme.ThemeConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/** Tests unitarios para StyleResolver. */
+/** Unit tests for StyleResolver. */
 class StyleResolverTest {
 
   private StyleResolver resolver;
@@ -43,9 +43,9 @@ class StyleResolverTest {
     String result = resolver.resolve(token);
 
     assertNotNull(result);
-    // Debe devolver el valor directo del color (hex) para que JavaFX pueda
-    // convertirlo a Paint en inline styles. Las referencias a variables CSS
-    // (-color-blue-500) no funcionan en inline styles.
+    // It must return the direct color value (hex) so JavaFX can convert it to a
+    // Paint in inline styles. References to CSS variables (-color-blue-500) do
+    // not work in inline styles.
     assertEquals("#3b82f6", result);
   }
 

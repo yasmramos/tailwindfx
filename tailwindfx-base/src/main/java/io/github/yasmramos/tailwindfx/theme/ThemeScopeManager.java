@@ -24,11 +24,11 @@ import java.util.Set;
 import javafx.scene.layout.Pane;
 
 /**
- * ThemeScopeManager — Temas por subtree, con herencia y override parcial.
+ * ThemeScopeManager — Per-subtree themes with inheritance and partial overrides.
  *
- * <p>Problema: ThemeManager es global (afecta toda la Scene). Para apps enterprise con secciones de
- * tema diferente en la misma pantalla: - Panel de admin: dark - Embedded form: light - Sidebar:
- * custom accent
+ * <p>Problem: ThemeManager is global (it affects the whole Scene). For enterprise apps with
+ * sections that use a different theme on the same screen: - Admin panel: dark - Embedded form:
+ * light - Sidebar: custom accent
  *
  * <p>Solution: apply Modena variables as inline style on any Pane, which JavaFX propagates to all
  * its children (local CSS cascade).
@@ -83,7 +83,7 @@ public final class ThemeScopeManager {
     return Optional.ofNullable(props.get(variable));
   }
 
-  /** Comprueba si un Pane tiene scope de tema propio. */
+  /** Checks whether a Pane has its own theme scope. */
   public static boolean hasScope(Pane pane) {
     return pane.getStyleClass().contains("theme-scoped");
   }
@@ -149,7 +149,7 @@ public final class ThemeScopeManager {
     }
 
     public ScopeBuilder preset(String name) {
-      // Locale.ROOT evita fallos con locales como el turco (p. ej. preset("BLUE")).
+      // Locale.ROOT avoids failures with locales such as Turkish (e.g. preset("BLUE")).
       return switch (name.toLowerCase(Locale.ROOT)) {
         case "dark" -> dark();
         case "light" -> light();
@@ -230,8 +230,8 @@ public final class ThemeScopeManager {
     }
 
     /**
-     * Aplica el scope al Pane. Merge no destructivo: preserva inline styles previos no relacionados
-     * con theming.
+     * Applies the scope to the Pane. Non-destructive merge: it preserves previous inline styles
+     * unrelated to theming.
      */
     public void apply() {
       if (vars.isEmpty()) return;
@@ -241,12 +241,12 @@ public final class ThemeScopeManager {
       if (forceDark != null) {
         dark = forceDark;
       } else {
-        // Auto-detect basado en luminancia del base
+        // Auto-detect based on the base color's luminance
         String base = vars.getOrDefault("-fx-base", "#ececec");
         dark = isColorDark(base);
       }
 
-      // Merge con estilos existentes del Pane
+      // Merge with the Pane's existing styles
       StringBuilder sb = new StringBuilder();
       vars.forEach((k, v) -> sb.append(k).append(": ").append(v).append("; "));
       // Only emit the tokens when this scope decides the mode (explicit dark()/light() or a
@@ -265,7 +265,7 @@ public final class ThemeScopeManager {
         pane.getStyleClass().remove("dark");
       }
 
-      // Marcar como con scope propio (para hasScope() y clearScope())
+      // Mark as having its own scope (for hasScope() and clearScope())
       if (!pane.getStyleClass().contains("theme-scoped")) {
         pane.getStyleClass().add("theme-scoped");
       }

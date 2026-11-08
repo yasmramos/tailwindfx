@@ -74,7 +74,7 @@ class TwGridPaneTest extends ApplicationTest {
   void testBuilderRows() {
     TwGridPane grid = TwGridPane.create().rows(4).build();
 
-    // rows se usa internamente pero no hay getter publico
+    // rows is used internally but there is no public getter
     assertNotNull(grid);
   }
 

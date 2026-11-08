@@ -7,7 +7,7 @@ import io.github.yasmramos.tailwindfx.theme.ThemeConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/** Tests unitarios para CssPropertyMapper. */
+/** Unit tests for CssPropertyMapper. */
 class CssPropertyMapperTest {
 
   private CssPropertyMapper mapper;

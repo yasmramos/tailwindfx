@@ -21,10 +21,10 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * ThemeConfig — Configuración centralizada del sistema de diseño.
+ * ThemeConfig — Centralized design-system configuration.
  *
- * <p>Equivalente JavaFX de tailwind.config.js. Define colores, spacing, breakpoints, border-radius,
- * sombras y otras tokens de diseño.
+ * <p>JavaFX equivalent of tailwind.config.js. Defines colors, spacing, breakpoints, border-radius,
+ * shadows and other design tokens.
  *
  * <p>Uso:
  *
@@ -61,7 +61,7 @@ public final class ThemeConfig {
     this.fontWeight = Collections.unmodifiableMap(new HashMap<>(builder.fontWeight));
   }
 
-  /** Obtiene la instancia singleton de configuración por defecto. */
+  /** Returns the default singleton configuration instance. */
   public static ThemeConfig defaultConfig() {
     if (instance == null) {
       instance = new Builder().build();
@@ -69,12 +69,12 @@ public final class ThemeConfig {
     return instance;
   }
 
-  /** Resetea la instancia singleton (útil para testing). */
+  /** Resets the singleton instance (useful for testing). */
   public static void reset() {
     instance = null;
   }
 
-  /** Obtiene un color específico. Ej: color("blue", 500) → "#3b82f6" */
+  /** Returns a specific color. E.g.: color("blue", 500) → "#3b82f6" */
   public String color(String name, int shade) {
     String[] shades = colors.get(name);
     if (shades == null) {
@@ -102,17 +102,17 @@ public final class ThemeConfig {
     return shades[index];
   }
 
-  /** Obtiene el array completo de colores para una familia. */
+  /** Returns the full color array for a family. */
   public String[] colorFamily(String name) {
     return colors.get(name);
   }
 
-  /** Obtiene todos los colores configurados. */
+  /** Returns every configured color. */
   public Map<String, String[]> colors() {
     return colors;
   }
 
-  /** Obtiene un valor de spacing. Ej: spacing(4) → 16.0 (4 * 4px) */
+  /** Returns a spacing value. E.g.: spacing(4) → 16.0 (4 * 4px) */
   public double spacing(int value) {
     if (value < 0 || value >= spacing.length) {
       return value * 4.0; // Fallback: multiplier base
@@ -120,22 +120,22 @@ public final class ThemeConfig {
     return spacing[value];
   }
 
-  /** Obtiene el array completo de spacing. */
+  /** Returns the full spacing array. */
   public double[] spacing() {
     return spacing.clone();
   }
 
-  /** Obtiene un breakpoint. Ej: breakpoint("md") → 768 */
+  /** Returns a breakpoint. E.g.: breakpoint("md") → 768 */
   public Integer breakpoint(String name) {
     return breakpoints.get(name);
   }
 
-  /** Obtiene todos los breakpoints. */
+  /** Returns every breakpoint. */
   public Map<String, Integer> breakpoints() {
     return breakpoints;
   }
 
-  /** Obtiene border-radius. Ej: borderRadius(4) → 16.0 */
+  /** Returns a border-radius. E.g.: borderRadius(4) → 16.0 */
   public double borderRadius(int value) {
     if (value < 0 || value >= borderRadius.length) {
       return value * 4.0;
@@ -143,57 +143,57 @@ public final class ThemeConfig {
     return borderRadius[value];
   }
 
-  /** Obtiene un shadow predefinido. Ej: shadow("md") → "0 4px 6px -1px rgba(0,0,0,0.1)" */
+  /** Returns a predefined shadow. E.g.: shadow("md") → "0 4px 6px -1px rgba(0,0,0,0.1)" */
   public String shadow(String name) {
     return shadows.get(name);
   }
 
-  /** Obtiene todos los shadows. */
+  /** Returns every shadow. */
   public Map<String, String> shadows() {
     return shadows;
   }
 
-  /** Obtiene opacidad. Ej: opacity(50) → 0.5 */
+  /** Returns an opacity value. E.g.: opacity(50) → 0.5 */
   public Double opacity(String name) {
     return opacity.get(name);
   }
 
-  /** Obtiene todos los valores de opacidad. */
+  /** Returns every opacity value. */
   public Map<String, Double> opacity() {
     return opacity;
   }
 
-  /** Obtiene una fuente. Ej: fontFamily("sans") → "Inter, system-ui, sans-serif" */
+  /** Returns a font family. E.g.: fontFamily("sans") → "Inter, system-ui, sans-serif" */
   public String fontFamily(String name) {
     return fontFamily.get(name);
   }
 
-  /** Obtiene todas las fuentes. */
+  /** Returns every font family. */
   public Map<String, String> fontFamily() {
     return fontFamily;
   }
 
-  /** Obtiene tamaño de fuente. Ej: fontSize("lg") → 18.0 */
+  /** Returns a font size. E.g.: fontSize("lg") → 18.0 */
   public Double fontSize(String name) {
     return fontSize.get(name);
   }
 
-  /** Obtiene todos los tamaños de fuente. */
+  /** Returns every font size. */
   public Map<String, Double> fontSize() {
     return fontSize;
   }
 
-  /** Obtiene peso de fuente. Ej: fontWeight("bold") → "700" */
+  /** Returns a font weight. E.g.: fontWeight("bold") → "700" */
   public String fontWeight(String name) {
     return fontWeight.get(name);
   }
 
-  /** Obtiene todos los pesos de fuente. */
+  /** Returns every font weight. */
   public Map<String, String> fontWeight() {
     return fontWeight;
   }
 
-  /** Builder para crear configuraciones personalizadas. */
+  /** Builder for creating custom configurations. */
   public static final class Builder {
     private final Map<String, String[]> colors = new HashMap<>();
     private double[] spacing = new double[65];
@@ -214,8 +214,8 @@ public final class ThemeConfig {
       for (String family : io.github.yasmramos.tailwindfx.color.ColorPalette.families()) {
         colors.put(family, io.github.yasmramos.tailwindfx.color.ColorPalette.shadesOf(family));
       }
-      // Colores planos: derivar desde ColorPalette.namedColors()
-      // Se modelan como arrays de 11 valores iguales para mantener compatibilidad con la API
+      // Flat colors: derived from ColorPalette.namedColors()
+      // They are modeled as arrays of 11 equal values to keep API compatibility
       for (Map.Entry<String, String> entry :
           io.github.yasmramos.tailwindfx.color.ColorPalette.namedColors().entrySet()) {
         String name = entry.getKey();
