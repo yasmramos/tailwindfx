@@ -99,5 +99,9 @@ that convention in `ColorPalette`, `GradientProcessor`, `RingProcessor`, etc.
   build plugin is not yet in the local repository; drop `-o` to allow downloads.
 - Tests run on JUnit 5 + TestFX + Mockito; the JavaFX toolkit is initialised by the
   test harness, so tests may construct `Node`/`Region`/`Scene` directly.
+- Unit tests (`**/*Test.java`) run under Surefire, integration tests (`**/*IT.java`)
+  under Failsafe. Both are bound to the JaCoCo agent through the `@{argLine}`
+  placeholder in their `<argLine>`; a module that drops it silently loses the
+  coverage of the tests it configures, so keep it when overriding `argLine`.
 - Regression tests for utility behaviour live next to the processor or in
   `style/ProgrammaticStyleApplierTest`. Prefer asserting real code paths, not mocks.
