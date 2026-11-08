@@ -20,6 +20,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Locale;
 import java.util.prefs.Preferences;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -214,7 +215,7 @@ public class ThemeCustomizationPanel extends VBox {
     slider.setPrefWidth(200);
     slider.setStyle("-fx-control-inner-background: #3b82f6;");
 
-    Label valueLabel = new Label(String.format("%.1f %s", value, unit));
+    Label valueLabel = new Label(String.format(Locale.ROOT, "%.1f %s", value, unit));
     valueLabel.setMinWidth(60);
     valueLabel.setStyle("-fx-text-fill: #475569; -fx-font-family: monospace;");
 
@@ -223,7 +224,7 @@ public class ThemeCustomizationPanel extends VBox {
         .valueProperty()
         .addListener(
             (obs, oldVal, newVal) -> {
-              valueLabel.setText(String.format("%.1f %s", newVal.doubleValue(), unit));
+              valueLabel.setText(String.format(Locale.ROOT, "%.1f %s", newVal.doubleValue(), unit));
               applyLiveChanges();
             });
 
@@ -376,7 +377,7 @@ public class ThemeCustomizationPanel extends VBox {
 
       // Update the preview box
       previewBox.setStyle(
-          String.format(
+          String.format(Locale.ROOT,
               """
                 -fx-background-color: derive(%s, 90%%);
                 -fx-background-radius: %.0f;
@@ -389,7 +390,7 @@ public class ThemeCustomizationPanel extends VBox {
 
       // Update preview button
       previewButton.setStyle(
-          String.format(
+          String.format(Locale.ROOT,
               """
                 -fx-background-color: %s;
                 -fx-text-fill: white;
@@ -402,7 +403,7 @@ public class ThemeCustomizationPanel extends VBox {
 
       // Update the preview label
       previewLabel.setStyle(
-          String.format(
+          String.format(Locale.ROOT,
               """
                 -fx-font-size: %.1f;
                 -fx-text-fill: %s;
@@ -556,9 +557,9 @@ public class ThemeCustomizationPanel extends VBox {
             String.format("background.color=%s\n", toCssColor(backgroundColorPicker.getValue())));
         writer.write(String.format("text.color=%s\n", toCssColor(textColorPicker.getValue())));
 
-        writer.write(String.format("border.radius=%.1f\n", radiusSlider.getValue()));
-        writer.write(String.format("spacing.scale=%.2f\n", spacingSlider.getValue()));
-        writer.write(String.format("shadow.intensity=%.1f\n", shadowIntensitySlider.getValue()));
+        writer.write(String.format(Locale.ROOT, "border.radius=%.1f\n", radiusSlider.getValue()));
+        writer.write(String.format(Locale.ROOT, "spacing.scale=%.2f\n", spacingSlider.getValue()));
+        writer.write(String.format(Locale.ROOT, "shadow.intensity=%.1f\n", shadowIntensitySlider.getValue()));
 
         showAlert("Success", "Configuration exported to:\n" + file.getAbsolutePath());
 
@@ -685,7 +686,7 @@ public class ThemeCustomizationPanel extends VBox {
    * @return JSON with the current configuration
    */
   public String getConfigAsJson() {
-    return String.format(
+    return String.format(Locale.ROOT,
         """
         {
             "colors": {
