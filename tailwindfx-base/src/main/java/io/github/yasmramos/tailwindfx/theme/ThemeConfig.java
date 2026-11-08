@@ -293,7 +293,7 @@ public final class ThemeConfig {
       fontFamily.put("serif", "Georgia, Cambria, serif");
       fontFamily.put("mono", "JetBrains Mono, Consolas, monospace");
 
-      // Font size (en px)
+      // Font size (in px)
       fontSize.put("xs", 12.0);
       fontSize.put("sm", 14.0);
       fontSize.put("base", 16.0);

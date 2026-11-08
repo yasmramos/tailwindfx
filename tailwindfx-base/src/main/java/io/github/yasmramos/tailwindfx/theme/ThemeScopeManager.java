@@ -124,7 +124,7 @@ public final class ThemeScopeManager {
       this.pane = pane;
     }
 
-    // --- Preset completo ---
+    // --- Full preset ---
     public ScopeBuilder dark() {
       forceDark = true;
       return base("#2b2b2b")
@@ -173,11 +173,14 @@ public final class ThemeScopeManager {
             .accent("#475569")
             .focus("#64748b")
             .faintFocus("rgba(100,116,139,0.2)");
-        default -> throw new IllegalArgumentException("Preset desconocido: " + name);
+        default -> throw new IllegalArgumentException(
+            "ThemeScopeManager: unknown preset '"
+                + name
+                + "'. Available: dark, light, blue, green, purple, rose, slate");
       };
     }
 
-    // --- Variables individuales (override parcial) ---
+    // --- Individual variables (partial override) ---
     public ScopeBuilder base(String color) {
       vars.put("-fx-base", color);
       return this;
