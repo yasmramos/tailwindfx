@@ -270,8 +270,9 @@ public final class GradientProcessor {
       return null;
     }
 
-    // Check common named colors
-    return switch (name.toLowerCase()) {
+    // Check common named colors. Locale.ROOT keeps the match correct on JVMs whose default
+    // locale lowercases 'I' to 'ı' (e.g. Turkish), which would break names such as "white".
+    return switch (name.toLowerCase(Locale.ROOT)) {
       case "transparent" -> "transparent";
       case "white" -> "#ffffff";
       case "black" -> "#000000";

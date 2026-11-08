@@ -194,4 +194,20 @@ class TypeHintProcessorTest {
     assertEquals(TypeHint.COLOR, result.typeHint());
     assertEquals("rgb(255,0,0)", result.value());
   }
+
+  @Test
+  void testNamedColorDetectionIsLocaleIndependent() {
+    // Regression: isColorValue used toLowerCase() without Locale.ROOT. On a JVM whose default
+    // locale is Turkish, "INHERIT".toLowerCase() yields "ınherıt" (dotless i), so the named
+    // color was not detected.
+    java.util.Locale original = java.util.Locale.getDefault();
+    java.util.Locale.setDefault(java.util.Locale.forLanguageTag("tr-TR"));
+    try {
+      assertEquals(TypeHint.COLOR, TypeHintProcessor.autoDetectType("INHERIT"));
+      assertEquals(TypeHint.COLOR, TypeHintProcessor.autoDetectType("TRANSPARENT"));
+      assertEquals(TypeHint.COLOR, TypeHintProcessor.autoDetectType("CURRENTCOLOR"));
+    } finally {
+      java.util.Locale.setDefault(original);
+    }
+  }
 }
