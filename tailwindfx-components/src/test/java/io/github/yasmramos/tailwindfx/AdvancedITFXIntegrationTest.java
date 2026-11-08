@@ -171,7 +171,7 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
 
       interact(() -> root.getChildren().add(field));
 
-      // Verificar directamente el promptText del TextField
+      // Verify the TextField promptText directly
       assertEquals("Enter your name", field.getPromptText());
     }
   }

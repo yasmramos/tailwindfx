@@ -110,7 +110,7 @@ example-project/
 </project>
 ```
 
-## Uso en código Java
+## Usage in Java code
 
 ```java
 package com.example;
@@ -127,10 +127,10 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
-        // Instalar TailwindFX con generación JIT
+        // Install TailwindFX with JIT generation
         TwInstall.installMinimal(stage.getScene());
 
-        // Crear UI con clases Tailwind
+        // Build the UI with Tailwind classes
         VBox root = new VBox(20);
         root.getStyleClass().add("p-8");
         root.getStyleClass().add("gap-4");
@@ -149,7 +149,7 @@ public class App extends Application {
 
         Scene scene = new Scene(root, 400, 300);
         
-        // Asegurar que TailwindFX esté instalado
+        // Ensure TailwindFX is installed
         TailwindFX.install(scene);
 
         stage.setTitle("TailwindFX Example");
@@ -163,34 +163,34 @@ public class App extends Application {
 }
 ```
 
-## Ejecución
+## Running
 
-1. **Construir el proyecto:**
+1. **Build the project:**
    ```bash
    mvn clean package
    ```
 
-   Esto generará el archivo CSS optimizado en `target/classes/css/tailwindfx-optimized.css`
+   This generates the optimized CSS file at `target/classes/css/tailwindfx-optimized.css`
 
-2. **Ejecutar la aplicación:**
+2. **Run the application:**
    ```bash
    mvn javafx:run
    ```
 
-3. **Ejecutar solo la generación de CSS:**
+3. **Run only the CSS generation:**
    ```bash
    mvn tailwindfx:generate
    ```
 
-## Beneficios
+## Benefits
 
-- **CSS optimizado**: Solo se incluyen las clases utilizadas en tu código
-- **Build automático**: El CSS se genera en cada compilación
-- **Tamaño reducido**: Menor tamaño del bundle final
-- **Mantenimiento automático**: Al agregar/quitar clases, el CSS se actualiza automáticamente
+- **Optimized CSS**: Only the classes used in your code are included
+- **Automatic build**: The CSS is generated on every compilation
+- **Reduced size**: Smaller final bundle size
+- **Automatic maintenance**: When classes are added or removed, the CSS updates automatically
 
-## Notas
+## Notes
 
-- El plugin escanea archivos `.java` y `.fxml` en busca de clases Tailwind
-- Las clases construidas dinámicamente pueden no ser detectadas
-- Para producción, considera activar la opción `minify=true`
+- The plugin scans `.java` and `.fxml` files for Tailwind classes
+- Dynamically built classes may not be detected
+- For production, consider enabling the `minify=true` option

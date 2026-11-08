@@ -618,9 +618,9 @@ public final class ThemeManager {
   }
 
   /**
-   * Elimina un tema guardado de las preferencias del sistema.
+   * Deletes a saved theme from the system preferences.
    *
-   * @param key clave usada en {@link #saveTheme}
+   * @param key key used in {@link #saveTheme}
    */
   public static void deleteTheme(String key) {
     Preconditions.requireNonBlank(key, "ThemeManager.deleteTheme", "key");

@@ -711,7 +711,7 @@ public final class TwAnimation {
     return new TwAnimation(tl);
   }
 
-  // HOVER effects — se instalan como listeners permanentes
+  // HOVER effects — installed as permanent listeners
   /**
    * Scales the node on hover — installs permanent mouse enter/exit listeners.
    *

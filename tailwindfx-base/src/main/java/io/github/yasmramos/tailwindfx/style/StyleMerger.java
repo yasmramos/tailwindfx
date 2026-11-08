@@ -38,14 +38,14 @@ public final class StyleMerger {
 
   private StyleMerger() {}
 
-  // Regex para parsear "property: value;" de un inline style
+  // Regex that parses "property: value;" pairs from an inline style
   private static final Pattern PROP_PATTERN = Pattern.compile("(-(?:fx|tw)-[a-z-]+)\\s*:\\s*([^;]+);?");
 
   // Public API
   /**
-   * Aplica tokens JIT a un nodo. Procesa las CSS classes fallback y el inline style merged.
+   * Applies JIT tokens to a node. It handles CSS-class fallbacks and the merged inline style.
    *
-   * <p>Ejemplo: StyleMerger.applyJit(button, "p-4", "bg-blue-500/80", "rounded-lg", "font-bold");
+   * <p>Example: StyleMerger.applyJit(button, "p-4", "bg-blue-500/80", "rounded-lg", "font-bold");
    */
   public static void applyJit(Node node, String... tokens) {
     JitCompiler.BatchResult result = JitCompiler.compileBatch(tokens);
@@ -56,7 +56,7 @@ public final class StyleMerger {
       node.setStyle(merged);
     }
 
-    // 2. CSS classes fallback (tokens desconocidos o que mapean a clases).
+    // 2. CSS-class fallback (unknown tokens or tokens that map to classes).
     // Tracked in node properties so replaceJit() can remove only framework-added classes.
     Set<String> tracked = trackedClasses(node);
     for (String cls : result.cssClasses()) {
@@ -127,11 +127,11 @@ public final class StyleMerger {
    */
   public static String merge(String existing, String incoming) {
     Map<String, String> props = parseStyle(existing);
-    props.putAll(parseStyle(incoming)); // incoming gana en conflictos
+    props.putAll(parseStyle(incoming)); // incoming wins on conflicts
     return buildStyle(props);
   }
 
-  /** Elimina del 'existing' todas las propiedades presentes en 'toRemove'. */
+  /** Removes from 'existing' every property present in 'toRemove'. */
   public static String removeProperties(String existing, String toRemove) {
     Map<String, String> props = parseStyle(existing);
     Set<String> keysToRemove = parseStyle(toRemove).keySet();
@@ -139,8 +139,8 @@ public final class StyleMerger {
     return buildStyle(props);
   }
 
-  // Parse y build de inline style string
-  /** Parsea "-fx-padding: 16px; -fx-opacity: 0.5;" → {"fx-padding":"16px", ...} */
+  // Inline style parsing and building
+  /** Parses "-fx-padding: 16px; -fx-opacity: 0.5;" → {"fx-padding":"16px", ...} */
   public static Map<String, String> parseStyle(String style) {
     Map<String, String> map = new LinkedHashMap<>();
     if (style == null || style.isBlank()) {
@@ -160,7 +160,7 @@ public final class StyleMerger {
       return "";
     }
     StringBuilder sb = new StringBuilder();
-    // Orden consistente para facilitar debugging
+    // Consistent ordering to ease debugging
     new TreeMap<>(props).forEach((k, v) -> sb.append(k).append(": ").append(v).append("; "));
     return sb.toString().trim();
   }

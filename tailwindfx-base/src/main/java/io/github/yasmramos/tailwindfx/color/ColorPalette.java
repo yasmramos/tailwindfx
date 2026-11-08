@@ -74,12 +74,12 @@ public final class ColorPalette {
 
   private ColorPalette() {}
 
-  /** Devuelve el conjunto ordenado de familias de colores con escala. */
+  /** Returns the ordered set of scaled color families. */
   public static String[] families() {
     return FAMILIES;
   }
 
-  /** Devuelve el mapa de colores planos (nombre → hex/valor). */
+  /** Returns the map of flat colors (name → hex/value). */
   public static Map<String, String> namedColors() {
     return NAMED_COLORS;
   }
@@ -212,7 +212,7 @@ public final class ColorPalette {
     return r + "," + g + "," + b;
   }
 
-  // Paleta completa Tailwind (mismos valores que en tailwindfx.css)
+  // Full Tailwind palette (same values as in tailwindfx.css)
 
   private static final Map<String, String> PALETTE = new HashMap<>(600);
 

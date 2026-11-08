@@ -71,7 +71,7 @@ public final class JitCompiler {
   private static final LruCache<String, CompileResult> CACHE =
       new LruCache<>(MAX_CACHE_SIZE);
 
-  // Modo debug: loguea todos los tokens procesados
+  // Debug mode: logs every processed token
   private static volatile boolean DEBUG = false;
 
   // Singleton instance for static compile() method
@@ -627,7 +627,7 @@ public final class JitCompiler {
       return CompileResult.unknown(raw);
     }
 
-    // Delegar mapeo de propiedades al CssPropertyMapper
+    // Delegate property mapping to CssPropertyMapper
     String style = propertyMapper.map(t, resolvedValue);
 
     if (style == null || style.isBlank()) {

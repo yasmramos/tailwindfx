@@ -4,17 +4,17 @@ import java.util.*;
 import java.util.regex.*;
 
 /**
- * Parser de variantes compatible con Tailwind CSS v4.
+ * Tailwind CSS v4-compatible variant parser.
  *
- * <p>Soporta todas las variantes oficiales: - State: hover:, focus:, active:, disabled:, etc. -
- * Logical: first:, last:, odd:, even:, etc. - Form: checked:, invalid:, required:, etc. - Content:
- * empty:, only-child:, etc. - Focus: focus-visible:, focus-within: - Group: group-hover:,
- * group-focus:, etc. - Responsive: sm:, md:, lg:, xl:, 2xl: - Theme: dark:, light: - Arbitrary:
+ * <p>Supports all official variants: - State: hover:, focus:, active:, disabled:, etc. - Logical:
+ * first:, last:, odd:, even:, etc. - Form: checked:, invalid:, required:, etc. - Content: empty:,
+ * only-child:, etc. - Focus: focus-visible:, focus-within: - Group: group-hover:, group-focus:,
+ * etc. - Responsive: sm:, md:, lg:, xl:, 2xl: - Theme: dark:, light: - Arbitrary:
  * [@media(min-width:768px)]:, [&:hover]:
  */
 public class VariantParser {
 
-  // Variantes de estado (state variants)
+  // State variants
   private static final Set<String> STATE_VARIANTS =
       Set.of(
           "hover",
@@ -45,7 +45,7 @@ public class VariantParser {
           "nth-2",
           "nth-3");
 
-  // Variantes de formulario (form variants)
+  // Form variants
   private static final Set<String> FORM_VARIANTS =
       Set.of(
           "valid",
@@ -57,14 +57,14 @@ public class VariantParser {
           "read-only",
           "read-write");
 
-  // Variantes de contenido (content variants)
+  // Content variants
   private static final Set<String> CONTENT_VARIANTS =
       Set.of("empty", "placeholder-shown", "autofill");
 
-  // Variantes de foco (focus variants)
+  // Focus variants
   private static final Set<String> FOCUS_VARIANTS = Set.of("focus-visible", "focus-within");
 
-  // Variantes de grupo (group variants)
+  // Group variants
   private static final Set<String> GROUP_VARIANTS =
       Set.of(
           "group-hover",
@@ -73,16 +73,16 @@ public class VariantParser {
           "group-focus-visible",
           "group-focus-within");
 
-  // Variantes responsivas (screen variants)
+  // Responsive (screen) variants
   private static final Set<String> SCREEN_VARIANTS =
       Set.of(
           "sm", "md", "lg", "xl", "2xl", "min-sm", "max-sm", "min-md", "max-md", "min-lg", "max-lg",
           "min-xl", "max-xl", "min-2xl", "max-2xl");
 
-  // Variantes de tema (theme variants)
+  // Theme variants
   private static final Set<String> THEME_VARIANTS = Set.of("dark", "light");
 
-  // Todas las variantes conocidas
+  // All known variants
   private static final Set<String> ALL_VARIANTS = new HashSet<>();
 
   static {
@@ -96,7 +96,7 @@ public class VariantParser {
     ALL_VARIANTS.addAll(THEME_VARIANTS);
   }
 
-  /** Resultado del parseo de un token con variante. */
+  /** Result of parsing a token that may carry a variant. */
   public static class VariantResult {
     private final List<String> variants;
     private final String utility;
@@ -131,15 +131,15 @@ public class VariantParser {
   }
 
   /**
-   * Parsea un token para extraer variantes y la utilidad base.
+   * Parses a token to extract its variants and base utility.
    *
-   * <p>Ejemplos: - "hover:bg-blue-500" → variants=[hover], utility=bg-blue-500 -
+   * <p>Examples: - "hover:bg-blue-500" → variants=[hover], utility=bg-blue-500 -
    * "md:hover:focus:bg-blue-700" → variants=[md, hover, focus], utility=bg-blue-700 - "bg-blue-500"
    * → variants=[], utility=bg-blue-500 - "[@media(min-width:768px)]:w-full" →
    * variants=[@media(min-width:768px)], utility=w-full
    *
-   * @param token El token a parsear
-   * @return Resultado con variantes y utilidad
+   * @param token the token to parse
+   * @return result with the variants and the utility
    */
   public static VariantResult parse(String token) {
     if (token == null || token.trim().isEmpty()) {
@@ -151,7 +151,7 @@ public class VariantParser {
     int pos = 0;
 
     while (pos < token.length()) {
-      // Buscar el siguiente ':'
+      // Find the next ':'
       int colonPos = token.indexOf(':', pos);
 
       if (colonPos == -1) {
@@ -184,26 +184,26 @@ public class VariantParser {
       return false;
     }
 
-    // Variante arbitraria: empieza con '[' y termina con ']'
+    // Arbitrary variant: starts with '[' and ends with ']'
     if (variant.startsWith("[") && variant.endsWith("]")) {
       return true;
     }
 
-    // Variante conocida
+    // Known variant
     return ALL_VARIANTS.contains(variant);
   }
 
-  /** Extrae solo las variantes de un token. */
+  /** Extracts only the variants from a token. */
   public static List<String> extractVariants(String token) {
     return parse(token).getVariants();
   }
 
-  /** Extrae solo la utilidad base de un token. */
+  /** Extracts only the base utility from a token. */
   public static String extractUtility(String token) {
     return parse(token).getUtility();
   }
 
-  /** Reconstruye un token completo a partir de variantes y utilidad. */
+  /** Rebuilds a full token from its variants and utility. */
   public static String reconstruct(List<String> variants, String utility) {
     if (variants == null || variants.isEmpty()) {
       return utility;
@@ -217,7 +217,7 @@ public class VariantParser {
     return sb.toString();
   }
 
-  /** Verifica si un token tiene alguna variante. */
+  /** Checks whether a token carries any variant. */
   public static boolean hasVariant(String token) {
     return parse(token).hasVariant();
   }
@@ -228,7 +228,7 @@ public class VariantParser {
     return result.getVariants().contains(variantName);
   }
 
-  /** Obtiene el tipo de variante (state, screen, theme, etc.) */
+  /** Returns the variant type (state, screen, theme, etc.). */
   public static String getVariantType(String variant) {
     if (variant == null) return "unknown";
 
@@ -245,22 +245,22 @@ public class VariantParser {
     return "unknown";
   }
 
-  /** Convierte una variante a su selector CSS equivalente. */
+  /** Converts a variant to its equivalent CSS selector. */
   public static String toCssSelector(String variant) {
     if (variant == null) return "";
 
-    // Variante arbitraria
+    // Arbitrary variant
     if (variant.startsWith("[") && variant.endsWith("]")) {
       String content = variant.substring(1, variant.length() - 1);
-      // Si es una media query, devolverla directamente
+      // If it is a media query, return it as-is
       if (content.startsWith("@media") || content.startsWith("@container")) {
         return content;
       }
-      // Si es un selector, devolverlo
+      // If it is a selector, return it
       return content;
     }
 
-    // Mapeo de variantes a selectores CSS
+    // Variant-to-CSS-selector mapping
     switch (variant) {
       case "hover":
         return ":hover";
@@ -361,7 +361,7 @@ public class VariantParser {
     }
   }
 
-  /** Obtiene la media query para un breakpoint. */
+  /** Returns the media query for a breakpoint. */
   private static String getBreakpointMediaQuery(String breakpoint) {
     Map<String, String> breakpoints = new HashMap<>();
     breakpoints.put("sm", "(min-width: 640px)");

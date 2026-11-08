@@ -562,8 +562,8 @@ class ThemeManagerIT extends ApplicationTest {
   @Test
   @DisplayName("Should resolve preset names case-insensitively regardless of locale")
   void testPresetUppercaseName() {
-    // Regression: preset(name) usaba toLowerCase() sin Locale.ROOT; en una JVM con locale
-    // turco, "BLUE".toLowerCase() produce "bluÌˆe" y el preset no se encontraba.
+    // Regression: preset(name) used toLowerCase() without Locale.ROOT; on a JVM with a
+    // Turkish locale, "BLUE".toLowerCase() yields a dotless-i and the preset was not found.
     interact(
         () -> {
           ThemeManager.forScene(scene).preset("DARK").apply();
