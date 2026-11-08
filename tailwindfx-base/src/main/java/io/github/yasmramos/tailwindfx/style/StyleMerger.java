@@ -50,7 +50,7 @@ public final class StyleMerger {
   public static void applyJit(Node node, String... tokens) {
     JitCompiler.BatchResult result = JitCompiler.compileBatch(tokens);
 
-    // 1. Inline styles: merge no destructivo
+    // 1. Inline styles: non-destructive merge
     if (result.hasInlineStyle()) {
       String merged = merge(node.getStyle(), result.inlineStyle());
       node.setStyle(merged);

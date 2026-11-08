@@ -121,7 +121,7 @@ public final class StyleToken {
     // 3. Numeric scale: p-4, w-12, -mt-4
     m = SCALE.matcher(token);
     if (m.matches()) {
-      // Detectar sub-prefix: px, py, pt, pr, pb, pl, mx, my, etc.
+      // Detect the sub-prefix: px, py, pt, pr, pb, pl, mx, my, etc.
       String full = m.group(2);
       String[] parts = splitSubPrefix(full);
       // Side border widths with an explicit width: border-t-4, border-x-2, ...
@@ -194,7 +194,7 @@ public final class StyleToken {
         || "y".equals(value);
   }
 
-  // Constructor privado
+  // Private constructor
 
   private StyleToken(
       String raw,
@@ -247,7 +247,7 @@ public final class StyleToken {
     return "StyleToken{" + kind + ", raw=" + raw + "}";
   }
 
-  // Internos
+  // Internal
 
   private static final java.util.Set<String> COLOR_NAMES =
       java.util.Set.of(

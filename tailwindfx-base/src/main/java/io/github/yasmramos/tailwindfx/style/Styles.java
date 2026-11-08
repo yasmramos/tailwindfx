@@ -831,7 +831,7 @@ public final class Styles {
     return node;
   }
 
-  // INTERNOS
+  // INTERNAL
 
   private static void applyOrMergeColorAdjust(
       Node node, double brightness, double saturation, double contrast, double hue) {

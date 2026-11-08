@@ -112,7 +112,7 @@ public final class ThemeScopeManager {
     }
   }
 
-  // Builder interno
+  // Internal builder
 
   public static final class ScopeBuilder {
 
@@ -359,7 +359,7 @@ public final class ThemeScopeManager {
     javafx.application.Platform.runLater(() -> pane.setStyle(style));
   }
 
-  // Internos
+  // Internal
 
   private static final Set<String> THEME_VARS =
       Set.of(
