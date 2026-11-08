@@ -140,6 +140,11 @@
     -fx-cursor: default;
 }
 
+/* Loading button: the disabled rule dims it, and this adds a distinct wait cue. */
+.btn-loading {
+    -fx-cursor: wait;
+}
+
 /* Icon button */
 .btn-icon {
     -fx-padding: 8px;
@@ -713,8 +718,12 @@
     -fx-border-width: 2;
 }
 
-/* Dropdown popup list, so the opened list matches the field styling */
-.select-popup .list-view {
+/*
+ * Dropdown popup list, so the opened list matches the field styling. JavaFX tags the ComboBox
+ * popup with the "combo-box-popup" class, so the rules must target that class (a custom
+ * "select-popup" class would never match and the popup would keep the default styling).
+ */
+.combo-box-popup .list-view {
     -fx-background-color: -tw-surface;
     -fx-border-color: -tw-border;
     -fx-border-width: 1;
@@ -722,12 +731,12 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 8, 0, 0, 2);
 }
 
-.select-popup .list-cell {
+.combo-box-popup .list-cell {
     -fx-padding: 8px 12px;
 }
 
-.select-popup .list-cell:filled:selected,
-.select-popup .list-cell:filled:hover {
+.combo-box-popup .list-cell:filled:selected,
+.combo-box-popup .list-cell:filled:hover {
     -fx-background-color: #eff6ff;
 }
 
@@ -875,12 +884,51 @@
     -fx-padding: 12px;
 }
 
-.data-table .table-row-cell:odd {
+/*
+ * Default zebra striping via :odd, plus the opt-in table-* modifiers TwDataTable documents.
+ * TwDataTable also tags every row with row-even / row-odd so a custom row factory can still drive
+ * striping and hover without the :odd pseudo-class.
+ */
+.data-table .table-row-cell:odd,
+.data-table.table-striped .table-row-cell.row-odd {
     -fx-background-color: -tw-surface-muted;
+}
+
+.data-table.table-hover .table-row-cell:filled:hover {
+    -fx-background-color: -tw-surface-subtle;
+}
+
+.data-table.table-compact .table-row-cell {
+    -fx-padding: 4px 12px;
+}
+
+.data-table.table-bordered .table-row-cell {
+    -fx-border-width: 0 1 1 0;
 }
 
 .data-table .table-row-cell:selected {
     -fx-background-color: #dbeafe;
+}
+
+/* Search bar rendered above a searchable TwDataTable (a sibling of the table, not a child). */
+.search-bar {
+    -fx-padding: 0 0 8 0;
+}
+
+.search-field {
+    -fx-background-color: -tw-surface;
+    -fx-background-radius: 6px;
+    -fx-border-color: -tw-border-strong;
+    -fx-border-width: 1;
+    -fx-border-radius: 6px;
+    -fx-padding: 8px 12px;
+    -fx-font-size: 14px;
+    -fx-text-fill: -tw-text;
+}
+
+.search-field:focused {
+    -fx-border-color: #3b82f6;
+    -fx-border-width: 2;
 }
 
 /* =============================================================================
@@ -1026,7 +1074,7 @@
     -fx-background-color: #1e3a8a99;
 }
 
-.dark .select-popup .list-cell:filled:selected,
-.dark .select-popup .list-cell:filled:hover {
+.dark .combo-box-popup .list-cell:filled:selected,
+.dark .combo-box-popup .list-cell:filled:hover {
     -fx-background-color: #1e3a8a66;
 }
