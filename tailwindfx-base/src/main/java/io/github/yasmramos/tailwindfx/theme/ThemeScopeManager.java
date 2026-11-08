@@ -351,15 +351,18 @@ public final class ThemeScopeManager {
    */
   public static void refreshScope(javafx.scene.layout.Pane pane) {
     if (pane == null || !hasScope(pane)) return;
-    // Force CSS re-evaluation by briefly toggling a dummy class
-    String style = pane.getStyle();
+    // A style-class change makes the CSS engine re-evaluate the node on the next pulse.
+    // Toggling a marker class achieves that without blanking the inline style: the previous
+    // implementation did pane.setStyle("") and restored it in Platform.runLater, which left
+    // the scope unset whenever no later pulse ran and briefly dropped the theme otherwise.
+    pane.getStyleClass().add(REFRESH_CLASS);
+    pane.getStyleClass().remove(REFRESH_CLASS);
     pane.applyCss();
-    // Re-apply the existing style to flush the CSS engine
-    pane.setStyle("");
-    javafx.application.Platform.runLater(() -> pane.setStyle(style));
   }
 
   // Internal
+
+  private static final String REFRESH_CLASS = "tailwindfx-scope-refresh";
 
   private static final Set<String> THEME_VARS =
       Set.of(

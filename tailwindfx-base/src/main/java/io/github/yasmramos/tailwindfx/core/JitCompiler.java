@@ -87,130 +87,6 @@ public final class JitCompiler {
     this.propertyMapper = new CssPropertyMapper(themeConfig);
   }
 
-  /**
-   * Detects if a token requires JIT compilation (arbitrary values only). Matches Tailwind CSS v4
-   * candidate parsing logic.
-   *
-   * <p>JIT triggers: - Arbitrary values: w-[320px], bg-[#fff], text-[length:var(--x)] - Arbitrary
-   * modifiers: bg-red-500/[0.3], hover:bg-[#fff]/(0.5) - Arbitrary properties: [color:red],
-   * [mask-type:luminance]
-   *
-   * <p>NOT JIT (predefined utilities): - w-32, bg-red-500, -mt-4, col-1, z-10
-   *
-   * <p>IMPORTANT: This method validates that '/' is used for opacity/modifiers on known color
-   * utilities, not arbitrary class names like 'icon/large'.
-   */
-  private static boolean requiresJitCompilation(String token) {
-    if (token == null || token.isEmpty()) return false;
-
-    // Fast path: arbitrary property [...]
-    if (token.startsWith("[") && token.endsWith("]")) {
-      // Must contain : for property:value syntax
-      return token.indexOf(':', 1) > 1; // [color:red] ✓, [] ✗
-    }
-
-    int lastSlashIndex = token.lastIndexOf('/');
-
-    if (lastSlashIndex == -1) {
-      // No slash, check for arbitrary values in base
-      return containsArbitraryValue(token);
-    }
-
-    String base = token.substring(0, lastSlashIndex);
-    String modifier = token.substring(lastSlashIndex + 1);
-
-    // If modifier is numeric (opacity), validate base normally
-    if (isNumeric(modifier)) {
-      return containsArbitraryValue(base);
-    }
-
-    // If modifier is arbitrary [...] or (...) → JIT
-    if (isArbitraryValue(modifier)) {
-      return true;
-    }
-
-    // If base contains arbitrary values → JIT
-    if (containsArbitraryValue(base)) {
-      return true;
-    }
-
-    // CRITICAL: Only treat '/' as JIT trigger if base is a known color utility.
-    // This prevents false positives like 'icon/large' being treated as JIT.
-    // Valid: bg-red-500/80, text-gray-900/50
-    // Invalid: icon/large, btn-primary/custom
-    if (!isValidColorUtilityBase(base)) {
-      // Not a valid color utility with opacity modifier, so not JIT
-      return false;
-    }
-
-    return true;
-  }
-
-  /**
-   * Checks if a string is numeric (integer or decimal).
-   *
-   * @param str the string to check
-   * @return true if it's a valid number
-   */
-  private static boolean isNumeric(String str) {
-    if (str == null || str.isEmpty()) return false;
-    return str.matches("\\d+(\\.\\d+)?");
-  }
-
-  /**
-   * Validates if a base token (before /) is a valid color utility that can have opacity. Examples:
-   * bg-red-500, text-gray-900, border-blue-300
-   *
-   * @param base the token before the '/' modifier
-   * @return true if this is a valid color utility base
-   */
-  private static boolean isValidColorUtilityBase(String base) {
-    // Delegate to shared utility class
-    return ColorUtilityValidator.isValidColorUtilityBase(base);
-  }
-
-  /**
-   * Checks if a string contains an arbitrary value in [...] syntax. Handles nested parens/brackets
-   * like calc(100px-4rem) or var(--x).
-   */
-  private static boolean containsArbitraryValue(String input) {
-    int bracketDepth = 0;
-    int start = -1;
-
-    for (int i = 0; i < input.length(); i++) {
-      char c = input.charAt(i);
-
-      if (c == '[' && bracketDepth == 0) {
-        start = i;
-        bracketDepth++;
-      } else if (c == '[') {
-        bracketDepth++;
-      } else if (c == ']') {
-        bracketDepth--;
-        if (bracketDepth == 0 && start >= 0) {
-          // Found complete [...] - validate it's not empty
-          String arbitrary = input.substring(start + 1, i);
-          return !arbitrary.isEmpty() && !arbitrary.trim().isEmpty();
-        }
-      }
-      // Skip escaped chars and strings for robustness (simplified)
-    }
-    return false;
-  }
-
-  /** Checks if a modifier/value is arbitrary: [...] or (...) for CSS vars. */
-  private static boolean isArbitraryValue(String value) {
-    if (value == null || value.length() < 2) return false;
-
-    // Arbitrary: [value] or (var(--x))
-    if ((value.startsWith("[") && value.endsWith("]"))
-        || (value.startsWith("(") && value.endsWith(")"))) {
-      String content = value.substring(1, value.length() - 1);
-      return !content.isEmpty() && !content.trim().isEmpty();
-    }
-    return false;
-  }
-
   public static void setDebug(boolean enabled) {
     DEBUG = enabled;
   }
@@ -504,7 +380,7 @@ public final class JitCompiler {
             cssClasses.add(result.cssClass());
           }
           boolean isGradientRelated = GradientProcessor.isGradientToken(t);
-          if (!result.isKnown() && requiresJitCompilation(t) && !isGradientRelated) {
+          if (!result.isKnown() && TokenRegistry.requiresJitCompilation(t) && !isGradientRelated) {
             LOG.warning(
                 "TailwindFX JIT: unknown token '"
                     + t

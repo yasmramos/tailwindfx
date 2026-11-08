@@ -3,6 +3,7 @@ package io.github.yasmramos.tailwindfx.components;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import javafx.animation.PauseTransition;
@@ -194,7 +195,7 @@ public final class TwDataTable<T> extends TableView<T> {
           // Search across all column values.
           return cols.stream()
               .map(col -> col.value().apply(item))
-              .anyMatch(val -> val != null && val.toLowerCase().contains(term));
+              .anyMatch(val -> val != null && val.toLowerCase(Locale.ROOT).contains(term));
         });
   }
 
@@ -425,7 +426,7 @@ public final class TwDataTable<T> extends TableView<T> {
               (obs, ov, nv) -> {
                 debounce.setOnFinished(
                     e -> {
-                      searchTerm = nv == null ? "" : nv.toLowerCase();
+                      searchTerm = nv == null ? "" : nv.toLowerCase(Locale.ROOT);
                       recomputeFilter();
                       if (paginated) {
                         currentPage = 0;

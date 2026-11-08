@@ -1055,7 +1055,9 @@ public class TwFlexPane extends Pane {
         }
       }
       case AROUND -> {
-        double unit = free / rowHeights.length;
+        // Same clamp as justifyPositions: on overflow (free < 0) a negative unit would
+        // place rows above the container.
+        double unit = Math.max(0, free) / rowHeights.length;
         double y = unit / 2;
         for (int i = 0; i < rowHeights.length; i++) {
           pos[i] = y;
@@ -1063,7 +1065,7 @@ public class TwFlexPane extends Pane {
         }
       }
       case EVENLY -> {
-        double unit = free / (rowHeights.length + 1);
+        double unit = Math.max(0, free) / (rowHeights.length + 1);
         double y = unit;
         for (int i = 0; i < rowHeights.length; i++) {
           pos[i] = y;
@@ -1129,12 +1131,6 @@ public class TwFlexPane extends Pane {
       a = eff;
     }
     return a == Align.STRETCH ? axisW : naturalPrefW(n);
-  }
-
-  /** Returns the effective align for a child, respecting align-self override. */
-  private Align effectiveAlign(Node n) {
-    Align self = getAlignSelf(n);
-    return self != null ? self : align;
   }
 
   private double alignedH(Node n, double axisH, Align a) {
