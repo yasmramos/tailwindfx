@@ -349,6 +349,14 @@ public final class CssPropertyMapper {
         if (token.scale == null) {
           return prop("-fx-border-width", "1px");
         }
+        // Side border widths (border-t, border-x, border-l-4, ...) expand to the JavaFX
+        // four-value form (top right bottom left) so only the requested side(s) get a stroke.
+        if (token.subPrefix != null) {
+          String sideWidth = expandBorderSideWidth(token.subPrefix, resolvedValue);
+          if (sideWidth != null) {
+            return prop("-fx-border-width", sideWidth);
+          }
+        }
         return prop("-fx-border-width", resolvedValue);
       }
       // Otherwise it's a border color (COLOR_SHADE type), continue with default mapping
@@ -497,6 +505,23 @@ public final class CssPropertyMapper {
         || "dashed".equals(value)
         || "dotted".equals(value)
         || "none".equals(value);
+  }
+
+  /**
+   * Expands a Tailwind side border (t, r, b, l, x, y) into the JavaFX four-value shorthand
+   * (top right bottom left). Returns {@code null} for an unrecognized side.
+   */
+  private String expandBorderSideWidth(String side, String width) {
+    String zero = "0px";
+    return switch (side) {
+      case "t" -> width + " " + zero + " " + zero + " " + zero;
+      case "r" -> zero + " " + width + " " + zero + " " + zero;
+      case "b" -> zero + " " + zero + " " + width + " " + zero;
+      case "l" -> zero + " " + zero + " " + zero + " " + width;
+      case "x" -> zero + " " + width + " " + zero + " " + width;
+      case "y" -> width + " " + zero + " " + width + " " + zero;
+      default -> null;
+    };
   }
 
   private static String prop(String name, String value) {

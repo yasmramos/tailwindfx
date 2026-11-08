@@ -478,41 +478,40 @@ public final class JitCompiler {
         }
 
         CompileResult result = compile(cleanToken);
-        if (result.hasInlineStyle()) {
-          inlineStyle.append(result.inlineStyle()).append(" ");
-        }
-        if (result.hasCssClass()) {
-          cssClasses.add(result.cssClass());
-        }
 
-        // Try specialized processors for unrecognized tokens. Use the modifier-free token
-        // (no '!' suffix, no 'dark:' prefix) so processors match the bare utility; the dark
-        // flag is preserved separately via result.isDarkMode() and hasDarkMode above.
+        // Specialized processors own utilities whose effect cannot be reproduced by a stylesheet
+        // class (ring, aspect-ratio, scroll-snap, container-query, transition). They must run
+        // whenever the generic compiler did not already emit inline CSS: some of these tokens
+        // (e.g. "ring-2", "ring-blue-500") resolve to a cssClass that has no matching rule, so
+        // gating on !result.isKnown() alone left them as silent no-ops.
         String specializedToken = cleanToken;
         if (specializedToken.startsWith(DARK_PREFIX)) {
           specializedToken = specializedToken.substring(DARK_PREFIX.length());
         }
-        if (!result.isKnown()) {
-          String specializedStyle = processSpecializedToken(specializedToken);
-          if (specializedStyle != null) {
-            inlineStyle.append(specializedStyle).append(" ");
-          } else {
-            boolean isGradientRelated = GradientProcessor.isGradientToken(t);
-            if (requiresJitCompilation(t) && !isGradientRelated) {
-              LOG.warning(
-                  "TailwindFX JIT: unknown token '"
-                      + t
-                      + "' (looks like a JIT utility but was not recognized)");
-            } else if (DEBUG) {
-              LOG.info("TailwindFX JIT: '" + t + "' → CSS class (fallback to stylesheet)");
-            }
+        String specializedStyle =
+            result.hasInlineStyle() ? null : processSpecializedToken(specializedToken);
+
+        if (result.hasInlineStyle()) {
+          inlineStyle.append(result.inlineStyle()).append(" ");
+          if (result.hasCssClass()) {
+            cssClasses.add(result.cssClass());
           }
-        } else if (DEBUG) {
-          String what =
-              result.hasInlineStyle()
-                  ? "inline: " + result.inlineStyle().trim()
-                  : "class: " + result.cssClass();
-          LOG.info("TailwindFX JIT: '" + t + "' → " + what);
+        } else if (specializedStyle != null) {
+          // Specialized output wins; do not also register the dead fallback class.
+          inlineStyle.append(specializedStyle).append(" ");
+        } else {
+          if (result.hasCssClass()) {
+            cssClasses.add(result.cssClass());
+          }
+          boolean isGradientRelated = GradientProcessor.isGradientToken(t);
+          if (!result.isKnown() && requiresJitCompilation(t) && !isGradientRelated) {
+            LOG.warning(
+                "TailwindFX JIT: unknown token '"
+                    + t
+                    + "' (looks like a JIT utility but was not recognized)");
+          } else if (DEBUG) {
+            LOG.info("TailwindFX JIT: '" + t + "' → CSS class (fallback to stylesheet)");
+          }
         }
       }
     }

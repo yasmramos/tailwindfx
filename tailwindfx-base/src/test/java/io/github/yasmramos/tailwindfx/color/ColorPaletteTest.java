@@ -202,4 +202,25 @@ class ColorPaletteTest {
       assertNotNull(color, colorName + " should be supported");
     }
   }
+
+  @Nested
+  @DisplayName("Locale Independence")
+  class LocaleIndependence {
+
+    @Test
+    @DisplayName("rgba() must use a dot decimal separator regardless of default locale")
+    void testRgbaIsLocaleIndependent() {
+      java.util.Locale original = java.util.Locale.getDefault();
+      try {
+        java.util.Locale.setDefault(java.util.Locale.GERMANY);
+        String color = ColorPalette.fxColor("blue", 500, 0.8);
+        assertNotNull(color);
+        assertTrue(color.startsWith("rgba("), color);
+        assertTrue(color.contains("0.80"), "Expected dot separator but got: " + color);
+        assertFalse(color.contains("0,80"), "Comma separator leaked into CSS: " + color);
+      } finally {
+        java.util.Locale.setDefault(original);
+      }
+    }
+  }
 }
