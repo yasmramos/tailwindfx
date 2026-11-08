@@ -56,51 +56,71 @@ public final class GradientProcessor {
       return new GradientResult(null, false);
     }
 
-    String direction = null;
-    String fromColor = null;
-    String viaColor = null;
-    String toColor = null;
-    boolean hasGradient = false;
+    GradientHolder holder = new GradientHolder();
 
     for (String token : tokens) {
       if (token == null || token.isBlank()) {
         continue;
       }
 
-      // Check for gradient direction
-      if (token.startsWith(GRADIENT_PREFIX)) {
-        direction = mapDirection(token.substring(GRADIENT_PREFIX.length()));
-        hasGradient = true;
-
-      } else if (token.startsWith(FROM_PREFIX)) {
-        String colorResolved = resolveGradientColor(token.substring(FROM_PREFIX.length()));
-        if (colorResolved != null) {
-          fromColor = colorResolved;
-          hasGradient = true;
-        }
-
-      } else if (token.startsWith(VIA_PREFIX)) {
-        String colorResolved = resolveGradientColor(token.substring(VIA_PREFIX.length()));
-        if (colorResolved != null) {
-          viaColor = colorResolved;
-          hasGradient = true;
-        }
-
-      } else if (token.startsWith(TO_PREFIX)) {
-        String colorResolved = resolveGradientColor(token.substring(TO_PREFIX.length()));
-        if (colorResolved != null) {
-          toColor = colorResolved;
-          hasGradient = true;
-        }
+      // A single array element may itself contain several whitespace-separated utilities
+      // ("bg-gradient-to-r from-blue-500 to-red-500"). Without splitting, the whole string
+      // is treated as one direction token and the colors are never resolved, yielding an
+      // empty gradient.
+      for (String part : token.split("\\s+")) {
+        processGradientPart(part, holder);
       }
     }
 
-    if (!hasGradient) {
+    if (!holder.hasGradient) {
       return new GradientResult(null, false);
     }
 
-    String css = buildGradient(direction, fromColor, viaColor, toColor);
+    String css =
+        buildGradient(holder.direction, holder.fromColor, holder.viaColor, holder.toColor);
     return new GradientResult(css, true);
+  }
+
+  /** Mutable accumulator for the values collected while scanning gradient tokens. */
+  private static final class GradientHolder {
+    private String direction;
+    private String fromColor;
+    private String viaColor;
+    private String toColor;
+    private boolean hasGradient;
+  }
+
+  private static void processGradientPart(String token, GradientHolder holder) {
+    if (token == null || token.isBlank()) {
+      return;
+    }
+
+    // Check for gradient direction
+    if (token.startsWith(GRADIENT_PREFIX)) {
+      holder.direction = mapDirection(token.substring(GRADIENT_PREFIX.length()));
+      holder.hasGradient = true;
+
+    } else if (token.startsWith(FROM_PREFIX)) {
+      String colorResolved = resolveGradientColor(token.substring(FROM_PREFIX.length()));
+      if (colorResolved != null) {
+        holder.fromColor = colorResolved;
+        holder.hasGradient = true;
+      }
+
+    } else if (token.startsWith(VIA_PREFIX)) {
+      String colorResolved = resolveGradientColor(token.substring(VIA_PREFIX.length()));
+      if (colorResolved != null) {
+        holder.viaColor = colorResolved;
+        holder.hasGradient = true;
+      }
+
+    } else if (token.startsWith(TO_PREFIX)) {
+      String colorResolved = resolveGradientColor(token.substring(TO_PREFIX.length()));
+      if (colorResolved != null) {
+        holder.toColor = colorResolved;
+        holder.hasGradient = true;
+      }
+    }
   }
 
   /**

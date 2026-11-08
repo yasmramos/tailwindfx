@@ -84,6 +84,21 @@ class JitCompilerTest {
     }
 
     @Test
+    @DisplayName("Should compile a complete gradient passed as one string")
+    void testWholeGradientString() {
+      // A single array element containing a full gradient must be split into its parts
+      // instead of being treated as an unknown direction token.
+      JitCompiler.BatchResult result =
+          JitCompiler.compileBatch("bg-gradient-to-r from-blue-500 to-red-500");
+
+      assertTrue(result.hasInlineStyle(), "Whole gradient string should produce inline style");
+      assertTrue(result.inlineStyle().contains("linear-gradient"));
+      assertTrue(result.inlineStyle().contains("to right"));
+      assertTrue(result.inlineStyle().contains("#3b82f6"));
+      assertTrue(result.inlineStyle().contains("#ef4444"));
+    }
+
+    @Test
     @DisplayName("Should resolve Tailwind color names to hex")
     void testColorResolution() {
       JitCompiler.BatchResult result =
