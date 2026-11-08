@@ -256,7 +256,10 @@ public final class StyleToken {
           "fuchsia", "pink", "rose", "white", "black");
 
   private static boolean isColorName(String s) {
-    return COLOR_NAMES.contains(s);
+    // ColorPalette is the single source of truth for color families, so custom families
+    // (mauve, olive, mist, taupe, ...) are recognized without duplicating the list here.
+    return COLOR_NAMES.contains(s)
+        || io.github.yasmramos.tailwindfx.color.ColorPalette.isFamily(s);
   }
 
   /** Prefixes that are named values without a scale (visible, hidden, overflow-*, cursor-*, etc.) */
