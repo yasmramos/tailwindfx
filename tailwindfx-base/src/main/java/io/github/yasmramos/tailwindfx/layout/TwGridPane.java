@@ -619,7 +619,10 @@ public final class TwGridPane extends Pane {
         if (isCol) {
           pos = new int[] {curCol, curRow};
           curRow += rs;
-          if (curRow >= (rows > 0 ? rows : Integer.MAX_VALUE)) {
+          // Fill down the current column up to the row count, then move to the next column.
+          // Using the inferred gridRows (not the raw `rows` field, which is 0 when unset) keeps
+          // this from overflowing past Integer.MAX_VALUE and stacking every child in column 0.
+          if (curRow >= gridRows) {
             curRow = 0;
             curCol++;
           }
