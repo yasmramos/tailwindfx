@@ -123,6 +123,61 @@ class TwFlexPaneLayoutTest extends ApplicationTest {
   }
 
   @Test
+  @DisplayName("Row grow with a gap must not overflow the container")
+  void rowGrowWithGapStaysWithinContainer() {
+    TwFlexPane pane = new TwFlexPane();
+    pane.gap(40);
+    Region a = new Region();
+    a.setPrefWidth(100);
+    Region b = new Region();
+    b.setPrefWidth(100);
+    pane.getChildren().addAll(a, b);
+    TwFlexPane.setGrow(a, 1);
+    TwFlexPane.setGrow(b, 1);
+    pane.resize(400, 100);
+
+    interact(
+        () -> {
+          pane.applyCss();
+          pane.layout();
+        });
+
+    double used = a.getWidth() + b.getWidth() + 40;
+    assertTrue(
+        used <= 400.0 + 0.5,
+        "children plus gap must fit the container, used " + used + " of 400");
+    assertEquals(180.0, a.getWidth(), 1.0);
+  }
+
+  @Test
+  @DisplayName("Column grow with a gap must not overflow the container")
+  void colGrowWithGapStaysWithinContainer() {
+    TwFlexPane pane = new TwFlexPane();
+    pane.setDirection(TwFlexPane.Direction.COL);
+    pane.gap(40);
+    Region a = new Region();
+    a.setPrefHeight(100);
+    Region b = new Region();
+    b.setPrefHeight(100);
+    pane.getChildren().addAll(a, b);
+    TwFlexPane.setGrow(a, 1);
+    TwFlexPane.setGrow(b, 1);
+    pane.resize(200, 400);
+
+    interact(
+        () -> {
+          pane.applyCss();
+          pane.layout();
+        });
+
+    double used = a.getHeight() + b.getHeight() + 40;
+    assertTrue(
+        used <= 400.0 + 0.5,
+        "children plus gap must fit the container, used " + used + " of 400");
+    assertEquals(180.0, a.getHeight(), 1.0);
+  }
+
+  @Test
   @DisplayName("Column layout stacks children and honours gap")
   void columnLayoutStacks() {
     TwFlexPane pane = new TwFlexPane();

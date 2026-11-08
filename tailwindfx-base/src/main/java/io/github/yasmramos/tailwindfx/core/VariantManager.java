@@ -383,39 +383,33 @@ public class VariantManager {
   public static void applyGroupVariant(
       Node node, String variant, String utility, JitCompiler jitCompiler) {
     String groupVariant = variant.substring(6); // Remove "group-" prefix
+    if (!"hover".equals(groupVariant)) {
+      return; // only group-hover is supported
+    }
 
-    // Create a listener that searches for .group parent and attaches handlers
+    // Handlers are stored per node so re-parenting can detach exactly the pair that was attached.
+    // addEventHandler/removeEventHandler (not setOnMouseEntered) is required: the latter replaces
+    // any handler already on the group parent, so a second group-hover child (or a user handler)
+    // would silently clobber the first.
+    final String KEY = "tailwindfx.group.handlers";
+
     var parentListener =
         (javafx.beans.value.ChangeListener<javafx.scene.Parent>)
             (obs, oldParent, newParent) -> {
-              // Remove listeners from old parent
-              if (oldParent != null) {
-                oldParent.setOnMouseEntered(null);
-                oldParent.setOnMouseExited(null);
-              }
+              detachGroupHandlers(node, KEY);
 
               // Search for .group parent in new hierarchy
               javafx.scene.Parent parent = newParent;
               while (parent != null) {
                 if (parent.getStyleClass().contains("group")) {
-                  switch (groupVariant) {
-                    case "hover":
-                      parent.setOnMouseEntered(
-                          e -> {
-                            JitCompiler.CompileResult result = jitCompiler.compile(utility);
-                            if (result != null && result.hasInlineStyle()) {
-                              applyStyle(node, result.inlineStyle());
-                            }
-                          });
-                      parent.setOnMouseExited(
-                          e -> {
-                            JitCompiler.CompileResult result = jitCompiler.compile(utility);
-                            if (result != null && result.hasInlineStyle()) {
-                              removeStyle(node, result.inlineStyle());
-                            }
-                          });
-                      break;
-                  }
+                  javafx.event.EventHandler<javafx.scene.input.MouseEvent> enter =
+                      e -> applyCompiledStyle(node, utility, jitCompiler);
+                  javafx.event.EventHandler<javafx.scene.input.MouseEvent> exit =
+                      e -> removeCompiledStyle(node, utility, jitCompiler);
+                  parent.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_ENTERED, enter);
+                  parent.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_EXITED, exit);
+                  node.getProperties()
+                      .put(KEY, new Object[] {parent, enter, exit});
                   break;
                 }
                 parent = parent.getParent();
@@ -427,6 +421,37 @@ public class VariantManager {
 
     // Trigger initial search
     parentListener.changed(null, null, node.getParent());
+  }
+
+  /** Detaches the group-variant handler pair previously recorded on {@code node}, if any. */
+  private static void detachGroupHandlers(Node node, String key) {
+    Object[] recorded = (Object[]) node.getProperties().remove(key);
+    if (recorded == null) {
+      return;
+    }
+    javafx.scene.Parent parent = (javafx.scene.Parent) recorded[0];
+    parent.removeEventHandler(
+        javafx.scene.input.MouseEvent.MOUSE_ENTERED,
+        (javafx.event.EventHandler<javafx.scene.input.MouseEvent>) recorded[1]);
+    parent.removeEventHandler(
+        javafx.scene.input.MouseEvent.MOUSE_EXITED,
+        (javafx.event.EventHandler<javafx.scene.input.MouseEvent>) recorded[2]);
+  }
+
+  /** Compiles {@code utility} and merges its inline style into the node. */
+  private static void applyCompiledStyle(Node node, String utility, JitCompiler jitCompiler) {
+    JitCompiler.CompileResult result = jitCompiler.compile(utility);
+    if (result != null && result.hasInlineStyle()) {
+      applyStyle(node, result.inlineStyle());
+    }
+  }
+
+  /** Compiles {@code utility} and removes its properties from the node's inline style. */
+  private static void removeCompiledStyle(Node node, String utility, JitCompiler jitCompiler) {
+    JitCompiler.CompileResult result = jitCompiler.compile(utility);
+    if (result != null && result.hasInlineStyle()) {
+      removeStyle(node, result.inlineStyle());
+    }
   }
 
   /** Applies an arbitrary variant ([@media...], [&:hover]) to a node. */

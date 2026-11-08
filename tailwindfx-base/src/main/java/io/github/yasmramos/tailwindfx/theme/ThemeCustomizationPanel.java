@@ -584,7 +584,10 @@ public class ThemeCustomizationPanel extends VBox {
         parseAndApplyConfig(content);
         showAlert("Success", "Configuration imported from:\n" + file.getAbsolutePath());
 
-      } catch (IOException e) {
+      } catch (IOException | RuntimeException e) {
+        // parseAndApplyConfig wraps malformed values (bad colour, non-numeric slider) in a
+        // RuntimeException; without catching it here a corrupt file would escape on the FX
+        // thread instead of reporting a friendly error.
         showAlert("Error", "Failed to import configuration: " + e.getMessage());
       }
     }
