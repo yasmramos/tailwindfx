@@ -33,23 +33,36 @@ public final class TwMetrics {
 
   private TwMetrics() {}
 
-  /** Generates a debug report for a node. */
+  /**
+   * Generates a debug report of the collected metrics.
+   *
+   * @param node the node the report relates to; currently informational only
+   * @return the formatted metrics report
+   */
   public static String debugReport(Node node) {
     // Delegate to existing report mechanism
     return TailwindFXMetrics.instance().report();
   }
 
-  /** Runs a health check on the TailwindFX system. */
+  /** Runs a health check on the TailwindFX system and prints the result. */
   public static void healthCheck() {
     TailwindFXMetrics.instance().printHealth();
   }
 
-  /** Enables or disables metrics collection. */
+  /**
+   * Enables or disables metrics collection.
+   *
+   * @param enabled {@code true} to collect metrics, {@code false} to stop
+   */
   public static void setEnabled(boolean enabled) {
     TailwindFXMetrics.instance().setEnabled(enabled);
   }
 
-  /** Returns whether metrics collection is enabled. */
+  /**
+   * Returns whether metrics collection is enabled.
+   *
+   * @return {@code true} if metrics are being collected
+   */
   public static boolean isEnabled() {
     return TailwindFXMetrics.instance().isEnabled();
   }
