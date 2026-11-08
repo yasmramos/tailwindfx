@@ -1325,7 +1325,7 @@ public final class Styles {
    *
    * <pre>
    * Styles.glass(panel);
-   * TailwindFX.backdropBlur(panel, 12); // blur the content behind
+   * TwEffect.backdropBlur(panel, 12); // blur the content behind
    * </pre>
    *
    * @param node the node to style as glass

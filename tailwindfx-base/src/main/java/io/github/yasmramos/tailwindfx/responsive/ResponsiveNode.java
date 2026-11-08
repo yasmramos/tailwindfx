@@ -66,8 +66,8 @@ import javafx.scene.Scene;
  *   <li>On resize, finds the highest breakpoint whose minWidth ≤ scene width.
  *   <li>Removes the previous breakpoint's classes, applies the new ones via {@link
  *       UtilityConflictResolver#applyAll}.
- *   <li>Base classes (registered with {@link #base}) are always present and are applied before
- *       breakpoint-specific classes.
+ *   <li>Base classes (registered with {@link Builder#base}) are always present and are applied
+ *       before breakpoint-specific classes.
  * </ol>
  */
 public final class ResponsiveNode {

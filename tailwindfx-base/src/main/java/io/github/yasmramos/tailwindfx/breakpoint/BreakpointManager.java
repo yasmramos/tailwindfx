@@ -43,7 +43,7 @@ import javafx.stage.Stage;
  * <p>Classes are CUMULATIVE like in Tailwind. .bp-lg implies that .bp-sm and .bp-md are also
  * active.
  *
- * <p>Basic usage: TailwindFX.responsive(stage) .onBreakpoint(Breakpoint.MD, () -> adaptLayout());
+ * <p>Basic usage: TwResponsive.forStage(stage).onBreakpoint(Breakpoint.MD, () -> adaptLayout());
  *
  * <p>With custom breakpoints: BreakpointManager.custom() .add("phone", 0) .add("tablet", 600)
  * .add("desktop", 960) .attach(stage);

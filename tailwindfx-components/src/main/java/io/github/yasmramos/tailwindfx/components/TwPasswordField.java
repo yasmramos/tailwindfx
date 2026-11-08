@@ -5,13 +5,14 @@ import javafx.scene.control.PasswordField;
 /**
  * TwPasswordField — Masked password input styled with the TailwindFX input classes.
  *
- * <p>JavaFX only masks characters in a {@link PasswordField}; a plain {@link TextField} cannot hide
- * its content. This component therefore extends {@code PasswordField} directly and reuses the same
- * {@code tw-input} styling, error state and input formatters as {@link TwInput}.
+ * <p>JavaFX only masks characters in a {@link PasswordField}; a plain
+ * {@link javafx.scene.control.TextField} cannot hide its content. This component therefore extends
+ * {@code PasswordField} directly and reuses the same {@code tw-input} styling, error state and
+ * input formatters as {@link TwInput}.
  *
  * <pre>
  * TwPasswordField password = TwPasswordField.create();
- * password.setErrorMessage("Password is required");
+ * password.setError(true);
  * </pre>
  */
 public class TwPasswordField extends PasswordField {

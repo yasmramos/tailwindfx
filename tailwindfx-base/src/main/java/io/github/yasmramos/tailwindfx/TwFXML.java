@@ -98,7 +98,6 @@ public final class TwFXML {
    * @param root the root node of the scene graph to enable auto-JIT on
    * @throws IllegalArgumentException if root is null
    * @see #disableAutoJit(Parent)
-   * @see TwConfig#autoJitFromStyleClass(boolean)
    */
   public static void enableAutoJit(Parent root) {
     if (root == null) {
