@@ -11,8 +11,8 @@
 
 - Author: `yasmramos` <yasmramos95@gmail.com> (already set via `git config user.name` / `user.email`).
 - **Never add AI attribution anywhere.** This covers commits, pull requests and
-  issues. Do not add `Co-authored-by: openhands`, `Generated with ...`,
-  `This PR was created by an AI agent ...`, or any similar trailer, banner or
+  issues. Do not add `Co-authored-by: openhands`, `Generated with ...`, any
+  "created by an AI agent" credit line, or any similar trailer, banner or
   footer. Commits, PR descriptions and issue bodies must read as if written
   solely by `yasmramos`.
   - When a PR is opened, strip any attribution footer that the tooling may have
