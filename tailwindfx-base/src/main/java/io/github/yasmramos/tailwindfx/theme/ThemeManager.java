@@ -133,7 +133,7 @@ public final class ThemeManager {
             "#94a3b8"));
   }
 
-  /** Lista de temas disponibles */
+  /** List of available themes. */
   public static List<String> availableThemes() {
     return new ArrayList<>(PRESETS.keySet());
   }
@@ -201,7 +201,7 @@ public final class ThemeManager {
     return preset("light");
   }
 
-  // Builder — variables individuales
+  // Builder — individual variables
   public ThemeManager base(String color) {
     Preconditions.requireNonBlank(color, "ThemeManager.base", "color");
     vars.put("-fx-base", color);
@@ -618,9 +618,9 @@ public final class ThemeManager {
   }
 
   /**
-   * Elimina un tema guardado de las preferencias del sistema.
+   * Deletes a saved theme from the system preferences.
    *
-   * @param key clave usada en {@link #saveTheme}
+   * @param key key used in {@link #saveTheme}
    */
   public static void deleteTheme(String key) {
     Preconditions.requireNonBlank(key, "ThemeManager.deleteTheme", "key");

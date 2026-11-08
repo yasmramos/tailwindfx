@@ -840,7 +840,7 @@ public final class UtilityConflictResolver {
     return out;
   }
 
-  // Internos
+  // Internal
 
   /**
    * Finds the conflict category for a CSS class, with responsive prefix support.

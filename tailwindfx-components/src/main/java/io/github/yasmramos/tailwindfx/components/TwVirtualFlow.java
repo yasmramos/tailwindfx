@@ -85,7 +85,7 @@ public class TwVirtualFlow<T> extends Region {
   /** Listener that drops stale selections when the caller mutates its own list directly. */
   private ListChangeListener<T> sourceItemsListener;
 
-  // Contenedor interno
+  // Internal container
   private final Pane cellContainer = new Pane();
   private final ScrollBar scrollBar = new ScrollBar();
   private final Map<Integer, Node> visibleCells = new HashMap<>();

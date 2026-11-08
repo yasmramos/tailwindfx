@@ -29,11 +29,11 @@ import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 
 /**
- * Panel de personalización de temas en tiempo real para TailwindFX.
+ * Real-time theme customization panel for TailwindFX.
  *
- * <p>Permite a los usuarios: - Cambiar colores primarios/secundarios dinámicamente - Ajustar
- * valores de tema (radius, spacing, etc.) - Ver preview en tiempo real - Guardar/cargar
- * configuraciones personalizadas - Exportar configuración como archivo JSON/properties
+ * <p>It lets users: - Change primary/secondary colors dynamically - Adjust theme values
+ * (radius, spacing, etc.) - See a live preview - Save/load custom configurations - Export the
+ * configuration as a JSON/properties file
  *
  * @author yasmramos
  * @version 0.1.1
@@ -42,7 +42,7 @@ public class ThemeCustomizationPanel extends VBox {
 
   private static final String PREFS_NODE = "tailwindfx/theme/custom";
 
-  // Secciones del panel
+  // Panel sections
   private ColorPicker primaryColorPicker;
   private ColorPicker secondaryColorPicker;
   private ColorPicker backgroundColorPicker;
@@ -59,15 +59,15 @@ public class ThemeCustomizationPanel extends VBox {
   private ThemeManager themeManager;
   private Preferences prefs;
 
-  /** Crea un nuevo panel de personalización de temas. */
+  /** Creates a new theme customization panel. */
   public ThemeCustomizationPanel() {
     this(null);
   }
 
   /**
-   * Crea un nuevo panel con un ThemeManager específico.
+   * Creates a new panel bound to a specific ThemeManager.
    *
-   * @param themeManager el gestor de temas a utilizar
+   * @param themeManager the theme manager to use
    */
   public ThemeCustomizationPanel(ThemeManager themeManager) {
     this.themeManager = themeManager;
@@ -78,7 +78,7 @@ public class ThemeCustomizationPanel extends VBox {
     setupListeners();
   }
 
-  /** Inicializa la interfaz de usuario del panel. */
+  /** Initializes the panel's user interface. */
   private void initializeUI() {
     setSpacing(20);
     setPadding(new Insets(20));
@@ -114,9 +114,9 @@ public class ThemeCustomizationPanel extends VBox {
   }
 
   /**
-   * Crea la sección de selección de colores.
+   * Creates the color selection section.
    *
-   * @return VBox con los controles de color
+   * @return VBox with the color controls
    */
   private VBox createColorsSection() {
     VBox section = new VBox(15);
@@ -158,9 +158,9 @@ public class ThemeCustomizationPanel extends VBox {
   }
 
   /**
-   * Crea la sección de ajuste de propiedades.
+   * Creates the property adjustment section.
    *
-   * @return VBox con los sliders de propiedades
+   * @return VBox with the property sliders
    */
   private VBox createPropertiesSection() {
     VBox section = new VBox(15);
@@ -191,14 +191,14 @@ public class ThemeCustomizationPanel extends VBox {
   }
 
   /**
-   * Crea un control slider con etiqueta y valor.
+   * Creates a slider control with a label and a value.
    *
-   * @param label texto de la etiqueta
-   * @param min valor mínimo
-   * @param max valor máximo
-   * @param value valor inicial
-   * @param unit unidad de medida
-   * @return VBox con el control completo
+   * @param label the label text
+   * @param min minimum value
+   * @param max maximum value
+   * @param value initial value
+   * @param unit unit of measure
+   * @return VBox with the complete control
    */
   private VBox createSliderControl(
       String label, double min, double max, double value, String unit) {
@@ -218,7 +218,7 @@ public class ThemeCustomizationPanel extends VBox {
     valueLabel.setMinWidth(60);
     valueLabel.setStyle("-fx-text-fill: #475569; -fx-font-family: monospace;");
 
-    // Actualizar etiqueta al cambiar slider
+    // Update the label when the slider changes
     slider
         .valueProperty()
         .addListener(
@@ -234,9 +234,9 @@ public class ThemeCustomizationPanel extends VBox {
   }
 
   /**
-   * Crea la sección de preview en vivo.
+   * Creates the live preview section.
    *
-   * @return VBox con el preview
+   * @return VBox with the preview
    */
   private VBox createPreviewSection() {
     VBox section = new VBox(15);
@@ -251,7 +251,7 @@ public class ThemeCustomizationPanel extends VBox {
     previewContainer.setStyle("-fx-background-color: #e2e8f0; -fx-background-radius: 8px;");
     this.previewBox = previewContainer;
 
-    // Elementos de preview
+    // Preview elements
     previewLabel = new Label("Sample Text Preview");
     previewLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: #1e293b;");
 
@@ -276,9 +276,9 @@ public class ThemeCustomizationPanel extends VBox {
   }
 
   /**
-   * Crea la sección de botones de acción.
+   * Creates the action button section.
    *
-   * @return HBox con los botones
+   * @return HBox with the buttons
    */
   private HBox createActionsSection() {
     HBox box = new HBox(10);
@@ -309,10 +309,10 @@ public class ThemeCustomizationPanel extends VBox {
   }
 
   /**
-   * Crea un ColorPicker estilizado.
+   * Creates a styled ColorPicker.
    *
-   * @param defaultColor color por defecto
-   * @return ColorPicker configurado
+   * @param defaultColor default color
+   * @return the configured ColorPicker
    */
   private ColorPicker createColorPicker(Color defaultColor) {
     ColorPicker picker = new ColorPicker(defaultColor);
@@ -323,10 +323,10 @@ public class ThemeCustomizationPanel extends VBox {
   }
 
   /**
-   * Crea una etiqueta personalizada.
+   * Creates a custom label.
    *
-   * @param text texto de la etiqueta
-   * @return Label estilizada
+   * @param text the label text
+   * @return a styled Label
    */
   private Label createCustomLabel(String text) {
     Label label = new Label(text);
@@ -335,10 +335,10 @@ public class ThemeCustomizationPanel extends VBox {
   }
 
   /**
-   * Obtiene el estilo para botones.
+   * Returns the style for buttons.
    *
-   * @param colorHex color en hexadecimal
-   * @return string de estilo CSS
+   * @param colorHex color as hexadecimal
+   * @return a CSS style string
    */
   private String getButtonStyle(String colorHex) {
     return String.format(
@@ -353,7 +353,7 @@ public class ThemeCustomizationPanel extends VBox {
         colorHex);
   }
 
-  /** Configura los listeners para cambios en tiempo real. */
+  /** Wires up the listeners for real-time changes. */
   private void setupListeners() {
     primaryColorPicker.valueProperty().addListener(e -> applyLiveChanges());
     secondaryColorPicker.valueProperty().addListener(e -> applyLiveChanges());
@@ -361,10 +361,10 @@ public class ThemeCustomizationPanel extends VBox {
     textColorPicker.valueProperty().addListener(e -> applyLiveChanges());
   }
 
-  /** Aplica los cambios en tiempo real al preview. */
+  /** Applies the real-time changes to the preview. */
   private void applyLiveChanges() {
     try {
-      // Aplicar colores al preview
+      // Apply colors to the preview
       Color primary = primaryColorPicker.getValue();
       Color secondary = secondaryColorPicker.getValue();
       Color bg = backgroundColorPicker.getValue();
@@ -374,7 +374,7 @@ public class ThemeCustomizationPanel extends VBox {
       double spacing = spacingSlider.getValue();
       double shadow = shadowIntensitySlider.getValue();
 
-      // Actualizar preview box
+      // Update the preview box
       previewBox.setStyle(
           String.format(
               """
@@ -400,7 +400,7 @@ public class ThemeCustomizationPanel extends VBox {
             """,
               toCssColor(primary), radius, 8 * spacing, 16 * spacing, 14 * spacing));
 
-      // Actualizar etiqueta de preview
+      // Update the preview label
       previewLabel.setStyle(
           String.format(
               """
@@ -422,10 +422,10 @@ public class ThemeCustomizationPanel extends VBox {
   }
 
   /**
-   * Convierte un Color JavaFX a formato CSS.
+   * Converts a JavaFX Color to CSS format.
    *
-   * @param color color a convertir
-   * @return string en formato CSS rgb/rgba
+   * @param color color to convert
+   * @return a string in CSS rgb/rgba format
    */
   private String toCssColor(Color color) {
     if (color == null) {
@@ -438,12 +438,12 @@ public class ThemeCustomizationPanel extends VBox {
   }
 
   /**
-   * Actualiza los colores del tema global.
+   * Updates the global theme colors.
    *
-   * @param primary color primario
-   * @param secondary color secundario
-   * @param bg color de fondo
-   * @param text color de texto
+   * @param primary primary color
+   * @param secondary secondary color
+   * @param bg background color
+   * @param text text color
    */
   private void updateThemeColors(Color primary, Color secondary, Color bg, Color text) {
     try {
@@ -459,7 +459,7 @@ public class ThemeCustomizationPanel extends VBox {
     }
   }
 
-  /** Guarda la configuración actual en Preferences. */
+  /** Saves the current configuration to Preferences. */
   public void saveConfiguration() {
     try {
       prefs.putDouble("primary.r", primaryColorPicker.getValue().getRed());
@@ -489,7 +489,7 @@ public class ThemeCustomizationPanel extends VBox {
     }
   }
 
-  /** Carga la configuración guardada desde Preferences. */
+  /** Loads the saved configuration from Preferences. */
   public void loadSavedConfiguration() {
     try {
       if (prefs.getDouble("primary.r", -1) != -1) {
@@ -533,7 +533,7 @@ public class ThemeCustomizationPanel extends VBox {
     }
   }
 
-  /** Exporta la configuración a un archivo. */
+  /** Exports the configuration to a file. */
   public void exportToFile() {
     FileChooser fileChooser = new FileChooser();
     fileChooser.setTitle("Export Theme Configuration");
@@ -568,7 +568,7 @@ public class ThemeCustomizationPanel extends VBox {
     }
   }
 
-  /** Importa la configuración desde un archivo. */
+  /** Imports the configuration from a file. */
   public void importFromFile() {
     FileChooser fileChooser = new FileChooser();
     fileChooser.setTitle("Import Theme Configuration");
@@ -590,9 +590,9 @@ public class ThemeCustomizationPanel extends VBox {
   }
 
   /**
-   * Parsea y aplica configuración desde contenido de archivo.
+   * Parses and applies configuration from file content.
    *
-   * @param content contenido del archivo
+   * @param content the file content
    */
   private void parseAndApplyConfig(String content) {
     try {
@@ -638,7 +638,7 @@ public class ThemeCustomizationPanel extends VBox {
     }
   }
 
-  /** Resetea la configuración a los valores por defecto. */
+  /** Resets the configuration to the default values. */
   public void resetToDefaults() {
     Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
     alert.setTitle("Reset Configuration");
@@ -666,10 +666,10 @@ public class ThemeCustomizationPanel extends VBox {
   }
 
   /**
-   * Muestra una alerta al usuario.
+   * Shows an alert to the user.
    *
-   * @param title título de la alerta
-   * @param message mensaje a mostrar
+   * @param title the alert title
+   * @param message the message to show
    */
   private void showAlert(String title, String message) {
     Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -680,9 +680,9 @@ public class ThemeCustomizationPanel extends VBox {
   }
 
   /**
-   * Obtiene la configuración actual como string JSON.
+   * Returns the current configuration as a JSON string.
    *
-   * @return JSON con la configuración actual
+   * @return JSON with the current configuration
    */
   public String getConfigAsJson() {
     return String.format(

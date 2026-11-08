@@ -19,25 +19,25 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * StyleToken — Representa un token JIT parseado.
+ * StyleToken — Represents a parsed JIT token.
  *
- * <p>Un token es la unidad mínima del parser: "p-4", "bg-blue-500/80", "w-[320px]". Cada token se
- * convierte en una o más propiedades -fx-* inline.
+ * <p>A token is the parser's smallest unit: "p-4", "bg-blue-500/80", "w-[320px]". Each token
+ * becomes one or more inline -fx-* properties.
  *
- * <p>Formatos soportados: Básico: p-4 bg-blue-500 text-sm opacity-75 Con escala: text-gray-900
- * border-red-300 shadow-blue-500 Opacidad: bg-blue-500/80 text-gray-900/50 (alpha 0-100) Negativo:
- * -mt-4 -translate-x-2 -rotate-45 Arbitrario: p-[13px] bg-[#ff6600] w-[320px] text-[16px]
+ * <p>Supported formats: Basic: p-4 bg-blue-500 text-sm opacity-75 Scaled: text-gray-900
+ * border-red-300 shadow-blue-500 Opacity: bg-blue-500/80 text-gray-900/50 (alpha 0-100) Negative:
+ * -mt-4 -translate-x-2 -rotate-45 Arbitrary: p-[13px] bg-[#ff6600] w-[320px] text-[16px]
  * rotate-[45deg]
  */
 public final class StyleToken {
 
   // Regex patterns
 
-  // Arbitrario: prefijo-[valor] o prefijo-[valor]/alpha (ej. bg-[#ff0000]/80)
+  // Arbitrary: prefix-[value] or prefix-[value]/alpha (e.g. bg-[#ff0000]/80)
   private static final Pattern ARBITRARY =
       Pattern.compile("^(-?)([a-z][a-z-]*)(?:-([a-z]+))?-\\[([^\\]]+)](?:/(\\d+))?$");
 
-  // Color con shade y opacidad opcional: bg-blue-500/80
+  // Color with shade and optional opacity: bg-blue-500/80
   private static final Pattern COLOR_SHADE_ALPHA =
       Pattern.compile("^(-?)([a-z][a-z-]*)-([a-z]+)-(\\d+)(?:/(\\d+))?$");
 
@@ -47,7 +47,7 @@ public final class StyleToken {
   // Named: text-sm, rounded-lg, font-bold
   private static final Pattern NAMED = Pattern.compile("^(-?)([a-z][a-z-]*)-([a-z0-9]+)$");
 
-  // Campos del token parseado
+  // Fields of the parsed token
 
   public enum Kind {
     SCALE,
@@ -57,30 +57,30 @@ public final class StyleToken {
     UNKNOWN
   }
 
-  public final String raw; // token original: "bg-blue-500/80"
+  public final String raw; // original token: "bg-blue-500/80"
   public final boolean negative; // -mt-4 → true
   public final String prefix; // "bg", "p", "text", "w"
-  public final String colorName; // "blue", "gray", "red" (solo COLOR_SHADE)
-  public final Integer shade; // 500, 300, 900 (solo COLOR_SHADE)
-  public final Integer alpha; // 0-100, null si no hay /alpha
-  public final Integer scale; // 4, 8, 12 (solo SCALE)
+  public final String colorName; // "blue", "gray", "red" (COLOR_SHADE only)
+  public final Integer shade; // 500, 300, 900 (COLOR_SHADE only)
+  public final Integer alpha; // 0-100, null when there is no /alpha
+  public final Integer scale; // 4, 8, 12 (SCALE only)
   public final String namedValue; // "sm", "lg", "bold" (NAMED/COLOR_SHADE)
   public final String arbitraryVal; // "13px", "#ff6600" (ARBITRARY)
-  public final String subPrefix; // "x", "y", "t", "r", "b", "l" de px-4, pt-2
+  public final String subPrefix; // "x", "y", "t", "r", "b", "l" from px-4, pt-2
   public final Kind kind;
 
-  // Factory — parse un string en un StyleToken
+  // Factory — parses a string into a StyleToken
 
   public static StyleToken parse(String raw) {
     if (raw == null || raw.isBlank()) return unknown(raw);
 
     String token = raw.trim();
 
-    // 1. Arbitrario: prefijo-[valor] o prefijo-subprefijo-[valor]
+    // 1. Arbitrary: prefix-[value] or prefix-subprefix-[value]
     Matcher m = ARBITRARY.matcher(token);
     if (m.matches()) {
-      // Para "-translate-x-[20px]": regex puede capturar prefix="translate-x", sub=null.
-      // splitSubPrefix normaliza a prefix="translate", sub="x".
+      // For "-translate-x-[20px]": the regex may capture prefix="translate-x", sub=null.
+      // splitSubPrefix normalizes it to prefix="translate", sub="x".
       String rawPrefix = m.group(2);
       String rawSub = m.group(3);
       String[] parts =
@@ -100,7 +100,7 @@ public final class StyleToken {
           Kind.ARBITRARY);
     }
 
-    // 2. Color con shade: bg-blue-500 o bg-blue-500/80
+    // 2. Color with shade: bg-blue-500 or bg-blue-500/80
     m = COLOR_SHADE_ALPHA.matcher(token);
     if (m.matches() && isColorName(m.group(3))) {
       Integer alpha = m.group(5) != null ? Integer.parseInt(m.group(5)) : null;
@@ -121,7 +121,7 @@ public final class StyleToken {
     // 3. Numeric scale: p-4, w-12, -mt-4
     m = SCALE.matcher(token);
     if (m.matches()) {
-      // Detectar sub-prefix: px, py, pt, pr, pb, pl, mx, my, etc.
+      // Detect the sub-prefix: px, py, pt, pr, pb, pl, mx, my, etc.
       String full = m.group(2);
       String[] parts = splitSubPrefix(full);
       // Side border widths with an explicit width: border-t-4, border-x-2, ...
@@ -142,7 +142,7 @@ public final class StyleToken {
           Kind.SCALE);
     }
 
-    // 4. Named: text-sm, rounded-lg, font-bold, opacity-75 (sin shade de color)
+    // 4. Named: text-sm, rounded-lg, font-bold, opacity-75 (no color shade)
     m = NAMED.matcher(token);
     if (m.matches()) {
       String full = m.group(2);
@@ -194,7 +194,7 @@ public final class StyleToken {
         || "y".equals(value);
   }
 
-  // Constructor privado
+  // Private constructor
 
   private StyleToken(
       String raw,
@@ -227,17 +227,17 @@ public final class StyleToken {
 
   // Helpers
 
-  /** Valor numérico del scale, aplicando signo negativo si aplica */
+  /** Numeric scale value, applying a negative sign when present */
   public int signedScale() {
     return negative ? -(scale != null ? scale : 0) : (scale != null ? scale : 0);
   }
 
-  /** Valor double de un alpha 0-100 → 0.0-1.0 */
+  /** Alpha as a double, 0-100 → 0.0-1.0 */
   public double alphaFraction() {
     return alpha != null ? alpha / 100.0 : 1.0;
   }
 
-  /** Si este token tiene alpha (opacidad parcial en el color) */
+  /** Whether this token carries alpha (partial color opacity) */
   public boolean hasAlpha() {
     return alpha != null;
   }
@@ -247,7 +247,7 @@ public final class StyleToken {
     return "StyleToken{" + kind + ", raw=" + raw + "}";
   }
 
-  // Internos
+  // Internal
 
   private static final java.util.Set<String> COLOR_NAMES =
       java.util.Set.of(
@@ -256,10 +256,13 @@ public final class StyleToken {
           "fuchsia", "pink", "rose", "white", "black");
 
   private static boolean isColorName(String s) {
-    return COLOR_NAMES.contains(s);
+    // ColorPalette is the single source of truth for color families, so custom families
+    // (mauve, olive, mist, taupe, ...) are recognized without duplicating the list here.
+    return COLOR_NAMES.contains(s)
+        || io.github.yasmramos.tailwindfx.color.ColorPalette.isFamily(s);
   }
 
-  /** Prefijos que son valores nombrados sin escala (visible, hidden, overflow-*, cursor-*, etc.) */
+  /** Prefixes that are named values without a scale (visible, hidden, overflow-*, cursor-*, etc.) */
   private static final java.util.Set<String> NAMED_PREFIXES =
       java.util.Set.of(
           "visible",
@@ -303,8 +306,8 @@ public final class StyleToken {
   }
 
   /**
-   * Separa "px" → ["p","x"], "pt" → ["p","t"], "translate" → ["translate",null] Solo para prefijos
-   * de 1-2 letras con sub-direcciones conocidas.
+   * Splits "px" → ["p","x"], "pt" → ["p","t"], "translate" → ["translate",null]. Only for 1-2
+   * letter prefixes with known sub-directions.
    */
   private static String[] splitSubPrefix(String full) {
     return switch (full) {

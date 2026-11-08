@@ -420,4 +420,33 @@ class StyleTokenExtendedTest {
       assertEquals(6, token.scale);
     }
   }
+
+  @Nested
+  @DisplayName("Custom Color Families")
+  class CustomColorFamilyTests {
+
+    @ParameterizedTest
+    @ValueSource(strings = {"mauve", "olive", "mist", "taupe"})
+    @DisplayName("Should parse custom family color as COLOR_SHADE")
+    void testCustomFamilyColor(String family) {
+      StyleToken token = StyleToken.parse("bg-" + family + "-500");
+
+      assertEquals(StyleToken.Kind.COLOR_SHADE, token.kind);
+      assertEquals("bg", token.prefix);
+      assertEquals(family, token.colorName);
+      assertEquals(500, token.shade);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"mauve", "olive", "mist", "taupe"})
+    @DisplayName("Should parse custom family color with alpha as COLOR_SHADE")
+    void testCustomFamilyColorWithAlpha(String family) {
+      StyleToken token = StyleToken.parse("bg-" + family + "-500/80");
+
+      assertEquals(StyleToken.Kind.COLOR_SHADE, token.kind);
+      assertEquals(family, token.colorName);
+      assertEquals(500, token.shade);
+      assertEquals(80, token.alpha);
+    }
+  }
 }

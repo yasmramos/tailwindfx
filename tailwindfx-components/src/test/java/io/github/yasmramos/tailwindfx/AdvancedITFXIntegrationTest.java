@@ -171,7 +171,7 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
 
       interact(() -> root.getChildren().add(field));
 
-      // Verificar directamente el promptText del TextField
+      // Verify the TextField promptText directly
       assertEquals("Enter your name", field.getPromptText());
     }
   }
@@ -247,7 +247,7 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
 
       interact(() -> root.getChildren().add(label));
 
-      moveTo(label); // Cambiar moveMouseTo por moveTo
+      moveTo(label);
       // Give time for hover event to process
       sleep(100); // Small pause to allow event processing
 

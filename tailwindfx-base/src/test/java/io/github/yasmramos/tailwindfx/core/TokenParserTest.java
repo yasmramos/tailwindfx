@@ -93,7 +93,7 @@ class TokenParserTest {
     TokenParser.ParseResult result = TokenParser.parse("flex", "grid", "inline-flex");
 
     // flex, grid, inline-flex son display properties -> CSS classes + layout migration
-    // NO son JIT tokens (no tienen valores arbitrarios)
+    // They are NOT JIT tokens (they have no arbitrary values)
     assertEquals(0, result.jitTokens().size());
     assertEquals(3, result.cssClasses().size());
     assertEquals(3, result.layoutMigrationTokens().size());

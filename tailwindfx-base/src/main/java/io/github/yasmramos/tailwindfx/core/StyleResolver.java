@@ -132,7 +132,7 @@ public final class StyleResolver {
 
     String colorValue = shades[index];
 
-    // Aplicar opacidad si existe: usar valor literal para rgba()
+    // Apply opacity when present: use a literal value for rgba()
     if (token.alpha != null) {
       return applyOpacity(colorValue, token.alpha);
     }
@@ -154,7 +154,7 @@ public final class StyleResolver {
         return "rgba(" + rgb + "," + String.format(Locale.ROOT, "%.2f", opacity) + ")";
       }
     }
-    // Sin alpha o no es un color hex: devolver el valor arbitrario tal cual
+    // No alpha, or not a hex color: return the arbitrary value unchanged
     return token.arbitraryVal;
   }
 
@@ -163,10 +163,10 @@ public final class StyleResolver {
   }
 
   private String applyOpacity(String colorValue, int alpha) {
-    // Alpha es 0-100, convertir a 0.0-1.0
+    // Alpha is 0-100; convert to 0.0-1.0
     double opacity = alpha / 100.0;
 
-    // Si es rgb(), convertir a rgba()
+    // If it is rgb(), convert to rgba()
     if (colorValue.startsWith("rgb(")) {
       String rgbContent = colorValue.substring(4, colorValue.length() - 1);
       return "rgba(" + rgbContent + "," + String.format(Locale.ROOT, "%.2f", opacity) + ")";
