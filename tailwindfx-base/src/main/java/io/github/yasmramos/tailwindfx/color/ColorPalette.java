@@ -3,6 +3,7 @@ package io.github.yasmramos.tailwindfx.color;
 import io.github.yasmramos.tailwindfx.core.Preconditions;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -163,7 +164,7 @@ public final class ColorPalette {
     }
     String rgb = rgb(colorName, shade);
     if (rgb == null) return null;
-    return String.format("rgba(%s,%.2f)", rgb, alphaFraction);
+    return String.format(Locale.ROOT, "rgba(%s,%.2f)", rgb, alphaFraction);
   }
 
   public static boolean exists(String colorName, int shade) {

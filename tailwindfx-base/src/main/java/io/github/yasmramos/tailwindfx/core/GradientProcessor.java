@@ -1,6 +1,7 @@
 package io.github.yasmramos.tailwindfx.core;
 
 import io.github.yasmramos.tailwindfx.color.ColorPalette;
+import java.util.Locale;
 import javafx.scene.paint.Color;
 
 /**
@@ -230,6 +231,7 @@ public final class GradientProcessor {
    */
   private static String formatRgba(Color color, double alpha) {
     return String.format(
+        Locale.ROOT,
         "rgba(%.0f,%.0f,%.0f,%.2f)",
         color.getRed() * 255,
         color.getGreen() * 255,
