@@ -1354,6 +1354,9 @@
 .bg-zinc-950 {
   -fx-background-color: #09090b;
 }
+.border {
+  -fx-border-width: 1px;
+}
 .border-0 {
   -fx-border-width: 0px;
 }
@@ -1398,6 +1401,9 @@
 }
 .border-amber-950 {
   -fx-border-color: #451a03;
+}
+.border-b {
+  -fx-border-width: 0px 0px 1px 0px;
 }
 .border-black {
   -fx-border-color: #000000;
@@ -1639,6 +1645,9 @@
 .border-indigo-950 {
   -fx-border-color: #1e1b4b;
 }
+.border-l {
+  -fx-border-width: 0px 0px 0px 1px;
+}
 .border-lime-100 {
   -fx-border-color: #ecfccb;
 }
@@ -1806,6 +1815,9 @@
 }
 .border-purple-950 {
   -fx-border-color: #3b0764;
+}
+.border-r {
+  -fx-border-width: 0px 1px 0px 0px;
 }
 .border-red-100 {
   -fx-border-color: #fee2e2;
@@ -1975,6 +1987,9 @@
 .border-stone-950 {
   -fx-border-color: #0c0a09;
 }
+.border-t {
+  -fx-border-width: 1px 0px 0px 0px;
+}
 .border-teal-100 {
   -fx-border-color: #ccfbf1;
 }
@@ -2046,6 +2061,12 @@
 }
 .border-white {
   -fx-border-color: #ffffff;
+}
+.border-x {
+  -fx-border-width: 0px 1px 0px 1px;
+}
+.border-y {
+  -fx-border-width: 1px 0px 1px 0px;
 }
 .border-yellow-100 {
   -fx-border-color: #fef9c3;

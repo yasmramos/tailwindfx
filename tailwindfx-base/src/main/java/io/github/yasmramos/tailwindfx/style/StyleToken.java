@@ -124,6 +124,10 @@ public final class StyleToken {
       // Detectar sub-prefix: px, py, pt, pr, pb, pl, mx, my, etc.
       String full = m.group(2);
       String[] parts = splitSubPrefix(full);
+      // Side border widths with an explicit width: border-t-4, border-x-2, ...
+      if (parts[0].startsWith("border-") && isBorderSide(parts[0].substring("border-".length()))) {
+        parts = new String[] {"border", parts[0].substring("border-".length())};
+      }
       return new StyleToken(
           raw,
           !m.group(1).isEmpty(),
@@ -143,6 +147,15 @@ public final class StyleToken {
     if (m.matches()) {
       String full = m.group(2);
       String[] parts = splitSubPrefix(full);
+      String namedValue = m.group(3);
+      // Side border widths: border-t, border-r, border-b, border-l, border-x, border-y
+      // default to 1px on the given side(s); model them as SCALE so map() can emit the
+      // four-value -fx-border-width declaration.
+      if ("border".equals(parts[0]) && parts[1] == null && isBorderSide(namedValue)) {
+        return new StyleToken(
+            raw, !m.group(1).isEmpty(), "border", namedValue, null, null, null, 1, null, null,
+            Kind.SCALE);
+      }
       return new StyleToken(
           raw,
           !m.group(1).isEmpty(),
@@ -152,7 +165,7 @@ public final class StyleToken {
           null,
           null,
           null,
-          m.group(3), // namedValue
+          namedValue,
           null,
           Kind.NAMED);
     }
@@ -163,8 +176,22 @@ public final class StyleToken {
     if (token.equals("rounded")) {
       return new StyleToken(raw, false, "rounded", null, null, null, null, null, "default", null, Kind.NAMED);
     }
+    // "border" without a suffix is a 1px border width on all sides.
+    if (token.equals("border")) {
+      return new StyleToken(raw, false, "border", null, null, null, null, 1, null, null, Kind.SCALE);
+    }
 
     return unknown(raw);
+  }
+
+  /** Sides accepted by the border-{t,r,b,l,x,y} width utilities. */
+  private static boolean isBorderSide(String value) {
+    return "t".equals(value)
+        || "r".equals(value)
+        || "b".equals(value)
+        || "l".equals(value)
+        || "x".equals(value)
+        || "y".equals(value);
   }
 
   // Constructor privado

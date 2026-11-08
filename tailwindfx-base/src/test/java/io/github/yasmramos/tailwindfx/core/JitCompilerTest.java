@@ -339,6 +339,29 @@ class JitCompilerTest {
       assertTrue(result.hasInlineStyle());
       assertTrue(result.inlineStyle().contains("border"));
     }
+
+    @Test
+    @DisplayName("Bare border compiles to a 1px border width")
+    void testBareBorder() {
+      JitCompiler.CompileResult result = JitCompiler.compile("border");
+
+      assertTrue(result.hasInlineStyle(), "bare border must not be a no-op");
+      assertTrue(result.inlineStyle().contains("-fx-border-width: 1px"), result.inlineStyle());
+    }
+
+    @Test
+    @DisplayName("Side border utilities expand to the four-value width form")
+    void testSideBorders() {
+      assertTrue(
+          JitCompiler.compile("border-t").inlineStyle().contains("-fx-border-width: 1px 0px 0px 0px"),
+          JitCompiler.compile("border-t").inlineStyle());
+      assertTrue(
+          JitCompiler.compile("border-x").inlineStyle().contains("-fx-border-width: 0px 1px 0px 1px"),
+          JitCompiler.compile("border-x").inlineStyle());
+      assertTrue(
+          JitCompiler.compile("border-l-4").inlineStyle().contains("-fx-border-width: 0px 0px 0px 4px"),
+          JitCompiler.compile("border-l-4").inlineStyle());
+    }
   }
 
   @Nested
