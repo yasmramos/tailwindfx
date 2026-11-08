@@ -160,76 +160,100 @@ class ThemeManagerIT extends ApplicationTest {
   @Test
   @DisplayName("Should apply custom base color")
   void testCustomBaseColor() {
-    ThemeManager.forScene(scene).base("#ff5733").apply();
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).base("#ff5733").apply();
 
-    String style = scene.getRoot().getStyle();
-    assertTrue(style.contains("-fx-base: #ff5733"));
+          String style = scene.getRoot().getStyle();
+          assertTrue(style.contains("-fx-base: #ff5733"));
+        });
   }
 
   @Test
   @DisplayName("Should apply custom background color")
   void testCustomBackgroundColor() {
-    ThemeManager.forScene(scene).background("#33ff57").apply();
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).background("#33ff57").apply();
 
-    String style = scene.getRoot().getStyle();
-    assertTrue(style.contains("-fx-background: #33ff57"));
+          String style = scene.getRoot().getStyle();
+          assertTrue(style.contains("-fx-background: #33ff57"));
+        });
   }
 
   @Test
   @DisplayName("Should apply custom inner background color")
   void testCustomInnerBackgroundColor() {
-    ThemeManager.forScene(scene).innerBackground("#5733ff").apply();
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).innerBackground("#5733ff").apply();
 
-    String style = scene.getRoot().getStyle();
-    assertTrue(style.contains("-fx-control-inner-background: #5733ff"));
+          String style = scene.getRoot().getStyle();
+          assertTrue(style.contains("-fx-control-inner-background: #5733ff"));
+        });
   }
 
   @Test
   @DisplayName("Should apply custom accent color")
   void testCustomAccentColor() {
-    ThemeManager.forScene(scene).accent("#ff33a1").apply();
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).accent("#ff33a1").apply();
 
-    String style = scene.getRoot().getStyle();
-    assertTrue(style.contains("-fx-accent: #ff33a1"));
-    assertTrue(style.contains("-fx-selection-bar: #ff33a1"));
+          String style = scene.getRoot().getStyle();
+          assertTrue(style.contains("-fx-accent: #ff33a1"));
+          assertTrue(style.contains("-fx-selection-bar: #ff33a1"));
+        });
   }
 
   @Test
   @DisplayName("Should apply custom focus color")
   void testCustomFocusColor() {
-    ThemeManager.forScene(scene).focus("#33fff5").apply();
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).focus("#33fff5").apply();
 
-    String style = scene.getRoot().getStyle();
-    assertTrue(style.contains("-fx-focus-color: #33fff5"));
+          String style = scene.getRoot().getStyle();
+          assertTrue(style.contains("-fx-focus-color: #33fff5"));
+        });
   }
 
   @Test
   @DisplayName("Should apply custom faint focus color")
   void testCustomFaintFocusColor() {
-    ThemeManager.forScene(scene).faintFocus("#f5ff33").apply();
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).faintFocus("#f5ff33").apply();
 
-    String style = scene.getRoot().getStyle();
-    assertTrue(style.contains("-fx-faint-focus-color: #f5ff33"));
+          String style = scene.getRoot().getStyle();
+          assertTrue(style.contains("-fx-faint-focus-color: #f5ff33"));
+        });
   }
 
   @Test
   @DisplayName("Should apply custom default button color")
   void testCustomDefaultButtonColor() {
-    ThemeManager.forScene(scene).defaultButton("#a133ff").apply();
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).defaultButton("#a133ff").apply();
 
-    String style = scene.getRoot().getStyle();
-    assertTrue(style.contains("-fx-default-button: #a133ff"));
+          String style = scene.getRoot().getStyle();
+          assertTrue(style.contains("-fx-default-button: #a133ff"));
+        });
   }
 
   @Test
   @DisplayName("Should chain multiple theme customizations")
   void testChainedCustomizations() {
-    ThemeManager.forScene(scene).base("#123456").accent("#654321").background("#abcdef").apply();
+    interact(
+        () -> {
+          ThemeManager.forScene(scene).base("#123456").accent("#654321").background("#abcdef").apply();
 
-    String style = scene.getRoot().getStyle();
-    assertTrue(style.contains("-fx-base: #123456"));
-    assertTrue(style.contains("-fx-accent: #654321"));
-    assertTrue(style.contains("-fx-background: #abcdef"));
+          String style = scene.getRoot().getStyle();
+          assertTrue(style.contains("-fx-base: #123456"));
+          assertTrue(style.contains("-fx-accent: #654321"));
+          assertTrue(style.contains("-fx-background: #abcdef"));
+        });
   }
 
   @Test
@@ -255,17 +279,20 @@ class ThemeManagerIT extends ApplicationTest {
   @Test
   @DisplayName("Should toggle between dark and light themes")
   void testToggle() {
-    // Start with light theme
-    ThemeManager.forScene(scene).light().apply();
-    assertFalse(scene.getRoot().getStyleClass().contains("dark"));
+    interact(
+        () -> {
+          // Start with light theme
+          ThemeManager.forScene(scene).light().apply();
+          assertFalse(scene.getRoot().getStyleClass().contains("dark"));
 
-    // Toggle to dark
-    ThemeManager.toggle(scene);
-    assertTrue(scene.getRoot().getStyleClass().contains("dark"));
+          // Toggle to dark
+          ThemeManager.toggle(scene);
+          assertTrue(scene.getRoot().getStyleClass().contains("dark"));
 
-    // Toggle back to light
-    ThemeManager.toggle(scene);
-    assertFalse(scene.getRoot().getStyleClass().contains("dark"));
+          // Toggle back to light
+          ThemeManager.toggle(scene);
+          assertFalse(scene.getRoot().getStyleClass().contains("dark"));
+        });
   }
 
   @Test
@@ -427,7 +454,7 @@ class ThemeManagerIT extends ApplicationTest {
     ThemeManager.saveTheme(scene, "test.load.theme");
 
     // Reset
-    ThemeManager.forScene(scene).reset();
+    interact(() -> ThemeManager.forScene(scene).reset());
 
     // Load and verify
     boolean loaded = ThemeManager.loadTheme(scene, "test.load.theme");
