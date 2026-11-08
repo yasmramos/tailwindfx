@@ -255,7 +255,6 @@ class JitCompilerTest {
     @Test
     @DisplayName("Should compile ring-0")
     void testRingZero() {
-      // Ring may not be fully implemented, just verify it compiles
       JitCompiler.CompileResult result = JitCompiler.compile("ring-0");
 
       assertNotNull(result);
@@ -275,6 +274,38 @@ class JitCompilerTest {
       JitCompiler.BatchResult result = JitCompiler.compileBatch("ring-2", "ring-blue-500");
 
       assertNotNull(result);
+    }
+
+    @Test
+    @DisplayName("compileBatch routes ring width through RingProcessor")
+    void testRingWidthEmitsInlineBorder() {
+      JitCompiler.BatchResult result = JitCompiler.compileBatch("ring-2");
+
+      assertTrue(result.hasInlineStyle(), "ring-2 must produce an inline style");
+      assertTrue(result.inlineStyle().contains("-fx-border-width: 2px"), result.inlineStyle());
+      assertFalse(
+          result.cssClasses().contains("ring-2"),
+          "ring-2 must not fall back to a dead CSS class");
+    }
+
+    @Test
+    @DisplayName("compileBatch routes ring color through RingProcessor")
+    void testRingColorEmitsInlineBorderColor() {
+      JitCompiler.BatchResult result = JitCompiler.compileBatch("ring-blue-500");
+
+      assertTrue(result.hasInlineStyle(), "ring-blue-500 must produce an inline style");
+      assertTrue(result.inlineStyle().contains("-fx-border-color"), result.inlineStyle());
+      assertTrue(result.inlineStyle().contains("#3b82f6"), result.inlineStyle());
+    }
+
+    @Test
+    @DisplayName("compileBatch routes both ring width and color through RingProcessor")
+    void testRingWidthAndColorCombined() {
+      JitCompiler.BatchResult result = JitCompiler.compileBatch("ring-2", "ring-blue-500");
+
+      assertTrue(result.inlineStyle().contains("-fx-border-width"), result.inlineStyle());
+      assertTrue(result.inlineStyle().contains("-fx-border-color"), result.inlineStyle());
+      assertTrue(result.cssClasses().isEmpty(), result.cssClasses().toString());
     }
   }
 
