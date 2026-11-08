@@ -422,8 +422,8 @@ public final class JitCompiler {
   }
 
   /**
-   * Compiles multiple tokens and returns the combined inline style and the list de CSS classes a
-   * agregar.
+   * Compiles multiple tokens and returns the combined inline style and the list of CSS classes to
+   * add.
    */
   public static BatchResult compileBatch(String... tokens) {
     if (tokens == null || tokens.length == 0) {
@@ -602,7 +602,7 @@ public final class JitCompiler {
     return CACHE.getStats();
   }
 
-  // Main compilation - delega a StyleResolver y CssPropertyMapper
+  // Main compilation — delegates to StyleResolver and CssPropertyMapper
   private CompileResult doCompile(String raw) {
     // Gradient utilities are resolved by GradientProcessor, which builds the complete
     // -fx-background-color: linear-gradient(...) declaration. Handled here (rather than in

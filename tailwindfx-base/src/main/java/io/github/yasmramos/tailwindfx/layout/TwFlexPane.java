@@ -721,7 +721,7 @@ public class TwFlexPane extends Pane {
         }
       }
     } else if (overflow > 0 && totalShrinkWeighted > 0) {
-      // Shrink: reduce proportionally to (shrink × pref) - CORREGIDO O(N)
+      // Shrink: reduce proportionally to (shrink × pref)
       for (int i = 0; i < count; i++) {
         double shrink = getShrink(children.get(i));
         if (shrink > 0) {

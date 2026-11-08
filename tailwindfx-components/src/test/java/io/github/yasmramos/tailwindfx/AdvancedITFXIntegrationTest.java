@@ -247,7 +247,7 @@ class AdvancedTestFXIntegrationTest extends ApplicationTest {
 
       interact(() -> root.getChildren().add(label));
 
-      moveTo(label); // Cambiar moveMouseTo por moveTo
+      moveTo(label);
       // Give time for hover event to process
       sleep(100); // Small pause to allow event processing
 

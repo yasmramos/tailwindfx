@@ -251,7 +251,7 @@ public class ThemeCustomizationPanel extends VBox {
     previewContainer.setStyle("-fx-background-color: #e2e8f0; -fx-background-radius: 8px;");
     this.previewBox = previewContainer;
 
-    // Elementos de preview
+    // Preview elements
     previewLabel = new Label("Sample Text Preview");
     previewLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: #1e293b;");
 

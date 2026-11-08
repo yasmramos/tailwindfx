@@ -57,16 +57,16 @@ public final class StyleToken {
     UNKNOWN
   }
 
-  public final String raw; // token original: "bg-blue-500/80"
+  public final String raw; // original token: "bg-blue-500/80"
   public final boolean negative; // -mt-4 → true
   public final String prefix; // "bg", "p", "text", "w"
-  public final String colorName; // "blue", "gray", "red" (solo COLOR_SHADE)
-  public final Integer shade; // 500, 300, 900 (solo COLOR_SHADE)
-  public final Integer alpha; // 0-100, null si no hay /alpha
-  public final Integer scale; // 4, 8, 12 (solo SCALE)
+  public final String colorName; // "blue", "gray", "red" (COLOR_SHADE only)
+  public final Integer shade; // 500, 300, 900 (COLOR_SHADE only)
+  public final Integer alpha; // 0-100, null when there is no /alpha
+  public final Integer scale; // 4, 8, 12 (SCALE only)
   public final String namedValue; // "sm", "lg", "bold" (NAMED/COLOR_SHADE)
   public final String arbitraryVal; // "13px", "#ff6600" (ARBITRARY)
-  public final String subPrefix; // "x", "y", "t", "r", "b", "l" de px-4, pt-2
+  public final String subPrefix; // "x", "y", "t", "r", "b", "l" from px-4, pt-2
   public final Kind kind;
 
   // Factory — parses a string into a StyleToken
@@ -121,7 +121,7 @@ public final class StyleToken {
     // 3. Numeric scale: p-4, w-12, -mt-4
     m = SCALE.matcher(token);
     if (m.matches()) {
-      // Detectar sub-prefix: px, py, pt, pr, pb, pl, mx, my, etc.
+      // Detect the sub-prefix: px, py, pt, pr, pb, pl, mx, my, etc.
       String full = m.group(2);
       String[] parts = splitSubPrefix(full);
       // Side border widths with an explicit width: border-t-4, border-x-2, ...
@@ -194,7 +194,7 @@ public final class StyleToken {
         || "y".equals(value);
   }
 
-  // Constructor privado
+  // Private constructor
 
   private StyleToken(
       String raw,
@@ -247,7 +247,7 @@ public final class StyleToken {
     return "StyleToken{" + kind + ", raw=" + raw + "}";
   }
 
-  // Internos
+  // Internal
 
   private static final java.util.Set<String> COLOR_NAMES =
       java.util.Set.of(
