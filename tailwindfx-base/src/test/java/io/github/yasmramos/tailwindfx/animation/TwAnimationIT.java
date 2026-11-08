@@ -2,6 +2,7 @@ package io.github.yasmramos.tailwindfx.animation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -581,6 +582,23 @@ public class TwAnimationIT extends ApplicationTest {
       assertThrows(IllegalArgumentException.class, () -> TwAnimation.onHoverLift(null, -4));
       assertThrows(IllegalArgumentException.class, () -> TwAnimation.onHoverDim(null, 0.5));
       assertThrows(IllegalArgumentException.class, () -> TwAnimation.removeHoverEffects(null));
+    }
+
+    @Test
+    @DisplayName("removeHoverEffects should detach the onHoverScale listeners")
+    void testRemoveHoverEffectsDetachesScaleListeners() {
+      interact(
+          () -> {
+            Region n = new Region();
+            TwAnimation.onHoverScale(n, 1.05);
+            assertNotNull(
+                n.getProperties().get("tailwindfx.hover.handlers"),
+                "onHoverScale must register its listeners so they can be removed later");
+            TwAnimation.removeHoverEffects(n);
+            assertNull(
+                n.getProperties().get("tailwindfx.hover.handlers"),
+                "removeHoverEffects must clear the registered hover listeners");
+          });
     }
 
     @Test

@@ -727,12 +727,15 @@ public final class TwAnimation {
     }
     final double baseScaleX = node.getScaleX();
     final double baseScaleY = node.getScaleY();
-    node.addEventHandler(
-        javafx.scene.input.MouseEvent.MOUSE_ENTERED,
-        e -> animateScale(node, baseScaleX * scaleFactor, baseScaleY * scaleFactor, 150));
-    node.addEventHandler(
-        javafx.scene.input.MouseEvent.MOUSE_EXITED,
-        e -> animateScale(node, baseScaleX, baseScaleY, 150));
+    javafx.event.EventHandler<javafx.scene.input.MouseEvent> enterScale =
+        e -> animateScale(node, baseScaleX * scaleFactor, baseScaleY * scaleFactor, 150);
+    javafx.event.EventHandler<javafx.scene.input.MouseEvent> exitScale =
+        e -> animateScale(node, baseScaleX, baseScaleY, 150);
+    node.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_ENTERED, enterScale);
+    node.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_EXITED, exitScale);
+    // Registered so removeHoverEffects() can detach them; without this the scale listeners stayed
+    // attached to the node and kept animating after the effect was supposedly removed.
+    storeHoverHandlers(node, enterScale, exitScale);
   }
 
   /**
