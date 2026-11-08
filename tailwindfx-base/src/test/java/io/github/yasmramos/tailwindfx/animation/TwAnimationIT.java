@@ -427,5 +427,150 @@ public class TwAnimationIT extends ApplicationTest {
             assertEquals(1, n.getOpacity(), DELTA, "opacity should be 1");
           });
     }
+
+    @Test
+    @DisplayName("resetNode should also reset rotation and scaleY")
+    void testResponsiveGuardResetNodeRotation() {
+      interact(
+          () -> {
+            Region n = new Region();
+            n.setRotate(45);
+            n.setScaleY(2.0);
+            TwAnimation.ResponsiveAnimationGuard.resetNode(n);
+            assertEquals(0, n.getRotate(), DELTA, "rotation should be 0");
+            assertEquals(1, n.getScaleY(), DELTA, "scaleY should be 1");
+          });
+    }
+
+    @Test
+    @DisplayName("guard should pause and resume animations in the enter slot")
+    void testGuardPausesEnterSlot() {
+      interact(
+          () -> {
+            Region n = new Region();
+            javafx.scene.layout.StackPane root = new javafx.scene.layout.StackPane(n);
+            javafx.scene.Scene scene = new javafx.scene.Scene(root, 100, 100);
+            TwAnimation anim = TwAnimation.fadeIn(n, 5000);
+            anim.play();
+            assertEquals(
+                Animation.Status.RUNNING, anim.raw().getStatus(), "should be running after play");
+            TwAnimation.ResponsiveAnimationGuard.onLayoutChangeStart(scene);
+            assertEquals(
+                Animation.Status.PAUSED,
+                anim.raw().getStatus(),
+                "enter-slot animation should be paused during layout change");
+            TwAnimation.ResponsiveAnimationGuard.onLayoutChangeEnd(scene);
+            assertEquals(
+                Animation.Status.RUNNING,
+                anim.raw().getStatus(),
+                "enter-slot animation should resume after layout change");
+            anim.stop();
+          });
+    }
+
+    @Test
+    @DisplayName("guard should be a no-op for null scene or null root")
+    void testGuardNullScene() {
+      TwAnimation.ResponsiveAnimationGuard.onLayoutChangeStart(null);
+      TwAnimation.ResponsiveAnimationGuard.onLayoutChangeEnd(null);
+    }
+  }
+
+  @Nested
+  @DisplayName("Easing")
+  class EasingTests {
+
+    @Test
+    @DisplayName("withEase should apply the interpolator to every key value")
+    void testWithEaseAppliesInterpolator() {
+      interact(
+          () -> {
+            Region n = new Region();
+            TwAnimation a = TwAnimation.fadeIn(n, 200).withEase(Interpolator.LINEAR);
+            javafx.animation.Timeline tl = (javafx.animation.Timeline) a.raw();
+            for (javafx.animation.KeyFrame frame : tl.getKeyFrames()) {
+              for (javafx.animation.KeyValue kv : frame.getValues()) {
+                assertEquals(
+                    Interpolator.LINEAR, kv.getInterpolator(), "key value should use LINEAR");
+              }
+            }
+          });
+    }
+
+    @Test
+    @DisplayName("easeIn shortcut should set EASE_IN on the key values")
+    void testEaseInShortcut() {
+      interact(
+          () -> {
+            Region n = new Region();
+            TwAnimation a = TwAnimation.fadeIn(n, 200).easeIn();
+            javafx.animation.Timeline tl = (javafx.animation.Timeline) a.raw();
+            for (javafx.animation.KeyFrame frame : tl.getKeyFrames()) {
+              for (javafx.animation.KeyValue kv : frame.getValues()) {
+                assertEquals(Interpolator.EASE_IN, kv.getInterpolator());
+              }
+            }
+          });
+    }
+
+    @Test
+    @DisplayName("withEase should throw for null interpolator")
+    void testWithEaseNull() {
+      interact(
+          () -> {
+            Region n = new Region();
+            TwAnimation a = TwAnimation.fadeIn(n, 200);
+            assertThrows(IllegalArgumentException.class, () -> a.withEase(null));
+          });
+    }
+  }
+
+  @Nested
+  @DisplayName("Playback parameter validation")
+  class PlaybackValidationTests {
+
+    @Test
+    @DisplayName("speed should reject non-positive rates")
+    void testSpeedRejectsNonPositive() {
+      interact(
+          () -> {
+            Region n = new Region();
+            TwAnimation a = TwAnimation.fadeIn(n, 200);
+            assertThrows(IllegalArgumentException.class, () -> a.speed(0));
+            assertThrows(IllegalArgumentException.class, () -> a.speed(-1));
+          });
+    }
+
+    @Test
+    @DisplayName("pause should reject non-positive durations")
+    void testPauseRejectsNonPositive() {
+      assertThrows(IllegalArgumentException.class, () -> TwAnimation.pause(0));
+      assertThrows(IllegalArgumentException.class, () -> TwAnimation.pause(-5));
+    }
+
+    @Test
+    @DisplayName("hover helpers should reject null nodes")
+    void testHoverHelpersNullGuards() {
+      assertThrows(IllegalArgumentException.class, () -> TwAnimation.onHoverLift(null, -4));
+      assertThrows(IllegalArgumentException.class, () -> TwAnimation.onHoverDim(null, 0.5));
+      assertThrows(IllegalArgumentException.class, () -> TwAnimation.removeHoverEffects(null));
+    }
+
+    @Test
+    @DisplayName("removeHoverEffects should restore translateY as well")
+    void testRemoveHoverEffectsResetsTranslateY() {
+      interact(
+          () -> {
+            Region n = new Region();
+            n.setTranslateY(12);
+            n.setScaleX(1.2);
+            n.setOpacity(0.4);
+            TwAnimation.onHoverLift(n, -4);
+            TwAnimation.removeHoverEffects(n);
+            assertEquals(0, n.getTranslateY(), DELTA, "translateY should be reset");
+            assertEquals(1, n.getScaleX(), DELTA, "scaleX should be reset");
+            assertEquals(1, n.getOpacity(), DELTA, "opacity should be reset");
+          });
+    }
   }
 }

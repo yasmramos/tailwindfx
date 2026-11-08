@@ -48,7 +48,6 @@ public final class TwAnimation {
   private final Animation timeline;
   private Node registeredNode;
   private String registeredSlot;
-  private Interpolator ease = null;
 
   public TwAnimation(Animation animation) {
     this.timeline = animation;
@@ -112,7 +111,6 @@ public final class TwAnimation {
                 new KeyFrame(Duration.ZERO, new KeyValue(node.opacityProperty(), 0, ease)),
                 new KeyFrame(
                     Duration.millis(durationMs), new KeyValue(node.opacityProperty(), 1, ease))));
-    fxAnim.ease = ease;
     return fxAnim.register(node, "enter");
   }
 
@@ -440,7 +438,6 @@ public final class TwAnimation {
                     new KeyValue(node.opacityProperty(), 1, ease),
                     new KeyValue(node.scaleXProperty(), 1.0, ease),
                     new KeyValue(node.scaleYProperty(), 1.0, ease))));
-    fxAnim.ease = ease;
     return fxAnim;
   }
 
@@ -834,6 +831,7 @@ public final class TwAnimation {
    * @see #chain(TwAnimation...)
    */
   public static TwAnimation pause(int durationMs) {
+    Preconditions.requirePositiveDuration(durationMs, "TwAnimation.pause");
     PauseTransition p = new PauseTransition(Duration.millis(durationMs));
     return new TwAnimation(p);
   }
@@ -879,7 +877,7 @@ public final class TwAnimation {
    * @throws IllegalArgumentException if rate <= 0
    */
   public TwAnimation speed(double rate) {
-    timeline.setRate(rate);
+    timeline.setRate(Preconditions.requirePositiveSpeed(rate, "TwAnimation.speed"));
     return this;
   }
 
@@ -1007,8 +1005,33 @@ public final class TwAnimation {
    */
   public TwAnimation withEase(Interpolator interpolator) {
     Preconditions.requireNonNull(interpolator, "TwAnimation.withEase", "interpolator");
-    this.ease = interpolator;
+    // Apply the interpolator to every KeyValue of the underlying Timeline. Without this the
+    // ease*() shortcuts only mutated a field that was never read, so they were silent no-ops.
+    // KeyValue is immutable in its interpolator, so the key frames have to be rebuilt.
+    // Transitions built by chain()/parallel() are not Timelines and keep their own easing.
+    if (timeline instanceof Timeline tl) {
+      java.util.List<KeyFrame> rebuilt = new java.util.ArrayList<>();
+      for (KeyFrame frame : tl.getKeyFrames()) {
+        java.util.List<KeyValue> values = new java.util.ArrayList<>();
+        for (KeyValue value : frame.getValues()) {
+          values.add(rekeyWithInterpolator(value, interpolator));
+        }
+        rebuilt.add(
+            new KeyFrame(
+                frame.getTime(), frame.getOnFinished(), values.toArray(new KeyValue[0])));
+      }
+      tl.getKeyFrames().setAll(rebuilt);
+    }
     return this;
+  }
+
+  /** Rebuilds a {@link KeyValue} with a different interpolator (KeyValue itself is immutable). */
+  @SuppressWarnings("unchecked")
+  private static <T> KeyValue rekeyWithInterpolator(KeyValue value, Interpolator interpolator) {
+    return new KeyValue(
+        (javafx.beans.value.WritableValue<T>) value.getTarget(),
+        (T) value.getEndValue(),
+        interpolator);
   }
 
   /**
@@ -1106,6 +1129,7 @@ public final class TwAnimation {
    * @see #removeHoverEffects(Node)
    */
   public static void onHoverLift(Node node, double offsetY) {
+    Preconditions.requireNode(node, "TwAnimation.onHoverLift");
     double originalY = node.getTranslateY();
     Timeline hoverIn =
         new Timeline(
@@ -1149,6 +1173,7 @@ public final class TwAnimation {
    * @see #removeHoverEffects(Node)
    */
   public static void onHoverDim(Node node, double targetOpacity) {
+    Preconditions.requireNode(node, "TwAnimation.onHoverDim");
     Timeline hoverIn =
         new Timeline(
             new KeyFrame(
@@ -1185,6 +1210,7 @@ public final class TwAnimation {
    * @throws IllegalArgumentException if node is null
    */
   public static void removeHoverEffects(Node node) {
+    Preconditions.requireNode(node, "TwAnimation.removeHoverEffects");
     @SuppressWarnings("unchecked")
     var handlers =
         (java.util.List<javafx.event.EventHandler<javafx.scene.input.MouseEvent>>)
@@ -1200,6 +1226,9 @@ public final class TwAnimation {
     node.setScaleX(1.0);
     node.setScaleY(1.0);
     node.setOpacity(1.0);
+    // Hover lift/dim animate translateY too, so restore it; otherwise the node keeps the
+    // offset left behind by the last hover transition.
+    node.setTranslateY(0);
   }
 
   /**
@@ -1504,7 +1533,9 @@ public final class TwAnimation {
      * @return true if this slot contains transform animations
      */
     private static boolean isTransformAnimation(String slot) {
-      return "translate".equals(slot)
+      return "enter".equals(slot)
+          || "exit".equals(slot)
+          || "translate".equals(slot)
           || "scale".equals(slot)
           || "rotate".equals(slot)
           || "slide".equals(slot);
