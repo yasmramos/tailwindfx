@@ -110,6 +110,30 @@ public class TwAlertIT {
   }
 
   @Test
+  public void testMessageReceivesAlertMessageClass() {
+    TwAlert alert = new TwAlert();
+    alert.setContent("Message");
+
+    javafx.scene.control.Label label = (javafx.scene.control.Label) alert.getChildren().get(0);
+    assertTrue(
+        label.getStyleClass().contains("alert-message"),
+        "the message must carry alert-message so the .alert-message rule styles it: "
+            + label.getStyleClass());
+  }
+
+  @Test
+  public void testMessageWithIconReceivesAlertMessageClass() {
+    TwAlert alert = new TwAlert();
+    javafx.scene.control.Label icon = new javafx.scene.control.Label("!");
+    alert.setContent(icon, "Message");
+
+    javafx.scene.control.Label label = (javafx.scene.control.Label) alert.getChildren().get(1);
+    assertTrue(
+        label.getStyleClass().contains("alert-message"),
+        "the message must carry alert-message even next to an icon: " + label.getStyleClass());
+  }
+
+  @Test
   public void testSpacingAndPadding() {
     TwAlert alert = new TwAlert();
 
