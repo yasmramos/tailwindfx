@@ -265,6 +265,29 @@ class GradientProcessorTest {
         assertTrue(result.isGradient(), "Should handle color: " + color);
       }
     }
+
+    @Test
+    @DisplayName("Should resolve named colors regardless of the default locale")
+    void testNamedColorResolutionIsLocaleIndependent() {
+      // Regression: resolveNamedColor used toLowerCase() without Locale.ROOT. On a JVM whose
+      // default locale is Turkish, "WHITE".toLowerCase() yields "whıte" (dotless i), so the
+      // switch fell through and the arbitrary color was lost.
+      java.util.Locale original = java.util.Locale.getDefault();
+      java.util.Locale.setDefault(java.util.Locale.forLanguageTag("tr-TR"));
+      try {
+        GradientProcessor.GradientResult result =
+            GradientProcessor.processGradientTokens(
+                new String[] {"bg-gradient-to-r", "from-[WHITE]", "to-[BLACK]"});
+
+        assertTrue(result.isGradient());
+        assertTrue(
+            result.inlineStyle().contains("#ffffff"),
+            "from-[WHITE] must resolve to #ffffff, got: " + result.inlineStyle());
+        assertTrue(result.inlineStyle().contains("#000000"));
+      } finally {
+        java.util.Locale.setDefault(original);
+      }
+    }
   }
 
   @Nested

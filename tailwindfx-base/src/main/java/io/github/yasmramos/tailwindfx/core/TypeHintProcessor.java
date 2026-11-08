@@ -1,6 +1,7 @@
 package io.github.yasmramos.tailwindfx.core;
 
 import io.github.yasmramos.tailwindfx.style.TypeHint;
+import java.util.Locale;
 
 /**
  * TypeHintProcessor — Advanced type hint detection and processing for Tailwind CSS v4.
@@ -174,8 +175,9 @@ public final class TypeHintProcessor {
       return true;
     }
 
-    // Named colors (common ones)
-    return switch (value.toLowerCase()) {
+    // Named colors (common ones). Locale.ROOT keeps the match correct on JVMs whose
+    // default locale lowercases 'I' to 'ı' (e.g. Turkish), which would break "INHERIT".
+    return switch (value.toLowerCase(Locale.ROOT)) {
       case "transparent", "currentcolor", "inherit" -> true;
       default -> false;
     };
