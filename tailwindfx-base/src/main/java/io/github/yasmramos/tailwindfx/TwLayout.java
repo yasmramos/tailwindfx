@@ -260,8 +260,8 @@ public final class TwLayout {
 
   /** Applies gap style using Builder. */
   private static void applyGap(Builder helper, String token) {
-    int value = parseTailwindValue(token);
-    double px = value * 4.0;
+    double px = resolvePx(token);
+    if (Double.isNaN(px)) return;
 
     if (token.startsWith("gap-x-")) {
       helper.hgap(px).build();
@@ -302,13 +302,13 @@ public final class TwLayout {
   private static void applyGridContainer(Builder helper, String token) {
     // Grid columns
     if (token.startsWith("grid-cols-")) {
-      int cols = parseTailwindValue(token);
-      helper.cols(cols).build();
+      int cols = parseCount(token);
+      if (cols > 0) helper.cols(cols).build();
     }
     // Grid rows
     else if (token.startsWith("grid-rows-")) {
-      int rows = parseTailwindValue(token);
-      helper.rows(rows).build();
+      int rows = parseCount(token);
+      if (rows > 0) helper.rows(rows).build();
     }
     // Grid auto-flow
     else if (token.equals("grid-flow-row")) {
@@ -330,11 +330,11 @@ public final class TwLayout {
     TwGridPane gridPane = (TwGridPane) parent;
 
     if (token.startsWith("col-span-")) {
-      int span = parseTailwindValue(token);
-      TwGridPane.setColSpan(node, span);
+      int span = parseCount(token);
+      if (span > 0) TwGridPane.setColSpan(node, span);
     } else if (token.startsWith("row-span-")) {
-      int span = parseTailwindValue(token);
-      TwGridPane.setRowSpan(node, span);
+      int span = parseCount(token);
+      if (span > 0) TwGridPane.setRowSpan(node, span);
     }
     // Note: col-start/end and row-start/end are not yet implemented in TwGridPane
     // These would require additional API methods for explicit positioning
@@ -349,21 +349,66 @@ public final class TwLayout {
     return null;
   }
 
-  /** Parses numeric value from Tailwind token. */
-  private static int parseTailwindValue(String token) {
-    if (token.contains("[")) {
-      int start = token.indexOf('[') + 1;
-      int end = token.indexOf(']');
-      String value = token.substring(start, end);
-      if (value.contains("px")) {
-        return (int) Double.parseDouble(value.replace("px", ""));
-      }
-      return Integer.parseInt(value);
+  /**
+   * Resolves a spacing token to a pixel value.
+   *
+   * <p>Scale tokens (gap-4) are multiplied by {@link TwConfig#unit()}; arbitrary values
+   * (gap-[16px], gap-[1.5rem], gap-[2em]) are treated as absolute lengths and never scaled, which
+   * matches {@code LayoutApplier}.
+   *
+   * @param token the token to resolve (e.g. "gap-4", "gap-[20px]")
+   * @return the value in pixels, or {@link Double#NaN} when it cannot be parsed
+   */
+  private static double resolvePx(String token) {
+    int open = token.indexOf('[');
+    if (open >= 0) {
+      int close = token.indexOf(']', open + 1);
+      if (close < 0) return Double.NaN;
+      return parseArbitraryPx(token.substring(open + 1, close));
     }
 
-    String numPart = token.substring(token.lastIndexOf('-') + 1);
     try {
-      return Integer.parseInt(numPart);
+      return Integer.parseInt(token.substring(token.lastIndexOf('-') + 1)) * TwConfig.unit();
+    } catch (NumberFormatException e) {
+      return Double.NaN;
+    }
+  }
+
+  /** Parses an arbitrary length ({@code 16px}, {@code 1.5rem}, {@code 2em}, {@code 2.5}). */
+  private static double parseArbitraryPx(String value) {
+    String v = value.trim();
+    try {
+      if (v.endsWith("px")) {
+        return Double.parseDouble(v.substring(0, v.length() - 2).trim());
+      }
+      if (v.endsWith("rem") || v.endsWith("em")) {
+        int cut = v.endsWith("rem") ? 3 : 2;
+        return Double.parseDouble(v.substring(0, v.length() - cut).trim()) * TwConfig.unit();
+      }
+      return Double.parseDouble(v);
+    } catch (NumberFormatException e) {
+      return Double.NaN;
+    }
+  }
+
+  /**
+   * Parses a non-negative integer count from a token (grid-cols-3, col-span-2).
+   *
+   * @param token the token to parse
+   * @return the parsed count, or 0 when the token is not a valid positive count
+   */
+  private static int parseCount(String token) {
+    int open = token.indexOf('[');
+    String value;
+    if (open >= 0) {
+      int close = token.indexOf(']', open + 1);
+      if (close < 0) return 0;
+      value = token.substring(open + 1, close).trim();
+    } else {
+      value = token.substring(token.lastIndexOf('-') + 1);
+    }
+    try {
+      return Integer.parseInt(value);
     } catch (NumberFormatException e) {
       return 0;
     }
