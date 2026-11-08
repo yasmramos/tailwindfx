@@ -56,8 +56,8 @@ Unsure where to begin contributing? You can start by looking at issues labeled:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yasmramos/TailwindFX.git
-cd TailwindFX
+git clone https://github.com/yasmramos/tailwindfx.git
+cd tailwindfx
 
 # Build the project
 mvn clean install
@@ -102,7 +102,7 @@ Follow the [Conventional Commits](https://www.conventionalcommits.org/) specific
 
 ```
 feat: add new grid layout utilities
-fix: resolve NPE in FxFlexPane when wrap=true
+fix: resolve NPE in TwFlexPane when wrap=true
 docs: update README with new examples
 test: add unit tests for ColorPalette
 refactor: simplify JitCompiler cache logic
@@ -117,7 +117,7 @@ refactor: simplify JitCompiler cache logic
 mvn test
 
 # Run specific test class
-mvn test -Dtest=FxFlexPaneTest
+mvn test -Dtest=TwFlexPaneIT
 
 # Run tests with coverage
 mvn test jacoco:report

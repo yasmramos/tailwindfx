@@ -150,7 +150,7 @@ public class App extends Application {
         Scene scene = new Scene(root, 400, 300);
         
         // Ensure TailwindFX is installed
-        TailwindFX.install(scene);
+        TwInstall.install(scene);
 
         stage.setTitle("TailwindFX Example");
         stage.setScene(scene);
