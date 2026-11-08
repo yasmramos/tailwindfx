@@ -882,7 +882,9 @@ public class TwFlexPane extends Pane {
 
     totalPrefH += gapCross * (count - 1);
     double overflow = totalPrefH - h; // positive = too tall, need to shrink
-    double extra = Math.max(0, h - (totalPrefH - gapCross * (count - 1))); // free space
+    // Same reasoning as layoutRowNoWrap: free space must exclude the gaps between items,
+    // otherwise a non-wrapping column with grow children overflows by gap * (count - 1).
+    double extra = Math.max(0, -overflow);
 
     double[] heights = new double[count];
     if (extra > 0 && totalGrowWeighted > 0) {
