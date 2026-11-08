@@ -433,6 +433,7 @@ We welcome contributions from the community! Here's how you can help:
 
 ### Quick Links
 - 📚 [Issues for Contributors](.github/ISSUES_FOR_CONTRIBUTORS.md)
+- 🧑‍💻 [Developer Guide](docs/DEVELOPER_GUIDE.md)
 - 🐛 [Report a Bug](https://github.com/yasmramos/TailwindFX/issues/new?template=bug_report.md)
 - 💡 [Request a Feature](https://github.com/yasmramos/TailwindFX/issues/new?template=feature_request.md)
 - 🎯 [Good First Issues](https://github.com/yasmramos/TailwindFX/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
