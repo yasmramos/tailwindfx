@@ -401,10 +401,10 @@
     -radius-default: 4px;
     -radius-md: 6px;
     -radius-lg: 8px;
-    -radius-xl: 20px;
-    -radius-2xl: 24px;
-    -radius-3xl: 28px;
-    -radius-full: 32px;
+    -radius-xl: 12px;
+    -radius-2xl: 16px;
+    -radius-3xl: 24px;
+    -radius-full: 9999px;
     -opacity-25: 0.25;
     -opacity-0: 0.0;
     -opacity-100: 1.0;
@@ -4185,16 +4185,16 @@
   -fx-border-radius: 4px;
 }
 .rounded-2xl {
+  -fx-background-radius: 16px;
+  -fx-border-radius: 16px;
+}
+.rounded-3xl {
   -fx-background-radius: 24px;
   -fx-border-radius: 24px;
 }
-.rounded-3xl {
-  -fx-background-radius: 28px;
-  -fx-border-radius: 28px;
-}
 .rounded-full {
-  -fx-background-radius: 32px;
-  -fx-border-radius: 32px;
+  -fx-background-radius: 9999px;
+  -fx-border-radius: 9999px;
 }
 .rounded-lg {
   -fx-background-radius: 8px;
@@ -4213,8 +4213,8 @@
   -fx-border-radius: 2px;
 }
 .rounded-xl {
-  -fx-background-radius: 20px;
-  -fx-border-radius: 20px;
+  -fx-background-radius: 12px;
+  -fx-border-radius: 12px;
 }
 .scale-0 {
   -fx-scale-x: 0.0;

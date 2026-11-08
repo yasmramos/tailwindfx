@@ -169,6 +169,25 @@ class CssPropertyMapperTest {
   }
 
   @Test
+  void testRoundedScaleMatchesTailwind() {
+    assertTrue(resolveAndMap("rounded-none").contains("0px"), resolveAndMap("rounded-none"));
+    assertTrue(resolveAndMap("rounded-sm").contains("2px"), resolveAndMap("rounded-sm"));
+    assertTrue(resolveAndMap("rounded").contains("4px"), resolveAndMap("rounded"));
+    assertTrue(resolveAndMap("rounded-md").contains("6px"), resolveAndMap("rounded-md"));
+    assertTrue(resolveAndMap("rounded-lg").contains("8px"), resolveAndMap("rounded-lg"));
+    assertTrue(resolveAndMap("rounded-xl").contains("12px"), resolveAndMap("rounded-xl"));
+    assertTrue(resolveAndMap("rounded-2xl").contains("16px"), resolveAndMap("rounded-2xl"));
+    assertTrue(resolveAndMap("rounded-3xl").contains("24px"), resolveAndMap("rounded-3xl"));
+  }
+
+  @Test
+  void testRoundedFullIsPillRadius() {
+    String result = resolveAndMap("rounded-full");
+    assertNotNull(result);
+    assertTrue(result.contains("-fx-background-radius: 9999px"), result);
+  }
+
+  @Test
   void testShadowUsesFullJavaFxDropshadowSignature() {
     assertEquals(
         "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 2, 0, 0, 1);",
