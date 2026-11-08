@@ -607,7 +607,27 @@ class StylesTest {
     }
 
     @Test
-    @DisplayName("fillCurrent falls back to black when the property is absent")
+    @DisplayName("fillCurrent reads a Label's text fill")
+    void fillCurrentFromLabel() {
+      Label label = new Label("hi");
+      label.setTextFill(Color.web("#ef4444"));
+      Rectangle shape = new Rectangle();
+      Styles.fillCurrent(shape, label);
+      assertEquals(Color.web("#ef4444"), shape.getFill());
+    }
+
+    @Test
+    @DisplayName("fillCurrent reads a Text node's fill")
+    void fillCurrentFromText() {
+      javafx.scene.text.Text text = new javafx.scene.text.Text("hi");
+      text.setFill(Color.web("#3b82f6"));
+      Rectangle shape = new Rectangle();
+      Styles.fillCurrent(shape, text);
+      assertEquals(Color.web("#3b82f6"), shape.getFill());
+    }
+
+    @Test
+    @DisplayName("fillCurrent falls back to black for a plain node")
     void fillCurrentFallback() {
       Rectangle shape = new Rectangle();
       Styles.fillCurrent(shape, new Region());

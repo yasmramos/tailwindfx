@@ -1128,12 +1128,23 @@ public final class Styles {
   public static void fillCurrent(javafx.scene.shape.Shape shape, Node reference) {
     Preconditions.requireNonNull(shape, "Styles.fillCurrent", "shape");
     Preconditions.requireNonNull(reference, "Styles.fillCurrent", "reference");
-    javafx.scene.paint.Paint fill =
-        (javafx.scene.paint.Paint)
-            reference
-                .getProperties()
-                .getOrDefault("tailwindfx.text.color", javafx.scene.paint.Color.BLACK);
-    shape.setFill(fill);
+    shape.setFill(resolveTextFill(reference));
+  }
+
+  private static javafx.scene.paint.Paint resolveTextFill(Node reference) {
+    // An explicit override wins, then the node's real text fill. Without this the method always
+    // fell back to black because nothing in the codebase ever wrote the property.
+    Object explicit = reference.getProperties().get("tailwindfx.text.color");
+    if (explicit instanceof javafx.scene.paint.Paint paint) {
+      return paint;
+    }
+    javafx.scene.paint.Paint textFill = null;
+    if (reference instanceof javafx.scene.control.Labeled labeled) {
+      textFill = labeled.getTextFill();
+    } else if (reference instanceof javafx.scene.text.Text text) {
+      textFill = text.getFill();
+    }
+    return textFill != null ? textFill : javafx.scene.paint.Color.BLACK;
   }
 
   /**
