@@ -113,16 +113,30 @@ public final class TwInstall {
     installGenerated(scene, null);
   }
 
-  /** Installs minimal CSS (base variables only). All utilities are JIT-compiled. */
+  /**
+   * Installs minimal CSS (base variables only); all utilities are JIT-compiled.
+   *
+   * @param scene the JavaFX scene to install into
+   */
   public static void install(Scene scene) {
     installMinimal(scene);
   }
 
+  /**
+   * Installs minimal CSS and registers the stage for responsive breakpoints.
+   *
+   * @param scene the JavaFX scene to install into
+   * @param stage the stage used for breakpoint tracking
+   */
   public static void install(Scene scene, Stage stage) {
     installMinimal(scene, stage);
   }
 
-  /** Installs only the base module (variables and reset). Required for JIT compilation. */
+  /**
+   * Installs only the base module (variables and reset). Required for JIT compilation.
+   *
+   * @param scene the JavaFX scene to install into
+   */
   public static void installBase(Scene scene) {
     installGeneratedBaseCss(scene, 0);
   }
@@ -144,6 +158,8 @@ public final class TwInstall {
 
   /**
    * Minimal installation: base CSS generated dynamically. All utilities JIT-compiled at runtime.
+   *
+   * @param scene the JavaFX scene to install into
    */
   public static void installMinimal(Scene scene) {
     installBase(scene);

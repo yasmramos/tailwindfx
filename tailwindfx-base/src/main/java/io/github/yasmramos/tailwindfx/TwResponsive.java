@@ -26,14 +26,23 @@ import javafx.stage.Stage;
  *
  * <pre>
  * TwResponsive.on(stage);
- * TwResponsive.forRegion(region);
+ * TwResponsive.on(region);
+ * TwResponsive.forStage(stage);
  * </pre>
  */
 public final class TwResponsive {
 
   private TwResponsive() {}
 
-  /** Installs responsive support on a Stage. */
+  /**
+   * Installs responsive support on the scene root of a stage.
+   *
+   * @param stage the stage whose scene root should become responsive; the stage must have a scene
+   *     attached
+   * @return the {@link ResponsiveNode} bound to the scene root
+   * @throws IllegalArgumentException if the stage has no scene, or its root is not a {@link
+   *     javafx.scene.Node}
+   */
   public static ResponsiveNode on(Stage stage) {
     Scene scene = stage.getScene();
     if (scene == null) {
@@ -49,12 +58,22 @@ public final class TwResponsive {
     throw new IllegalArgumentException("Scene root must be a Node");
   }
 
-  /** Makes a Region responsive to breakpoint changes. */
+  /**
+   * Makes a region responsive to breakpoint changes.
+   *
+   * @param region the region to bind to the current scene
+   * @return the {@link ResponsiveNode} bound to the region
+   */
   public static ResponsiveNode on(Region region) {
     return ResponsiveNode.on(region).install(region.getScene());
   }
 
-  /** Gets the BreakpointManager for a Stage. */
+  /**
+   * Returns the breakpoint manager associated with a stage.
+   *
+   * @param stage the stage whose breakpoints should be managed
+   * @return the {@link BreakpointManager} for the stage
+   */
   public static BreakpointManager forStage(Stage stage) {
     return BreakpointManager.from(stage);
   }

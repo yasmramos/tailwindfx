@@ -44,7 +44,7 @@ import javafx.scene.Node;
  *
  * <pre>
  * TwStyle.apply(node, "btn-primary", "rounded-lg");
- * TwStyle.jit(node, "bg-blue-500/80", "p-[13px]");
+ * TwStyle.apply(node, "bg-blue-500/80", "p-[13px]"); // arbitrary/JIT tokens
  * TwStyle.remove(node, "old-class");
  * TwStyle.toggle(node, "active");
  * </pre>
@@ -84,7 +84,25 @@ public final class TwStyle {
 
   private TwStyle() {}
 
-  /** Applies utility classes and JIT tokens to a node with intelligent auto-detection. */
+  /**
+   * Applies one or more TailwindFX utility classes to a JavaFX node.
+   *
+   * <p>Each argument may be a single token or a space-separated group of tokens. Tokens are
+   * auto-detected: plain utilities become CSS classes, arbitrary/JIT values (for example {@code
+   * w-[320px]} or {@code bg-blue-500/80}) are compiled to inline styles, {@code animate-*}
+   * utilities are played as timelines, and variants such as {@code hover:} or {@code dark:} are
+   * registered accordingly.
+   *
+   * <pre>
+   * TwStyle.apply(button, "bg-blue-500", "text-white", "rounded-lg");
+   * TwStyle.apply(button, "px-4 py-2");           // space-separated group
+   * TwStyle.apply(button, "w-[320px]");           // JIT / arbitrary value
+   * </pre>
+   *
+   * @param node the JavaFX node to style; must not be {@code null}
+   * @param tokens one or more utility tokens (or space-separated groups of them); a {@code null} or
+   *     empty array is ignored
+   */
   public static void apply(Node node, String... tokens) {
     Preconditions.requireNode(node, "TwStyle.apply");
     if (tokens == null || tokens.length == 0) return;
@@ -171,7 +189,22 @@ public final class TwStyle {
   // private copies that could silently drift out of sync with LayoutApplier. Those duplicates were
   // removed; applyInternal() above delegates directly to LayoutApplier.applyLayoutDependentStyles.
 
-  /** Applies utility classes WITHOUT conflict resolution. */
+  /**
+   * Applies utility classes without conflict resolution.
+   *
+   * <p>Unlike {@link #apply(Node, String...)}, this method does not classify tokens, resolve
+   * conflicts or run JIT compilation: each token is added verbatim to the node's style class list.
+   * Use it when you want full control over the resulting class list (for example, when driving a
+   * stylesheet directly).
+   *
+   * <pre>
+   * TwStyle.applyRaw(button, "bg-blue-500", "rounded-lg");
+   * TwStyle.applyRaw(button, "px-4 py-2"); // split on whitespace
+   * </pre>
+   *
+   * @param node the JavaFX node to style; must not be {@code null}
+   * @param classes the CSS classes to add; {@code null} is ignored and blank entries are skipped
+   */
   public static void applyRaw(Node node, String... classes) {
     Preconditions.requireNode(node, "TwStyle.applyRaw");
     if (classes == null) return;
@@ -185,20 +218,47 @@ public final class TwStyle {
     }
   }
 
-  /** Removes CSS classes from a node. */
+  /**
+   * Removes the given CSS classes from a node.
+   *
+   * <pre>
+   * TwStyle.remove(button, "bg-blue-500", "rounded-lg");
+   * </pre>
+   *
+   * @param node the JavaFX node to update; must not be {@code null}
+   * @param classes the CSS classes to remove; {@code null} or an empty array is ignored
+   */
   public static void remove(Node node, String... classes) {
     Preconditions.requireNode(node, "TwStyle.remove");
     if (classes == null || classes.length == 0) return;
     node.getStyleClass().removeAll(Arrays.asList(classes));
   }
 
-  /** Replaces all CSS classes on a node. */
+  /**
+   * Replaces the entire style class list of a node with the given classes.
+   *
+   * <pre>
+   * TwStyle.replace(button, "bg-green-500", "rounded-lg");
+   * </pre>
+   *
+   * @param node the JavaFX node to update
+   * @param classes the classes that become the node's full style class list; {@code null} clears it
+   */
   public static void replace(Node node, String... classes) {
     Preconditions.requireNode(node, "TwStyle.replace");
     node.getStyleClass().setAll(Arrays.asList(classes == null ? new String[0] : classes));
   }
 
-  /** Toggles a CSS class on a node. */
+  /**
+   * Toggles a CSS class on a node: adds it when absent, removes it when present.
+   *
+   * <pre>
+   * TwStyle.toggle(button, "active"); // add if missing, remove if present
+   * </pre>
+   *
+   * @param node the JavaFX node to update
+   * @param cssClass the class to toggle
+   */
   public static void toggle(Node node, String cssClass) {
     if (node.getStyleClass().contains(cssClass)) {
       node.getStyleClass().remove(cssClass);
@@ -207,27 +267,74 @@ public final class TwStyle {
     }
   }
 
-  /** Enables automatic cleanup of JIT styles when a node is removed from the scene. */
+  /**
+   * Enables automatic cleanup of JIT styles when the node is removed from the scene.
+   *
+   * <p>Registers the node with {@link
+   * io.github.yasmramos.tailwindfx.core.UtilityConflictResolver#autoCleanup(Node)} so that its
+   * inline JIT styles and cache entries are released once it leaves the scene graph, preventing
+   * stale state from leaking across scene rebuilds.
+   *
+   * <pre>
+   * TwStyle.autoCleanup(card); // release JIT styles when the card leaves the scene
+   * </pre>
+   *
+   * @param node the JavaFX node to track; must not be {@code null}
+   */
   public static void autoCleanup(Node node) {
     Preconditions.requireNode(node, "TwStyle.autoCleanup");
     // Delegate to existing cleanup mechanism in UtilityConflictResolver
     io.github.yasmramos.tailwindfx.core.UtilityConflictResolver.autoCleanup(node);
   }
 
-  /** Invalidates the entire style cache for a node. */
+  /**
+   * Invalidates the entire style cache for a node.
+   *
+   * <p>Forces the next {@code apply} on this node to re-resolve every category instead of reusing
+   * cached results. Call it after changing state that the cache cannot observe (for example, a
+   * theme switch performed outside {@code TwTheme}).
+   *
+   * <pre>
+   * TwStyle.invalidateCache(node);
+   * </pre>
+   *
+   * @param node the JavaFX node whose cache should be dropped
+   */
   public static void invalidateCache(Node node) {
     StyleCache.invalidate(node);
   }
 
   /**
-   * Removes all TailwindFX styles from a node (cleanup). Alias for invalidateCache for backward
-   * compatibility.
+   * Removes all TailwindFX styles from a node.
+   *
+   * <p>Alias for {@link #invalidateCache(Node)}, kept for backward compatibility. Prefer {@code
+   * cleanupNode} when you mean "detach TailwindFX from this node" and {@code invalidateCache} when
+   * you only need to drop cached resolutions.
+   *
+   * <pre>
+   * TwStyle.cleanupNode(node);
+   * </pre>
+   *
+   * @param node the JavaFX node to clean up
    */
   public static void cleanupNode(Node node) {
     StyleCache.cleanup(node);
   }
 
-  /** Invalidates a specific category from the style cache for a node. */
+  /**
+   * Invalidates a single utility category from the style cache for a node.
+   *
+   * <p>More targeted than {@link #invalidateCache(Node)}: only the cache entries belonging to {@code
+   * category} are dropped, so unrelated categories keep their cached resolutions.
+   *
+   * <pre>
+   * TwStyle.invalidateCategoryCache(node, "colors");
+   * </pre>
+   *
+   * @param node the JavaFX node whose category cache should be dropped
+   * @param category the utility category to invalidate (for example {@code "colors"} or {@code
+   *     "spacing"})
+   */
   public static void invalidateCategoryCache(Node node, String category) {
     StyleCache.invalidateCategory(node, category);
   }
