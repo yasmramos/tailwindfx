@@ -190,6 +190,16 @@ class TwVirtualFlowLayoutTest extends ApplicationTest {
         "the selected class must not accumulate across layout passes: " + cell.getStyleClass());
   }
 
+  @Test
+  @DisplayName("Applies the virtual-flow base class the stylesheet scopes its rules to")
+  void baseClassIsApplied() {
+    TwVirtualFlow<String> flow = new TwVirtualFlow<>();
+    assertTrue(
+        flow.getStyleClass().contains("virtual-flow"),
+        "the .virtual-flow rules only match when the base class is present: "
+            + flow.getStyleClass());
+  }
+
   private Node firstCell(TwVirtualFlow<String> flow) {
     Pane container = (Pane) flow.getChildrenUnmodifiable().get(0);
     return container.getChildren().isEmpty() ? null : container.getChildren().get(0);

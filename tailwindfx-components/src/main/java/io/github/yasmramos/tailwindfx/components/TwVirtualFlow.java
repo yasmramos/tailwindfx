@@ -127,6 +127,10 @@ public class TwVirtualFlow<T> extends Region {
 
   // Constructor
   public TwVirtualFlow() {
+    // "virtual-flow" is the base class the component stylesheet scopes its cell rules to
+    // (".virtual-flow .fx-virtualflow-cell", ".virtual-flow .fx-virtualflow-cell.selected",
+    // ...); without it those rules never matched.
+    getStyleClass().add("virtual-flow");
     // Setup container
     dropIndicator.getStyleClass().add("fx-virtualflow-drop-indicator");
     dropIndicator.setStyle("-fx-background-color: #3b82f6; -fx-pref-height: 2;");

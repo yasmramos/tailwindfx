@@ -162,6 +162,9 @@ public final class TwDataTable<T> extends TableView<T> {
     }
   }
 
+  /** Base class the component stylesheet scopes its table rules to. */
+  private static final String BASE_CLASS = "data-table";
+
   // Column definition
 
   private record ColDef<T>(String header, Function<T, String> value, boolean sortable) {}
@@ -373,7 +376,11 @@ public final class TwDataTable<T> extends TableView<T> {
   private void configureTable(Builder<T> b) {
     setItems(paginated ? FXCollections.observableArrayList() : sorted);
     setPlaceholder(new Label(b.placeholder));
-    getStyleClass().addAll("table-view");
+    // JavaFX already ships "table-view" as the TableView default style class, so adding it
+    // unconditionally duplicated it ("table-view table-view"). "data-table" is the base class
+    // the component stylesheet scopes its rules to (".data-table .column-header",
+    // ".data-table .table-row-cell", ...); without it that whole block never matched.
+    if (!getStyleClass().contains(BASE_CLASS)) getStyleClass().add(BASE_CLASS);
     if (b.styleClasses.length > 0) getStyleClass().addAll(b.styleClasses);
     if (b.rowFactory != null) setRowFactory(b.rowFactory);
     else setRowFactory(tv -> buildStyledRow());
