@@ -151,11 +151,27 @@ public class VariantParser {
     int pos = 0;
 
     while (pos < token.length()) {
-      // Find the next ':'
-      int colonPos = token.indexOf(':', pos);
+      // Find the next top-level ':'. Colons inside an arbitrary variant's square
+      // brackets belong to the variant itself (e.g. [@media(min-width:768px)] or
+      // [&:hover]), so they must not split the token.
+      int colonPos = -1;
+      int bracketDepth = 0;
+      for (int i = pos; i < token.length(); i++) {
+        char c = token.charAt(i);
+        if (c == '[') {
+          bracketDepth++;
+        } else if (c == ']') {
+          if (bracketDepth > 0) {
+            bracketDepth--;
+          }
+        } else if (c == ':' && bracketDepth == 0) {
+          colonPos = i;
+          break;
+        }
+      }
 
       if (colonPos == -1) {
-        // No more ':', the rest is the utility
+        // No more top-level ':', the rest is the utility
         break;
       }
 

@@ -42,23 +42,29 @@ class VariantParserTest {
 
   @Test
   void testParseArbitraryVariant() {
-    // Note: The current implementation has a bug with arbitrary variants containing ':'
-    // [@media(min-width:768px)] contains ':' inside, so the parser fails
     VariantParser.VariantResult result = VariantParser.parse("[@media(min-width:768px)]:w-full");
 
-    // Current behavior: parser stops at first ':' inside the brackets
-    assertFalse(result.hasVariant());
-    assertEquals("[@media(min-width:768px)]:w-full", result.getUtility());
+    assertTrue(result.hasVariant());
+    assertEquals(List.of("[@media(min-width:768px)]"), result.getVariants());
+    assertEquals("w-full", result.getUtility());
   }
 
   @Test
   void testParseArbitraryHoverVariant() {
     VariantParser.VariantResult result = VariantParser.parse("[&:hover]:bg-red-500");
 
-    // Note: [&:hover] is not in the known variants set, so it's treated as invalid
-    // The parser stops at the first invalid variant
-    assertFalse(result.hasVariant());
-    assertEquals("[&:hover]:bg-red-500", result.getUtility());
+    assertTrue(result.hasVariant());
+    assertEquals(List.of("[&:hover]"), result.getVariants());
+    assertEquals("bg-red-500", result.getUtility());
+  }
+
+  @Test
+  void testParseArbitraryVariantChainedWithKnownVariant() {
+    VariantParser.VariantResult result = VariantParser.parse("md:[@media(min-width:768px)]:w-full");
+
+    assertTrue(result.hasVariant());
+    assertEquals(List.of("md", "[@media(min-width:768px)]"), result.getVariants());
+    assertEquals("w-full", result.getUtility());
   }
 
   @Test
