@@ -35,9 +35,12 @@ class ProgrammaticStyleApplierTest {
     assertTrue(ProgrammaticStyleApplier.handles("z-50"));
     assertTrue(ProgrammaticStyleApplier.handles("w-full"));
     assertTrue(ProgrammaticStyleApplier.handles("h-full"));
+    assertTrue(ProgrammaticStyleApplier.handles("aspect-video"));
+    assertTrue(ProgrammaticStyleApplier.handles("aspect-[4/3]"));
 
     assertFalse(ProgrammaticStyleApplier.handles("p-4"));
     assertFalse(ProgrammaticStyleApplier.handles("bg-blue-500"));
+    assertFalse(ProgrammaticStyleApplier.handles("aspect-auto"));
     assertFalse(ProgrammaticStyleApplier.handles(null));
     assertFalse(ProgrammaticStyleApplier.handles(""));
   }
@@ -95,6 +98,23 @@ class ProgrammaticStyleApplierTest {
 
     ProgrammaticStyleApplier.apply(pane, java.util.List.of("h-full", "max-h-screen"));
     assertEquals(Double.MAX_VALUE, pane.getMaxHeight());
+  }
+
+  @Test
+  @DisplayName("aspect utilities bind the region preferred height to its width")
+  void testAspectRatio() {
+    Pane pane = new Pane();
+    ProgrammaticStyleApplier.apply(pane, java.util.List.of("aspect-video"));
+    assertTrue(pane.prefHeightProperty().isBound(), "aspect-video should bind pref height");
+
+    Pane arbitrary = new Pane();
+    ProgrammaticStyleApplier.apply(arbitrary, java.util.List.of("aspect-[4/3]"));
+    assertTrue(arbitrary.prefHeightProperty().isBound());
+
+    // aspect-auto must leave the region untouched.
+    Pane auto = new Pane();
+    ProgrammaticStyleApplier.apply(auto, java.util.List.of("aspect-auto"));
+    assertFalse(auto.prefHeightProperty().isBound());
   }
 
   @Test

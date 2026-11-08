@@ -40,6 +40,7 @@ import javafx.scene.shape.Rectangle;
  *   <li>{@code overflow-hidden} (and axis/clip variants) → {@code setClip};
  *       {@code overflow-*-visible} → {@code setClip(null)}
  *   <li>{@code z-{n}} / {@code z-auto} → {@link Styles#z}
+ *   <li>{@code aspect-square}/{@code aspect-video}/... → {@link Styles#aspectRatio}
  *   <li>{@code w-full}/{@code w-screen}/{@code h-full}/{@code h-screen} and the {@code max-*}
  *       equivalents → grow to fill the available space
  * </ul>
@@ -94,7 +95,8 @@ public final class ProgrammaticStyleApplier {
         || FILL_WIDTH.contains(t)
         || FILL_HEIGHT.contains(t)
         || isOverflowToken(t)
-        || isZToken(t);
+        || isZToken(t)
+        || isAspectToken(t);
   }
 
   private static void applyToken(Node node, String token) {
@@ -106,6 +108,8 @@ public final class ProgrammaticStyleApplier {
       default -> {
         if (isZToken(token)) {
           Styles.z(node, Integer.parseInt(token.substring(2)));
+        } else if (isAspectToken(token)) {
+          applyAspect(node, token);
         } else if (isOverflowToken(token)) {
           applyOverflow(node, token);
         } else if (node instanceof Region region) {
@@ -116,6 +120,49 @@ public final class ProgrammaticStyleApplier {
           }
         }
       }
+    }
+  }
+
+  private static boolean isAspectToken(String token) {
+    return token.startsWith("aspect-") && !token.equals("aspect-auto");
+  }
+
+  private static void applyAspect(Node node, String token) {
+    if (!(node instanceof Region region) || region.prefHeightProperty().isBound()) {
+      return;
+    }
+    double ratio = aspectRatioOf(token.substring("aspect-".length()));
+    if (ratio > 0) {
+      Styles.aspectRatio(region, ratio);
+    }
+  }
+
+  private static double aspectRatioOf(String value) {
+    switch (value) {
+      case "square":
+        return 1.0;
+      case "video":
+        return 16.0 / 9.0;
+      case "portrait":
+        return 3.0 / 4.0;
+      case "landscape":
+        return 4.0 / 3.0;
+      default:
+        break;
+    }
+    if (value.startsWith("[") && value.endsWith("]")) {
+      value = value.substring(1, value.length() - 1).trim();
+    }
+    int slash = value.indexOf('/');
+    try {
+      if (slash > 0) {
+        double width = Double.parseDouble(value.substring(0, slash).trim());
+        double height = Double.parseDouble(value.substring(slash + 1).trim());
+        return height == 0 ? -1 : width / height;
+      }
+      return Double.parseDouble(value.trim());
+    } catch (NumberFormatException e) {
+      return -1;
     }
   }
 
