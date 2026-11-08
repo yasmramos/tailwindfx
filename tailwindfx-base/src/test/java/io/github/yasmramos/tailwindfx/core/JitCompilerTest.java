@@ -84,6 +84,21 @@ class JitCompilerTest {
     }
 
     @Test
+    @DisplayName("Should compile a complete gradient passed as one string")
+    void testWholeGradientString() {
+      // A single array element containing a full gradient must be split into its parts
+      // instead of being treated as an unknown direction token.
+      JitCompiler.BatchResult result =
+          JitCompiler.compileBatch("bg-gradient-to-r from-blue-500 to-red-500");
+
+      assertTrue(result.hasInlineStyle(), "Whole gradient string should produce inline style");
+      assertTrue(result.inlineStyle().contains("linear-gradient"));
+      assertTrue(result.inlineStyle().contains("to right"));
+      assertTrue(result.inlineStyle().contains("#3b82f6"));
+      assertTrue(result.inlineStyle().contains("#ef4444"));
+    }
+
+    @Test
     @DisplayName("Should resolve Tailwind color names to hex")
     void testColorResolution() {
       JitCompiler.BatchResult result =
@@ -255,7 +270,6 @@ class JitCompilerTest {
     @Test
     @DisplayName("Should compile ring-0")
     void testRingZero() {
-      // Ring may not be fully implemented, just verify it compiles
       JitCompiler.CompileResult result = JitCompiler.compile("ring-0");
 
       assertNotNull(result);
@@ -275,6 +289,38 @@ class JitCompilerTest {
       JitCompiler.BatchResult result = JitCompiler.compileBatch("ring-2", "ring-blue-500");
 
       assertNotNull(result);
+    }
+
+    @Test
+    @DisplayName("compileBatch routes ring width through RingProcessor")
+    void testRingWidthEmitsInlineBorder() {
+      JitCompiler.BatchResult result = JitCompiler.compileBatch("ring-2");
+
+      assertTrue(result.hasInlineStyle(), "ring-2 must produce an inline style");
+      assertTrue(result.inlineStyle().contains("-fx-border-width: 2px"), result.inlineStyle());
+      assertFalse(
+          result.cssClasses().contains("ring-2"),
+          "ring-2 must not fall back to a dead CSS class");
+    }
+
+    @Test
+    @DisplayName("compileBatch routes ring color through RingProcessor")
+    void testRingColorEmitsInlineBorderColor() {
+      JitCompiler.BatchResult result = JitCompiler.compileBatch("ring-blue-500");
+
+      assertTrue(result.hasInlineStyle(), "ring-blue-500 must produce an inline style");
+      assertTrue(result.inlineStyle().contains("-fx-border-color"), result.inlineStyle());
+      assertTrue(result.inlineStyle().contains("#3b82f6"), result.inlineStyle());
+    }
+
+    @Test
+    @DisplayName("compileBatch routes both ring width and color through RingProcessor")
+    void testRingWidthAndColorCombined() {
+      JitCompiler.BatchResult result = JitCompiler.compileBatch("ring-2", "ring-blue-500");
+
+      assertTrue(result.inlineStyle().contains("-fx-border-width"), result.inlineStyle());
+      assertTrue(result.inlineStyle().contains("-fx-border-color"), result.inlineStyle());
+      assertTrue(result.cssClasses().isEmpty(), result.cssClasses().toString());
     }
   }
 
@@ -307,6 +353,29 @@ class JitCompilerTest {
       // border-2 compiles to border-width property
       assertTrue(result.hasInlineStyle());
       assertTrue(result.inlineStyle().contains("border"));
+    }
+
+    @Test
+    @DisplayName("Bare border compiles to a 1px border width")
+    void testBareBorder() {
+      JitCompiler.CompileResult result = JitCompiler.compile("border");
+
+      assertTrue(result.hasInlineStyle(), "bare border must not be a no-op");
+      assertTrue(result.inlineStyle().contains("-fx-border-width: 1px"), result.inlineStyle());
+    }
+
+    @Test
+    @DisplayName("Side border utilities expand to the four-value width form")
+    void testSideBorders() {
+      assertTrue(
+          JitCompiler.compile("border-t").inlineStyle().contains("-fx-border-width: 1px 0px 0px 0px"),
+          JitCompiler.compile("border-t").inlineStyle());
+      assertTrue(
+          JitCompiler.compile("border-x").inlineStyle().contains("-fx-border-width: 0px 1px 0px 1px"),
+          JitCompiler.compile("border-x").inlineStyle());
+      assertTrue(
+          JitCompiler.compile("border-l-4").inlineStyle().contains("-fx-border-width: 0px 0px 0px 4px"),
+          JitCompiler.compile("border-l-4").inlineStyle());
     }
   }
 

@@ -231,6 +231,11 @@ public final class TwCatalog {
       utilities.add("border-" + name);
       utilities.add("ring-" + name);
     }
+    // Ring widths (ring-0/1/2/4/8) and offsets, handled by RingProcessor at compile time.
+    for (String width : new String[] {"0", "1", "2", "4", "8"}) {
+      utilities.add("ring-" + width);
+      utilities.add("ring-offset-" + width);
+    }
   }
 
   private static void addSpacingUtilities(Set<String> utilities, ThemeConfig config) {

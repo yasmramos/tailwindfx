@@ -244,7 +244,11 @@ public final class ThemeConfig {
       breakpoints.put("xl", 1280);
       breakpoints.put("2xl", 1536);
 
-      // Border radius
+      // Border radius. Indices 0-8 are the named scale consumed by
+      // CssPropertyMapper.resolveBorderRadius and ThemeCssGenerator via the
+      // {none, sm, default, md, lg, xl, 2xl, 3xl, full} key array, so they must hold
+      // Tailwind-accurate pixel values (full is a pill radius). Indices 9-16 keep the
+      // generic 4px step used by the indexed ThemeConfig.borderRadius(int) accessor.
       for (int i = 0; i <= 16; i++) {
         borderRadius[i] = i * 4.0;
       }
@@ -253,6 +257,10 @@ public final class ThemeConfig {
       borderRadius[2] = 4;
       borderRadius[3] = 6;
       borderRadius[4] = 8;
+      borderRadius[5] = 12; // xl
+      borderRadius[6] = 16; // 2xl
+      borderRadius[7] = 24; // 3xl
+      borderRadius[8] = 9999; // full (pill)
 
       // Shadows
       shadows.put("sm", "0 1px 2px 0 rgba(0,0,0,0.05)");

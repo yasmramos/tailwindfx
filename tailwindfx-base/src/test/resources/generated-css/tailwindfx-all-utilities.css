@@ -401,10 +401,10 @@
     -radius-default: 4px;
     -radius-md: 6px;
     -radius-lg: 8px;
-    -radius-xl: 20px;
-    -radius-2xl: 24px;
-    -radius-3xl: 28px;
-    -radius-full: 32px;
+    -radius-xl: 12px;
+    -radius-2xl: 16px;
+    -radius-3xl: 24px;
+    -radius-full: 9999px;
     -opacity-25: 0.25;
     -opacity-0: 0.0;
     -opacity-100: 1.0;
@@ -1354,6 +1354,9 @@
 .bg-zinc-950 {
   -fx-background-color: #09090b;
 }
+.border {
+  -fx-border-width: 1px;
+}
 .border-0 {
   -fx-border-width: 0px;
 }
@@ -1398,6 +1401,9 @@
 }
 .border-amber-950 {
   -fx-border-color: #451a03;
+}
+.border-b {
+  -fx-border-width: 0px 0px 1px 0px;
 }
 .border-black {
   -fx-border-color: #000000;
@@ -1639,6 +1645,9 @@
 .border-indigo-950 {
   -fx-border-color: #1e1b4b;
 }
+.border-l {
+  -fx-border-width: 0px 0px 0px 1px;
+}
 .border-lime-100 {
   -fx-border-color: #ecfccb;
 }
@@ -1806,6 +1815,9 @@
 }
 .border-purple-950 {
   -fx-border-color: #3b0764;
+}
+.border-r {
+  -fx-border-width: 0px 1px 0px 0px;
 }
 .border-red-100 {
   -fx-border-color: #fee2e2;
@@ -1975,6 +1987,9 @@
 .border-stone-950 {
   -fx-border-color: #0c0a09;
 }
+.border-t {
+  -fx-border-width: 1px 0px 0px 0px;
+}
 .border-teal-100 {
   -fx-border-color: #ccfbf1;
 }
@@ -2046,6 +2061,12 @@
 }
 .border-white {
   -fx-border-color: #ffffff;
+}
+.border-x {
+  -fx-border-width: 0px 1px 0px 1px;
+}
+.border-y {
+  -fx-border-width: 1px 0px 1px 0px;
 }
 .border-yellow-100 {
   -fx-border-color: #fef9c3;
@@ -3139,16 +3160,1018 @@
 .py-9 {
   -fx-padding: 36px 0px 36px 0px;
 }
+.ring-0 {
+  -fx-border-width: 0px;
+}
+.ring-1 {
+  -fx-border-width: 1px;
+  -fx-border-style: solid;
+}
+.ring-2 {
+  -fx-border-width: 2px;
+  -fx-border-style: solid;
+}
+.ring-4 {
+  -fx-border-width: 4px;
+  -fx-border-style: solid;
+}
+.ring-8 {
+  -fx-border-width: 8px;
+  -fx-border-style: solid;
+}
+.ring-amber-100 {
+  -fx-border-color: #fef3c7;
+  -fx-border-width: 3px;
+}
+.ring-amber-200 {
+  -fx-border-color: #fde68a;
+  -fx-border-width: 3px;
+}
+.ring-amber-300 {
+  -fx-border-color: #fcd34d;
+  -fx-border-width: 3px;
+}
+.ring-amber-400 {
+  -fx-border-color: #fbbf24;
+  -fx-border-width: 3px;
+}
+.ring-amber-50 {
+  -fx-border-color: #fffbeb;
+  -fx-border-width: 3px;
+}
+.ring-amber-500 {
+  -fx-border-color: #f59e0b;
+  -fx-border-width: 3px;
+}
+.ring-amber-600 {
+  -fx-border-color: #d97706;
+  -fx-border-width: 3px;
+}
+.ring-amber-700 {
+  -fx-border-color: #b45309;
+  -fx-border-width: 3px;
+}
+.ring-amber-800 {
+  -fx-border-color: #92400e;
+  -fx-border-width: 3px;
+}
+.ring-amber-900 {
+  -fx-border-color: #78350f;
+  -fx-border-width: 3px;
+}
+.ring-amber-950 {
+  -fx-border-color: #451a03;
+  -fx-border-width: 3px;
+}
 .ring-black {
   -fx-border-color: #000000;
+  -fx-border-width: 3px;
+}
+.ring-blue-100 {
+  -fx-border-color: #dbeafe;
+  -fx-border-width: 3px;
+}
+.ring-blue-200 {
+  -fx-border-color: #bfdbfe;
+  -fx-border-width: 3px;
+}
+.ring-blue-300 {
+  -fx-border-color: #93c5fd;
+  -fx-border-width: 3px;
+}
+.ring-blue-400 {
+  -fx-border-color: #60a5fa;
+  -fx-border-width: 3px;
+}
+.ring-blue-50 {
+  -fx-border-color: #eff6ff;
+  -fx-border-width: 3px;
+}
+.ring-blue-500 {
+  -fx-border-color: #3b82f6;
+  -fx-border-width: 3px;
+}
+.ring-blue-600 {
+  -fx-border-color: #2563eb;
+  -fx-border-width: 3px;
+}
+.ring-blue-700 {
+  -fx-border-color: #1d4ed8;
+  -fx-border-width: 3px;
+}
+.ring-blue-800 {
+  -fx-border-color: #1e40af;
+  -fx-border-width: 3px;
+}
+.ring-blue-900 {
+  -fx-border-color: #1e3a8a;
+  -fx-border-width: 3px;
+}
+.ring-blue-950 {
+  -fx-border-color: #172554;
+  -fx-border-width: 3px;
+}
+.ring-cyan-100 {
+  -fx-border-color: #cffafe;
+  -fx-border-width: 3px;
+}
+.ring-cyan-200 {
+  -fx-border-color: #a5f3fc;
+  -fx-border-width: 3px;
+}
+.ring-cyan-300 {
+  -fx-border-color: #67e8f9;
+  -fx-border-width: 3px;
+}
+.ring-cyan-400 {
+  -fx-border-color: #22d3ee;
+  -fx-border-width: 3px;
+}
+.ring-cyan-50 {
+  -fx-border-color: #ecfeff;
+  -fx-border-width: 3px;
+}
+.ring-cyan-500 {
+  -fx-border-color: #06b6d4;
+  -fx-border-width: 3px;
+}
+.ring-cyan-600 {
+  -fx-border-color: #0891b2;
+  -fx-border-width: 3px;
+}
+.ring-cyan-700 {
+  -fx-border-color: #0e7490;
+  -fx-border-width: 3px;
+}
+.ring-cyan-800 {
+  -fx-border-color: #155e75;
+  -fx-border-width: 3px;
+}
+.ring-cyan-900 {
+  -fx-border-color: #164e63;
+  -fx-border-width: 3px;
+}
+.ring-cyan-950 {
+  -fx-border-color: #083344;
+  -fx-border-width: 3px;
+}
+.ring-emerald-100 {
+  -fx-border-color: #d1fae5;
+  -fx-border-width: 3px;
+}
+.ring-emerald-200 {
+  -fx-border-color: #a7f3d0;
+  -fx-border-width: 3px;
+}
+.ring-emerald-300 {
+  -fx-border-color: #6ee7b7;
+  -fx-border-width: 3px;
+}
+.ring-emerald-400 {
+  -fx-border-color: #34d399;
+  -fx-border-width: 3px;
+}
+.ring-emerald-50 {
+  -fx-border-color: #ecfdf5;
+  -fx-border-width: 3px;
+}
+.ring-emerald-500 {
+  -fx-border-color: #10b981;
+  -fx-border-width: 3px;
+}
+.ring-emerald-600 {
+  -fx-border-color: #059669;
+  -fx-border-width: 3px;
+}
+.ring-emerald-700 {
+  -fx-border-color: #047857;
+  -fx-border-width: 3px;
+}
+.ring-emerald-800 {
+  -fx-border-color: #065f46;
+  -fx-border-width: 3px;
+}
+.ring-emerald-900 {
+  -fx-border-color: #064e3b;
+  -fx-border-width: 3px;
+}
+.ring-emerald-950 {
+  -fx-border-color: #022c22;
+  -fx-border-width: 3px;
+}
+.ring-fuchsia-100 {
+  -fx-border-color: #fae8ff;
+  -fx-border-width: 3px;
+}
+.ring-fuchsia-200 {
+  -fx-border-color: #f5d0fe;
+  -fx-border-width: 3px;
+}
+.ring-fuchsia-300 {
+  -fx-border-color: #f0abfc;
+  -fx-border-width: 3px;
+}
+.ring-fuchsia-400 {
+  -fx-border-color: #e879f9;
+  -fx-border-width: 3px;
+}
+.ring-fuchsia-50 {
+  -fx-border-color: #fdf4ff;
+  -fx-border-width: 3px;
+}
+.ring-fuchsia-500 {
+  -fx-border-color: #d946ef;
+  -fx-border-width: 3px;
+}
+.ring-fuchsia-600 {
+  -fx-border-color: #c026d3;
+  -fx-border-width: 3px;
+}
+.ring-fuchsia-700 {
+  -fx-border-color: #a21caf;
+  -fx-border-width: 3px;
+}
+.ring-fuchsia-800 {
+  -fx-border-color: #86198f;
+  -fx-border-width: 3px;
+}
+.ring-fuchsia-900 {
+  -fx-border-color: #701a75;
+  -fx-border-width: 3px;
+}
+.ring-fuchsia-950 {
+  -fx-border-color: #4a044e;
+  -fx-border-width: 3px;
+}
+.ring-gray-100 {
+  -fx-border-color: #f3f4f6;
+  -fx-border-width: 3px;
+}
+.ring-gray-200 {
+  -fx-border-color: #e5e7eb;
+  -fx-border-width: 3px;
+}
+.ring-gray-300 {
+  -fx-border-color: #d1d5db;
+  -fx-border-width: 3px;
+}
+.ring-gray-400 {
+  -fx-border-color: #9ca3af;
+  -fx-border-width: 3px;
+}
+.ring-gray-50 {
+  -fx-border-color: #f9fafb;
+  -fx-border-width: 3px;
+}
+.ring-gray-500 {
+  -fx-border-color: #6b7280;
+  -fx-border-width: 3px;
+}
+.ring-gray-600 {
+  -fx-border-color: #4b5563;
+  -fx-border-width: 3px;
+}
+.ring-gray-700 {
+  -fx-border-color: #374151;
+  -fx-border-width: 3px;
+}
+.ring-gray-800 {
+  -fx-border-color: #1f2937;
+  -fx-border-width: 3px;
+}
+.ring-gray-900 {
+  -fx-border-color: #111827;
+  -fx-border-width: 3px;
+}
+.ring-gray-950 {
+  -fx-border-color: #030712;
+  -fx-border-width: 3px;
+}
+.ring-green-100 {
+  -fx-border-color: #dcfce7;
+  -fx-border-width: 3px;
+}
+.ring-green-200 {
+  -fx-border-color: #bbf7d0;
+  -fx-border-width: 3px;
+}
+.ring-green-300 {
+  -fx-border-color: #86efac;
+  -fx-border-width: 3px;
+}
+.ring-green-400 {
+  -fx-border-color: #4ade80;
+  -fx-border-width: 3px;
+}
+.ring-green-50 {
+  -fx-border-color: #f0fdf4;
+  -fx-border-width: 3px;
+}
+.ring-green-500 {
+  -fx-border-color: #22c55e;
+  -fx-border-width: 3px;
+}
+.ring-green-600 {
+  -fx-border-color: #16a34a;
+  -fx-border-width: 3px;
+}
+.ring-green-700 {
+  -fx-border-color: #15803d;
+  -fx-border-width: 3px;
+}
+.ring-green-800 {
+  -fx-border-color: #166534;
+  -fx-border-width: 3px;
+}
+.ring-green-900 {
+  -fx-border-color: #14532d;
+  -fx-border-width: 3px;
+}
+.ring-green-950 {
+  -fx-border-color: #052e16;
+  -fx-border-width: 3px;
+}
+.ring-indigo-100 {
+  -fx-border-color: #e0e7ff;
+  -fx-border-width: 3px;
+}
+.ring-indigo-200 {
+  -fx-border-color: #c7d2fe;
+  -fx-border-width: 3px;
+}
+.ring-indigo-300 {
+  -fx-border-color: #a5b4fc;
+  -fx-border-width: 3px;
+}
+.ring-indigo-400 {
+  -fx-border-color: #818cf8;
+  -fx-border-width: 3px;
+}
+.ring-indigo-50 {
+  -fx-border-color: #eef2ff;
+  -fx-border-width: 3px;
+}
+.ring-indigo-500 {
+  -fx-border-color: #6366f1;
+  -fx-border-width: 3px;
+}
+.ring-indigo-600 {
+  -fx-border-color: #4f46e5;
+  -fx-border-width: 3px;
+}
+.ring-indigo-700 {
+  -fx-border-color: #4338ca;
+  -fx-border-width: 3px;
+}
+.ring-indigo-800 {
+  -fx-border-color: #3730a3;
+  -fx-border-width: 3px;
+}
+.ring-indigo-900 {
+  -fx-border-color: #312e81;
+  -fx-border-width: 3px;
+}
+.ring-indigo-950 {
+  -fx-border-color: #1e1b4b;
+  -fx-border-width: 3px;
+}
+.ring-lime-100 {
+  -fx-border-color: #ecfccb;
+  -fx-border-width: 3px;
+}
+.ring-lime-200 {
+  -fx-border-color: #d9f99d;
+  -fx-border-width: 3px;
+}
+.ring-lime-300 {
+  -fx-border-color: #bef264;
+  -fx-border-width: 3px;
+}
+.ring-lime-400 {
+  -fx-border-color: #a3e635;
+  -fx-border-width: 3px;
+}
+.ring-lime-50 {
+  -fx-border-color: #f7fee7;
+  -fx-border-width: 3px;
+}
+.ring-lime-500 {
+  -fx-border-color: #84cc16;
+  -fx-border-width: 3px;
+}
+.ring-lime-600 {
+  -fx-border-color: #65a30d;
+  -fx-border-width: 3px;
+}
+.ring-lime-700 {
+  -fx-border-color: #4d7c0f;
+  -fx-border-width: 3px;
+}
+.ring-lime-800 {
+  -fx-border-color: #3f6212;
+  -fx-border-width: 3px;
+}
+.ring-lime-900 {
+  -fx-border-color: #365314;
+  -fx-border-width: 3px;
+}
+.ring-lime-950 {
+  -fx-border-color: #1a2e05;
+  -fx-border-width: 3px;
+}
+.ring-neutral-100 {
+  -fx-border-color: #f5f5f5;
+  -fx-border-width: 3px;
+}
+.ring-neutral-200 {
+  -fx-border-color: #e5e5e5;
+  -fx-border-width: 3px;
+}
+.ring-neutral-300 {
+  -fx-border-color: #d4d4d4;
+  -fx-border-width: 3px;
+}
+.ring-neutral-400 {
+  -fx-border-color: #a3a3a3;
+  -fx-border-width: 3px;
+}
+.ring-neutral-50 {
+  -fx-border-color: #fafafa;
+  -fx-border-width: 3px;
+}
+.ring-neutral-500 {
+  -fx-border-color: #737373;
+  -fx-border-width: 3px;
+}
+.ring-neutral-600 {
+  -fx-border-color: #525252;
+  -fx-border-width: 3px;
+}
+.ring-neutral-700 {
+  -fx-border-color: #404040;
+  -fx-border-width: 3px;
+}
+.ring-neutral-800 {
+  -fx-border-color: #262626;
+  -fx-border-width: 3px;
+}
+.ring-neutral-900 {
+  -fx-border-color: #171717;
+  -fx-border-width: 3px;
+}
+.ring-neutral-950 {
+  -fx-border-color: #0a0a0a;
+  -fx-border-width: 3px;
+}
+.ring-offset-0 {
+  -fx-padding: 0px;
+}
+.ring-offset-1 {
+  -fx-padding: 1px;
+}
+.ring-offset-2 {
+  -fx-padding: 2px;
+}
+.ring-offset-4 {
+  -fx-padding: 4px;
+}
+.ring-offset-8 {
+  -fx-padding: 8px;
+}
+.ring-orange-100 {
+  -fx-border-color: #ffedd5;
+  -fx-border-width: 3px;
+}
+.ring-orange-200 {
+  -fx-border-color: #fed7aa;
+  -fx-border-width: 3px;
+}
+.ring-orange-300 {
+  -fx-border-color: #fdba74;
+  -fx-border-width: 3px;
+}
+.ring-orange-400 {
+  -fx-border-color: #fb923c;
+  -fx-border-width: 3px;
+}
+.ring-orange-50 {
+  -fx-border-color: #fff7ed;
+  -fx-border-width: 3px;
+}
+.ring-orange-500 {
+  -fx-border-color: #f97316;
+  -fx-border-width: 3px;
+}
+.ring-orange-600 {
+  -fx-border-color: #ea580c;
+  -fx-border-width: 3px;
+}
+.ring-orange-700 {
+  -fx-border-color: #c2410c;
+  -fx-border-width: 3px;
+}
+.ring-orange-800 {
+  -fx-border-color: #9a3412;
+  -fx-border-width: 3px;
+}
+.ring-orange-900 {
+  -fx-border-color: #7c2d12;
+  -fx-border-width: 3px;
+}
+.ring-orange-950 {
+  -fx-border-color: #431407;
+  -fx-border-width: 3px;
+}
+.ring-pink-100 {
+  -fx-border-color: #fce7f3;
+  -fx-border-width: 3px;
+}
+.ring-pink-200 {
+  -fx-border-color: #fbcfe8;
+  -fx-border-width: 3px;
+}
+.ring-pink-300 {
+  -fx-border-color: #f9a8d4;
+  -fx-border-width: 3px;
+}
+.ring-pink-400 {
+  -fx-border-color: #f472b6;
+  -fx-border-width: 3px;
+}
+.ring-pink-50 {
+  -fx-border-color: #fdf2f8;
+  -fx-border-width: 3px;
+}
+.ring-pink-500 {
+  -fx-border-color: #ec4899;
+  -fx-border-width: 3px;
+}
+.ring-pink-600 {
+  -fx-border-color: #db2777;
+  -fx-border-width: 3px;
+}
+.ring-pink-700 {
+  -fx-border-color: #be185d;
+  -fx-border-width: 3px;
+}
+.ring-pink-800 {
+  -fx-border-color: #9d174d;
+  -fx-border-width: 3px;
+}
+.ring-pink-900 {
+  -fx-border-color: #831843;
+  -fx-border-width: 3px;
+}
+.ring-pink-950 {
+  -fx-border-color: #500724;
+  -fx-border-width: 3px;
+}
+.ring-purple-100 {
+  -fx-border-color: #f3e8ff;
+  -fx-border-width: 3px;
+}
+.ring-purple-200 {
+  -fx-border-color: #e9d5ff;
+  -fx-border-width: 3px;
+}
+.ring-purple-300 {
+  -fx-border-color: #d8b4fe;
+  -fx-border-width: 3px;
+}
+.ring-purple-400 {
+  -fx-border-color: #c084fc;
+  -fx-border-width: 3px;
+}
+.ring-purple-50 {
+  -fx-border-color: #faf5ff;
+  -fx-border-width: 3px;
+}
+.ring-purple-500 {
+  -fx-border-color: #a855f7;
+  -fx-border-width: 3px;
+}
+.ring-purple-600 {
+  -fx-border-color: #9333ea;
+  -fx-border-width: 3px;
+}
+.ring-purple-700 {
+  -fx-border-color: #7e22ce;
+  -fx-border-width: 3px;
+}
+.ring-purple-800 {
+  -fx-border-color: #6b21a8;
+  -fx-border-width: 3px;
+}
+.ring-purple-900 {
+  -fx-border-color: #581c87;
+  -fx-border-width: 3px;
+}
+.ring-purple-950 {
+  -fx-border-color: #3b0764;
+  -fx-border-width: 3px;
+}
+.ring-red-100 {
+  -fx-border-color: #fee2e2;
+  -fx-border-width: 3px;
+}
+.ring-red-200 {
+  -fx-border-color: #fecaca;
+  -fx-border-width: 3px;
+}
+.ring-red-300 {
+  -fx-border-color: #fca5a5;
+  -fx-border-width: 3px;
+}
+.ring-red-400 {
+  -fx-border-color: #f87171;
+  -fx-border-width: 3px;
+}
+.ring-red-50 {
+  -fx-border-color: #fef2f2;
+  -fx-border-width: 3px;
+}
+.ring-red-500 {
+  -fx-border-color: #ef4444;
+  -fx-border-width: 3px;
+}
+.ring-red-600 {
+  -fx-border-color: #dc2626;
+  -fx-border-width: 3px;
+}
+.ring-red-700 {
+  -fx-border-color: #b91c1c;
+  -fx-border-width: 3px;
+}
+.ring-red-800 {
+  -fx-border-color: #991b1b;
+  -fx-border-width: 3px;
+}
+.ring-red-900 {
+  -fx-border-color: #7f1d1d;
+  -fx-border-width: 3px;
+}
+.ring-red-950 {
+  -fx-border-color: #450a0a;
+  -fx-border-width: 3px;
+}
+.ring-rose-100 {
+  -fx-border-color: #ffe4e6;
+  -fx-border-width: 3px;
+}
+.ring-rose-200 {
+  -fx-border-color: #fecdd3;
+  -fx-border-width: 3px;
+}
+.ring-rose-300 {
+  -fx-border-color: #fda4af;
+  -fx-border-width: 3px;
+}
+.ring-rose-400 {
+  -fx-border-color: #fb7185;
+  -fx-border-width: 3px;
+}
+.ring-rose-50 {
+  -fx-border-color: #fff1f2;
+  -fx-border-width: 3px;
+}
+.ring-rose-500 {
+  -fx-border-color: #f43f5e;
+  -fx-border-width: 3px;
+}
+.ring-rose-600 {
+  -fx-border-color: #e11d48;
+  -fx-border-width: 3px;
+}
+.ring-rose-700 {
+  -fx-border-color: #be123c;
+  -fx-border-width: 3px;
+}
+.ring-rose-800 {
+  -fx-border-color: #9f1239;
+  -fx-border-width: 3px;
+}
+.ring-rose-900 {
+  -fx-border-color: #881337;
+  -fx-border-width: 3px;
+}
+.ring-rose-950 {
+  -fx-border-color: #4c0519;
+  -fx-border-width: 3px;
+}
+.ring-sky-100 {
+  -fx-border-color: #e0f2fe;
+  -fx-border-width: 3px;
+}
+.ring-sky-200 {
+  -fx-border-color: #bae6fd;
+  -fx-border-width: 3px;
+}
+.ring-sky-300 {
+  -fx-border-color: #7dd3fc;
+  -fx-border-width: 3px;
+}
+.ring-sky-400 {
+  -fx-border-color: #38bdf8;
+  -fx-border-width: 3px;
+}
+.ring-sky-50 {
+  -fx-border-color: #f0f9ff;
+  -fx-border-width: 3px;
+}
+.ring-sky-500 {
+  -fx-border-color: #0ea5e9;
+  -fx-border-width: 3px;
+}
+.ring-sky-600 {
+  -fx-border-color: #0284c7;
+  -fx-border-width: 3px;
+}
+.ring-sky-700 {
+  -fx-border-color: #0369a1;
+  -fx-border-width: 3px;
+}
+.ring-sky-800 {
+  -fx-border-color: #075985;
+  -fx-border-width: 3px;
+}
+.ring-sky-900 {
+  -fx-border-color: #0c4a6e;
+  -fx-border-width: 3px;
+}
+.ring-sky-950 {
+  -fx-border-color: #082f49;
+  -fx-border-width: 3px;
+}
+.ring-slate-100 {
+  -fx-border-color: #f1f5f9;
+  -fx-border-width: 3px;
+}
+.ring-slate-200 {
+  -fx-border-color: #e2e8f0;
+  -fx-border-width: 3px;
+}
+.ring-slate-300 {
+  -fx-border-color: #cbd5e1;
+  -fx-border-width: 3px;
+}
+.ring-slate-400 {
+  -fx-border-color: #94a3b8;
+  -fx-border-width: 3px;
+}
+.ring-slate-50 {
+  -fx-border-color: #f8fafc;
+  -fx-border-width: 3px;
+}
+.ring-slate-500 {
+  -fx-border-color: #64748b;
+  -fx-border-width: 3px;
+}
+.ring-slate-600 {
+  -fx-border-color: #475569;
+  -fx-border-width: 3px;
+}
+.ring-slate-700 {
+  -fx-border-color: #334155;
+  -fx-border-width: 3px;
+}
+.ring-slate-800 {
+  -fx-border-color: #1e293b;
+  -fx-border-width: 3px;
+}
+.ring-slate-900 {
+  -fx-border-color: #0f172a;
+  -fx-border-width: 3px;
+}
+.ring-slate-950 {
+  -fx-border-color: #020617;
+  -fx-border-width: 3px;
+}
+.ring-stone-100 {
+  -fx-border-color: #f5f5f4;
+  -fx-border-width: 3px;
+}
+.ring-stone-200 {
+  -fx-border-color: #e7e5e4;
+  -fx-border-width: 3px;
+}
+.ring-stone-300 {
+  -fx-border-color: #d6d3d1;
+  -fx-border-width: 3px;
+}
+.ring-stone-400 {
+  -fx-border-color: #a8a29e;
+  -fx-border-width: 3px;
+}
+.ring-stone-50 {
+  -fx-border-color: #fafaf9;
+  -fx-border-width: 3px;
+}
+.ring-stone-500 {
+  -fx-border-color: #78716c;
+  -fx-border-width: 3px;
+}
+.ring-stone-600 {
+  -fx-border-color: #57534e;
+  -fx-border-width: 3px;
+}
+.ring-stone-700 {
+  -fx-border-color: #44403c;
+  -fx-border-width: 3px;
+}
+.ring-stone-800 {
+  -fx-border-color: #292524;
+  -fx-border-width: 3px;
+}
+.ring-stone-900 {
+  -fx-border-color: #1c1917;
+  -fx-border-width: 3px;
+}
+.ring-stone-950 {
+  -fx-border-color: #0c0a09;
+  -fx-border-width: 3px;
+}
+.ring-teal-100 {
+  -fx-border-color: #ccfbf1;
+  -fx-border-width: 3px;
+}
+.ring-teal-200 {
+  -fx-border-color: #99f6e4;
+  -fx-border-width: 3px;
+}
+.ring-teal-300 {
+  -fx-border-color: #5eead4;
+  -fx-border-width: 3px;
+}
+.ring-teal-400 {
+  -fx-border-color: #2dd4bf;
+  -fx-border-width: 3px;
+}
+.ring-teal-50 {
+  -fx-border-color: #f0fdfa;
+  -fx-border-width: 3px;
+}
+.ring-teal-500 {
+  -fx-border-color: #14b8a6;
+  -fx-border-width: 3px;
+}
+.ring-teal-600 {
+  -fx-border-color: #0d9488;
+  -fx-border-width: 3px;
+}
+.ring-teal-700 {
+  -fx-border-color: #0f766e;
+  -fx-border-width: 3px;
+}
+.ring-teal-800 {
+  -fx-border-color: #115e59;
+  -fx-border-width: 3px;
+}
+.ring-teal-900 {
+  -fx-border-color: #134e4a;
+  -fx-border-width: 3px;
+}
+.ring-teal-950 {
+  -fx-border-color: #042f2e;
   -fx-border-width: 3px;
 }
 .ring-transparent {
   -fx-border-color: transparent;
   -fx-border-width: 3px;
 }
+.ring-violet-100 {
+  -fx-border-color: #ede9fe;
+  -fx-border-width: 3px;
+}
+.ring-violet-200 {
+  -fx-border-color: #ddd6fe;
+  -fx-border-width: 3px;
+}
+.ring-violet-300 {
+  -fx-border-color: #c4b5fd;
+  -fx-border-width: 3px;
+}
+.ring-violet-400 {
+  -fx-border-color: #a78bfa;
+  -fx-border-width: 3px;
+}
+.ring-violet-50 {
+  -fx-border-color: #f5f3ff;
+  -fx-border-width: 3px;
+}
+.ring-violet-500 {
+  -fx-border-color: #8b5cf6;
+  -fx-border-width: 3px;
+}
+.ring-violet-600 {
+  -fx-border-color: #7c3aed;
+  -fx-border-width: 3px;
+}
+.ring-violet-700 {
+  -fx-border-color: #6d28d9;
+  -fx-border-width: 3px;
+}
+.ring-violet-800 {
+  -fx-border-color: #5b21b6;
+  -fx-border-width: 3px;
+}
+.ring-violet-900 {
+  -fx-border-color: #4c1d95;
+  -fx-border-width: 3px;
+}
+.ring-violet-950 {
+  -fx-border-color: #2e1065;
+  -fx-border-width: 3px;
+}
 .ring-white {
   -fx-border-color: #ffffff;
+  -fx-border-width: 3px;
+}
+.ring-yellow-100 {
+  -fx-border-color: #fef9c3;
+  -fx-border-width: 3px;
+}
+.ring-yellow-200 {
+  -fx-border-color: #fef08a;
+  -fx-border-width: 3px;
+}
+.ring-yellow-300 {
+  -fx-border-color: #fde047;
+  -fx-border-width: 3px;
+}
+.ring-yellow-400 {
+  -fx-border-color: #facc15;
+  -fx-border-width: 3px;
+}
+.ring-yellow-50 {
+  -fx-border-color: #fefce8;
+  -fx-border-width: 3px;
+}
+.ring-yellow-500 {
+  -fx-border-color: #eab308;
+  -fx-border-width: 3px;
+}
+.ring-yellow-600 {
+  -fx-border-color: #ca8a04;
+  -fx-border-width: 3px;
+}
+.ring-yellow-700 {
+  -fx-border-color: #a16207;
+  -fx-border-width: 3px;
+}
+.ring-yellow-800 {
+  -fx-border-color: #854d0e;
+  -fx-border-width: 3px;
+}
+.ring-yellow-900 {
+  -fx-border-color: #713f12;
+  -fx-border-width: 3px;
+}
+.ring-yellow-950 {
+  -fx-border-color: #422006;
+  -fx-border-width: 3px;
+}
+.ring-zinc-100 {
+  -fx-border-color: #f4f4f5;
+  -fx-border-width: 3px;
+}
+.ring-zinc-200 {
+  -fx-border-color: #e4e4e7;
+  -fx-border-width: 3px;
+}
+.ring-zinc-300 {
+  -fx-border-color: #d4d4d8;
+  -fx-border-width: 3px;
+}
+.ring-zinc-400 {
+  -fx-border-color: #a1a1aa;
+  -fx-border-width: 3px;
+}
+.ring-zinc-50 {
+  -fx-border-color: #fafafa;
+  -fx-border-width: 3px;
+}
+.ring-zinc-500 {
+  -fx-border-color: #71717a;
+  -fx-border-width: 3px;
+}
+.ring-zinc-600 {
+  -fx-border-color: #52525b;
+  -fx-border-width: 3px;
+}
+.ring-zinc-700 {
+  -fx-border-color: #3f3f46;
+  -fx-border-width: 3px;
+}
+.ring-zinc-800 {
+  -fx-border-color: #27272a;
+  -fx-border-width: 3px;
+}
+.ring-zinc-900 {
+  -fx-border-color: #18181b;
+  -fx-border-width: 3px;
+}
+.ring-zinc-950 {
+  -fx-border-color: #09090b;
   -fx-border-width: 3px;
 }
 .rotate-0 {
@@ -3183,16 +4206,16 @@
   -fx-border-radius: 4px;
 }
 .rounded-2xl {
+  -fx-background-radius: 16px;
+  -fx-border-radius: 16px;
+}
+.rounded-3xl {
   -fx-background-radius: 24px;
   -fx-border-radius: 24px;
 }
-.rounded-3xl {
-  -fx-background-radius: 28px;
-  -fx-border-radius: 28px;
-}
 .rounded-full {
-  -fx-background-radius: 32px;
-  -fx-border-radius: 32px;
+  -fx-background-radius: 9999px;
+  -fx-border-radius: 9999px;
 }
 .rounded-lg {
   -fx-background-radius: 8px;
@@ -3211,8 +4234,8 @@
   -fx-border-radius: 2px;
 }
 .rounded-xl {
-  -fx-background-radius: 20px;
-  -fx-border-radius: 20px;
+  -fx-background-radius: 12px;
+  -fx-border-radius: 12px;
 }
 .scale-0 {
   -fx-scale-x: 0.0;

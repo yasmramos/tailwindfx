@@ -244,6 +244,9 @@ TwFXML.enableAutoJit(root);
 
 Contributions are welcome! See the main repository for contribution guidelines.
 
+If you are working on TailwindFX itself, read the **[Developer Guide](DEVELOPER_GUIDE.md)** for the
+architecture, the JIT compiler internals, how to add new utilities, and the testing conventions.
+
 ## License
 
 Apache License 2.0 - See LICENSE file for details.

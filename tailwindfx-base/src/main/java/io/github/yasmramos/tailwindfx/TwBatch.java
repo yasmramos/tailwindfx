@@ -31,12 +31,23 @@ public final class TwBatch {
 
   private TwBatch() {}
 
-  /** Executes a batch of style operations efficiently. */
+  /**
+   * Executes a batch of style operations efficiently.
+   *
+   * <p>Within {@code action}, {@code TwStyle.apply} calls are queued and flushed in a single pass
+   * instead of being applied one by one, reducing layout thrash and metrics overhead.
+   *
+   * @param action the operations to run as a single batch
+   */
   public static void run(Runnable action) {
     StylePerf.batch(action);
   }
 
-  /** Executes a batch of style operations asynchronously. */
+  /**
+   * Executes a batch of style operations asynchronously.
+   *
+   * @param action the operations to run as a single batch on a background thread
+   */
   public static void runAsync(Runnable action) {
     StylePerf.batchAsync(action);
   }

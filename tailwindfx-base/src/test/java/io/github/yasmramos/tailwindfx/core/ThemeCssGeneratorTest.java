@@ -71,6 +71,15 @@ public class ThemeCssGeneratorTest {
   }
 
   @Test
+  public void testGenerateBaseCss_BorderRadiusVariablesUseTailwindValues() {
+    String css = generator.generateBaseCss();
+    assertTrue(css.contains("-radius-xl: 12px"), css);
+    assertTrue(css.contains("-radius-2xl: 16px"), css);
+    assertTrue(css.contains("-radius-3xl: 24px"), css);
+    assertTrue(css.contains("-radius-full: 9999px"), css);
+  }
+
+  @Test
   public void testGenerateBaseCss_HasOpacityVariables() {
     String css = generator.generateBaseCss();
     assertTrue(css.contains("-opacity-0"));

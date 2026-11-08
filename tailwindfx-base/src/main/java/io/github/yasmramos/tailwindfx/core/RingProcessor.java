@@ -2,6 +2,7 @@ package io.github.yasmramos.tailwindfx.core;
 
 import io.github.yasmramos.tailwindfx.color.ColorPalette;
 import io.github.yasmramos.tailwindfx.style.StyleToken;
+import java.util.Locale;
 
 /**
  * RingProcessor — Handles Tailwind CSS v4 ring utilities.
@@ -208,6 +209,7 @@ public final class RingProcessor {
       javafx.scene.paint.Color color = javafx.scene.paint.Color.web(hexColor);
       double alpha = alphaPercent / 100.0;
       return String.format(
+          Locale.ROOT,
           "rgba(%d,%d,%d,%.2f)",
           (int) (color.getRed() * 255),
           (int) (color.getGreen() * 255),

@@ -432,6 +432,7 @@
                 <module>examples/ecommerce-demo</module>
                 <module>examples/tailwindfx-demo-dashboard</module>
                 <module>examples/tailwindfx-examples</module>
+                <module>examples/animations-demo</module>
             </modules>
         </profile>
     </profiles>

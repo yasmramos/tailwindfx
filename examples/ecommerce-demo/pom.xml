@@ -101,6 +101,12 @@
                 The patch-module JVM argument below patches Monocle into javafx.graphics, required
                 on JDKs bundling JavaFX (e.g. Liberica Full) where the platform class loader
                 cannot otherwise see openjfx-monocle on the test classpath.
+
+                headless.geometry enlarges the virtual Monocle screen. Monocle defaults to
+                1280x800, which is smaller than this demo's scene; rendering a larger scene onto
+                the smaller framebuffer makes Monocle throw BufferOverflowException from
+                Framebuffer.composePixels and every test fails. Sizing the virtual screen above the
+                largest scene the demo can create keeps the tests green.
             -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -112,6 +118,40 @@
                         <testfx.headless>true</testfx.headless>
                         <glass.platform>Monocle</glass.platform>
                         <monocle.platform>Headless</monocle.platform>
+                        <headless.geometry>1600x1000x32</headless.geometry>
+                        <prism.order>sw</prism.order>
+                        <prism.text>t2k</prism.text>
+                        <java.awt.headless>true</java.awt.headless>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+            <!-- UI/integration tests follow the *IT.java convention used across the project. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <argLine>--patch-module javafx.graphics="${openjfx-monocle.jar}" --add-opens javafx.graphics/com.sun.glass.ui.monocle=ALL-UNNAMED --add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED --add-opens javafx.graphics/com.sun.javafx.application=ALL-UNNAMED</argLine>
+                    <systemPropertyVariables>
+                        <testfx.robot>glass</testfx.robot>
+                        <testfx.headless>true</testfx.headless>
+                        <glass.platform>Monocle</glass.platform>
+                        <monocle.platform>Headless</monocle.platform>
+                        <headless.geometry>1600x1000x32</headless.geometry>
                         <prism.order>sw</prism.order>
                         <prism.text>t2k</prism.text>
                         <java.awt.headless>true</java.awt.headless>
