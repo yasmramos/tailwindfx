@@ -668,9 +668,14 @@ public class TwVirtualFlow<T> extends Region {
       double start = prefixSums[i] - scrollPosition;
       double size = prefixSums[i + 1] - prefixSums[i];
       boolean isSelected = selectedIndices.contains(i);
-      // Update visual state
-      if (isSelected) cell.getStyleClass().add("selected");
-      else cell.getStyleClass().remove("selected");
+      // Update visual state. add() must be guarded: updateVisibleCells() runs on every layout
+      // pass (and on width/height changes), so an unguarded add() appends a duplicate "selected"
+      // to the same reused cell each time.
+      if (isSelected) {
+        if (!cell.getStyleClass().contains("selected")) cell.getStyleClass().add("selected");
+      } else {
+        cell.getStyleClass().remove("selected");
+      }
 
       if (orientation == Orientation.VERTICAL) {
         double aw = Math.max(0, cellContainer.getWidth() - pad.getLeft() - pad.getRight());
