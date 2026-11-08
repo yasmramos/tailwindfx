@@ -998,16 +998,11 @@
     -fx-border-radius: 0 0 8px 8px;
 }
 
-.collapse-header {
-    -fx-background-color: -tw-surface-muted;
-    -fx-padding: 16px;
-    -fx-font-weight: 600;
-    -fx-cursor: hand;
-}
-
-.collapse-content {
-    -fx-padding: 16px;
-}
+/*
+ * TitledPane does not expose its header and content nodes through named style classes, so there is
+ * no "collapse-header" / "collapse-content" to target: the skin tags them "title" and "content".
+ * They are styled below, next to the .titled-pane base rule.
+ */
 
 /*
  * State classes applied by TwAccordion. The expanded pane needs no extra rules of its own (the
@@ -1041,6 +1036,7 @@
     -fx-background-color: -tw-surface-muted;
     -fx-padding: 16px;
     -fx-font-weight: 600;
+    -fx-cursor: hand;
 }
 
 .titled-pane > .content {

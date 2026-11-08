@@ -119,10 +119,17 @@ class ComponentCssContractTest {
   @Test
   @DisplayName("no rule targets a class the components never apply")
   void noRuleTargetsAnUnappliedClass() {
-    // "select-popup" was declared but no JavaFX node carries it: the ComboBox popup is tagged
-    // "combo-box-popup". A rule that matches nothing is dead weight and misleads callers.
-    assertFalse(
-        declaredClasses.contains("select-popup"),
-        "select-popup is not applied by any node; target combo-box-popup instead");
+    // Legacy rules that matched nothing because no node carries these classes: the ComboBox popup
+    // is tagged "combo-box-popup", and TitledPane's skin tags its header/content "title" /
+    // "content". A rule that can never match is dead weight and misleads callers.
+    Set<String> dead = new LinkedHashSet<>();
+    for (String cls : Set.of("select-popup", "collapse-header", "collapse-content")) {
+      if (declaredClasses.contains(cls)) {
+        dead.add(cls);
+      }
+    }
+    assertTrue(
+        dead.isEmpty(),
+        "these rules target a class no node carries, so they can never match: " + dead);
   }
 }
