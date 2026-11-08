@@ -158,6 +158,60 @@ public class ContainerQueryIT extends ApplicationTest {
   }
 
   @Test
+  @DisplayName("Re-install does not leak width listeners")
+  public void testReinstallDoesNotLeakListeners() {
+    ContainerQuery query = ContainerQuery.on(testLabel).sm("text-sm").md("text-md");
+
+    query.install(container);
+    query.install(container);
+    query.install(container);
+
+    // One listener per install would fire the callback three times per resize.
+    final int[] calls = new int[1];
+    ContainerQuery counted =
+        ContainerQuery.on(testLabel).onBreakpoint(bp -> calls[0]++).sm("text-sm");
+    counted.install(container);
+    counted.install(container);
+
+    calls[0] = 0;
+    container.setPrefWidth(700);
+    container.resize(700, 600);
+    container.layout();
+
+    assertEquals(1, calls[0], "Re-installing must leave a single width listener attached");
+
+    query.detach();
+    counted.detach();
+  }
+
+  @Test
+  @DisplayName("Breakpoint classes follow the container width")
+  public void testBreakpointClassesFollowWidth() {
+    Label label = new Label("Nested");
+    Pane inner = new Pane(label);
+    ContainerQuery query = ContainerQuery.on(label).sm("text-sm").md("text-md");
+    query.install(inner);
+
+    // Below every tier: no breakpoint class is active.
+    inner.resize(500, 600);
+    assertFalse(label.getStyleClass().contains("text-sm"), "sm must not apply below 640px");
+    assertFalse(label.getStyleClass().contains("text-md"), "md must not apply below 768px");
+
+    // 800px activates the highest matching tier (md), matching the rest of the library.
+    inner.resize(800, 600);
+    assertTrue(label.getStyleClass().contains("text-md"), "md must apply at 800px");
+    assertFalse(
+        label.getStyleClass().contains("text-sm"),
+        "only the highest matching tier stays active");
+
+    // Shrinking below the tier removes its classes again.
+    inner.resize(500, 600);
+    assertFalse(label.getStyleClass().contains("text-md"), "md must be removed when shrinking");
+
+    query.detach();
+  }
+
+  @Test
   @DisplayName("Manual Refresh")
   public void testRefresh() {
     assertDoesNotThrow(
