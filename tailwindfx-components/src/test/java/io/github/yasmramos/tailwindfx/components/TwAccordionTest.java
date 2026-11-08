@@ -118,6 +118,26 @@ public class TwAccordionTest {
   }
 
   @Test
+  public void testStateClassesAreNotDuplicatedAcrossUpdates() {
+    TitledPane pane1 = new TitledPane("Pane 1", new javafx.scene.layout.StackPane());
+    TitledPane pane2 = new TitledPane("Pane 2", new javafx.scene.layout.StackPane());
+    TwAccordion accordion = new TwAccordion(pane1, pane2);
+
+    accordion.setExpandedPane(pane1);
+    accordion.setExpandedPane(pane2);
+    accordion.setExpandedPane(pane1);
+
+    assertEquals(
+        1,
+        pane1.getStyleClass().stream().filter("collapse-open"::equals).count(),
+        "collapse-open must not accumulate duplicates: " + pane1.getStyleClass());
+    assertEquals(
+        1,
+        pane2.getStyleClass().stream().filter("collapse-close"::equals).count(),
+        "collapse-close must not accumulate duplicates: " + pane2.getStyleClass());
+  }
+
+  @Test
   public void testAddPaneAfterConstruction() {
     TwAccordion accordion = new TwAccordion();
     TitledPane pane = new TitledPane("Dynamic Pane", new javafx.scene.layout.StackPane());
