@@ -1310,7 +1310,17 @@ public final class TwAnimation {
     public static void play(javafx.scene.Node node, String slot, Animation animation) {
       cancel(node, slot);
       getSlots(node).put(slot, animation);
-      animation.setOnFinished(e -> getSlots(node).remove(slot));
+      // The slot must be cleaned up when the animation ends, but setOnFinished() replaces any
+      // handler the caller installed through TwAnimation.onFinished(). Capture it first and chain
+      // it, otherwise the documented "onFinished(...).play()" pattern silently loses its callback.
+      javafx.event.EventHandler<javafx.event.ActionEvent> userHandler = animation.getOnFinished();
+      animation.setOnFinished(
+          e -> {
+            getSlots(node).remove(slot);
+            if (userHandler != null) {
+              userHandler.handle(e);
+            }
+          });
       animation.play();
       installSceneListener(node);
     }

@@ -388,6 +388,33 @@ public class TwAnimationIT extends ApplicationTest {
             }
           });
     }
+    @Test
+    @DisplayName("registry should preserve the caller's onFinished handler")
+    void testRegistryPreservesOnFinished() {
+      interact(
+          () -> {
+            Region n = new Region();
+            AtomicBoolean fired = new AtomicBoolean(false);
+            javafx.animation.Timeline t =
+                new javafx.animation.Timeline(
+                    new javafx.animation.KeyFrame(javafx.util.Duration.millis(1000), e -> {}));
+            t.setOnFinished(e -> fired.set(true));
+
+            TwAnimation.AnimationRegistry.play(n, "enter", t);
+            assertTrue(TwAnimation.AnimationRegistry.isActive(n, "enter"));
+
+            // Fire the completion event the way the FX pulse would, without waiting for the
+            // timeline to run (interact() blocks the pulse thread).
+            t.getOnFinished().handle(null);
+
+            assertTrue(
+                fired.get(), "the caller's onFinished handler must still run on completion");
+            assertTrue(
+                !TwAnimation.AnimationRegistry.isActive(n, "enter"),
+                "slot must still be cleaned up on completion");
+            TwAnimation.AnimationRegistry.cancelAll(n);
+          });
+    }
   }
 
   @Nested
