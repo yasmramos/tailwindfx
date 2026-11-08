@@ -127,6 +127,10 @@ public class TwVirtualFlow<T> extends Region {
 
   // Constructor
   public TwVirtualFlow() {
+    // "virtual-flow" is the base class the component stylesheet scopes its cell rules to
+    // (".virtual-flow .fx-virtualflow-cell", ".virtual-flow .fx-virtualflow-cell.selected",
+    // ...); without it those rules never matched.
+    getStyleClass().add("virtual-flow");
     // Setup container
     dropIndicator.getStyleClass().add("fx-virtualflow-drop-indicator");
     dropIndicator.setStyle("-fx-background-color: #3b82f6; -fx-pref-height: 2;");
@@ -668,9 +672,14 @@ public class TwVirtualFlow<T> extends Region {
       double start = prefixSums[i] - scrollPosition;
       double size = prefixSums[i + 1] - prefixSums[i];
       boolean isSelected = selectedIndices.contains(i);
-      // Update visual state
-      if (isSelected) cell.getStyleClass().add("selected");
-      else cell.getStyleClass().remove("selected");
+      // Update visual state. add() must be guarded: updateVisibleCells() runs on every layout
+      // pass (and on width/height changes), so an unguarded add() appends a duplicate "selected"
+      // to the same reused cell each time.
+      if (isSelected) {
+        if (!cell.getStyleClass().contains("selected")) cell.getStyleClass().add("selected");
+      } else {
+        cell.getStyleClass().remove("selected");
+      }
 
       if (orientation == Orientation.VERTICAL) {
         double aw = Math.max(0, cellContainer.getWidth() - pad.getLeft() - pad.getRight());

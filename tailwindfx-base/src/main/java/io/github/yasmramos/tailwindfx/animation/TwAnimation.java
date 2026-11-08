@@ -727,12 +727,15 @@ public final class TwAnimation {
     }
     final double baseScaleX = node.getScaleX();
     final double baseScaleY = node.getScaleY();
-    node.addEventHandler(
-        javafx.scene.input.MouseEvent.MOUSE_ENTERED,
-        e -> animateScale(node, baseScaleX * scaleFactor, baseScaleY * scaleFactor, 150));
-    node.addEventHandler(
-        javafx.scene.input.MouseEvent.MOUSE_EXITED,
-        e -> animateScale(node, baseScaleX, baseScaleY, 150));
+    javafx.event.EventHandler<javafx.scene.input.MouseEvent> enterScale =
+        e -> animateScale(node, baseScaleX * scaleFactor, baseScaleY * scaleFactor, 150);
+    javafx.event.EventHandler<javafx.scene.input.MouseEvent> exitScale =
+        e -> animateScale(node, baseScaleX, baseScaleY, 150);
+    node.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_ENTERED, enterScale);
+    node.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_EXITED, exitScale);
+    // Registered so removeHoverEffects() can detach them; without this the scale listeners stayed
+    // attached to the node and kept animating after the effect was supposedly removed.
+    storeHoverHandlers(node, enterScale, exitScale);
   }
 
   /**
@@ -1310,7 +1313,17 @@ public final class TwAnimation {
     public static void play(javafx.scene.Node node, String slot, Animation animation) {
       cancel(node, slot);
       getSlots(node).put(slot, animation);
-      animation.setOnFinished(e -> getSlots(node).remove(slot));
+      // The slot must be cleaned up when the animation ends, but setOnFinished() replaces any
+      // handler the caller installed through TwAnimation.onFinished(). Capture it first and chain
+      // it, otherwise the documented "onFinished(...).play()" pattern silently loses its callback.
+      javafx.event.EventHandler<javafx.event.ActionEvent> userHandler = animation.getOnFinished();
+      animation.setOnFinished(
+          e -> {
+            getSlots(node).remove(slot);
+            if (userHandler != null) {
+              userHandler.handle(e);
+            }
+          });
       animation.play();
       installSceneListener(node);
     }

@@ -13,6 +13,18 @@ import javafx.scene.layout.VBox;
  */
 public class TwCard extends VBox {
 
+  /** Stylesheet class applied to the header slot. */
+  private static final String HEADER_CLASS = "tw-card-header";
+
+  /** Stylesheet class applied to the title created by {@link #withTitle(String)}. */
+  private static final String TITLE_CLASS = "tw-card-title";
+
+  /** Stylesheet class applied to the body slot. */
+  private static final String CONTENT_CLASS = "tw-card-content";
+
+  /** Stylesheet class applied to the footer slot. */
+  private static final String FOOTER_CLASS = "tw-card-footer";
+
   private Node header;
   private Node footer;
 
@@ -52,6 +64,11 @@ public class TwCard extends VBox {
     }
     this.header = header;
     if (header != null) {
+      // The stylesheet styles the header through ".tw-card-header"; without the class the slot
+      // keeps the default VBox child styling instead of the bordered, padded header.
+      if (!header.getStyleClass().contains(HEADER_CLASS)) {
+        header.getStyleClass().add(HEADER_CLASS);
+      }
       getChildren().add(0, header);
     }
   }
@@ -74,6 +91,9 @@ public class TwCard extends VBox {
    * @param body the body node
    */
   public void setBody(Node body) {
+    if (body != null && !body.getStyleClass().contains(CONTENT_CLASS)) {
+      body.getStyleClass().add(CONTENT_CLASS);
+    }
     if (this.footer != null) {
       getChildren().add(getChildren().indexOf(this.footer), body);
     } else {
@@ -92,6 +112,11 @@ public class TwCard extends VBox {
     }
     this.footer = footer;
     if (footer != null) {
+      // The stylesheet styles the footer through ".tw-card-footer"; without the class the slot
+      // keeps the default VBox child styling instead of the top border and padding.
+      if (!footer.getStyleClass().contains(FOOTER_CLASS)) {
+        footer.getStyleClass().add(FOOTER_CLASS);
+      }
       getChildren().add(footer);
     }
   }
@@ -114,7 +139,9 @@ public class TwCard extends VBox {
   public static TwCard withTitle(String title) {
     TwCard card = new TwCard();
     Label titleLabel = new Label(title);
-    titleLabel.getStyleClass().addAll("text-xl", "font-bold");
+    // The dedicated ".tw-card-title" rule (font size and weight) lives in the component
+    // stylesheet; applying it here is what keeps the title consistent with the card surface.
+    titleLabel.getStyleClass().add(TITLE_CLASS);
     card.setHeader(titleLabel);
     return card;
   }

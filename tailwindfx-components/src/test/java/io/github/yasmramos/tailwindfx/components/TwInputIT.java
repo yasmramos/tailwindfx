@@ -43,6 +43,15 @@ public class TwInputIT {
   }
 
   @Test
+  public void testRepeatedSetErrorDoesNotDuplicateClass() {
+    TwInput input = new TwInput();
+    input.setError(true);
+    input.setError(true);
+    long count = input.getStyleClass().stream().filter("input-error"::equals).count();
+    assertEquals(1, count, "input-error must not be added twice: " + input.getStyleClass());
+  }
+
+  @Test
   public void testErrorAutoClearsOnTextChange() {
     TwInput input = new TwInput();
     input.setError(true);
@@ -105,6 +114,15 @@ public class TwInputIT {
     // The value round-trips, but the control masks what it renders.
     assertEquals("secret", password.getText());
     assertTrue(password.getStyleClass().contains("tw-input"));
+  }
+
+  @Test
+  public void testPasswordRepeatedSetErrorDoesNotDuplicateClass() {
+    TwPasswordField password = TwPasswordField.create();
+    password.setError(true);
+    password.setError(true);
+    long count = password.getStyleClass().stream().filter("input-error"::equals).count();
+    assertEquals(1, count, "input-error must not be added twice: " + password.getStyleClass());
   }
 
   @Test

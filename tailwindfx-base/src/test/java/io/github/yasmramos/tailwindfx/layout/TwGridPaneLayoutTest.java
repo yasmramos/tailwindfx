@@ -97,6 +97,41 @@ class TwGridPaneLayoutTest extends ApplicationTest {
   }
 
   @Test
+  @DisplayName("Row auto-flow wraps a column-spanning child that does not fit the row")
+  void rowAutoFlowWrapsSpanningChild() {
+    TwGridPane grid = TwGridPane.create().cols(3).build();
+    Region single = region(40, 40);
+    Region wide = region(40, 40);
+    TwGridPane.setColSpan(wide, 3);
+    grid.getChildren().addAll(single, wide);
+    layout(grid, 400, 400);
+
+    // single occupies col 0; wide (span 3) cannot fit in cols 1-2, so it moves to row 1 col 0.
+    assertEquals(0.0, single.getLayoutX(), 0.5);
+    assertEquals(0.0, single.getLayoutY(), 0.5);
+    assertEquals(0.0, wide.getLayoutX(), 0.5);
+    assertTrue(wide.getLayoutY() > single.getLayoutY(), "spanning child should wrap to the next row");
+  }
+
+  @Test
+  @DisplayName("Column auto-flow starts a new column for a row-spanning child that does not fit")
+  void colAutoFlowStartsNewColumnForSpanningChild() {
+    TwGridPane grid =
+        TwGridPane.create().cols(2).rows(2).autoFlow(TwGridPane.AutoFlow.COL).build();
+    Region single = region(40, 40);
+    Region tall = region(40, 40);
+    TwGridPane.setRowSpan(tall, 2);
+    grid.getChildren().addAll(single, tall);
+    layout(grid, 400, 400);
+
+    // single occupies (col 0, row 0); tall (span 2) cannot fit below it in column 0, so it
+    // starts column 1 at row 0 instead of overflowing past the bottom of the grid.
+    assertEquals(0.0, single.getLayoutX(), 0.5);
+    assertTrue(tall.getLayoutX() > single.getLayoutX(), "spanning child should use a new column");
+    assertEquals(0.0, tall.getLayoutY(), 0.5);
+  }
+
+  @Test
   @DisplayName("Dense auto-flow packs around a spanning child")
   void denseAutoFlow() {
     TwGridPane grid =

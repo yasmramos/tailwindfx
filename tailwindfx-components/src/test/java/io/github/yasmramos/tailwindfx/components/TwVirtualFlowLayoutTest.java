@@ -173,6 +173,39 @@ class TwVirtualFlowLayoutTest extends ApplicationTest {
   }
 
   @Test
+  @DisplayName("selected class is not duplicated when the layout runs repeatedly")
+  void selectedClassIsNotDuplicatedAcrossLayouts() {
+    TwVirtualFlow<String> flow = flowWithItems(10);
+    interact(() -> flow.selectIndex(0));
+    layout(flow, 300, 240);
+    layout(flow, 300, 240);
+    layout(flow, 300, 240);
+
+    Node cell = firstCell(flow);
+    assertNotNull(cell, "a cell should be visible after layout");
+    long count = cell.getStyleClass().stream().filter("selected"::equals).count();
+    assertEquals(
+        1,
+        count,
+        "the selected class must not accumulate across layout passes: " + cell.getStyleClass());
+  }
+
+  @Test
+  @DisplayName("Applies the virtual-flow base class the stylesheet scopes its rules to")
+  void baseClassIsApplied() {
+    TwVirtualFlow<String> flow = new TwVirtualFlow<>();
+    assertTrue(
+        flow.getStyleClass().contains("virtual-flow"),
+        "the .virtual-flow rules only match when the base class is present: "
+            + flow.getStyleClass());
+  }
+
+  private Node firstCell(TwVirtualFlow<String> flow) {
+    Pane container = (Pane) flow.getChildrenUnmodifiable().get(0);
+    return container.getChildren().isEmpty() ? null : container.getChildren().get(0);
+  }
+
+  @Test
   @DisplayName("getSelectedItems returns the items behind the selected indices")
   void selectedItems() {
     TwVirtualFlow<String> flow = flowWithItems(5);

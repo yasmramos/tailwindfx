@@ -124,6 +124,23 @@ public class TwDataTableIT extends ApplicationTest {
       assertTrue(t.getStyleClass().contains("table-hover"));
       assertTrue(t.getStyleClass().contains("table-view"));
     }
+
+    @Test
+    @DisplayName("Applies the data-table base class the stylesheet scopes its rules to")
+    void testBaseClassIsApplied() {
+      TwDataTable<Person> t = buildBasic();
+      assertTrue(
+          t.getStyleClass().contains("data-table"),
+          "the .data-table rules only match when the base class is present: " + t.getStyleClass());
+    }
+
+    @Test
+    @DisplayName("The default table-view class is not duplicated")
+    void testTableViewModelClassIsNotDuplicated() {
+      TwDataTable<Person> t = buildBasic();
+      long count = t.getStyleClass().stream().filter("table-view"::equals).count();
+      assertEquals(1, count, "table-view must appear once: " + t.getStyleClass());
+    }
   }
 
   @Nested

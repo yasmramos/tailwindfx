@@ -11,6 +11,12 @@ import javafx.scene.layout.HBox;
  */
 public class TwAlert extends HBox {
 
+  /** Stylesheet class that lets the per-type rules colour the icon. */
+  private static final String ICON_CLASS = "alert-icon";
+
+  /** Stylesheet class applied to the message label so the alert typography rules match. */
+  private static final String MESSAGE_CLASS = "alert-message";
+
   private AlertType type = AlertType.INFO;
 
   /** Creates a default alert. */
@@ -97,6 +103,9 @@ public class TwAlert extends HBox {
     getChildren().clear();
     javafx.scene.control.Label label = new javafx.scene.control.Label(content);
     label.setWrapText(true);
+    // The stylesheet styles the body text through ".alert-message"; without the class the label
+    // keeps the default Label typography instead of the alert's.
+    label.getStyleClass().add(MESSAGE_CLASS);
     getChildren().add(label);
   }
 
@@ -110,6 +119,12 @@ public class TwAlert extends HBox {
     getChildren().clear();
     javafx.scene.control.Label label = new javafx.scene.control.Label(content);
     label.setWrapText(true);
+    label.getStyleClass().add(MESSAGE_CLASS);
+    // The stylesheet colours the glyph through `.alert-<type> .alert-icon`, so the icon must
+    // carry that class or it keeps the default text fill instead of the alert's accent.
+    if (icon != null && !icon.getStyleClass().contains(ICON_CLASS)) {
+      icon.getStyleClass().add(ICON_CLASS);
+    }
     getChildren().addAll(icon, label);
   }
 

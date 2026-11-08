@@ -41,7 +41,9 @@ public class TwProgressBar extends ProgressBar {
   }
 
   private void initialize() {
-    getStyleClass().add(BASE_CLASS);
+    // JavaFX already ships "progress-bar" as the ProgressBar default style class; adding it
+    // unconditionally produced "progress-bar progress-bar".
+    if (!getStyleClass().contains(BASE_CLASS)) getStyleClass().add(BASE_CLASS);
     applyColor();
   }
 
