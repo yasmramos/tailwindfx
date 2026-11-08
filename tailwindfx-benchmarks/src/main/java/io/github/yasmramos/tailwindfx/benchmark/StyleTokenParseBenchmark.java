@@ -17,8 +17,13 @@ import org.openjdk.jmh.infra.Blackhole;
 /**
  * JMH-based benchmarks for StyleToken.parse() method.
  *
- * <p>Measures parsing performance for different token kinds: SCALE, COLOR_SHADE, ARBITRARY, NAMED,
- * and UNKNOWN. Uses parametrized tokens to characterize the cost of each regex pattern.
+ * <p>Measures parsing performance for the different token kinds: SCALE, COLOR_SHADE (with and
+ * without alpha), ARBITRARY, NAMED and UNKNOWN. Uses parametrized tokens to characterize the cost
+ * of each regex pattern.
+ *
+ * <p>Each token kind lives in its own {@link State}, so the per-kind {@code @Param} values are
+ * measured in isolation. Keeping the parameters in the benchmark class itself would form the
+ * Cartesian product of every parameter group and blow up the run time.
  *
  * <h2>Usage:</h2>
  *
@@ -42,37 +47,56 @@ import org.openjdk.jmh.infra.Blackhole;
 public class StyleTokenParseBenchmark {
 
   /** Test tokens for SCALE kind: p-4, m-2, w-12, etc. */
-  @Param({"p-4", "m-2", "w-12", "gap-8", "h-auto"})
-  private String scaleToken;
+  @State(Scope.Thread)
+  public static class ScaleState {
+    @Param({"p-4", "m-2", "w-12", "gap-8", "h-auto"})
+    private String scaleToken;
+  }
 
   /** Test tokens for COLOR_SHADE kind: bg-blue-500, text-gray-900, etc. */
-  @Param({"bg-blue-500", "text-gray-900", "border-red-300", "shadow-blue-500"})
-  private String colorShadeToken;
+  @State(Scope.Thread)
+  public static class ColorShadeState {
+    @Param({"bg-blue-500", "text-gray-900", "border-red-300", "shadow-blue-500"})
+    private String colorShadeToken;
+  }
 
   /** Test tokens for COLOR_SHADE with alpha: bg-blue-500/80, text-gray-900/50, etc. */
-  @Param({"bg-blue-500/80", "text-gray-900/50", "border-red-300/75"})
-  private String colorShadeAlphaToken;
+  @State(Scope.Thread)
+  public static class ColorShadeAlphaState {
+    @Param({"bg-blue-500/80", "text-gray-900/50", "border-red-300/75"})
+    private String colorShadeAlphaToken;
+  }
 
   /** Test tokens for ARBITRARY kind: w-[320px], bg-[#ff6600], etc. */
-  @Param({"w-[320px]", "bg-[#ff6600]", "p-[13px]", "text-[16px]", "rotate-[45deg]"})
-  private String arbitraryToken;
+  @State(Scope.Thread)
+  public static class ArbitraryState {
+    @Param({"w-[320px]", "bg-[#ff6600]", "p-[13px]", "text-[16px]", "rotate-[45deg]"})
+    private String arbitraryToken;
+  }
 
   /** Test tokens for NAMED kind: text-sm, rounded-lg, font-bold, etc. */
-  @Param({"text-sm", "rounded-lg", "font-bold", "shadow-md", "flex"})
-  private String namedToken;
+  @State(Scope.Thread)
+  public static class NamedState {
+    @Param({"text-sm", "rounded-lg", "font-bold", "shadow-md", "flex"})
+    private String namedToken;
+  }
 
   /** Test tokens for UNKNOWN kind: invalid or malformed tokens. */
-  @Param({"invalid-token-", "not-a-class", "123invalid", ""})
-  private String unknownToken;
+  @State(Scope.Thread)
+  public static class UnknownState {
+    @Param({"invalid-token-", "not-a-class", "123invalid", ""})
+    private String unknownToken;
+  }
 
   /**
    * Benchmarks parsing of SCALE tokens (e.g., p-4, m-2).
    *
    * @param blackhole JMH blackhole to consume results and prevent dead-code elimination
+   * @param state the SCALE token under test
    */
   @Benchmark
-  public void benchmarkScaleParse(Blackhole blackhole) {
-    StyleToken result = StyleToken.parse(scaleToken);
+  public void benchmarkScaleParse(Blackhole blackhole, ScaleState state) {
+    StyleToken result = StyleToken.parse(state.scaleToken);
     blackhole.consume(result);
   }
 
@@ -80,10 +104,11 @@ public class StyleTokenParseBenchmark {
    * Benchmarks parsing of COLOR_SHADE tokens without alpha (e.g., bg-blue-500).
    *
    * @param blackhole JMH blackhole to consume results and prevent dead-code elimination
+   * @param state the COLOR_SHADE token under test
    */
   @Benchmark
-  public void benchmarkColorShadeParse(Blackhole blackhole) {
-    StyleToken result = StyleToken.parse(colorShadeToken);
+  public void benchmarkColorShadeParse(Blackhole blackhole, ColorShadeState state) {
+    StyleToken result = StyleToken.parse(state.colorShadeToken);
     blackhole.consume(result);
   }
 
@@ -91,10 +116,11 @@ public class StyleTokenParseBenchmark {
    * Benchmarks parsing of COLOR_SHADE tokens with alpha (e.g., bg-blue-500/80).
    *
    * @param blackhole JMH blackhole to consume results and prevent dead-code elimination
+   * @param state the COLOR_SHADE+alpha token under test
    */
   @Benchmark
-  public void benchmarkColorShadeAlphaParse(Blackhole blackhole) {
-    StyleToken result = StyleToken.parse(colorShadeAlphaToken);
+  public void benchmarkColorShadeAlphaParse(Blackhole blackhole, ColorShadeAlphaState state) {
+    StyleToken result = StyleToken.parse(state.colorShadeAlphaToken);
     blackhole.consume(result);
   }
 
@@ -102,10 +128,11 @@ public class StyleTokenParseBenchmark {
    * Benchmarks parsing of ARBITRARY tokens (e.g., w-[320px], bg-[#ff6600]).
    *
    * @param blackhole JMH blackhole to consume results and prevent dead-code elimination
+   * @param state the ARBITRARY token under test
    */
   @Benchmark
-  public void benchmarkArbitraryParse(Blackhole blackhole) {
-    StyleToken result = StyleToken.parse(arbitraryToken);
+  public void benchmarkArbitraryParse(Blackhole blackhole, ArbitraryState state) {
+    StyleToken result = StyleToken.parse(state.arbitraryToken);
     blackhole.consume(result);
   }
 
@@ -113,10 +140,11 @@ public class StyleTokenParseBenchmark {
    * Benchmarks parsing of NAMED tokens (e.g., text-sm, rounded-lg).
    *
    * @param blackhole JMH blackhole to consume results and prevent dead-code elimination
+   * @param state the NAMED token under test
    */
   @Benchmark
-  public void benchmarkNamedParse(Blackhole blackhole) {
-    StyleToken result = StyleToken.parse(namedToken);
+  public void benchmarkNamedParse(Blackhole blackhole, NamedState state) {
+    StyleToken result = StyleToken.parse(state.namedToken);
     blackhole.consume(result);
   }
 
@@ -124,10 +152,11 @@ public class StyleTokenParseBenchmark {
    * Benchmarks parsing of UNKNOWN/invalid tokens.
    *
    * @param blackhole JMH blackhole to consume results and prevent dead-code elimination
+   * @param state the UNKNOWN token under test
    */
   @Benchmark
-  public void benchmarkUnknownParse(Blackhole blackhole) {
-    StyleToken result = StyleToken.parse(unknownToken);
+  public void benchmarkUnknownParse(Blackhole blackhole, UnknownState state) {
+    StyleToken result = StyleToken.parse(state.unknownToken);
     blackhole.consume(result);
   }
 }
