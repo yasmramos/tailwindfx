@@ -117,7 +117,7 @@ public class TwCheckbox extends CheckBox {
    */
   public void setError(boolean error) {
     if (error) {
-      getStyleClass().add(ERROR_CLASS);
+      if (!getStyleClass().contains(ERROR_CLASS)) getStyleClass().add(ERROR_CLASS);
     } else {
       getStyleClass().remove(ERROR_CLASS);
     }

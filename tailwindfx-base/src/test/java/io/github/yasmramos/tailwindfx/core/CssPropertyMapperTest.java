@@ -217,4 +217,209 @@ class CssPropertyMapperTest {
     assertNull(resolveAndMap("animate-spin"));
     assertNull(resolveAndMap("aspect-square"));
   }
+
+  // ---------------------------------------------------------------------------
+  // Extended coverage: prefix -> property mapping and named-value resolution.
+  // ---------------------------------------------------------------------------
+
+  @Test
+  void testMapRemainingPrefixes() {
+    assertEquals("-fx-font-family", mapper.mapToCssProperty("font"));
+    assertEquals("-fx-min-width", mapper.mapToCssProperty("min-w"));
+    assertEquals("-fx-min-height", mapper.mapToCssProperty("min-h"));
+    assertEquals("-fx-max-width", mapper.mapToCssProperty("max-w"));
+    assertEquals("-fx-max-height", mapper.mapToCssProperty("max-h"));
+    assertEquals("-fx-opacity", mapper.mapToCssProperty("opacity"));
+    assertEquals("-fx-rotate", mapper.mapToCssProperty("rotate"));
+    assertEquals("-fx-scale-x", mapper.mapToCssProperty("scale"));
+    assertEquals("-fx-scale-y", mapper.mapToCssProperty("scale-y"));
+    assertEquals("-fx-translate-x", mapper.mapToCssProperty("translate-x"));
+    assertEquals("-fx-translate-y", mapper.mapToCssProperty("translate-y"));
+    assertEquals("-fx-background-radius", mapper.mapToCssProperty("rounded"));
+    assertEquals("-fx-effect", mapper.mapToCssProperty("shadow"));
+    assertEquals("-fx-hgap", mapper.mapToCssProperty("gap"));
+    assertEquals("-fx-vgap", mapper.mapToCssProperty("gap-y"));
+    assertEquals("-fx-cursor", mapper.mapToCssProperty("cursor"));
+    assertEquals("-fx-border-color", mapper.mapToCssProperty("border"));
+  }
+
+  @Test
+  void testUnmappedPrefixesReturnNull() {
+    // Utilities with no JavaFX CSS equivalent must return null to avoid invalid CSS.
+    for (String p :
+        new String[] {
+          "pt", "top", "pr", "pb", "pl", "left",
+          "visible", "hidden", "invisible", "overflow", "z", "resize",
+          "skew-x", "skew-y", "blur", "brightness", "contrast", "grayscale", "invert", "sepia",
+          "unknown-prefix"
+        }) {
+      assertNull(mapper.mapToCssProperty(p), "prefix should not map: " + p);
+    }
+  }
+
+  @Test
+  void testResolveNamedColors() {
+    assertEquals("#ffffff", mapper.resolveNamedValue("bg", "white"));
+    assertEquals("#000000", mapper.resolveNamedValue("bg", "black"));
+    assertEquals("transparent", mapper.resolveNamedValue("bg", "transparent"));
+    assertEquals("#ffffff", mapper.resolveNamedValue("text", "white"));
+    assertEquals("#000000", mapper.resolveNamedValue("border", "black"));
+    assertNull(mapper.resolveNamedValue("bg", "chartreuse"));
+  }
+
+  @Test
+  void testResolveBorderStyles() {
+    assertEquals("solid", mapper.resolveNamedValue("border", "solid"));
+    assertEquals("dashed", mapper.resolveNamedValue("border", "dashed"));
+    assertEquals("dotted", mapper.resolveNamedValue("border", "dotted"));
+    assertEquals("none", mapper.resolveNamedValue("border", "none"));
+    assertNull(mapper.resolveNamedValue("border", "wavy"));
+  }
+
+  @Test
+  void testResolveCursors() {
+    assertEquals("default", mapper.resolveNamedValue("cursor", "default"));
+    assertEquals("hand", mapper.resolveNamedValue("cursor", "pointer"));
+    assertEquals("text", mapper.resolveNamedValue("cursor", "text"));
+    assertEquals("move", mapper.resolveNamedValue("cursor", "move"));
+    assertEquals("wait", mapper.resolveNamedValue("cursor", "wait"));
+    assertEquals("crosshair", mapper.resolveNamedValue("cursor", "crosshair"));
+    assertEquals("open-hand", mapper.resolveNamedValue("cursor", "grab"));
+    assertEquals("closed-hand", mapper.resolveNamedValue("cursor", "grabbing"));
+    assertEquals("h-resize", mapper.resolveNamedValue("cursor", "col-resize"));
+    assertEquals("v-resize", mapper.resolveNamedValue("cursor", "row-resize"));
+    assertEquals("ne-resize", mapper.resolveNamedValue("cursor", "nesw-resize"));
+    assertEquals("nw-resize", mapper.resolveNamedValue("cursor", "nwse-resize"));
+    assertEquals("none", mapper.resolveNamedValue("cursor", "none"));
+    assertNull(mapper.resolveNamedValue("cursor", "bogus"));
+  }
+
+  @Test
+  void testResolveOverflowVisibilityResize() {
+    assertEquals("hidden", mapper.resolveNamedValue("overflow", "hidden"));
+    assertEquals("scroll", mapper.resolveNamedValue("overflow", "scroll"));
+    assertEquals("auto", mapper.resolveNamedValue("overflow", "auto"));
+    assertNull(mapper.resolveNamedValue("overflow", "clip"));
+
+    assertEquals("visible", mapper.resolveNamedValue("visible", "visible"));
+    assertEquals("hidden", mapper.resolveNamedValue("hidden", "hidden"));
+    assertEquals("hidden", mapper.resolveNamedValue("invisible", "invisible"));
+
+    assertEquals("none", mapper.resolveNamedValue("resize", "none"));
+    assertEquals("horizontal", mapper.resolveNamedValue("resize", "x"));
+    assertEquals("vertical", mapper.resolveNamedValue("resize", "y"));
+    assertEquals("both", mapper.resolveNamedValue("resize", "both"));
+    assertNull(mapper.resolveNamedValue("resize", "weird"));
+  }
+
+  @Test
+  void testResolveDimensions() {
+    assertEquals("-1", mapper.resolveNamedValue("w", "auto"));
+    assertEquals("-1", mapper.resolveNamedValue("w", "min"));
+    assertEquals("-1", mapper.resolveNamedValue("h", "max"));
+    assertNull(mapper.resolveNamedValue("w", "huge"));
+  }
+
+  @Test
+  void testResolveMaxWidth() {
+    assertEquals("320px", mapper.resolveNamedValue("max-w", "xs"));
+    assertEquals("384px", mapper.resolveNamedValue("max-w", "sm"));
+    assertEquals("448px", mapper.resolveNamedValue("max-w", "md"));
+    assertEquals("512px", mapper.resolveNamedValue("max-w", "lg"));
+    assertEquals("576px", mapper.resolveNamedValue("max-w", "xl"));
+    assertEquals("672px", mapper.resolveNamedValue("max-w", "2xl"));
+    assertEquals("768px", mapper.resolveNamedValue("max-w", "3xl"));
+    // "full" is not expressible as a JavaFX CSS length.
+    assertNull(mapper.resolveNamedValue("max-w", "full"));
+  }
+
+  @Test
+  void testResolveEffects() {
+    assertEquals("0px", mapper.resolveNamedValue("blur", "none"));
+    assertEquals("4px", mapper.resolveNamedValue("blur", "default"));
+    assertEquals("32px", mapper.resolveNamedValue("blur", "3xl"));
+    assertEquals("10px", mapper.resolveNamedValue("blur", "10"));
+    assertNull(mapper.resolveNamedValue("blur", "nope"));
+
+    assertEquals("0%", mapper.resolveNamedValue("brightness", "0"));
+    assertEquals("150%", mapper.resolveNamedValue("brightness", "150"));
+    assertEquals("123%", mapper.resolveNamedValue("brightness", "123"));
+
+    assertEquals("200%", mapper.resolveNamedValue("contrast", "200"));
+    assertEquals("75%", mapper.resolveNamedValue("grayscale", "75"));
+    assertNull(mapper.resolveNamedValue("grayscale", "x"));
+    assertEquals("40%", mapper.resolveNamedValue("invert", "40"));
+    assertNull(mapper.resolveNamedValue("invert", "x"));
+    assertEquals("60%", mapper.resolveNamedValue("sepia", "60"));
+    assertNull(mapper.resolveNamedValue("sepia", "x"));
+  }
+
+  @Test
+  void testResolveSkew() {
+    assertEquals("0", mapper.resolveNamedValue("skew-x", "0"));
+    assertEquals("0.0175", mapper.resolveNamedValue("skew-x", "1"));
+    assertEquals("0.2126", mapper.resolveNamedValue("skew-y", "12"));
+    assertEquals("0.1051", mapper.resolveNamedValue("skew-y", "6"));
+    // Numeric degrees go through tan(radians).
+    assertTrue(mapper.resolveNamedValue("skew-x", "45").startsWith("0.99"));
+    assertNull(mapper.resolveNamedValue("skew-x", "abc"));
+  }
+
+  @Test
+  void testResolveFontSizeAndWeight() {
+    assertEquals("14px", mapper.resolveNamedValue("text", "sm"));
+    assertEquals("36px", mapper.resolveNamedValue("text", "4xl"));
+    assertNull(mapper.resolveNamedValue("text", "chartreuse"));
+
+    assertEquals("100", mapper.resolveNamedValue("font", "thin"));
+    assertEquals("900", mapper.resolveNamedValue("font", "black"));
+    assertNull(mapper.resolveNamedValue("font", "bogus"));
+  }
+
+  @Test
+  void testMapBorderWidthsAndStyles() {
+    assertEquals("-fx-border-width: 1px;", resolveAndMap("border"));
+    assertEquals("-fx-border-width: 2px;", resolveAndMap("border-2"));
+    assertTrue(resolveAndMap("border-t-4").startsWith("-fx-border-width:"));
+    assertTrue(resolveAndMap("border-x-2").contains("2px"));
+    assertEquals("-fx-border-style: solid;", resolveAndMap("border-solid"));
+    assertEquals("-fx-border-color: #000000;", resolveAndMap("border-black"));
+  }
+
+  @Test
+  void testMapFontSizeAndWeightTokens() {
+    assertEquals("-fx-font-size: 16px;", resolveAndMap("text-base"));
+    assertEquals("-fx-font-weight: 700;", resolveAndMap("font-bold"));
+    assertEquals("-fx-text-fill: #ffffff;", resolveAndMap("text-white"));
+  }
+
+  @Test
+  void testMapRotateAndTranslate() {
+    assertEquals("-fx-rotate: 45;", resolveAndMap("rotate-45"));
+    assertEquals("-fx-translate-x: 16px;", resolveAndMap("translate-x-4"));
+    assertEquals("-fx-translate-y: 16px;", resolveAndMap("translate-y-4"));
+  }
+
+  @Test
+  void testMapPaddingAxisForms() {
+    assertEquals("-fx-padding: 0px 16px 0px 16px;", resolveAndMap("px-4"));
+    assertEquals("-fx-padding: 16px 0px 16px 0px;", resolveAndMap("py-4"));
+    assertEquals("-fx-padding: 16px 0px 0px 0px;", resolveAndMap("pt-4"));
+    assertEquals("-fx-padding: 0px 16px 0px 0px;", resolveAndMap("pr-4"));
+    assertEquals("-fx-padding: 0px 0px 16px 0px;", resolveAndMap("pb-4"));
+    assertEquals("-fx-padding: 0px 0px 0px 16px;", resolveAndMap("pl-4"));
+  }
+
+  @Test
+  void testMapDimensionAndMaxWidthTokens() {
+    assertEquals("-fx-pref-width: -1;", resolveAndMap("w-auto"));
+    assertEquals("-fx-pref-height: -1;", resolveAndMap("h-auto"));
+    assertEquals("-fx-max-width: 448px;", resolveAndMap("max-w-md"));
+  }
+
+  @Test
+  void testMapNullInputs() {
+    assertNull(mapper.map(null, "10px"));
+    assertNull(mapper.map(StyleToken.parse("p-4"), null));
+  }
 }

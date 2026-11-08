@@ -152,8 +152,11 @@
                         <include>**/*IT.java</include>
                     </includes>
                     <!-- See the surefire configuration above for the rationale of the
-                         Monocle headless properties and of the patch-module argument. -->
-                    <argLine>--patch-module javafx.graphics="${openjfx-monocle.jar}" --add-opens javafx.graphics/com.sun.glass.ui.monocle=ALL-UNNAMED --add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED --add-opens javafx.graphics/com.sun.javafx.application=ALL-UNNAMED</argLine>
+                         Monocle headless properties and of the patch-module argument.
+                         @{argLine} is required so the JaCoCo agent (bound by the root
+                         prepare-agent execution) instruments the integration tests too;
+                         without it their coverage is silently dropped. -->
+                    <argLine>@{argLine} --patch-module javafx.graphics="${openjfx-monocle.jar}" --add-opens javafx.graphics/com.sun.glass.ui.monocle=ALL-UNNAMED --add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED --add-opens javafx.graphics/com.sun.javafx.application=ALL-UNNAMED</argLine>
                     <systemPropertyVariables>
                         <testfx.robot>glass</testfx.robot>
                         <testfx.headless>true</testfx.headless>
@@ -185,12 +188,12 @@
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.52</minimum>
+                                            <minimum>0.81</minimum>
                                         </limit>
                                         <limit>
                                             <counter>BRANCH</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.45</minimum>
+                                            <minimum>0.68</minimum>
                                         </limit>
                                     </limits>
                                 </rule>

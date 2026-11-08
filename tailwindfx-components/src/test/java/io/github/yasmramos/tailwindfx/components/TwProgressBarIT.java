@@ -37,6 +37,13 @@ public class TwProgressBarIT {
   }
 
   @Test
+  public void testBaseClassIsNotDuplicated() {
+    TwProgressBar bar = new TwProgressBar(0.5);
+    long count = bar.getStyleClass().stream().filter("progress-bar"::equals).count();
+    assertEquals(1, count, "progress-bar must appear once: " + bar.getStyleClass());
+  }
+
+  @Test
   public void testProgressBarSetColor() {
     TwProgressBar bar = new TwProgressBar(0.5);
     bar.setColor("green");

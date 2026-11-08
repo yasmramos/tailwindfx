@@ -3,6 +3,7 @@ package io.github.yasmramos.tailwindfx.components;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import javafx.animation.PauseTransition;
@@ -161,6 +162,9 @@ public final class TwDataTable<T> extends TableView<T> {
     }
   }
 
+  /** Base class the component stylesheet scopes its table rules to. */
+  private static final String BASE_CLASS = "data-table";
+
   // Column definition
 
   private record ColDef<T>(String header, Function<T, String> value, boolean sortable) {}
@@ -194,7 +198,7 @@ public final class TwDataTable<T> extends TableView<T> {
           // Search across all column values.
           return cols.stream()
               .map(col -> col.value().apply(item))
-              .anyMatch(val -> val != null && val.toLowerCase().contains(term));
+              .anyMatch(val -> val != null && val.toLowerCase(Locale.ROOT).contains(term));
         });
   }
 
@@ -372,7 +376,11 @@ public final class TwDataTable<T> extends TableView<T> {
   private void configureTable(Builder<T> b) {
     setItems(paginated ? FXCollections.observableArrayList() : sorted);
     setPlaceholder(new Label(b.placeholder));
-    getStyleClass().addAll("table-view");
+    // JavaFX already ships "table-view" as the TableView default style class, so adding it
+    // unconditionally duplicated it ("table-view table-view"). "data-table" is the base class
+    // the component stylesheet scopes its rules to (".data-table .column-header",
+    // ".data-table .table-row-cell", ...); without it that whole block never matched.
+    if (!getStyleClass().contains(BASE_CLASS)) getStyleClass().add(BASE_CLASS);
     if (b.styleClasses.length > 0) getStyleClass().addAll(b.styleClasses);
     if (b.rowFactory != null) setRowFactory(b.rowFactory);
     else setRowFactory(tv -> buildStyledRow());
@@ -425,7 +433,7 @@ public final class TwDataTable<T> extends TableView<T> {
               (obs, ov, nv) -> {
                 debounce.setOnFinished(
                     e -> {
-                      searchTerm = nv == null ? "" : nv.toLowerCase();
+                      searchTerm = nv == null ? "" : nv.toLowerCase(Locale.ROOT);
                       recomputeFilter();
                       if (paginated) {
                         currentPage = 0;

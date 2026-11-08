@@ -10,9 +10,13 @@
 ## Git Configuration
 
 - Author: `yasmramos` <yasmramos95@gmail.com> (already set via `git config user.name` / `user.email`).
-- **Never add AI attribution to commits.** Do not add `Co-authored-by: openhands`,
-  `Generated with ...`, or any similar trailer. Commits must look like they were
-  authored solely by `yasmramos`.
+- **Never add AI attribution anywhere.** This covers commits, pull requests and
+  issues. Do not add `Co-authored-by: openhands`, `Generated with ...`, any
+  "created by an AI agent" credit line, or any similar trailer, banner or
+  footer. Commits, PR descriptions and issue bodies must read as if written
+  solely by `yasmramos`.
+  - When a PR is opened, strip any attribution footer that the tooling may have
+    appended, so the published description contains only the change summary.
 - Remote: `origin` -> `https://github.com/yasmramos/tailwindfx` (authenticated with a GitHub personal access token).
 - Working branch: **`develop`** (tracks `origin/develop`). Feature work should branch off `develop` and be merged back into it.
 
@@ -95,5 +99,9 @@ that convention in `ColorPalette`, `GradientProcessor`, `RingProcessor`, etc.
   build plugin is not yet in the local repository; drop `-o` to allow downloads.
 - Tests run on JUnit 5 + TestFX + Mockito; the JavaFX toolkit is initialised by the
   test harness, so tests may construct `Node`/`Region`/`Scene` directly.
+- Unit tests (`**/*Test.java`) run under Surefire, integration tests (`**/*IT.java`)
+  under Failsafe. Both are bound to the JaCoCo agent through the `@{argLine}`
+  placeholder in their `<argLine>`; a module that drops it silently loses the
+  coverage of the tests it configures, so keep it when overriding `argLine`.
 - Regression tests for utility behaviour live next to the processor or in
   `style/ProgrammaticStyleApplierTest`. Prefer asserting real code paths, not mocks.

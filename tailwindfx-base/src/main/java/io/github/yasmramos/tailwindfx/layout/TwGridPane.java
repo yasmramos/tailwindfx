@@ -617,13 +617,29 @@ public final class TwGridPane extends Pane {
         curRow = isCol ? pos[1] : pos[1];
       } else {
         if (isCol) {
+          // A row-spanning item that no longer fits in the current column must start a new
+          // column, matching CSS Grid's sparse auto-placement. Without this check the item
+          // is emitted at the current row and overflows past the bottom of the grid.
+          if (curRow > 0 && curRow + rs > gridRows) {
+            curRow = 0;
+            curCol++;
+          }
           pos = new int[] {curCol, curRow};
           curRow += rs;
-          if (curRow >= (rows > 0 ? rows : Integer.MAX_VALUE)) {
+          // Fill down the current column up to the row count, then move to the next column.
+          // Using the inferred gridRows (not the raw `rows` field, which is 0 when unset) keeps
+          // this from overflowing past Integer.MAX_VALUE and stacking every child in column 0.
+          if (curRow >= gridRows) {
             curRow = 0;
             curCol++;
           }
         } else {
+          // Same reasoning on the row axis: a column-spanning item that does not fit in the
+          // remaining columns of the current row wraps to the next row instead of overflowing.
+          if (curCol > 0 && curCol + cs > gridCols) {
+            curCol = 0;
+            curRow++;
+          }
           pos = new int[] {curCol, curRow};
           curCol += cs;
           if (curCol >= gridCols) {

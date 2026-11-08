@@ -100,6 +100,15 @@ public class TwCheckboxIT extends ApplicationTest {
   }
 
   @Test
+  public void testRepeatedSetErrorDoesNotDuplicateClass() {
+    TwCheckbox checkbox = new TwCheckbox();
+    checkbox.setError(true);
+    checkbox.setError(true);
+    long count = checkbox.getStyleClass().stream().filter("checkbox-error"::equals).count();
+    assertEquals(1, count, "checkbox-error must not be added twice: " + checkbox.getStyleClass());
+  }
+
+  @Test
   public void testStaticFactory_Create() {
     TwCheckbox checkbox = TwCheckbox.create("Test");
 

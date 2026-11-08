@@ -17,6 +17,7 @@ package io.github.yasmramos.tailwindfx.style;
 
 import io.github.yasmramos.tailwindfx.animation.TwAnimation;
 import io.github.yasmramos.tailwindfx.core.Preconditions;
+import io.github.yasmramos.tailwindfx.core.TokenRegistry;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -104,7 +105,7 @@ public final class Styles {
     return node;
   }
 
-  /** Atajo: colSpan(2) */
+  /** Shorthand for {@code colSpan(node, 2)}. */
   public static <T extends Node> T colSpan2(T node) {
     return colSpan(node, 2);
   }
@@ -381,7 +382,7 @@ public final class Styles {
   /**
    * Adds {@code node} to {@code parent} and applies a margin on all sides.
    *
-   * <p>Equivale a:
+   * <p>Equivalent to:
    *
    * <pre>
    * parent.getChildren().add(node);
@@ -398,7 +399,7 @@ public final class Styles {
   /**
    * Adds {@code node} to {@code parent} and applies a horizontal margin (n × 4px).
    *
-   * <p>Equivale a:
+   * <p>Equivalent to:
    *
    * <pre>
    * parent.getChildren().add(node);
@@ -574,7 +575,7 @@ public final class Styles {
   public static <T extends Node> T brightness(T node, double value) {
     Preconditions.requireNode(node, "Styles.brightness");
     Preconditions.warnBrightnessRange(value, "Styles.brightness");
-    // ColorAdjust brightness: -1 (negro) a 1 (blanco), 0 = normal
+    // ColorAdjust brightness: -1 (black) to 1 (white), 0 = normal
     double adjusted = value - 1.0; // 1.0 → 0, 0.5 → -0.5, 1.5 → 0.5
     applyOrMergeColorAdjust(node, adjusted, Double.NaN, Double.NaN, Double.NaN);
     return node;
@@ -599,7 +600,7 @@ public final class Styles {
   /** .hue-rotate-{deg} — rotates the hue in degrees (0-360) */
   public static <T extends Node> T hueRotate(T node, double degrees) {
     Preconditions.requireNode(node, "Styles.hueRotate");
-    // ColorAdjust hue: -1 a 1 (representa -180° a +180°)
+    // ColorAdjust hue: -1 to 1 (represents -180° to +180°)
     double adjusted = degrees / 180.0;
     applyOrMergeColorAdjust(node, Double.NaN, Double.NaN, Double.NaN, adjusted);
     return node;
@@ -845,10 +846,21 @@ public final class Styles {
   }
 
   private static void applyOrMergeShear(Node node, double kx, double ky) {
-    // Remove existing Shear if present, then add new one
+    // Merge with any existing Shear so skew-x and skew-y compose instead of the second call
+    // discarding the first. A zero component on one axis keeps the value already set there.
+    Shear existing = null;
+    for (var t : node.getTransforms()) {
+      if (t instanceof Shear s) {
+        existing = s;
+        break;
+      }
+    }
+    double newKx = kx != 0 ? kx : (existing != null ? existing.getX() : 0);
+    double newKy = ky != 0 ? ky : (existing != null ? existing.getY() : 0);
+
     node.getTransforms().removeIf(t -> t instanceof Shear);
-    if (kx != 0 || ky != 0) {
-      node.getTransforms().add(new Shear(kx, ky));
+    if (newKx != 0 || newKy != 0) {
+      node.getTransforms().add(new Shear(newKx, newKy));
     }
   }
 
@@ -1116,12 +1128,23 @@ public final class Styles {
   public static void fillCurrent(javafx.scene.shape.Shape shape, Node reference) {
     Preconditions.requireNonNull(shape, "Styles.fillCurrent", "shape");
     Preconditions.requireNonNull(reference, "Styles.fillCurrent", "reference");
-    javafx.scene.paint.Paint fill =
-        (javafx.scene.paint.Paint)
-            reference
-                .getProperties()
-                .getOrDefault("tailwindfx.text.color", javafx.scene.paint.Color.BLACK);
-    shape.setFill(fill);
+    shape.setFill(resolveTextFill(reference));
+  }
+
+  private static javafx.scene.paint.Paint resolveTextFill(Node reference) {
+    // An explicit override wins, then the node's real text fill. Without this the method always
+    // fell back to black because nothing in the codebase ever wrote the property.
+    Object explicit = reference.getProperties().get("tailwindfx.text.color");
+    if (explicit instanceof javafx.scene.paint.Paint paint) {
+      return paint;
+    }
+    javafx.scene.paint.Paint textFill = null;
+    if (reference instanceof javafx.scene.control.Labeled labeled) {
+      textFill = labeled.getTextFill();
+    } else if (reference instanceof javafx.scene.text.Text text) {
+      textFill = text.getFill();
+    }
+    return textFill != null ? textFill : javafx.scene.paint.Color.BLACK;
   }
 
   /**
@@ -1608,78 +1631,16 @@ public final class Styles {
   }
 
   /**
-   * Checks if a token is a known utility class that can be applied via CSS. Uses regex validation
-   * to detect typos while avoiding false positives. Used for debug warnings on unknown tokens.
+   * Checks whether {@code token} is a known utility class that can be applied via CSS.
+   *
+   * <p>Delegates to {@link TokenRegistry#isKnownUtility(String)}, which is the single source of
+   * truth for token knowledge; the previous local regex copy had drifted and rejected valid tokens
+   * such as {@code bg-red-500}, {@code gap-4}, {@code flex-col} or negative margins.
+   *
+   * @param token the token to validate
+   * @return {@code true} if the token is a recognized utility class
    */
   public static boolean isKnownUtilityClass(String token) {
-    if (token == null || token.isEmpty()) {
-      return false;
-    }
-
-    // Component classes - exact prefix match
-    java.util.Set<String> componentPrefixes = new java.util.HashSet<>();
-    componentPrefixes.add("btn");
-    componentPrefixes.add("input");
-    componentPrefixes.add("card");
-    componentPrefixes.add("badge");
-    componentPrefixes.add("avatar");
-    componentPrefixes.add("alert");
-    componentPrefixes.add("spinner");
-    componentPrefixes.add("tooltip");
-    componentPrefixes.add("modal");
-    componentPrefixes.add("group");
-
-    for (String prefix : componentPrefixes) {
-      if (token.equals(prefix) || token.startsWith(prefix + "-")) {
-        return true;
-      }
-    }
-
-    // Theme variants
-    if (token.equals("dark")
-        || token.equals("light")
-        || token.startsWith("dark:")
-        || token.startsWith("light:")) {
-      return true;
-    }
-
-    // Tailwind utility classes with regex validation to catch typos
-    // Pattern: prefix-value (e.g., rounded-lg, p-4, bg-red-500)
-    // This catches typos like "pd-4" (invalid) vs "p-4" (valid)
-    java.util.regex.Pattern[] validPatterns = {
-      java.util.regex.Pattern.compile("^rounded(-[a-zA-Z0-9]+)?$"),
-      java.util.regex.Pattern.compile("^font(-[a-zA-Z0-9]+)?$"),
-      java.util.regex.Pattern.compile("^shadow(-[a-zA-Z0-9]+)?$"),
-      java.util.regex.Pattern.compile("^(flex|hidden|italic)$"),
-      java.util.regex.Pattern.compile("^text(-[a-zA-Z0-9]+)?$"),
-      java.util.regex.Pattern.compile("^bg(-[a-zA-Z0-9]+)?$"),
-      java.util.regex.Pattern.compile("^border(-[a-zA-Z0-9]+)?$"),
-      java.util.regex.Pattern.compile("^[pm](t|r|b|l|x|y)?(-[a-zA-Z0-9\\[\\]]+)?$"),
-      java.util.regex.Pattern.compile("^(w|h|min|max)(-[a-zA-Z0-9]+)?$"),
-      java.util.regex.Pattern.compile("^opacity(-[0-9]+)?$"),
-      java.util.regex.Pattern.compile("^rotate(-[0-9]+)?$"),
-      java.util.regex.Pattern.compile("^scale(-[0-9]+)?$"),
-      java.util.regex.Pattern.compile("^translate(x|y)?(-[a-zA-Z0-9]+)?$"),
-      java.util.regex.Pattern.compile("^skew(x|y)?(-[0-9]+)?$"),
-      java.util.regex.Pattern.compile("^cursor(-[a-zA-Z]+)?$"),
-      java.util.regex.Pattern.compile("^overflow(-[a-zA-Z]+)?$"),
-      java.util.regex.Pattern.compile("^resize$"),
-      java.util.regex.Pattern.compile("^visible$"),
-      java.util.regex.Pattern.compile("^z(-[a-zA-Z0-9]+)?$"),
-      java.util.regex.Pattern.compile("^blur(-[a-zA-Z0-9]+)?$"),
-      java.util.regex.Pattern.compile("^brightness(-[0-9]+)?$"),
-      java.util.regex.Pattern.compile("^contrast(-[0-9]+)?$"),
-      java.util.regex.Pattern.compile("^grayscale(-[0-9]+)?$"),
-      java.util.regex.Pattern.compile("^invert(-[0-9]+)?$"),
-      java.util.regex.Pattern.compile("^sepia(-[0-9]+)?$")
-    };
-
-    for (java.util.regex.Pattern pattern : validPatterns) {
-      if (pattern.matcher(token).matches()) {
-        return true;
-      }
-    }
-
-    return false;
+    return TokenRegistry.isKnownUtility(token);
   }
 }

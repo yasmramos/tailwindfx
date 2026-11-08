@@ -102,8 +102,70 @@ public class TwCardIT extends ApplicationTest {
     assertTrue(header instanceof Label);
     Label titleLabel = (Label) header;
     assertEquals("My Title", titleLabel.getText());
-    assertTrue(titleLabel.getStyleClass().contains("text-xl"));
-    assertTrue(titleLabel.getStyleClass().contains("font-bold"));
+    assertTrue(
+        titleLabel.getStyleClass().contains("tw-card-title"),
+        "the title must carry tw-card-title so the .tw-card-title rule styles it: "
+            + titleLabel.getStyleClass());
+    assertTrue(
+        titleLabel.getStyleClass().contains("tw-card-header"),
+        "the title is the header slot, so it must also carry tw-card-header: "
+            + titleLabel.getStyleClass());
+  }
+
+  @Test
+  public void testHeaderGetsHeaderClass() {
+    TwCard card = new TwCard();
+    Label header = new Label("Header");
+
+    card.setHeader(header);
+
+    assertTrue(
+        header.getStyleClass().contains("tw-card-header"),
+        "the header slot must carry tw-card-header so the stylesheet styles it: "
+            + header.getStyleClass());
+  }
+
+  @Test
+  public void testBodyGetsContentClass() {
+    TwCard card = new TwCard();
+    Label body = new Label("Body");
+
+    card.setBody(body);
+
+    assertTrue(
+        body.getStyleClass().contains("tw-card-content"),
+        "the body slot must carry tw-card-content so the stylesheet styles it: "
+            + body.getStyleClass());
+  }
+
+  @Test
+  public void testFooterGetsFooterClass() {
+    TwCard card = new TwCard();
+    Label footer = new Label("Footer");
+
+    card.setFooter(footer);
+
+    assertTrue(
+        footer.getStyleClass().contains("tw-card-footer"),
+        "the footer slot must carry tw-card-footer so the stylesheet styles it: "
+            + footer.getStyleClass());
+  }
+
+  @Test
+  public void testSlotClassesAreNotDuplicated() {
+    TwCard card = new TwCard();
+    Label header = new Label("Header");
+    Label body = new Label("Body");
+    Label footer = new Label("Footer");
+
+    card.setHeader(header);
+    card.setHeader(header);
+    card.setBody(body);
+    card.setFooter(footer);
+
+    assertEquals(1, header.getStyleClass().stream().filter("tw-card-header"::equals).count());
+    assertEquals(1, body.getStyleClass().stream().filter("tw-card-content"::equals).count());
+    assertEquals(1, footer.getStyleClass().stream().filter("tw-card-footer"::equals).count());
   }
 
   @Test

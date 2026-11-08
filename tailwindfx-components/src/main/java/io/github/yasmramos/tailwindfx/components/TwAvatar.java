@@ -3,6 +3,7 @@ package io.github.yasmramos.tailwindfx.components;
 import io.github.yasmramos.tailwindfx.TwStyle;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import java.util.Locale;
 import java.util.Map;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -86,7 +87,7 @@ public class TwAvatar extends StackPane {
     TwStyle.apply(this, "avatar", "avatar-" + sizeKey, "avatar-" + colorKey);
     setPadding(Insets.EMPTY);
 
-    Label lbl = new Label(initials == null ? "" : initials.toUpperCase());
+    Label lbl = new Label(initials == null ? "" : initials.toUpperCase(Locale.ROOT));
     TwStyle.apply(lbl, "avatar-text", "avatar-text-" + colorKey);
 
     getChildren().setAll(lbl);

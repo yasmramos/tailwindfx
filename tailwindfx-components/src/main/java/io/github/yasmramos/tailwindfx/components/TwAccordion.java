@@ -97,15 +97,12 @@ public class TwAccordion extends Accordion {
       if (pane == null) {
         continue;
       }
-      // Replace the state class in a single pass so a pane never keeps both, and so panes that
-      // were expanded keep no stale class after collapsing.
-      if (pane.equals(expanded)) {
-        pane.getStyleClass().remove(STATE_CLOSED);
-        pane.getStyleClass().add(STATE_OPEN);
-      } else {
-        pane.getStyleClass().remove(STATE_OPEN);
-        pane.getStyleClass().add(STATE_CLOSED);
-      }
+      // Replace the state classes in a single pass so a pane never keeps both, never keeps a
+      // stale class after collapsing, and never accumulates duplicates when a pane is expanded
+      // repeatedly. Removing the target class before adding it matters: add() on an
+      // ObservableList appends a duplicate when the pane came from the other state.
+      pane.getStyleClass().removeAll(STATE_OPEN, STATE_CLOSED);
+      pane.getStyleClass().add(pane.equals(expanded) ? STATE_OPEN : STATE_CLOSED);
     }
   }
 }

@@ -1,6 +1,7 @@
 package io.github.yasmramos.tailwindfx.components;
 
 import io.github.yasmramos.tailwindfx.TwStyle;
+import java.util.Locale;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -53,7 +54,7 @@ public class TwBadge extends Label {
    */
   public static TwBadge create(String text, String color) {
     TwBadge lbl = new TwBadge();
-    lbl.setText(text == null ? "" : text.toUpperCase());
+    lbl.setText(text == null ? "" : text.toUpperCase(Locale.ROOT));
     TwStyle.apply(lbl, BASE_CLASS, "badge-" + color, "badge-md");
     return lbl;
   }
@@ -123,7 +124,7 @@ public class TwBadge extends Label {
    */
   public static TwBadge outline(String text, String color) {
     TwBadge lbl = new TwBadge();
-    lbl.setText(text == null ? "" : text.toUpperCase());
+    lbl.setText(text == null ? "" : text.toUpperCase(Locale.ROOT));
     TwStyle.apply(lbl, BASE_CLASS, OUTLINE_CLASS, "badge-" + color, "badge-md");
     return lbl;
   }

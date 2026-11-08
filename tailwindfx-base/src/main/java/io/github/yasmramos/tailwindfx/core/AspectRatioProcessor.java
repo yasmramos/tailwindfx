@@ -102,44 +102,6 @@ public final class AspectRatioProcessor {
     return null;
   }
 
-  private static String normalizeRatio(String ratio) {
-    if (ratio == null || ratio.isBlank()) {
-      return null;
-    }
-
-    ratio = ratio.trim();
-
-    // Handle "width/height" format
-    if (ratio.contains("/")) {
-      String[] parts = ratio.split("/", 2);
-      if (parts.length == 2) {
-        try {
-          double width = Double.parseDouble(parts[0].trim());
-          double height = Double.parseDouble(parts[1].trim());
-          if (height == 0) {
-            return null;
-          }
-          return String.format("%.4f", width / height);
-        } catch (NumberFormatException e) {
-          // If parsing fails, return as-is for CSS
-          return ratio.replace(" ", "");
-        }
-      }
-    }
-
-    // Handle decimal format directly
-    try {
-      double value = Double.parseDouble(ratio);
-      if (value <= 0) {
-        return null;
-      }
-      return String.valueOf(value);
-    } catch (NumberFormatException e) {
-      // Not a valid number
-      return null;
-    }
-  }
-
   private static String tryParseRatio(String value) {
     if (value == null || value.isBlank()) {
       return null;
