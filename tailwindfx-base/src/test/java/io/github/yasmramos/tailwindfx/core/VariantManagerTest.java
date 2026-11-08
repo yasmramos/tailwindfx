@@ -170,10 +170,34 @@ class VariantManagerTest {
           new Scene(group, 100, 100);
 
           VariantManager.applyGroupVariant(child, "group-hover", UTILITY, new JitCompiler());
-          group.getOnMouseEntered().handle(null);
+          fireMouse(group, MouseEvent.MOUSE_ENTERED);
           assertNotEquals("", child.getStyle(), "group enter applies the child style");
-          group.getOnMouseExited().handle(null);
+          fireMouse(group, MouseEvent.MOUSE_EXITED);
           assertEquals("", child.getStyle(), "group exit removes the child style");
+          return null;
+        });
+  }
+
+  @Test
+  @DisplayName("two group-hover children both react (handlers must not clobber each other)")
+  void groupHoverMultipleChildren() throws Exception {
+    onFx(
+        () -> {
+          Pane group = new Pane();
+          group.getStyleClass().add("group");
+          Region a = new Region();
+          Region b = new Region();
+          group.getChildren().addAll(a, b);
+          new Scene(group, 100, 100);
+
+          VariantManager.applyGroupVariant(a, "group-hover", UTILITY, new JitCompiler());
+          VariantManager.applyGroupVariant(b, "group-hover", UTILITY, new JitCompiler());
+          fireMouse(group, MouseEvent.MOUSE_ENTERED);
+          assertNotEquals("", a.getStyle(), "first child reacts");
+          assertNotEquals("", b.getStyle(), "second child reacts too");
+          fireMouse(group, MouseEvent.MOUSE_EXITED);
+          assertEquals("", a.getStyle(), "first child resets");
+          assertEquals("", b.getStyle(), "second child resets");
           return null;
         });
   }
@@ -188,7 +212,9 @@ class VariantManagerTest {
           parent.getChildren().add(child);
           new Scene(parent, 100, 100);
           VariantManager.applyGroupVariant(child, "group-hover", UTILITY, new JitCompiler());
-          assertNull(parent.getOnMouseEntered());
+          assertNull(parent.getOnMouseEntered(), "no handler is installed on a plain parent");
+          fireMouse(parent, MouseEvent.MOUSE_ENTERED);
+          assertEquals("", child.getStyle(), "no group parent means no effect");
           return null;
         });
   }
@@ -273,7 +299,7 @@ class VariantManagerTest {
           group.getChildren().add(child);
           new Scene(group, 100, 100);
           VariantManager.processToken(child, "group-hover:" + UTILITY, new JitCompiler());
-          group.getOnMouseEntered().handle(null);
+          fireMouse(group, MouseEvent.MOUSE_ENTERED);
           assertNotEquals("", child.getStyle());
           return null;
         });
