@@ -57,7 +57,7 @@ public class TwInput extends TextField {
   public void setError(boolean error) {
     this.error = error;
     if (error) {
-      getStyleClass().add("input-error");
+      if (!getStyleClass().contains("input-error")) getStyleClass().add("input-error");
     } else {
       getStyleClass().remove("input-error");
     }
