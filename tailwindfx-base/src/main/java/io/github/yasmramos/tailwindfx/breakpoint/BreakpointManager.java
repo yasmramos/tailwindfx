@@ -43,7 +43,7 @@ import javafx.stage.Stage;
  * <p>Classes are CUMULATIVE like in Tailwind. .bp-lg implies that .bp-sm and .bp-md are also
  * active.
  *
- * <p>Basic usage: TailwindFX.responsive(stage) .onBreakpoint(Breakpoint.MD, () -> adaptLayout());
+ * <p>Basic usage: TwResponsive.forStage(stage).onBreakpoint(Breakpoint.MD, () -> adaptLayout());
  *
  * <p>With custom breakpoints: BreakpointManager.custom() .add("phone", 0) .add("tablet", 600)
  * .add("desktop", 960) .attach(stage);
@@ -156,6 +156,12 @@ public final class BreakpointManager {
   private long lastUpdate = 0;
   private static final long THROTTLE_MS = 120;
 
+  // Trailing-edge throttle state: keeps the newest width of a resize burst so the final
+  // breakpoint is not lost when the last change lands inside the throttle window.
+  private double pendingWidth;
+  private boolean hasPendingWidth;
+  private javafx.animation.PauseTransition trailingUpdate;
+
   // Set to prevent duplicate callbacks
   private final java.util.Set<String> registeredCallbacks = new java.util.HashSet<>();
 
@@ -248,6 +254,11 @@ public final class BreakpointManager {
   public void detach() {
     if (widthListener != null) stage.widthProperty().removeListener(widthListener);
     if (heightListener != null) stage.heightProperty().removeListener(heightListener);
+    if (trailingUpdate != null) {
+      trailingUpdate.stop();
+      trailingUpdate = null;
+    }
+    hasPendingWidth = false;
     listeners.clear();
     registeredCallbacks.clear();
     instances.remove(stage);
@@ -263,9 +274,44 @@ public final class BreakpointManager {
 
   private void update(double width) {
     long now = System.nanoTime();
-    if (now - lastUpdate < THROTTLE_MS * 1_000_000L) return;
+    long elapsedMs = (now - lastUpdate) / 1_000_000L;
+    if (elapsedMs < THROTTLE_MS) {
+      // Inside the throttle window: remember the newest width and flush it once the window
+      // elapses, otherwise the last resize of a burst would be dropped and the breakpoint would
+      // stay on an intermediate value.
+      pendingWidth = width;
+      hasPendingWidth = true;
+      scheduleTrailingUpdate(THROTTLE_MS - elapsedMs);
+      return;
+    }
     lastUpdate = now;
+    dispatchUpdate(width);
+  }
 
+  /** Schedules the delayed flush of the last width seen during a throttle window. */
+  private void scheduleTrailingUpdate(long delayMs) {
+    if (!javafx.application.Platform.isFxApplicationThread()) {
+      // Width listeners always run on the FX thread, but keep a safe fallback for callers that
+      // trigger update() directly from another thread.
+      javafx.application.Platform.runLater(() -> scheduleTrailingUpdate(delayMs));
+      return;
+    }
+    if (trailingUpdate == null) {
+      trailingUpdate = new javafx.animation.PauseTransition();
+      trailingUpdate.setOnFinished(
+          e -> {
+            if (!hasPendingWidth) return;
+            hasPendingWidth = false;
+            lastUpdate = System.nanoTime();
+            dispatchUpdate(pendingWidth);
+          });
+    }
+    trailingUpdate.stop();
+    trailingUpdate.setDuration(javafx.util.Duration.millis(Math.max(1, delayMs)));
+    trailingUpdate.playFromStart();
+  }
+
+  private void dispatchUpdate(double width) {
     javafx.application.Platform.runLater(
         () -> {
           if (customBps != null && !customBps.isEmpty()) {

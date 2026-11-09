@@ -163,15 +163,14 @@ String css = TwCatalog.generateFullCss();
 TwInstall.installGenerated(scene, "/css/tailwindfx-generated.css");
 ```
 
-### With JitCompiler
+### With the JIT compiler
+
+`TwStyle.apply` applies known utilities from the catalog and JIT-compiles arbitrary values, so a
+single call handles both:
 
 ```java
-// Use catalog for known utilities, JIT for arbitrary values
-if (TwCatalog.allUtilityClasses().contains(token)) {
-    TwStyle.apply(node, token);
-} else {
-    TwStyle.jit(node, token);
-}
+TwStyle.apply(node, "p-4");            // catalog utility
+TwStyle.apply(node, "p-[13px]");       // arbitrary value, JIT-compiled
 ```
 
 ### With Maven Plugin

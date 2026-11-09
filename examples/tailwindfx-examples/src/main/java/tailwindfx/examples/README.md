@@ -18,7 +18,7 @@ mvn exec:java -Dexec.mainClass=tailwindfx.examples.DashboardApp
 - ✓ **Donut/Pie Charts** - Interactive pie charts with legend and percentages
 - ✓ **Sparklines** - Mini inline charts in stat cards showing trends
 - ✓ **Toast Notifications** - Animated notification system with different types (success, error, warning, info)
-- ✓ **Enhanced Data Table** - Sortable, searchable, paginated table with FxDataTable
+- ✓ **Enhanced Data Table** - Sortable, searchable, paginated table with TwDataTable
 - ✓ **Calendar Widget** - Interactive calendar with upcoming events
 - ✓ **Activity Feed** - Real-time activity tracking
 - ✓ **Modal Dialogs** - Popup dialogs for details and confirmations
@@ -60,7 +60,8 @@ mvn exec:java -Dexec.mainClass=tailwindfx.examples.DashboardApp
 ### Basic Setup
 
 ```java
-import tailwindfx.TailwindFX;
+import io.github.yasmramos.tailwindfx.TwInstall;
+import io.github.yasmramos.tailwindfx.TwTheme;
 import tailwindfx.examples.Dashboard;
 
 public class MyApp extends Application {
@@ -70,7 +71,7 @@ public class MyApp extends Application {
         VBox dashboard = Dashboard.create();
         
         Scene scene = new Scene(dashboard, 1200, 800);
-        TailwindFX.install(scene); // Install all styles
+        TwInstall.install(scene); // Install all styles
         
         stage.setScene(scene);
         stage.show();
@@ -81,23 +82,16 @@ public class MyApp extends Application {
 ### Modular Setup
 
 ```java
-// Load only essential modules
-TailwindFX.installBase(scene);
-TailwindFX.installComponents(scene);
-TailwindFX.installComponentsPreset(scene);
-
-// Optional: dark mode
-// TailwindFX.installDark(scene);
+// Load only the base stylesheet
+TwInstall.installBase(scene);
+TwInstall.installGenerated(scene, "/tailwindfx-components.css");
 ```
 
 ### Enable Dark Mode
 
 ```java
-// Add dark class to root
-root.getStyleClass().add("dark");
-
-// Or use ThemeManager
-TailwindFX.theme(scene).dark().apply();
+// Use the theme facade
+TwTheme.of(scene).dark().apply();
 ```
 
 ## Components Used
@@ -125,7 +119,7 @@ TwStyle.apply(badge, "badge", "badge-blue");
 
 ### Avatars
 ```java
-StackPane avatar = ComponentFactory.avatar("JD", "blue", 48);
+TwAvatar avatar = TwAvatar.create("JD", "blue", "lg");
 ```
 
 ### Inputs
@@ -145,12 +139,12 @@ scene.getRoot().setStyle("-fx-accent: #3b82f6;");
 ### Custom Spacing
 ```java
 // Use arbitrary values
-TailwindFX.jit(node, "p-[13px]", "m-[5px]");
+TwStyle.apply(node, "p-[13px]", "m-[5px]");
 ```
 
 ### Custom Shadows
 ```java
-TailwindFX.jit(node, "shadow-[0_10px_40px_rgba(0,0,0,0.1)]");
+TwStyle.apply(node, "shadow-[0_10px_40px_rgba(0,0,0,0.1)]");
 ```
 
 ## More Examples

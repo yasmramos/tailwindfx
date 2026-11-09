@@ -134,11 +134,11 @@ public final class TwStyle {
     // Migration tokens detected (e.g. legacy "flex"/"grid" usage on a plain node): we log a
     // warning and CONTINUE applying the remaining tokens. The node is therefore not left
     // "half-styled" by an exception; only the migration-requiring tokens themselves are skipped,
-    // since turning a node into a container requires TwLayout.layout() rather than TwStyle.apply().
+    // since turning a node into a container requires TwLayout.apply() rather than TwStyle.apply().
     if (!result.layoutMigrationTokens().isEmpty()) {
       LOGGER.log(
           Level.WARNING,
-          "Layout classes requiring container migration ({0}) should be applied using TailwindFX.layout() instead of TwStyle.apply().",
+          "Layout classes requiring container migration ({0}) should be applied using TwLayout.apply() instead of TwStyle.apply().",
           String.join(", ", result.layoutMigrationTokens()));
       // These tokens are intentionally skipped here to avoid partial/incorrect styling;
       // every other token in the call is still applied below.

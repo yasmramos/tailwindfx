@@ -86,6 +86,26 @@ When adding or fixing a utility, verify which path actually applies it:
   `ProgrammaticStyleApplier`; they cannot work through the stylesheet alone.
 - `TwStyle.apply` is the runtime entry point that wires the programmatic path.
 
+### Public API facades
+
+There is no single `TailwindFX` entry-point class (removed in `a7d7832f`); each
+responsibility has its own facade, all in `io.github.yasmramos.tailwindfx`:
+
+- `TwInstall` — `install`, `installBase`, `installGenerated`, `installMinimal`
+- `TwStyle` — `apply` (handles catalog utilities *and* JIT/arbitrary values), `applyRaw`,
+  `remove`, `replace`, `toggle`; there is no `TwStyle.jit`
+- `TwTheme` — `of(scene)`, `forScene(scene)`, `scope(pane)`, plus `saveTheme`/`loadTheme`
+- `TwResponsive` — `on(Stage)`, `on(Region)`, `forStage(Stage)`
+- `TwBatch`, `TwMetrics`, `TwLayout`, `TwFXML`, `TwCatalog`, `TwConfig`, `TwEffect`
+
+When documenting or writing examples, check the real signature in `tailwindfx-base` /
+`tailwindfx-components` first: the docs drifted badly after the split and several
+phantom methods (`TailwindFX.jit`, `TwInstall.installWithDarkMode`,
+`BreakpointManager.forStage`, `BreakpointManager.getBreakpoint`,
+`ResponsiveNode.wrap`) were referenced for months. Breakpoints are the
+`BreakpointManager.Breakpoint` enum (`XS`…`XXL`, exposed via `BP` as a shorthand), not
+`"sm"`/`"md"` strings, and the reactive property is `activeBreakpointProperty()`.
+
 ### Locale and number formatting
 
 Any CSS produced with `String.format`/`NumberFormat` must pin `Locale.ROOT`. Under a

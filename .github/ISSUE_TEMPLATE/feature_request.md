@@ -22,7 +22,7 @@ Add any other context or screenshots about the feature request here.
 **Example Usage**
 ```java
 // How would this feature be used?
-TailwindFX.apply(node, "new-feature-class");
+TwStyle.apply(node, "new-feature-class");
 ```
 
 **References**

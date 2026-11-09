@@ -66,7 +66,7 @@ All good first issues have been resolved! Check back soon for new opportunities,
 **Difficulty:** Advanced  
 **Labels:** `enhancement`, `devtools`, `hot-reload`  
 **Description:** Implement a file watcher that automatically recompiles and applies CSS changes during development.  
-**Files:** `src/main/java/io/github/yasmramos/tailwindfx/TailwindFX.java` (watch method enhancement)  
+**Files:** `tailwindfx-base/src/main/java/io/github/yasmramos/tailwindfx/TwInstall.java` (stylesheet watch support)  
 **Expected:** Sub-second reload on CSS file changes.
 
 ### 18. Visual Builder Tool

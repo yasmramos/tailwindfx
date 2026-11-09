@@ -1018,6 +1018,7 @@ public final class Styles {
    */
   public static <T extends Node> T clipRect(T node, double width, double height, double radius) {
     Preconditions.requireNonNull(node, "Styles.clipRect", "node");
+    detachClipListener(node);
     javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(width, height);
     clip.setArcWidth(radius * 2);
     clip.setArcHeight(radius * 2);
@@ -1038,6 +1039,12 @@ public final class Styles {
   }
 
   /**
+   * Node property key under which the bounds listener installed by {@link #clipCircle} / {@link
+   * #clipRounded} is stored, so a later {@link #clipNone} can detach it.
+   */
+  private static final String CLIP_LISTENER_KEY = "tailwindfx.clip.listener";
+
+  /**
    * Clips a node to a circle centered in its bounds (analogous to CSS {@code mask-image:
    * radial-gradient(circle, ...)}).
    *
@@ -1045,7 +1052,7 @@ public final class Styles {
    *
    * <pre>
    * Styles.clipCircle(avatarImageView);
-   * // The node is now circular. Re-call after resize to update the clip.
+   * // The node is now circular and follows its bounds. Styles.clipNone removes it.
    * </pre>
    *
    * @param node the node to clip
@@ -1053,16 +1060,18 @@ public final class Styles {
   public static void clipCircle(Node node) {
     Preconditions.requireNonNull(node, "Styles.clipCircle", "node");
     javafx.scene.shape.Circle clip = new javafx.scene.shape.Circle();
-    // Bind radius to half of min(width, height) — updates on resize
-    node.layoutBoundsProperty()
-        .addListener(
-            (obs, ov, nv) -> {
-              double r = Math.min(nv.getWidth(), nv.getHeight()) / 2.0;
-              clip.setCenterX(nv.getWidth() / 2.0);
-              clip.setCenterY(nv.getHeight() / 2.0);
-              clip.setRadius(r);
-            });
-    node.setClip(clip);
+    // Keep the radius in sync with the node bounds and remember the listener so clipNone can
+    // detach it; otherwise every re-clip would leave a stale listener on the node.
+    applyBoundsClip(
+        node,
+        clip,
+        (nv, shape) -> {
+          javafx.scene.shape.Circle circle = (javafx.scene.shape.Circle) shape;
+          double r = Math.min(nv.getWidth(), nv.getHeight()) / 2.0;
+          circle.setCenterX(nv.getWidth() / 2.0);
+          circle.setCenterY(nv.getHeight() / 2.0);
+          circle.setRadius(r);
+        });
   }
 
   /**
@@ -1081,13 +1090,38 @@ public final class Styles {
     javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
     clip.setArcWidth(radius * 2);
     clip.setArcHeight(radius * 2);
-    node.layoutBoundsProperty()
-        .addListener(
-            (obs, ov, nv) -> {
-              clip.setWidth(nv.getWidth());
-              clip.setHeight(nv.getHeight());
-            });
+    applyBoundsClip(
+        node,
+        clip,
+        (nv, shape) -> {
+          javafx.scene.shape.Rectangle rect = (javafx.scene.shape.Rectangle) shape;
+          rect.setWidth(nv.getWidth());
+          rect.setHeight(nv.getHeight());
+        });
+  }
+
+  /** Installs a bounds-tracking clip and records its listener so {@link #clipNone} can remove it. */
+  private static void applyBoundsClip(
+      Node node,
+      javafx.scene.shape.Shape clip,
+      java.util.function.BiConsumer<javafx.geometry.Bounds, javafx.scene.shape.Shape> updater) {
+    detachClipListener(node);
+    updater.accept(node.getLayoutBounds(), clip);
+    javafx.beans.value.ChangeListener<javafx.geometry.Bounds> listener =
+        (obs, ov, nv) -> updater.accept(nv, clip);
+    node.layoutBoundsProperty().addListener(listener);
+    node.getProperties().put(CLIP_LISTENER_KEY, listener);
     node.setClip(clip);
+  }
+
+  /** Detaches the bounds listener installed by a previous bounds-tracking clip, if any. */
+  @SuppressWarnings("unchecked")
+  private static void detachClipListener(Node node) {
+    Object recorded = node.getProperties().remove(CLIP_LISTENER_KEY);
+    if (recorded instanceof javafx.beans.value.ChangeListener<?> listener) {
+      node.layoutBoundsProperty()
+          .removeListener((javafx.beans.value.ChangeListener<javafx.geometry.Bounds>) listener);
+    }
   }
 
   /**
@@ -1100,12 +1134,19 @@ public final class Styles {
   public static void clipMask(Node node, javafx.scene.shape.Shape shape) {
     Preconditions.requireNonNull(node, "Styles.clipMask", "node");
     Preconditions.requireNonNull(shape, "Styles.clipMask", "shape");
+    detachClipListener(node);
     node.setClip(shape);
   }
 
-  /** Removes any clip/mask from the node. */
+  /**
+   * Removes any clip/mask from the node, detaching the bounds listener installed by {@link
+   * #clipCircle} or {@link #clipRounded} if one is present.
+   *
+   * @param node the node to clear
+   */
   public static void clipNone(Node node) {
     Preconditions.requireNonNull(node, "Styles.clipNone", "node");
+    detachClipListener(node);
     node.setClip(null);
   }
 
@@ -1325,7 +1366,7 @@ public final class Styles {
    *
    * <pre>
    * Styles.glass(panel);
-   * TailwindFX.backdropBlur(panel, 12); // blur the content behind
+   * TwEffect.backdropBlur(panel, 12); // blur the content behind
    * </pre>
    *
    * @param node the node to style as glass

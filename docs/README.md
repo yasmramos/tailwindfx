@@ -44,7 +44,7 @@ public void start(Stage stage) {
 
 ### Main Entry Point
 
-- **[TailwindFX](TailwindFX.md)** - Main entry point facade providing unified access to all TailwindFX features
+- **[Entry Points](EntryPoints.md)** - The `Tw*` facades and which one to use for each task
 
 ### Styling & Layout
 
@@ -78,8 +78,8 @@ public void start(Stage stage) {
 // Standard utility classes
 TwStyle.apply(button, "bg-blue-500", "text-white", "p-4", "rounded-lg");
 
-// JIT compilation for arbitrary values
-TwStyle.jit(element, "bg-[#38bdf8]", "p-[13px]");
+// Arbitrary values are auto-detected by apply() and JIT-compiled
+TwStyle.apply(element, "bg-[#38bdf8]", "p-[13px]");
 
 // Remove or toggle classes
 TwStyle.remove(node, "old-class");
@@ -154,8 +154,8 @@ TwConfig.preferStylesheet(true);
 TwResponsive.on(stage);
 
 // Monitor breakpoints
-BreakpointManager bpm = BreakpointManager.forStage(stage);
-bpm.currentBreakpointProperty().addListener((obs, oldVal, newVal) -> {
+BreakpointManager bpm = TwResponsive.forStage(stage);
+bpm.activeBreakpointProperty().addListener((obs, oldVal, newVal) -> {
     System.out.println("Current breakpoint: " + newVal);
 });
 ```
@@ -176,7 +176,7 @@ TwMetrics.healthCheck();
 
 ## Component Documentation
 
-See [Components](components/) for documentation on UI components like `TwButton`, `TwCard`, `TwAlert`, and `TwInput`.
+See [Components](components/README.md) for documentation on UI components like `TwButton`, `TwCard`, `TwAlert`, and `TwInput`.
 
 ## Integration Guides
 
@@ -231,8 +231,8 @@ TwFXML.enableAutoJit(root);
 - Check debug logs for compilation errors
 
 **Dark mode not working:**
-- Call `TwInstall.installDark(scene)` to enable dark mode support
-- Use `TwTheme.of(scene).dark().apply()` to activate
+- Use `TwTheme.of(scene).dark().apply()` to activate dark mode; `TwInstall.installDark(scene)` is a
+  deprecated no-op
 
 ### Getting Help
 

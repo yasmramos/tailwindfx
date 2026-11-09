@@ -1,5 +1,10 @@
 # Issue: Restructure Source Code Packages for Better Modularity
 
+> **Status: historical.** The restructure has since been carried out differently: the code now
+> lives in Maven modules (`tailwindfx-base`, `tailwindfx-components`, `tailwindfx-maven-plugin`)
+> under the `io.github.yasmramos.tailwindfx` package. The tree below is the original proposal and
+> does not reflect the current layout.
+
 ## 🎯 Objective
 
 Restructure the source code packages to improve modularity, maintainability, and scalability. Currently, all ~50 Java classes are in the root `tailwindfx` package, making navigation and maintenance difficult.
@@ -116,7 +121,7 @@ tailwindfx/
 ---
 
 **How to create this issue on GitHub:**
-1. Go to https://github.com/yasmramos/TailwindFX/issues/new
+1. Go to https://github.com/yasmramos/tailwindfx/issues/new
 2. Copy this content
 3. Add labels: `refactoring`, `enhancement`, `architecture`
 4. Submit

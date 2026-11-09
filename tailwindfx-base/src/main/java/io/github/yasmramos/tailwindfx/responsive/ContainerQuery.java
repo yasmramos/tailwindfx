@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.layout.Region;
 
 public final class ContainerQuery {
@@ -36,14 +37,9 @@ public final class ContainerQuery {
   private Consumer<String> breakpointCallback;
 
   private ChangeListener<Number> listener;
+  private ChangeListener<Scene> nodeSceneListener;
+  private ChangeListener<Scene> containerSceneListener;
   private Region currentContainer;
-
-  // Ensure customBreakpoints is never null
-  {
-    if (customBreakpoints == null) {
-      throw new IllegalStateException("customBreakpoints initialization failed");
-    }
-  }
 
   public static final class CustomBreakpoint {
     public final double minWidth;
@@ -134,6 +130,8 @@ public final class ContainerQuery {
 
   public void install(Region container) {
     Objects.requireNonNull(container, "container");
+    // Re-installing on a different container must not leave the previous listeners attached.
+    detach();
     this.currentContainer = container;
 
     applyClasses(baseClasses);
@@ -147,22 +145,21 @@ public final class ContainerQuery {
     container.widthProperty().addListener(listener);
     updateClasses(container.getWidth());
 
-    node.sceneProperty()
-        .addListener(
-            (obs, oldScene, newScene) -> {
-              if (newScene == null) {
-                detach();
-              }
-            });
+    nodeSceneListener =
+        (obs, oldScene, newScene) -> {
+          if (newScene == null) {
+            detach();
+          }
+        };
+    node.sceneProperty().addListener(nodeSceneListener);
 
-    container
-        .sceneProperty()
-        .addListener(
-            (obs, oldScene, newScene) -> {
-              if (newScene == null) {
-                detach();
-              }
-            });
+    containerSceneListener =
+        (obs, oldScene, newScene) -> {
+          if (newScene == null) {
+            detach();
+          }
+        };
+    container.sceneProperty().addListener(containerSceneListener);
   }
 
   private void updateClasses(double width) {
@@ -225,6 +222,14 @@ public final class ContainerQuery {
     if (listener != null && currentContainer != null) {
       currentContainer.widthProperty().removeListener(listener);
       listener = null;
+    }
+    if (nodeSceneListener != null) {
+      node.sceneProperty().removeListener(nodeSceneListener);
+      nodeSceneListener = null;
+    }
+    if (containerSceneListener != null && currentContainer != null) {
+      currentContainer.sceneProperty().removeListener(containerSceneListener);
+      containerSceneListener = null;
     }
   }
 

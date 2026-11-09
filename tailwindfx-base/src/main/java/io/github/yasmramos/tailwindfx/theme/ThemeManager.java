@@ -41,20 +41,20 @@ import javafx.util.Duration;
  * <p>2. PREDEFINED THEMES: light, dark, blue, green, purple, rose, slate.
  *
  * <p>3. THEME INHERITANCE: base theme + partial override.
- * ThemeManager.theme(scene).preset("dark").accent("#f97316").apply();
+ * TwTheme.of(scene).preset("dark").accent("#f97316").apply();
  *
  * <p>4. SCOPES: apply a theme only to a subtree of nodes.
  * ThemeManager.scope(myPanel).preset("dark").applyTo(myPanel);
  *
- * <p>5. ANIMATED TRANSITION (optional): ThemeManager.theme(scene).dark().animated(300).apply();
+ * <p>5. ANIMATED TRANSITION (optional): TwTheme.of(scene).dark().animated(300).apply();
  *
- * <p>Basic usage: TailwindFX.theme(scene).dark().apply();
- * TailwindFX.theme(scene).preset("blue").apply();
- * TailwindFX.theme(scene).base("#1e293b").accent("#3b82f6").apply(); ThemeManager.toggle(scene);
+ * <p>Basic usage: TwTheme.of(scene).dark().apply();
+ * TwTheme.of(scene).preset("blue").apply();
+ * TwTheme.of(scene).base("#1e293b").accent("#3b82f6").apply(); ThemeManager.toggle(scene);
  */
 public final class ThemeManager {
 
-  // Temas predefinidos
+  // Predefined themes
   private record ThemeVars(
       String base,
       String innerBg,

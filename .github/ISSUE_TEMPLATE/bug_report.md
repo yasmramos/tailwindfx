@@ -35,6 +35,6 @@ Add any other context about the problem here.
 **Code Example**
 ```java
 // Minimal code example that reproduces the issue
-TailwindFX.install(stage);
-TailwindFX.apply(node, "bg-red-500");
+TwInstall.install(scene);
+TwStyle.apply(node, "bg-red-500");
 ```

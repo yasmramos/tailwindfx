@@ -320,6 +320,42 @@ class BreakpointManagerTest extends ApplicationTest {
         "Should throw NPE for null stage");
   }
 
+  @Test
+  void testFinalWidthOfResizeBurstIsNotDropped() {
+    // Use a dedicated Stage: resizing the shared testStage would leak into the other tests.
+    final Stage[] holder = new Stage[1];
+    final BreakpointManager[] bpm = new BreakpointManager[1];
+    interact(
+        () -> {
+          Stage stage = new Stage();
+          stage.setScene(new Scene(new StackPane(), 800, 600));
+          stage.show();
+          holder[0] = stage;
+          bpm[0] = BreakpointManager.from(stage);
+        });
+
+    // Burst of resizes inside a single throttle window: only the last width should win, but it
+    // must not be dropped just because it arrived during the throttle window.
+    interact(
+        () -> {
+          holder[0].setWidth(700);
+          holder[0].setWidth(900);
+          holder[0].setWidth(1300);
+        });
+    waitForSnapshot();
+
+    assertEquals(
+        BreakpointManager.Breakpoint.XL,
+        bpm[0].current(),
+        "The last width of a resize burst must be applied (trailing throttle)");
+
+    interact(
+        () -> {
+          bpm[0].detach();
+          holder[0].close();
+        });
+  }
+
   private void waitForSnapshot() {
     try {
       Thread.sleep(200); // Wait for throttle and Platform.runLater

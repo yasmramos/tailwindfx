@@ -51,8 +51,8 @@ import javafx.scene.layout.RowConstraints;
  *       String)}.
  *   <li><b>grid-cols / grid-rows utilities</b> — {@link #cols(int)}, {@link #rows(int)}: uniform
  *       column/row count with equal sizing.
- *   <li><b>Masonry-like layout</b> — {@link #masonry(int)}: auto-flow column mode with items placed
- *       in the shortest column.
+ *   <li><b>Masonry-like layout</b> — {@link Builder#masonry(int)}: auto-flow column mode with items
+ *       placed in the shortest column.
  *   <li><b>gap semantics</b> — {@link #gap(double)}, {@link #gapX(double)}, {@link #gapY(double)}:
  *       consistent with TwFlexPane.
  * </ul>

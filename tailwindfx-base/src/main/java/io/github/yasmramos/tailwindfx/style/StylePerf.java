@@ -73,8 +73,8 @@ import javafx.scene.Node;
  *
  * <pre>
  * TwStyle.apply(node, "btn-primary", "rounded-lg");
- * TailwindFX.batch(() -> { ... });
- * TailwindFX.batchJit(() -> { ... });
+ * StylePerf.batch(() -> { ... });
+ * StylePerf.batchAsync(() -> { ... });
  * </pre>
  */
 public final class StylePerf {

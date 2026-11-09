@@ -486,7 +486,12 @@ public final class UtilityConflictResolver {
    */
   public static void autoCleanup(Node node) {
     if (node == null) return;
-    final String KEY = "tailwindfx.cleanup-listener";
+    // Distinct from StyleCache's "tailwindfx.cleanup-listener" key on purpose. Both mechanisms
+    // hang off sceneProperty(), but StyleCache stores a ChangeListener<Scene> under its key while
+    // this method stores a marker; sharing one key made StyleCache.invalidate()/cleanup() cast the
+    // marker to a ChangeListener and throw ClassCastException, and made either mechanism mistake
+    // the other's registration for its own.
+    final String KEY = "tailwindfx.auto-cleanup";
     if (node.getProperties().containsKey(KEY)) return; // already installed
 
     node.sceneProperty()
