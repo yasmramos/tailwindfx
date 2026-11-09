@@ -55,6 +55,9 @@ public final class TwFXML {
 
   private static final String AUTO_JIT_ENABLED_KEY = "twfxml.autoJitEnabled";
 
+  /** Node property key holding the auto-JIT style-class listener, so it can be detached again. */
+  private static final String AUTO_JIT_LISTENER_KEY = "twfxml.autoJitListener";
+
   private TwFXML() {
     // Prevent instantiation
   }
@@ -214,44 +217,44 @@ public final class TwFXML {
 
     node.getProperties().put(AUTO_JIT_ENABLED_KEY, Boolean.TRUE);
 
-    node.getStyleClass()
-        .addListener(
-            (javafx.collections.ListChangeListener<String>)
-                change -> {
-                  // Skip if auto-JIT is disabled or in the middle of framework modifications
-                  Object enabledObj = node.getProperties().get(AUTO_JIT_ENABLED_KEY);
-                  if (!Boolean.TRUE.equals(enabledObj)
-                      || Boolean.TRUE.equals(node.getProperties().get("tw.internalModification"))) {
-                    return;
-                  }
+    javafx.collections.ListChangeListener<String> listener =
+        change -> {
+          // Skip if auto-JIT is disabled or in the middle of framework modifications
+          Object enabledObj = node.getProperties().get(AUTO_JIT_ENABLED_KEY);
+          if (!Boolean.TRUE.equals(enabledObj)
+              || Boolean.TRUE.equals(node.getProperties().get("tw.internalModification"))) {
+            return;
+          }
 
-                  // Collect added JIT tokens first to avoid ConcurrentModificationException
-                  java.util.List<String> jitTokensToAdd = new java.util.ArrayList<>();
-                  while (change.next()) {
-                    if (change.wasAdded()) {
-                      for (String addedClass : change.getAddedSubList()) {
-                        if (isJitToken(addedClass)) {
-                          jitTokensToAdd.add(addedClass);
-                        }
-                      }
-                    }
-                  }
+          // Collect added JIT tokens first to avoid ConcurrentModificationException
+          java.util.List<String> jitTokensToAdd = new java.util.ArrayList<>();
+          while (change.next()) {
+            if (change.wasAdded()) {
+              for (String addedClass : change.getAddedSubList()) {
+                if (isJitToken(addedClass)) {
+                  jitTokensToAdd.add(addedClass);
+                }
+              }
+            }
+          }
 
-                  // Process collected JIT tokens
-                  if (!jitTokensToAdd.isEmpty()) {
-                    // Mark internal modification to prevent recursion
-                    node.getProperties().put("tw.internalModification", Boolean.TRUE);
-                    try {
-                      for (String jitToken : jitTokensToAdd) {
-                        // Remove the JIT class and apply it as inline style
-                        node.getStyleClass().remove(jitToken);
-                      }
-                      TwStyle.apply(node, jitTokensToAdd.toArray(new String[0]));
-                    } finally {
-                      node.getProperties().put("tw.internalModification", Boolean.FALSE);
-                    }
-                  }
-                });
+          // Process collected JIT tokens
+          if (!jitTokensToAdd.isEmpty()) {
+            // Mark internal modification to prevent recursion
+            node.getProperties().put("tw.internalModification", Boolean.TRUE);
+            try {
+              for (String jitToken : jitTokensToAdd) {
+                // Remove the JIT class and apply it as inline style
+                node.getStyleClass().remove(jitToken);
+              }
+              TwStyle.apply(node, jitTokensToAdd.toArray(new String[0]));
+            } finally {
+              node.getProperties().put("tw.internalModification", Boolean.FALSE);
+            }
+          }
+        };
+    node.getProperties().put(AUTO_JIT_LISTENER_KEY, listener);
+    node.getStyleClass().addListener(listener);
   }
 
   private static void traverseAndEnableAutoJit(Parent parent) {
@@ -273,8 +276,19 @@ public final class TwFXML {
       return;
     }
 
-    // Mark as permanently disabled so listener stops processing
+    // Mark as permanently disabled so a later enableAutoJit() re-installs a fresh listener.
     node.getProperties().put(AUTO_JIT_ENABLED_KEY, Boolean.FALSE);
+
+    // Detach the listener instead of leaving it attached: the flag alone would keep the
+    // callback (and the node) reachable from the style-class list forever, and every
+    // enable/disable cycle would stack another dormant listener on the same node.
+    Object recorded = node.getProperties().remove(AUTO_JIT_LISTENER_KEY);
+    if (recorded instanceof javafx.collections.ListChangeListener<?> listener) {
+      @SuppressWarnings("unchecked")
+      javafx.collections.ListChangeListener<String> typed =
+          (javafx.collections.ListChangeListener<String>) listener;
+      node.getStyleClass().removeListener(typed);
+    }
   }
 
   private static void traverseAndDisableAutoJit(Parent parent) {
