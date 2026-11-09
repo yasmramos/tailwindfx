@@ -91,11 +91,6 @@ public class TwCheckbox extends CheckBox {
    *
    * @param size size modifier (xs, sm, md, lg, xl)
    */
-  /**
-   * Sets the checkbox size.
-   *
-   * @param size size modifier (xs, sm, md, lg, xl)
-   */
   public void setSize(String size) {
     this.size = size;
     applyStyling();
