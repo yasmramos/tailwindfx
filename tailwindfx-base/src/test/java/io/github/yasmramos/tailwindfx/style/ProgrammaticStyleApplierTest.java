@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.yasmramos.tailwindfx.TwStyle;
 import javafx.scene.layout.Pane;
+import javafx.scene.shape.Rectangle;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -76,6 +77,26 @@ class ProgrammaticStyleApplierTest {
 
     ProgrammaticStyleApplier.apply(pane, java.util.List.of("overflow-visible"));
     assertNull(pane.getClip());
+  }
+
+  @Test
+  @DisplayName("removing overflow-hidden detaches the clip's bounds listener")
+  void testOverflowClipListenerDetached() {
+    Pane pane = new Pane();
+    pane.resize(100, 100);
+    ProgrammaticStyleApplier.apply(pane, java.util.List.of("overflow-hidden"));
+    Rectangle staleClip = (Rectangle) pane.getClip();
+    double widthWhileClipped = staleClip.getWidth();
+
+    ProgrammaticStyleApplier.apply(pane, java.util.List.of("overflow-visible"));
+    // Resizing fires the layout-bounds listener; a leaked listener would keep updating the
+    // detached clip, so its width must stay frozen.
+    pane.resize(500, 500);
+
+    assertEquals(
+        widthWhileClipped,
+        staleClip.getWidth(),
+        "a removed clip must no longer react to layout bounds changes");
   }
 
   @Test

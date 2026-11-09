@@ -17,6 +17,7 @@ package io.github.yasmramos.tailwindfx.style;
 
 import io.github.yasmramos.tailwindfx.core.Preconditions;
 import java.util.Set;
+import javafx.beans.value.ChangeListener;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
@@ -51,8 +52,8 @@ import javafx.scene.shape.Rectangle;
  */
 public final class ProgrammaticStyleApplier {
 
-  /** Marker stored on the node so a repeated overflow-hidden call does not stack clips. */
-  private static final String OVERFLOW_CLIP_KEY = "tw-overflow-clip";
+  /** Node property key holding the bounds listener installed by {@code overflow-hidden}. */
+  private static final String OVERFLOW_CLIP_LISTENER_KEY = "tw-overflow-clip-listener";
 
   /** Width utilities that make a node fill the available horizontal space. */
   private static final Set<String> FILL_WIDTH =
@@ -178,25 +179,38 @@ public final class ProgrammaticStyleApplier {
     boolean clips = token.endsWith("-hidden") || token.endsWith("-clip");
     if (!clips) {
       // overflow-*-visible restores the default (no clipping).
-      if (Boolean.TRUE.equals(node.getProperties().remove(OVERFLOW_CLIP_KEY))) {
-        node.setClip(null);
-      }
+      removeOverflowClip(node);
       return;
     }
-    if (Boolean.TRUE.equals(node.getProperties().get(OVERFLOW_CLIP_KEY))) {
+    if (node.getClip() != null) {
+      // A clip is already installed; do not stack a second one.
       return;
     }
     Rectangle clip = new Rectangle();
     Bounds bounds = node.getLayoutBounds();
     clip.setWidth(bounds.getWidth());
     clip.setHeight(bounds.getHeight());
-    node.layoutBoundsProperty()
-        .addListener(
-            (obs, oldBounds, newBounds) -> {
-              clip.setWidth(newBounds.getWidth());
-              clip.setHeight(newBounds.getHeight());
-            });
+    // Keep a reference to the bounds listener so removing the clip can also detach it; otherwise
+    // each overflow-hidden/overflow-visible cycle would leave a listener bound to the node.
+    ChangeListener<Bounds> boundsListener =
+        (obs, oldBounds, newBounds) -> {
+          clip.setWidth(newBounds.getWidth());
+          clip.setHeight(newBounds.getHeight());
+        };
+    node.layoutBoundsProperty().addListener(boundsListener);
+    node.getProperties().put(OVERFLOW_CLIP_LISTENER_KEY, boundsListener);
     node.setClip(clip);
-    node.getProperties().put(OVERFLOW_CLIP_KEY, Boolean.TRUE);
+  }
+
+  /** Removes a clip previously installed by {@code overflow-hidden} and detaches its listener. */
+  private static void removeOverflowClip(Node node) {
+    Object recorded = node.getProperties().remove(OVERFLOW_CLIP_LISTENER_KEY);
+    if (recorded == null) {
+      return;
+    }
+    @SuppressWarnings("unchecked")
+    ChangeListener<Bounds> boundsListener = (ChangeListener<Bounds>) recorded;
+    node.layoutBoundsProperty().removeListener(boundsListener);
+    node.setClip(null);
   }
 }
