@@ -115,7 +115,6 @@ example-project/
 ```java
 package com.example;
 
-import io.github.yasmramos.tailwindfx.TailwindFX;
 import io.github.yasmramos.tailwindfx.TwInstall;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -127,9 +126,6 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
-        // Install TailwindFX with JIT generation
-        TwInstall.installMinimal(stage.getScene());
-
         // Build the UI with Tailwind classes
         VBox root = new VBox(20);
         root.getStyleClass().add("p-8");
