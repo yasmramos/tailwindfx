@@ -1,6 +1,6 @@
 package io.github.yasmramos.tailwindfx.components;
 
-import java.lang.reflect.InvocationTargetException;
+import io.github.yasmramos.tailwindfx.TwStyle;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -875,23 +875,23 @@ public class TwVirtualFlow<T> extends Region {
     return this;
   }
 
-  /** Safe TailwindFX wrapper (fallback to CSS if not in classpath) */
+  /**
+   * Applies TailwindFX utility classes to the nodes produced by {@code base}.
+   *
+   * <p>Delegates to {@link TwStyle#apply(Node, String...)}, which resolves conflicts between
+   * competing utilities (e.g. two widths) instead of letting both classes accumulate.
+   *
+   * @param base the cell factory producing the base node
+   * @param classes utility classes to apply to each produced node
+   * @return this flow, for chaining
+   */
   public TwVirtualFlow<T> withTailwindStyling(Function<T, Node> base, String... classes) {
     Objects.requireNonNull(base);
     return cellFactory(
         item -> {
           Node n = base.apply(item);
           if (n != null && classes.length > 0) {
-            try {
-              Class.forName("tailwindfx.TailwindFX")
-                  .getMethod("apply", Node.class, String[].class)
-                  .invoke(null, n, (Object) classes);
-            } catch (ClassNotFoundException
-                | IllegalAccessException
-                | NoSuchMethodException
-                | InvocationTargetException ex) {
-              n.getStyleClass().addAll(classes);
-            }
+            TwStyle.apply(n, classes);
           }
           return n;
         });
