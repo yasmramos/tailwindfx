@@ -54,7 +54,7 @@ import javafx.util.Duration;
  */
 public final class ThemeManager {
 
-  // Temas predefinidos
+  // Predefined themes
   private record ThemeVars(
       String base,
       String innerBg,
