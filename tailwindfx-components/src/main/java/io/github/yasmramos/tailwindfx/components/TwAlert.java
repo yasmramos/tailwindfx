@@ -110,9 +110,9 @@ public class TwAlert extends HBox {
   }
 
   /**
-   * Sets the alert content with icon.
+   * Sets the alert content with an optional leading icon.
    *
-   * @param icon the icon node
+   * @param icon the icon node; when {@code null} only the message is shown
    * @param content the content text
    */
   public void setContent(Node icon, String content) {
@@ -122,7 +122,11 @@ public class TwAlert extends HBox {
     label.getStyleClass().add(MESSAGE_CLASS);
     // The stylesheet colours the glyph through `.alert-<type> .alert-icon`, so the icon must
     // carry that class or it keeps the default text fill instead of the alert's accent.
-    if (icon != null && !icon.getStyleClass().contains(ICON_CLASS)) {
+    if (icon == null) {
+      getChildren().add(label);
+      return;
+    }
+    if (!icon.getStyleClass().contains(ICON_CLASS)) {
       icon.getStyleClass().add(ICON_CLASS);
     }
     getChildren().addAll(icon, label);

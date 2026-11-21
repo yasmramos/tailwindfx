@@ -10,7 +10,7 @@ The `TwResponsive` class is a responsive facade for breakpoint management in Tai
 
 - **Stage-based Monitoring**: Install responsive support on entire stages
 - **Region-based Monitoring**: Monitor specific regions for size changes
-- **Breakpoint Detection**: Automatic detection of sm, md, lg, xl, 2xl breakpoints
+- **Breakpoint Detection**: Automatic detection of `SM`, `MD`, `LG`, `XL`, `XXL` breakpoints
 - **Reactive Updates**: Property-based notifications for breakpoint changes
 - **Scene Integration**: Works with JavaFX scenes and stages
 
@@ -19,21 +19,22 @@ The `TwResponsive` class is a responsive facade for breakpoint management in Tai
 ### Stage-based Responsive Support
 
 ```java
-// Install responsive support on a stage
+// Install responsive support on the scene root of a stage
 TwResponsive.on(stage);
 
-// Get breakpoint manager
-BreakpointManager bpm = BreakpointManager.forStage(stage);
+// Get the breakpoint manager for the stage
+BreakpointManager bpm = TwResponsive.forStage(stage);
 
-// Listen for breakpoint changes
-bpm.currentBreakpointProperty().addListener((obs, oldVal, newVal) -> {
+// Listen for breakpoint changes (activeBreakpointProperty is a
+// ReadOnlyObjectProperty<BreakpointManager.Breakpoint>)
+bpm.activeBreakpointProperty().addListener((obs, oldVal, newVal) -> {
     System.out.println("Current breakpoint: " + newVal);
-    
-    // Apply different layouts based on breakpoint
+
     switch (newVal) {
-        case "sm": applyMobileLayout(); break;
-        case "md": applyTabletLayout(); break;
-        case "lg": applyDesktopLayout(); break;
+        case SM: applyMobileLayout(); break;
+        case MD: applyTabletLayout(); break;
+        case LG: applyDesktopLayout(); break;
+        default: break;
     }
 });
 ```
@@ -41,26 +42,27 @@ bpm.currentBreakpointProperty().addListener((obs, oldVal, newVal) -> {
 ### Region-based Responsive Support
 
 ```java
-// Install responsive support on a region
-ResponsiveNode responsive = TwResponsive.on(region);
-
-// Monitor the region
-responsive.breakpointProperty().addListener((obs, oldVal, newVal) -> {
-    updateLayoutForBreakpoint(newVal);
-});
+// Install responsive support on a region and declare breakpoint classes
+ResponsiveNode.on(region)
+    .base("p-4")            // always applied
+    .md("p-8")              // applied at >= 768px
+    .lg("p-12")             // applied at >= 1024px
+    .onBreakpoint(bp -> System.out.println("active width: " + bp))
+    .install(region.getScene());
 ```
 
 ### Access Breakpoint Manager
 
 ```java
-// Get manager for stage
-BreakpointManager manager = BreakpointManager.forStage(stage);
+// Get manager for a stage
+BreakpointManager manager = TwResponsive.forStage(stage);
 
-// Get current breakpoint
-String currentBp = manager.getCurrentBreakpoint();
+// Get the current breakpoint (enum value)
+BreakpointManager.Breakpoint currentBp = manager.current();
 
-// Get all available breakpoints
-Set<String> breakpoints = manager.getAvailableBreakpoints();
+// Query relative positions
+boolean desktop = manager.is(BreakpointManager.Breakpoint.LG);
+boolean belowTablet = manager.below(BreakpointManager.Breakpoint.MD);
 ```
 
 ## Advanced Usage
@@ -69,13 +71,14 @@ Set<String> breakpoints = manager.getAvailableBreakpoints();
 
 ```java
 stage.widthProperty().addListener((obs, oldVal, newVal) -> {
-    String bp = BreakpointManager.getBreakpoint(newVal.doubleValue());
-    
-    if ("sm".equals(bp)) {
+    BreakpointManager.Breakpoint bp =
+        BreakpointManager.Breakpoint.forWidth(newVal.doubleValue());
+
+    if (bp == BreakpointManager.Breakpoint.SM) {
         // Mobile: stack vertically
         container.setOrientation(Orientation.VERTICAL);
         sidebar.setVisible(false);
-    } else if ("lg".equals(bp)) {
+    } else if (bp == BreakpointManager.Breakpoint.LG) {
         // Desktop: horizontal layout with sidebar
         container.setOrientation(Orientation.HORIZONTAL);
         sidebar.setVisible(true);
@@ -87,11 +90,11 @@ stage.widthProperty().addListener((obs, oldVal, newVal) -> {
 
 ```java
 public void setupResponsiveGrid(GridPane grid, Stage stage) {
-    BreakpointManager bpm = BreakpointManager.forStage(stage);
-    
-    bpm.currentBreakpointProperty().addListener((obs, oldVal, newVal) -> {
+    BreakpointManager bpm = TwResponsive.forStage(stage);
+
+    bpm.activeBreakpointProperty().addListener((obs, oldVal, newVal) -> {
         int cols = getColumnsForBreakpoint(newVal);
-        
+
         // Update grid constraints
         grid.getColumnConstraints().clear();
         for (int i = 0; i < cols; i++) {
@@ -99,18 +102,19 @@ public void setupResponsiveGrid(GridPane grid, Stage stage) {
             col.setPercentWidth(100.0 / cols);
             grid.getColumnConstraints().add(col);
         }
-        
+
         // Reorganize children
         reorganizeGridChildren(grid, cols);
     });
 }
 
-private int getColumnsForBreakpoint(String breakpoint) {
+private int getColumnsForBreakpoint(BreakpointManager.Breakpoint breakpoint) {
     switch (breakpoint) {
-        case "sm": return 1;
-        case "md": return 2;
-        case "lg": return 3;
-        case "xl": return 4;
+        case SM: return 1;
+        case MD: return 2;
+        case LG: return 3;
+        case XL:
+        case XXL: return 4;
         default: return 1;
     }
 }
@@ -120,34 +124,35 @@ private int getColumnsForBreakpoint(String breakpoint) {
 
 ```java
 public class ResponsiveNavigation extends BorderPane {
-    
+
     private final HBox navLinks;
     private final MenuButton mobileMenu;
-    
+
     public ResponsiveNavigation() {
         navLinks = new HBox(10);
         mobileMenu = new MenuButton("Menu");
-        
+
         // Setup links
         navLinks.getChildren().addAll(
             createLink("Home"),
             createLink("About"),
             createLink("Contact")
         );
-        
+
         // Install responsive monitoring
         TwResponsive.on(this);
-        
+
         // React to breakpoint changes
         widthProperty().addListener((obs, oldVal, newVal) -> {
             updateNavigation(newVal.doubleValue());
         });
     }
-    
+
     private void updateNavigation(double width) {
-        String bp = BreakpointManager.getBreakpoint(width);
-        
-        if ("sm".equals(bp)) {
+        BreakpointManager.Breakpoint bp =
+            BreakpointManager.Breakpoint.forWidth(width);
+
+        if (bp == BreakpointManager.Breakpoint.SM) {
             // Mobile: show hamburger menu
             getLeft().setAll(mobileMenu);
             navLinks.setVisible(false);
@@ -162,15 +167,16 @@ public class ResponsiveNavigation extends BorderPane {
 
 ## Breakpoint Values
 
-Default TailwindFX breakpoints:
+Default TailwindFX breakpoints (enum constants on `BreakpointManager.Breakpoint`):
 
-| Breakpoint | Min Width | Typical Device |
-|------------|-----------|----------------|
-| `sm` | 640px | Large phones |
-| `md` | 768px | Tablets |
-| `lg` | 1024px | Laptops |
-| `xl` | 1280px | Desktops |
-| `2xl` | 1536px | Large screens |
+| Breakpoint | Min Width | CSS class | Typical Device |
+|------------|-----------|-----------|----------------|
+| `XS` | 0px | — | any |
+| `SM` | 640px | `bp-sm` | Large phones |
+| `MD` | 768px | `bp-md` | Tablets |
+| `LG` | 1024px | `bp-lg` | Laptops |
+| `XL` | 1280px | `bp-xl` | Desktops |
+| `XXL` | 1536px | `bp-2xl` | Large screens |
 
 ## Common Patterns
 
@@ -178,31 +184,33 @@ Default TailwindFX breakpoints:
 
 ```java
 public class ResponsiveCardGrid extends FlowPane {
-    
+
     public ResponsiveCardGrid() {
         setHgap(16);
         setVgap(16);
-        
+
         widthProperty().addListener((obs, oldVal, newVal) -> {
             updateCardWidth(newVal.doubleValue());
         });
     }
-    
+
     private void updateCardWidth(double containerWidth) {
-        String bp = BreakpointManager.getBreakpoint(containerWidth);
+        BreakpointManager.Breakpoint bp =
+            BreakpointManager.Breakpoint.forWidth(containerWidth);
         double cardWidth;
-        
+
         switch (bp) {
-            case "sm":
+            case XS:
+            case SM:
                 cardWidth = containerWidth - 32; // Full width minus padding
                 break;
-            case "md":
+            case MD:
                 cardWidth = (containerWidth - 48) / 2; // 2 columns
                 break;
             default:
                 cardWidth = (containerWidth - 64) / 3; // 3 columns
         }
-        
+
         for (Node child : getChildren()) {
             if (child instanceof Region) {
                 ((Region) child).setPrefWidth(cardWidth);
@@ -216,29 +224,31 @@ public class ResponsiveCardGrid extends FlowPane {
 
 ```java
 public class SidebarLayout extends BorderPane {
-    
+
     private final VBox sidebar;
-    private String currentBreakpoint = "lg";
-    
+    private BreakpointManager.Breakpoint currentBreakpoint = BreakpointManager.Breakpoint.LG;
+
     public SidebarLayout() {
         sidebar = new VBox(8);
         sidebar.setPrefWidth(256);
         sidebar.getStyleClass().add("bg-gray-800");
-        
+
         setLeft(sidebar);
-        
+
         // Monitor width changes
         widthProperty().addListener((obs, oldVal, newVal) -> {
-            String bp = BreakpointManager.getBreakpoint(newVal.doubleValue());
-            if (!bp.equals(currentBreakpoint)) {
+            BreakpointManager.Breakpoint bp =
+                BreakpointManager.Breakpoint.forWidth(newVal.doubleValue());
+            if (bp != currentBreakpoint) {
                 currentBreakpoint = bp;
                 updateSidebar(bp);
             }
         });
     }
-    
-    private void updateSidebar(String breakpoint) {
-        if ("sm".equals(breakpoint) || "md".equals(breakpoint)) {
+
+    private void updateSidebar(BreakpointManager.Breakpoint breakpoint) {
+        if (breakpoint == BreakpointManager.Breakpoint.SM
+            || breakpoint == BreakpointManager.Breakpoint.MD) {
             // Hide sidebar on mobile/tablet
             sidebar.setVisible(false);
             sidebar.setManaged(false);
@@ -255,18 +265,20 @@ public class SidebarLayout extends BorderPane {
 
 ```java
 public void applyResponsiveText(Text text, Stage stage) {
-    BreakpointManager bpm = BreakpointManager.forStage(stage);
-    
-    bpm.currentBreakpointProperty().addListener((obs, oldVal, newVal) -> {
+    BreakpointManager bpm = TwResponsive.forStage(stage);
+
+    bpm.activeBreakpointProperty().addListener((obs, oldVal, newVal) -> {
         switch (newVal) {
-            case "sm":
+            case XS:
+            case SM:
                 text.setFont(Font.font(12));
                 break;
-            case "md":
+            case MD:
                 text.setFont(Font.font(14));
                 break;
-            case "lg":
-            case "xl":
+            case LG:
+            case XL:
+            case XXL:
                 text.setFont(Font.font(16));
                 break;
         }
@@ -291,7 +303,7 @@ public void applyResponsiveText(Text text, Stage stage) {
 
 ## See Also
 
-- `BreakpointManager` - Core breakpoint detection
-- `ResponsiveNode` - Responsive node wrapper
+- `BreakpointManager` - Core breakpoint detection (`current()`, `is()`, `below()`, `activeBreakpointProperty()`)
+- `ResponsiveNode` - Responsive node wrapper (`on(Node)`, `base()`, `md()`, `install(Scene)`)
 - `TwStyle` - Apply breakpoint-specific utilities
 - `TwLayout` - Responsive layout utilities

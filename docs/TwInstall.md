@@ -124,8 +124,8 @@ public void start(Stage stage) {
     // Install minimal base variables
     TwInstall.installMinimal(scene);
     
-    // Use JIT for all styling
-    TwStyle.jit(node, "bg-[#38bdf8]", "p-[13px]");
+    // Use JIT for all styling (arbitrary values are compiled on the fly)
+    TwStyle.apply(node, "bg-[#38bdf8]", "p-[13px]");
     
     stage.setScene(scene);
     stage.show();

@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>Tracks cache performance, method call counts, and timing data. All counters are thread-safe
  * ({@link AtomicLong}).
  *
- * <p>Access via {@link TailwindFX#metrics()} or directly:
+ * <p>Access via {@link #instance()} or through the {@link io.github.yasmramos.tailwindfx.TwMetrics} facade:
  *
  * <pre>
  * TailwindFXMetrics m = TailwindFXMetrics.instance();
@@ -160,7 +160,8 @@ public final class TailwindFXMetrics {
   private final AtomicLong totalLayoutNs = new AtomicLong();
 
   /**
-   * Records a layout pass from {@link TwFlexPane#layoutChildren}.
+   * Records a layout pass from {@link io.github.yasmramos.tailwindfx.layout.TwFlexPane} (called
+   * during its layout pass).
    *
    * @param durationNs duration of the layout pass in nanoseconds
    */
@@ -300,7 +301,7 @@ public final class TailwindFXMetrics {
    * Registers an alert handler for metric threshold violations.
    *
    * <pre>
-   * TailwindFX.metrics()
+   * TailwindFXMetrics.instance()
    *     .onAlert((metric, value, threshold) ->
    *         System.err.printf("[TailwindFX] Alert: %s=%.2f (threshold=%.2f)%n",
    *             metric, value, threshold))
@@ -490,7 +491,7 @@ public final class TailwindFXMetrics {
    * </ul>
    *
    * <pre>
-   * TailwindFX.metrics().checkHealth()
+   * TailwindFXMetrics.instance().checkHealth()
    *     .forEach(System.out::println);
    * </pre>
    *
@@ -562,7 +563,7 @@ public final class TailwindFXMetrics {
    * Prints a health report to stdout.
    *
    * <pre>
-   * TailwindFX.metrics().printHealth();
+   * TailwindFXMetrics.instance().printHealth();
    * // ✅ All healthy   — or —
    * // [WARN] Low JIT cache hit ratio: 34.2% (250 lookups)
    * //   → Use TwStyle.apply() for stable classes...

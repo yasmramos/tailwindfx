@@ -138,12 +138,11 @@ if (!isDarkMode) {
 **Usage Pattern:**
 ```java
 // Existing responsive infrastructure
-ResponsiveNode.wrap(myNode)
-    .addVariant("md", 768)   // 768px breakpoint
-    .addVariant("lg", 1024); // 1024px breakpoint
-
-// Tokens with md: prefix apply at 768px+
-applyTokens("p-4 md:p-8 lg:p-12");
+ResponsiveNode.on(myNode)
+    .base("p-4")          // base classes, always applied
+    .md("p-8")            // md: applies at >= 768px
+    .lg("p-12")           // lg: applies at >= 1024px
+    .install(scene);
 ```
 
 ---

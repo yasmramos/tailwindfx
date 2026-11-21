@@ -571,6 +571,24 @@ class StylesTest {
       Styles.clipNone(region);
       assertNull(region.getClip());
     }
+
+    @Test
+    @DisplayName("clipNone detaches the bounds listener installed by clipRounded")
+    void clipNoneDetachesBoundsListener() {
+      region.resize(100, 100);
+      Styles.clipRounded(region, 8);
+      Rectangle stale = (Rectangle) region.getClip();
+      double widthWhileClipped = stale.getWidth();
+
+      Styles.clipNone(region);
+      // A leaked listener would keep resizing the detached clip on the next layout pass.
+      region.resize(400, 400);
+
+      assertEquals(
+          widthWhileClipped,
+          stale.getWidth(),
+          "a removed clip must no longer track the node's layout bounds");
+    }
   }
 
   @Nested

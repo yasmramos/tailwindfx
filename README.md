@@ -4,8 +4,8 @@
 
 [![Java](https://img.shields.io/badge/Java-17%2B-blue)](https://openjdk.org/projects/jdk/17/)
 [![JavaFX](https://img.shields.io/badge/JavaFX-17%2B-green)](https://openjfx.io/)
-[![Build](https://img.shields.io/github/actions/workflow/status/yasmramos/TailwindFX/maven.yml?branch=main&label=build)](https://github.com/yasmramos/TailwindFX/actions/workflows/maven.yml)
-[![Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/yasmramos/85eea898808574addebcd08db98ccb69/raw/test-results.json)](https://github.com/yasmramos/TailwindFX/actions/workflows/maven.yml)
+[![Build](https://img.shields.io/github/actions/workflow/status/yasmramos/tailwindfx/maven.yml?branch=main&label=build)](https://github.com/yasmramos/tailwindfx/actions/workflows/maven.yml)
+[![Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/yasmramos/85eea898808574addebcd08db98ccb69/raw/test-results.json)](https://github.com/yasmramos/tailwindfx/actions/workflows/maven.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](LICENSE)
 
 ---
@@ -119,7 +119,7 @@ TwStyle.apply(node, "bg-blue-500/80", "w-[320px]");
 // → w-[320px]: arbitrary value → JIT inline fallback
 
 // Dark mode support (optional)
-TwInstall.installWithDarkMode(scene); // Also loads dark theme overrides
+TwTheme.of(scene).dark().apply(); // Applies the dark theme to the scene
 ```
 
 ```java
@@ -157,15 +157,15 @@ TwAnimation.onHoverScale(btn, 1.05);
 |---|---|
 | **1,400+ CSS utilities** | Layout, typography, colors, shadows, effects, transforms |
 | **JIT compiler** | `bg-blue-500/80`, `p-[13px]`, `drop-shadow-[#3b82f6]` arbitrary values |
-| **FxFlexPane** | Real flexbox: direction, wrap, justify-content (6), align-items (4), gap, flex-grow/shrink/basis |
-| **FxGridPane** | Grid-template-areas, masonry, auto-flow |
-| **FxDataTable** | Sortable, filterable, paginated TableView wrapper |
+| **TwFlexPane** | Real flexbox: direction, wrap, justify-content (6), align-items (4), gap, flex-grow/shrink/basis |
+| **TwGridPane** | Grid-template-areas, masonry, auto-flow |
+| **TwDataTable** | Sortable, filterable, paginated TableView wrapper |
 | **ResponsiveNode** | Per-node breakpoint rules driven by `Scene.widthProperty()` |
 | **Themes** | Dark/light/blue/green/purple/rose/slate + scoped subtree themes |
 | **Animations** | fadeIn/Out, slideUp/Down/Left/Right, shake, bounce, pulse, spin + hover effects |
 | **Tailwind v4.1** | text-shadow, drop-shadow-[color], SVG fill/stroke, 3D transforms, clip/mask |
-| **Glassmorphism** | `TailwindFX.glass()`, `backdropBlur()`, `.glass` CSS class |
-| **Neumorphism** | `TailwindFX.neumorph()`, `.neumorph` CSS class |
+| **Glassmorphism** | `Styles.glass()`, `TwEffect.backdropBlur()`, `.glass` CSS class |
+| **Neumorphism** | `Styles.neumorph()`, `.neumorph` CSS class |
 | **Pre-built Components** | TwButton, TwCard, TwBadge, TwAlert, TwInput, TwCheckbox, TwSelect, TwDataTable, TwProgressBar, TwSpinner, TwAvatar, TwVirtualFlow, TwAccordion |
 | **Metrics + alerts** | Cache hit ratio, conflict rate, compile time alerts |
 | **Performance** | StyleDiff (skip redundant applies), batch apply, LRU cache |
@@ -241,10 +241,11 @@ public class MyApp extends Application {
 | `TwTheme` | Dark/light themes, presets, scoped themes | `TwTheme.of(scene).dark().apply()` |
 | `TwLayout` | Flexbox, Grid, layout builders | `TwLayout.of(container).row().gap(16).build()` |
 | `TwAnimation` | Animations, hover effects | `TwAnimation.fadeIn(node).play()` |
-| `TwResponsive` | Breakpoint-aware nodes | `TwResponsive.on(region).sm("w-full").install(scene)` |
-| `TwEffect` | Glassmorphism, neumorphism, shadows | `TwEffect.glass(panel)` |
-| `TwMetrics` | Performance monitoring, alerts | `TwMetrics.print()` |
-| `TwConfig` | Global configuration | `TwConfig.unit(Unit.PX)` |
+| `TwResponsive` | Breakpoint-aware nodes | `ResponsiveNode.on(region).sm("w-full").install(scene)` |
+| `Styles` | Glassmorphism, neumorphism, shadows | `Styles.glass(panel)` |
+| `TwEffect` | Blur, brightness, contrast, grayscale effects | `TwEffect.backdropBlur(panel, 12)` |
+| `TwMetrics` | Performance monitoring, alerts | `TwMetrics.healthCheck()` |
+| `TwConfig` | Global configuration | `TwConfig.unit(8.0)` |
 | `TwBatch` | Batch operations for performance | `TwBatch.run(() -> applyStyles())` |
 
 ### Components
@@ -254,17 +255,17 @@ TailwindFX provides pre-built components in the `io.github.yasmramos.tailwindfx.
 | Component | Description | Usage Example |
 |-----------|-------------|---------------|
 | `TwButton` | Styled button with variants | `new TwButton("Click")` or `TwButton.primary("Submit")` |
-| `TwCard` | Card container | `new TwCard("Title", "Content")` |
+| `TwCard` | Card container | `new TwCard(content)` or `TwCard.withTitle("Title")` |
 | `TwBadge` | Status badges | `TwBadge.create("NEW", "blue")` or `TwBadge.pill("Active", "green")` |
-| `TwAlert` | Alert dialogs | `TwAlert.info("Message").show()` |
+| `TwAlert` | Inline alert box | `TwAlert.info("Message")` or `new TwAlert(AlertType.ERROR, "Failed")` |
 | `TwInput` | Text input field | `new TwInput("Placeholder")` |
 | `TwCheckbox` | Checkbox with label | `new TwCheckbox("Accept terms")` |
-| `TwSelect` | Dropdown selector | `new TwSelect<>(items)` |
-| `TwDataTable` | Sortable table | `new TwDataTable<>(data)` |
+| `TwSelect` | Dropdown selector | `TwSelect.comboBox("One", "Two")` |
+| `TwDataTable` | Sortable table | `TwDataTable.of(User.class).column("Name", User::name).build()` |
 | `TwProgressBar` | Progress indicator | `new TwProgressBar(0.75)` |
-| `TwSpinner` | Loading spinner | `new TwSpinner()` |
-| `TwAvatar` | User avatar | `new TwAvatar(imageUrl)` |
-| `TwVirtualFlow` | Virtualized list | `new TwVirtualFlow<>(items)` |
+| `TwSpinner` | Loading spinner | `TwSpinner.create()` |
+| `TwAvatar` | User avatar | `TwAvatar.create("YA")` or `TwAvatar.fromImage(imageView)` |
+| `TwVirtualFlow` | Virtualized list | `new TwVirtualFlow<>()` then `setItems(items)` |
 | `TwAccordion` | Collapsible sections | `new TwAccordion()` |
 
 ### Usage Examples
@@ -272,7 +273,7 @@ TailwindFX provides pre-built components in the `io.github.yasmramos.tailwindfx.
 ```java
 // Style
 TwStyle.apply(btn, "btn-primary", "rounded-lg", "px-4", "py-2");
-TwStyle.jit(node, "bg-blue-500/80", "p-[13px]");
+TwStyle.apply(node, "bg-blue-500/80", "p-[13px]");   // arbitrary values are JIT-compiled
 TwStyle.remove(node, "text-red-500");
 TwStyle.toggle(node, "dark-mode");
 
@@ -283,7 +284,8 @@ TwTheme.scope(panel).preset("rose").apply();
 
 // Layout
 TwLayout.of(container).row().gap(16).build();
-TwLayout.flexRow().wrap(true).justify(TwFlexPane.Justify.BETWEEN).build();
+TwFlexPane row = TwLayout.flexRow();
+row.wrap(true).justify(TwFlexPane.Justify.BETWEEN);
 
 // Animation
 TwAnimation.fadeIn(node, 300).play();
@@ -291,29 +293,30 @@ TwAnimation.onHoverScale(btn, 1.05);
 TwAnimation.shake(button).play();
 
 // Components
-TwCard card = new TwCard("Welcome", "Hello world");
-TwButton btn = new TwButton("Click", ButtonVariant.PRIMARY);
-TwBadge badge = new TwBadge("New", BadgeVariant.SUCCESS);
-TwAlert.info("Operation completed").show();
+TwCard card = new TwCard(new Label("Welcome"));
+TwButton button = TwButton.primary("Click");
+TwBadge badge = TwBadge.create("New", "green");
+TwAlert alert = TwAlert.info("Operation completed");
 
 // Responsive
-TwResponsive.on(sidebar)
+ResponsiveNode.on(sidebar)
     .base("w-64")
     .sm("w-full")
     .md("w-48")
     .install(scene);
 
 // Effect
-TwEffect.glass(overlayPane);
-TwEffect.neumorph(button);
-TwEffect.textShadowMd(heading);
+Styles.glass(overlayPane);
+Styles.neumorph(button);
+Styles.textShadowMd(heading);
+TwEffect.backdropBlur(panel, 12);
 
 // Metrics
 TwMetrics.setEnabled(true);
-TwMetrics.print();
+TwMetrics.healthCheck();
 
 // Config
-TwConfig.autoBatch(20);
+TwConfig.preferStylesheet(true);
 TwConfig.debug(true);
 
 // Batch
@@ -322,25 +325,11 @@ TwBatch.run(() -> {
 });
 ```
 
-### Backward Compatibility
+### Entry points
 
-The old `TailwindFX` facade still works for backward compatibility, delegating to the specialized facades:
-
-```java
-// Still works (delegates to TwStyle)
-TailwindFX.apply(node, "p-4", "bg-white");
-
-// Still works (delegates to TwInstall)
-TailwindFX.install(scene);
-
-// Still works (delegates to TwTheme)
-TailwindFX.theme(scene).dark().apply();
-
-// Recommended: use specialized facades directly
-TwStyle.apply(node, "p-4", "bg-white");
-TwInstall.install(scene);
-TwTheme.of(scene).dark().apply();
-```
+TailwindFX has no single "god" entry point. Each responsibility has its own facade (`TwStyle`,
+`TwInstall`, `TwTheme`, `TwLayout`, ...), which keeps imports and call sites explicit. See
+[Entry Points](docs/EntryPoints.md) for the full list.
 ---
 
 ## Performance
@@ -425,17 +414,17 @@ These are **platform limitations**, not bugs. Report only issues related to Tail
 
 We welcome contributions from the community! Here's how you can help:
 
-1. **Check existing issues** - Look for [Good First Issues](https://github.com/yasmramos/TailwindFX/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) to get started
+1. **Check existing issues** - Look for [Good First Issues](https://github.com/yasmramos/tailwindfx/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) to get started
 2. **Read our guides** - See [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 3. **Fork and submit PRs** - Create a branch from `develop`, make your changes, and submit a pull request
-4. **Report bugs** - Use our [bug report template](https://github.com/yasmramos/TailwindFX/issues/new?template=bug_report.md)
-5. **Suggest features** - Use our [feature request template](https://github.com/yasmramos/TailwindFX/issues/new?template=feature_request.md)
+4. **Report bugs** - Use our [bug report template](https://github.com/yasmramos/tailwindfx/issues/new?template=bug_report.md)
+5. **Suggest features** - Use our [feature request template](https://github.com/yasmramos/tailwindfx/issues/new?template=feature_request.md)
 
 ### Quick Links
 - 📚 [Issues for Contributors](.github/ISSUES_FOR_CONTRIBUTORS.md)
 - 🧑‍💻 [Developer Guide](docs/DEVELOPER_GUIDE.md)
-- 🐛 [Report a Bug](https://github.com/yasmramos/TailwindFX/issues/new?template=bug_report.md)
-- 💡 [Request a Feature](https://github.com/yasmramos/TailwindFX/issues/new?template=feature_request.md)
-- 🎯 [Good First Issues](https://github.com/yasmramos/TailwindFX/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+- 🐛 [Report a Bug](https://github.com/yasmramos/tailwindfx/issues/new?template=bug_report.md)
+- 💡 [Request a Feature](https://github.com/yasmramos/tailwindfx/issues/new?template=feature_request.md)
+- 🎯 [Good First Issues](https://github.com/yasmramos/tailwindfx/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 
 ---

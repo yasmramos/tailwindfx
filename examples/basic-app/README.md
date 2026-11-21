@@ -89,12 +89,12 @@ These examples use TailwindFX the correct way — no inline `setStyle()`:
 
 ```java
 // Install TailwindFX styles on the scene
-TailwindFX.install(scene);
+TwInstall.install(scene);
 
 // Apply utility classes to nodes
-TailwindFX.apply(loginButton, "btn-primary", "rounded-lg");
-TailwindFX.apply(root, "bg-gray-50", "border", "rounded-xl");
-TailwindFX.apply(title, "text-2xl", "font-bold");
+TwStyle.apply(loginButton, "btn-primary", "rounded-lg");
+TwStyle.apply(root, "bg-gray-50", "border", "rounded-xl");
+TwStyle.apply(title, "text-2xl", "font-bold");
 ```
 
 ---
@@ -105,7 +105,7 @@ TailwindFX.apply(title, "text-2xl", "font-bold");
 → Make sure your VM Options include `--module-path` and `--add-modules javafx.controls,javafx.fxml`
 
 **TailwindFX styles not applying**
-→ Confirm `TailwindFX.install(scene)` is called after `new Scene(...)` and before `stage.show()`
+→ Confirm `TwInstall.install(scene)` is called after `new Scene(...)` and before `stage.show()`
 
 **Old UI still showing after code changes**
 → Save all files (Ctrl+S), then go to **Build → Rebuild Project**, and re-run
@@ -118,7 +118,7 @@ This project helps developers:
 - Understand how to set up and install TailwindFX
 - Learn utility-first styling in JavaFX applications
 - See real working examples of login and dashboard layouts
-- Use `TailwindFX.apply()` instead of traditional inline styles
+- Use `TwStyle.apply()` instead of traditional inline styles
 
 ---
 

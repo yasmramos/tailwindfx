@@ -134,6 +134,17 @@ public class TwAlertIT {
   }
 
   @Test
+  public void testNullIconShowsMessageOnly() {
+    TwAlert alert = new TwAlert();
+    alert.setContent(null, "Message");
+
+    assertEquals(1, alert.getChildren().size(), "a null icon must not become a child");
+    javafx.scene.control.Label label = (javafx.scene.control.Label) alert.getChildren().get(0);
+    assertEquals("Message", label.getText());
+    assertTrue(label.getStyleClass().contains("alert-message"));
+  }
+
+  @Test
   public void testSpacingAndPadding() {
     TwAlert alert = new TwAlert();
 

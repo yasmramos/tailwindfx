@@ -1420,7 +1420,7 @@ public final class TwAnimation {
    * integration with BreakpointManager ensures smooth responsive behavior.
    *
    * <pre>
-   * BreakpointManager bpm = TailwindFX.responsive(stage);
+   * BreakpointManager bpm = TwResponsive.forStage(stage);
    * ResponsiveAnimationGuard.install(scene);
    * // Animations now pause/resume automatically during breakpoint changes
    * </pre>

@@ -186,6 +186,19 @@ class StyleCacheTest {
       StyleCache.removeCleanupListener(node);
       assertFalse(StyleCache.hasCleanupListener(node));
     }
+
+    @Test
+    @DisplayName("invalidate after autoCleanup does not clash with the resolver's own listener")
+    void invalidateAfterAutoCleanupDoesNotThrow() {
+      // Regression: UtilityConflictResolver.autoCleanup() used to store its marker under this
+      // class's "tailwindfx.cleanup-listener" key, so invalidate()/cleanup() cast that Boolean to
+      // a ChangeListener<Scene> and threw ClassCastException.
+      StackPane node = new StackPane();
+      UtilityConflictResolver.autoCleanup(node);
+
+      assertDoesNotThrow(() -> StyleCache.invalidate(node));
+      assertFalse(StyleCache.hasCleanupListener(node));
+    }
   }
 
   @Nested

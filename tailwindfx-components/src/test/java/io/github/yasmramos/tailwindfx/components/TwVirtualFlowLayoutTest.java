@@ -163,8 +163,8 @@ class TwVirtualFlowLayoutTest extends ApplicationTest {
   }
 
   @Test
-  @DisplayName("withTailwindStyling falls back to style classes when TailwindFX is absent")
-  void withTailwindStylingFallback() {
+  @DisplayName("withTailwindStyling applies the utilities through TwStyle")
+  void withTailwindStylingAppliesUtilities() {
     TwVirtualFlow<String> flow = new TwVirtualFlow<>();
     flow.withTailwindStyling(item -> new Label(item), "p-4", "bg-red-500");
     Node cell = flow.getCellFactory().apply("x");

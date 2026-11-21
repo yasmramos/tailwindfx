@@ -66,8 +66,8 @@ import javafx.scene.Scene;
  *   <li>On resize, finds the highest breakpoint whose minWidth ≤ scene width.
  *   <li>Removes the previous breakpoint's classes, applies the new ones via {@link
  *       UtilityConflictResolver#applyAll}.
- *   <li>Base classes (registered with {@link #base}) are always present and are applied before
- *       breakpoint-specific classes.
+ *   <li>Base classes (registered with {@link Builder#base}) are always present and are applied
+ *       before breakpoint-specific classes.
  * </ol>
  */
 public final class ResponsiveNode {
@@ -258,12 +258,16 @@ public final class ResponsiveNode {
    * changes to the node's class list.
    */
   public void refresh() {
-    applyForWidth(scene.getWidth());
+    applyForWidth(scene.getWidth(), true);
   }
 
   // Core logic
 
   private void applyForWidth(double width) {
+    applyForWidth(width, false);
+  }
+
+  private void applyForWidth(double width, boolean force) {
     // Find the highest breakpoint whose minWidth <= current width
     Integer bp = null;
     for (Integer minW : rules.descendingKeySet()) {
@@ -274,7 +278,11 @@ public final class ResponsiveNode {
     }
 
     int newBp = bp != null ? bp : -1;
-    if (newBp == activeBp) return; // no change — skip
+    // The early return only applies to width-driven updates: when the breakpoint is unchanged the
+    // node's class list already holds the right classes. refresh() passes force=true because its
+    // whole purpose is to rebuild the list after it was mutated externally, so the guard would
+    // make it a silent no-op.
+    if (!force && newBp == activeBp) return; // no change — skip
     activeBp = newBp;
 
     // Remove ALL breakpoint-specific classes from all rules

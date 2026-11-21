@@ -33,7 +33,7 @@ import javafx.scene.layout.Pane;
  * <p>Solution: apply Modena variables as inline style on any Pane, which JavaFX propagates to all
  * its children (local CSS cascade).
  *
- * <p>Usage: // Entire scene in dark TailwindFX.theme(scene).dark().apply();
+ * <p>Usage: // Entire scene in dark TwTheme.of(scene).dark().apply();
  *
  * <p>// Only the alerts panel with red accent ThemeScopeManager.scope(alertPanel)
  * .accent("#ef4444") .focus("#f87171") .apply();
@@ -55,7 +55,7 @@ public final class ThemeScopeManager {
   /**
    * Starts the configuration of a scope for a specific Pane.
    *
-   * <p>TailwindFX also exposes this as: TailwindFX.scope(pane).dark().apply();
+   * <p>Also exposed through the theme facade as: TwTheme.scope(pane).dark().apply();
    */
   public static ScopeBuilder scope(Pane pane) {
     return new ScopeBuilder(pane);

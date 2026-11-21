@@ -28,11 +28,11 @@ TwStyle.apply(node, "btn-primary", "rounded-lg");
 // Apply multiple classes at once
 TwStyle.apply(button, "bg-blue-500", "text-white", "px-4", "py-2", "rounded");
 
-// Apply JIT-compiled styles with arbitrary values
-TwStyle.jit(node, "bg-blue-500/80", "p-[13px]");
+// Arbitrary values are auto-detected and JIT-compiled
+TwStyle.apply(node, "bg-blue-500/80", "p-[13px]");
 
 // Apply arbitrary color values
-TwStyle.jit(element, "bg-[#38bdf8]", "text-[#1e3a8a]");
+TwStyle.apply(element, "bg-[#38bdf8]", "text-[#1e3a8a]");
 ```
 
 ### Removing Styles
@@ -57,18 +57,21 @@ TwStyle.toggle(node, "disabled", isDisabled);
 
 ### JIT Compilation
 
+There is no separate `jit` method: `TwStyle.apply` detects tokens that need compilation (arbitrary
+values, opacity modifiers, negative values) and JIT-compiles them automatically.
+
 ```java
 // Arbitrary background color with opacity
-TwStyle.jit(node, "bg-blue-500/80");
+TwStyle.apply(node, "bg-blue-500/80");
 
 // Arbitrary padding value
-TwStyle.jit(node, "p-[13px]");
+TwStyle.apply(node, "p-[13px]");
 
 // Arbitrary border radius
-TwStyle.jit(node, "rounded-[7px]");
+TwStyle.apply(node, "rounded-[7px]");
 
 // Combined JIT tokens
-TwStyle.jit(element, "bg-[#38bdf8]", "text-[#1e3a8a]", "m-[10px]");
+TwStyle.apply(element, "bg-[#38bdf8]", "text-[#1e3a8a]", "m-[10px]");
 ```
 
 ## Application Order

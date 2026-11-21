@@ -218,6 +218,86 @@ class TwFXMLTest extends ApplicationTest {
   }
 
   @Test
+  @DisplayName("disableAutoJit() detaches the listener so re-enabling does not stack callbacks")
+  void testDisableAutoJitDetachesListener() {
+    VBox box = new VBox();
+    interact(
+        () -> {
+          root.getChildren().add(box);
+        });
+
+    // Cycle enable/disable several times. Before the fix, disableAutoJit() only flipped a flag
+    // and left the listener attached, so each cycle stacked another dormant listener on the
+    // node's style-class list.
+    int baseline = styleClassListenerCount(box);
+    for (int i = 0; i < 5; i++) {
+      TwFXML.enableAutoJit(root);
+      TwFXML.disableAutoJit(root);
+    }
+
+    assertEquals(
+        baseline,
+        styleClassListenerCount(box),
+        "disableAutoJit() must remove every auto-JIT listener it installed");
+
+    // Re-enabling after disabling must install exactly one listener, not one per past cycle.
+    TwFXML.enableAutoJit(root);
+    assertEquals(
+        baseline + 1,
+        styleClassListenerCount(box),
+        "re-enabling auto-JIT must not stack a listener per enable/disable cycle");
+  }
+
+  /**
+   * Counts the {@code ListChangeListener}s attached to {@code node.getStyleClass()}.
+   *
+   * <p>JavaFX stores them inside a {@code ListListenerHelper} held by the private {@code
+   * listenerHelper} field of {@code ObservableListBase}; the helper keeps them either directly or
+   * inside an array, depending on how many are registered, so both shapes are inspected.
+   */
+  private static int styleClassListenerCount(VBox node) {
+    try {
+      java.lang.reflect.Field helperField =
+          javafx.collections.ObservableListBase.class.getDeclaredField("listenerHelper");
+      helperField.setAccessible(true);
+      Object helper = helperField.get(node.getStyleClass());
+      if (helper == null) {
+        return 0;
+      }
+      int count = 0;
+      for (Class<?> type = helper.getClass(); type != null; type = type.getSuperclass()) {
+        for (java.lang.reflect.Field field : type.getDeclaredFields()) {
+          if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
+            continue;
+          }
+          field.setAccessible(true);
+          count += countListeners(field.get(helper));
+        }
+      }
+      return count;
+    } catch (ReflectiveOperationException e) {
+      throw new AssertionError("could not read style-class listener count", e);
+    }
+  }
+
+  /** Counts the listeners held directly by a value, or inside an array of listeners. */
+  private static int countListeners(Object value) {
+    if (value instanceof javafx.collections.ListChangeListener<?>) {
+      return 1;
+    }
+    if (value instanceof Object[] array) {
+      int count = 0;
+      for (Object element : array) {
+        if (element instanceof javafx.collections.ListChangeListener<?>) {
+          count++;
+        }
+      }
+      return count;
+    }
+    return 0;
+  }
+
+  @Test
   @DisplayName("process() throws IllegalArgumentException for null root")
   void testProcessNullRoot() {
     assertThrows(IllegalArgumentException.class, () -> TwFXML.process(null));
